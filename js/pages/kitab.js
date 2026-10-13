@@ -1,0 +1,2 @@
+/* js/pages/kitab.js - Kitab kuning */
+P.kitab=i=>i!=null&&KITAB[i]?{html:head(KITAB[i][0],'#/kitab')+`<p class="mut">${KITAB[i][1]} · ${KITAB[i][2]}</p><div class="card"><div class="ar2">${KSAMPLE[0]}</div><b>Terjemahan / makna gandul</b><p>${KSAMPLE[1]}</p></div><p class="mut">Isi lengkap kitab segera hadir.</p>`}:{html:head('Kitab Kuning')+list(KITAB,(k,i)=>`<a class="row" href="#/kitab/${i}"><span class="num">${i+1}</span><span class="t">${k[0]}<br><small>${k[1]} · ${k[2]}</small></span>${ic('next',18)}</a>`)};

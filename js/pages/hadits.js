@@ -1,0 +1,2 @@
+/* js/pages/hadits.js - Hadits Nabi */
+P.hadits=()=>({html:head('Hadits Nabi')+'<p class="mut">Hadits masyhur secara ringkas. Periksa kembali ke kitab asli untuk rujukan.</p>'+HADITS.map(h=>`<div class="card" style="margin-bottom:10px"><div class="ar2">${h[0]}</div><p style="margin:6px 0">${h[1]}</p><small class="mut">${h[2]}</small><div style="margin-top:8px"><button class="sb" data-copy="${esc(h[0]+'\n'+h[1]+'\n('+h[2]+')')}">Salin</button></div></div>`).join('')});
