@@ -16,7 +16,7 @@
  --rad:10px;
  --rl:14px;
  --shadow:none;
- --ar:'Amiri','Scheherazade New','Noto Naskh Arabic','Traditional Arabic',serif;
+ --ar:'Times New Roman',Times,serif;
 }
 [data-theme=dark]{
  --bg:#121413;
@@ -35,7 +35,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;overflow:hidden}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 'Times New Roman',Times,serif;-webkit-tap-highlight-color:transparent}
 a{color:inherit;text-decoration:none}
 button,input,select{font:inherit;color:inherit}
 img{max-width:100%}
@@ -374,7 +374,7 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 /* Mushaf, ayat, dan teks Arab */
 .mushaf{direction:rtl;padding:8px 2px;font-family:var(--ar);line-height:2.5;text-align:justify;text-align-last:center}
 .bsm{margin:6px 0 10px;text-align:center}
-.mk{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin:0 .3em;border:1px solid var(--g);border-radius:50%;font-family:system-ui,sans-serif;font-size:.5em;color:var(--g);vertical-align:middle}
+.mk{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin:0 .3em;border:1px solid var(--g);border-radius:50%;font-family:'Times New Roman',Times,serif;font-size:.5em;color:var(--g);vertical-align:middle}
 #ay{padding-bottom:90px}
 .stick{position:sticky;top:0;z-index:4;max-height:38vh;overflow:auto;margin-bottom:12px;box-shadow:0 6px 14px rgba(0,0,0,.1)}
 .ar2{margin:8px 0;font:26px/2 var(--ar);text-align:right;direction:rtl}
@@ -480,7 +480,7 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
  #nav .sbt .ic{width:20px;height:20px}
  /* Tooltip melayang di kanan (seperti Gemini): tombol sidebar, dan menu saat mode ringkas */
  body.nav-off #nav a{position:relative}
- #nav [data-tip]::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;z-index:50;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--bg);font:500 13px/1.3 system-ui,sans-serif;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-4px,-50%);transition:opacity .15s,transform .15s}
+ #nav [data-tip]::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;z-index:50;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--bg);font:500 13px/1.3 'Times New Roman',Times,serif;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-4px,-50%);transition:opacity .15s,transform .15s}
  #nav a[data-tip]::after{display:none}
  body.nav-off #nav a[data-tip]::after{display:block}
  #nav [data-tip]:hover::after,#nav [data-tip]:focus-visible::after{opacity:1;transform:translate(0,-50%)}
@@ -493,6 +493,41 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
  body.nav-off #nav a span{display:none}
  body.nav-off #view{max-width:1040px}
 }
+
+/* 6b. Halaman baca Al-Qur'an: ayat sebagai kartu, header melayang, pemutar mengambang */
+.ay{margin:14px 0;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ay .ah{margin-bottom:6px}
+.ay .ar{margin:4px 0 14px;line-height:2.2}
+.ay .lt{margin:0 0 8px;line-height:1.6}
+.ay .tr{margin:0;line-height:1.7}
+.rh{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.pl{left:50%;right:auto;width:min(520px,calc(100% - 32px));transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));padding:8px 14px 8px 8px;background:var(--card);border:1px solid var(--line);border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.pl .ib{width:44px;height:44px}
+.full .pl{left:50%}
+@media(min-width:900px){.pl{left:calc(50% + 115px);bottom:24px}body.nav-off .pl{left:calc(50% + 38px)}.full .pl{left:50%}}
+.snav{display:flex;justify-content:space-between;gap:8px;margin:28px 0 104px}
+.mushaf{max-width:860px;margin:0 auto;line-height:3;text-align:justify;text-justify:inter-word;text-align-last:center}
+.mk{color:var(--mut);border-color:var(--line);font-size:.55em}
+#nav a{transition:background-color .2s ease,color .2s ease,transform .2s ease}
+#nav a:not(.on):hover{background:var(--fill)}
+
+/* 6c. Pengaturan baca, daftar surah, dan transisi mode */
+.back-d{background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.rcs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px 0 10px}
+.rcs button{position:relative;padding:12px 6px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--mut);font-weight:600;cursor:pointer;transition:border-color .2s,background-color .2s,color .2s}
+.rcs button.on{border-color:var(--g);background:var(--gs);color:var(--g)}
+.rcs button.on::after{content:"✓";position:absolute;top:4px;right:8px;font-size:12px}
+.qpv{margin:10px 0;padding:14px;border-radius:14px;background:var(--fill);text-align:center}
+.qpv .qpa{display:block;font-family:var(--ar);line-height:2.2;direction:rtl}
+.jn{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600;vertical-align:middle;background:var(--gs);color:var(--g)}
+.kh{margin:0 0 12px;border:1px solid var(--line);border-radius:14px}
+.kh-r{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}
+.kh .pb{margin:8px 0 4px;height:6px;border-radius:6px}
+.kh .pb i{background:var(--g)}
+.fz-in{animation:fzIn .35s ease both}
+@keyframes fzIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(min-width:900px){#ay{max-width:860px;margin:0 auto}}
+@media(prefers-reduced-motion:reduce){.fz-in{animation:none}}
 
 /* 7. Aksesibilitas */
 @media(prefers-reduced-motion:reduce){
