@@ -122,8 +122,6 @@ label{display:block;font-size:13px;color:var(--mut);margin:0 0 3px}
 .rt{flex:1;min-width:0}
 .rt b{display:block}
 .rt small{color:var(--mut)}
-.full #view{padding-top:0}
-.full .rh{margin-top:0}
 
 /* Ikon */
 .ic{flex:none;vertical-align:-4px}
@@ -507,7 +505,10 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 @media(min-width:900px){.pl{left:calc(50% + 115px);bottom:24px}body.nav-off .pl{left:calc(50% + 38px)}.full .pl{left:50%}}
 .snav{display:flex;justify-content:space-between;gap:8px;margin:28px 0 104px}
 .mushaf{max-width:860px;margin:0 auto;line-height:3;text-align:justify;text-justify:inter-word;text-align-last:center}
-.mk{color:var(--mut);border-color:var(--line);font-size:.55em}
+.mk{width:1.7em;height:1.7em;min-width:0;padding:0;line-height:1;color:var(--mut);border-color:var(--line);font-size:.5em}
+.ay .n{width:28px;height:28px;min-width:0;padding:0;line-height:1;place-items:center;border-radius:50%}
+.fsb .fst{display:none}
+@media(min-width:600px){.fsb{width:auto;height:36px;padding:0 14px;border-radius:99px;gap:6px;display:inline-flex;align-items:center}.fsb .fst{display:inline;font-size:13px;font-weight:600;white-space:nowrap}}
 #nav a{transition:background-color .2s ease,color .2s ease,transform .2s ease}
 #nav a:not(.on):hover{background:var(--fill)}
 
