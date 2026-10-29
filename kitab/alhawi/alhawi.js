@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "alhawi", "judul": "Al-Hawi fi Khulashatish Sharf wan Nahw", "arab": "الحاوي في خلاصة الصرف والنحو", "pengarang": "Pondok Pesantren Fadzkuruuni", "ket": "Ringkasan ilmu sharaf dan nahwu (Arab, dengan keterangan Sunda dan Indonesia)", "juzTotal": 3, "juz": [{"no": 1, "halaman": 24, "pola": "kitab/alhawi/hal/j1-{n}.webp"}, {"no": 2, "halaman": 20, "pola": "kitab/alhawi/hal/j2-{n}.webp"}], "rasio": 0.7606});
