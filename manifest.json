@@ -1,0 +1,32 @@
+{
+ "name": "Fadzkuruuni",
+ "short_name": "Fadzkuruuni",
+ "description": "Aplikasi Islami: Al-Qur'an, wirid, doa, jadwal salat, kiblat, zakat",
+ "start_url": "./index.html",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait-primary",
+ "lang": "id",
+ "background_color": "#f3efe6",
+ "theme_color": "#1f5a43",
+ "icons": [
+  {
+   "src": "img/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "img/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "img/icon-maskable.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
