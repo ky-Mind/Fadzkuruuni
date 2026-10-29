@@ -4,7 +4,11 @@ const S=Object.assign({theme:'auto',fs:32,tr:true,gold:'',loc:{lat:-6.9175,lng:1
 const save=()=>{localStorage.fz=JSON.stringify(S);window.cloudPush&&window.cloudPush()};
 const rp=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200)};
-const theme=()=>{const d=S.theme=='dark'||(S.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'};
+const theme=()=>{const d=S.theme=='dark'||(S.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';accent()};
+/* Warna aksen: [terang utama, terang turunan, gelap utama, gelap turunan] */
+const ACC={emerald:['#24584a','#3a7363','#7fb5a2','#9fcdbb'],teal:['#0f5f63','#2b7f83','#7cc7cb','#a6dadd'],blue:['#24497d','#3b68a6','#8fb6e6','#adcbf0']};
+const ARF={times:"'Times New Roman',Times,serif",amiri:"'Amiri',serif",scheh:"'Scheherazade New',serif"};
+const accent=()=>{const a=ACC[S.ac]||ACC.emerald,r=document.documentElement.style,dk=document.documentElement.dataset.theme=='dark';r.setProperty('--g',dk?a[2]:a[0]);r.setProperty('--g2',dk?a[3]:a[1]);r.setProperty('--ar',ARF[S.af]||ARF.times)};
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
