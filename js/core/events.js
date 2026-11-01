@@ -36,7 +36,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('.pnav a,.bk');if
 let gx=0,gy=0,gt=0,gh=0,gv=null;
 const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
 const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
-addEventListener('touchstart',e=>{gv=null;if(e.touches.length>1||!$('#view .pnav')||e.target.closest('input,textarea,.sheet,#ftb')||gGeserX(e.target))return;gv=$('#view');gx=e.touches[0].clientX;gy=e.touches[0].clientY;gt=Date.now();gh=0},{passive:true});
+addEventListener('touchstart',e=>{gv=null;if(e.touches.length>1||!$('#view .pnav')||e.target.closest('input,textarea,.sheet,#ftb,.tdlap,.tdbar')||gGeserX(e.target))return;gv=$('#view');gx=e.touches[0].clientX;gy=e.touches[0].clientY;gt=Date.now();gh=0},{passive:true});
 addEventListener('touchmove',e=>{if(!gv)return;if(e.touches.length>1){gh=-1;gv.style.transform='';return}const dx=e.touches[0].clientX-gx,dy=e.touches[0].clientY-gy;if(!gh&&Math.abs(dx)>10)gh=Math.abs(dx)>Math.abs(dy)*1.3?1:-1;if(gh!=1)return;
  const r=gLink(dx)?dx*.55:dx*.12;gv.style.transition='none';gv.style.transform=`translateX(${r}px)`;gv.style.opacity=1-Math.min(Math.abs(r)/700,.35)},{passive:true});
 addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx=e.changedTouches[0].clientX-gx,cepat=Math.abs(dx)>40&&Date.now()-gt<250,L=gLink(dx);
@@ -47,8 +47,11 @@ addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest('input,tex
 const ptr=mk('',ic('rot',20));ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
 let py=0,px=0,pt=0,pon=0;
 const ptrSet=(y,a)=>{ptr.style.transform=`translate(-50%,${y}px) rotate(${a}deg)`;ptr.style.opacity=Math.min(1,Math.max(0,(y+44)/60))};
-addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX;ptr.style.transition='none'},{passive:true});
+addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX;ptr.style.transition='none'},{passive:true});
 addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(-44,0);return}
  pt=Math.max(0,Math.min(d*.5,120));ptrSet(pt-44,pt*3.2);ptr.classList.toggle('siap',pt>72)},{passive:true});
 addEventListener('touchend',()=>{if(!pon)return;pon=0;ptr.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';
  if(pt>72){ptr.classList.add('muter');ptrSet(28,0);setTimeout(()=>location.reload(),650)}else{ptrSet(-44,0);ptr.classList.remove('siap')}},{passive:true});
+/* Cegah salin, potong, seret, dan menu klik kanan pada isi aplikasi; kolom isian tetap bisa diketik dan ditempel */
+const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contenteditable]');
+['copy','cut','dragstart','contextmenu','selectstart'].forEach(t=>document.addEventListener(t,e=>{if(!bebasSalin(e))e.preventDefault()}));
