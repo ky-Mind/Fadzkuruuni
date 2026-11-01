@@ -697,3 +697,11 @@ body.td #app{top:var(--tdh,52px);height:auto;bottom:0}
 .lgb{display:flex;align-items:center;justify-content:center;gap:10px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-weight:600;cursor:pointer;transition:transform .1s}
 .lgb:active{transform:scale(.98)}
 .lgb svg{flex:none}
+.lgi{margin:0;padding:12px 14px 6px;font-size:13px;line-height:1.6}
+
+/* Dialog konfirmasi (keluar akun, hapus, dll.): di tengah layar, bukan dari bawah */
+.back-d.tgh{align-items:center;padding:16px}
+.back-d.tgh .sheet{max-width:360px;padding:20px 18px 16px;border-radius:16px;text-align:center;animation:tghIn .18s cubic-bezier(.22,.8,.3,1)}
+.back-d.tgh .sheet>b{font-size:17px;color:var(--ink)}
+.back-d.tgh .act{flex-wrap:nowrap}
+@keyframes tghIn{from{opacity:0;transform:scale(.94)}}
