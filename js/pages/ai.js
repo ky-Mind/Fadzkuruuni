@@ -24,7 +24,7 @@ function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k)=>X.push({j,t:Stri
  HADITS.forEach(h=>tam(String(h[1]).slice(0,70),h[1]+' '+(h[2]||''),'#/hadits','Hadis'));
  NAMA.forEach((n,i)=>tam('Surah '+n,ARTI[i]+' · '+AYAT[i]+' ayat','#/quran/'+(i+1),"Al-Qur'an"));
  MAULID_DAFTAR.forEach(m=>tam(m.judul,'maulid shalawat sholawat',m.berkas?'#/maulid/'+m.id:'#/maulid','Maulid'));
- (window.KITAB_DAFTAR||[]).forEach(k=>tam(k.judul,k.ket||'kitab',k.berkas?'#/kitab/'+k.id:'#/kitab','Kitab'));
+ (typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).forEach(k=>tam(k.judul,k.ket||'kitab',k.berkas?'#/kitab/'+k.id:'#/kitab','Kitab'));
  AI_FITUR.forEach(f=>tam(f[0],f[1],f[2],'Fitur'));
  return AIX=X}
 const aiNorm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9؀-ۿ ]+/g,' ');
@@ -35,21 +35,32 @@ function aiCari(q,n=4){const T=aiNorm(q).split(/\s+/).filter(w=>w.length>2&&!AI_
  return X.map(([x,j,t])=>{let s=0;T.forEach((w,i)=>{if(j.includes(w))s+=3*W[i];else if(t.includes(w))s+=W[i]});return [s,x]}).filter(a=>a[0]>0.5).sort((a,b)=>b[0]-a[0]).slice(0,n).map(a=>a[1])}
 
 /* Teks jawaban: tebal, daftar, dan baris baru (tanpa HTML dari luar) */
-const aiMd=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*•]\s+(.+)$/gm,'<span class="aili">$1</span>').replace(/\n/g,'<br>');
+const aiMd=s=>esc(s).replace(/^\s*&gt;\s?/gm,'').replace(/^\s*-{3,}\s*$/gm,'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*•]\s+(.+)$/gm,'<span class="aili">$1</span>').replace(/\n/g,'<br>');
 const AI_MODE={online:'Dijawab AI online',lokal:'Dijawab AI offline di perangkat',cari:'Mode offline: hasil dari isi aplikasi'};
 const aiGelembung=m=>m.role=='user'?`<div class="aim u"><div>${esc(m.content).replace(/\n/g,'<br>')}</div></div>`:`<div class="aim a"><div>${aiMd(m.content)}${m.hits&&m.hits.length?`<div class="aih">${m.hits.map(h=>`<a class="chip2" href="${h[1]}">${esc(h[0])}</a>`).join('')}</div>`:''}${m.mode?`<small class="aimd">${AI_MODE[m.mode]||''}</small>`:''}</div></div>`;
 
+/* Profil singkat untuk AI online: nama, lokasi, tanggal, jadwal salat hari ini, dan isi yang tersedia */
+function aiProfil(){const d=new Date(),T=waktu(d,S.loc),L=[];
+ if(S.nm||FBU&&FBU.displayName)L.push('Nama panggilan: '+(S.nm||FBU.displayName));
+ L.push('Lokasi: '+S.loc.n,'Tanggal: '+d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' / '+hijri(d),'Jam sekarang: '+hm(locNow())+' '+tzl());
+ L.push('Jadwal salat hari ini: '+T.map(x=>x[0]+' '+hm(x[1])).join(', '));
+ L.push('Maulid tersedia: '+MAULID_DAFTAR.filter(m=>m.berkas).map(m=>m.judul).join(', '));
+ if(typeof KITAB_DAFTAR!='undefined')L.push('Kitab tersedia: '+KITAB_DAFTAR.filter(k=>k.berkas).map(k=>k.judul).join(', ')+'; segera hadir: '+KITAB_DAFTAR.filter(k=>!k.berkas).map(k=>k.judul).join(', '));
+ if(S.hist&&S.hist[0])L.push('Terakhir membaca surah: '+NAMA[S.hist[0]-1]);
+ return L.join('\n')}
 /* Mode online lewat server; aliran jawaban dibaca per potong agar teks muncul bertahap */
-async function aiOnline(L,konteks,tulis){const r=await fetch('api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pesan:L.slice(-10).map(m=>({role:m.role,content:m.content})),konteks})});
+async function aiOnline(L,konteks,tulis){const r=await fetch('api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pesan:L.slice(-10).map(m=>({role:m.role,content:m.content})),konteks,profil:aiProfil()})});
  if(!r.ok){let g='';try{g=(await r.json()).galat}catch(e){}throw {kode:r.status,galat:g}}
  const rd=r.body.getReader(),dec=new TextDecoder();let buf='',teks='';
  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});const B=buf.split('\n');buf=B.pop();
   for(const l of B){if(!l.startsWith('data:'))continue;const d=l.slice(5).trim();if(d=='[DONE]')continue;try{const c=JSON.parse(d).choices?.[0]?.delta?.content;if(c){teks+=c;tulis(teks)}}catch(e){}}}
  if(!teks)throw {kode:0};return teks}
+/* Mesin AI offline dijalankan di Web Worker (js/ai-worker.js) agar tampilan tidak tersendat; bila tidak didukung, di halaman */
+async function aiBuat(id,prog){AIL=AIL||await import(WEBLLM);try{return await AIL.CreateWebWorkerMLCEngine(new Worker('js/ai-worker.js',{type:'module'}),id,{initProgressCallback:prog})}catch(e){if(e&&/model|cache|fetch|network|quota|memory/i.test(e.message||''))throw e;return AIL.CreateMLCEngine(id,{initProgressCallback:prog})}}
 /* Mode offline: mesin WebLLM dimuat dari unduhan yang tersimpan */
-async function aiMesin(prog){if(AIE)return AIE;if(!navigator.gpu)throw {gpu:1};AIL=AIL||await import(WEBLLM);AIE=await AIL.CreateMLCEngine(AIM[aiTerpasang()||'kecil'].id,{initProgressCallback:prog});return AIE}
+async function aiMesin(prog){if(AIE)return AIE;if(!navigator.gpu)throw {gpu:1};AIE=await aiBuat(AIM[aiTerpasang()||'kecil'].id,prog);return AIE}
 async function aiLokal(L,konteks,tulis){const e=await aiMesin(p=>tulis('Menyiapkan AI offline… '+Math.round((p.progress||0)*100)+'%'));
- const s=await e.chat.completions.create({stream:true,temperature:.4,max_tokens:600,messages:[{role:'system',content:AI_SISTEM+(konteks?'\n\nIsi aplikasi yang terkait:\n'+konteks:'')},...L.slice(-6).map(m=>({role:m.role,content:m.content}))]});
+ const s=await e.chat.completions.create({stream:true,temperature:.4,max_tokens:400,messages:[{role:'system',content:AI_SISTEM+(konteks?'\n\nIsi aplikasi yang terkait:\n'+konteks:'')},...L.slice(-6).map(m=>({role:m.role,content:m.content}))]});
  let t='';for await(const c of s){const d=c.choices[0]?.delta?.content;if(d){t+=d;tulis(t)}}if(!t)throw 0;return t}
 const aiJawabCari=hits=>hits.length?'Saat ini AI online tidak tersedia, jadi berikut isi aplikasi yang paling sesuai dengan pertanyaanmu. Ketuk untuk membukanya.':'Saat ini AI online tidak tersedia dan tidak ditemukan isi aplikasi yang cocok. Coba kata kunci lain (mis. "doa tidur", "zakat emas"), atau unduh AI offline saat ada internet.';
 
@@ -69,7 +80,8 @@ P.ai=()=>({html:`<div class="bar"><h1>Tanya AI</h1><button class="ib" data-aihap
    if(!L.length)c.innerHTML='';L.push({role:'user',content:t});c.insertAdjacentHTML('beforeend',aiGelembung(L[L.length-1]));
    const hits=aiCari(t),konteks=hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,300)}`).join('\n');
    c.insertAdjacentHTML('beforeend','<div class="aim a"><div class="aiw"><i></i><i></i><i></i></div></div>');const b=c.lastElementChild.firstElementChild,v=$('#view');v.scrollTop=1e9;
-   const tulis=s=>{b.className='';b.innerHTML=aiMd(s);v.scrollTop=1e9};let teks='',mode='online';
+   /* Teks digambar paling sering sekali per bingkai layar agar tetap mulus saat jawaban mengalir cepat */
+   let bk=0,isi='';const tulis=s=>{isi=s;if(bk)return;bk=requestAnimationFrame(()=>{bk=0;b.className='';b.innerHTML=aiMd(isi);v.scrollTop=1e9})};let teks='',mode='online';
    try{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L,konteks,tulis)}
    catch(er){if(er&&er.galat=='belum-dipasang')toast('AI online belum diaktifkan pengelola aplikasi');else if(er&&er.kode==429)toast('AI online sedang ramai, memakai mode offline');
     try{if(!aiTerpasang())throw 0;mode='lokal';teks=await aiLokal(L,konteks,tulis)}catch(e2){mode='cari';teks=aiJawabCari(hits)}}
@@ -83,12 +95,12 @@ async function aiOfflineSheet(){const m=aiTerpasang();let gpu=false;try{gpu=!!(n
  e.innerHTML=`<div class="sheet ems"><b>AI offline</b><p class="mut">Unduh sekali saat ada internet, lalu AI bisa menjawab tanpa internet langsung di HP. Jawaban AI offline lebih sederhana daripada AI online.</p>
  ${gpu?'':'<p class="aiwarn">HP atau browser ini belum mendukung WebGPU, jadi AI offline tidak bisa dijalankan. Saat offline, jawaban tetap tersedia lewat pencarian isi aplikasi.</p>'}
  ${Object.entries(AIM).map(([k,x])=>`<div class="srw dlr"><span class="t">${x.nama} <small class="mut">(${x.ukuran})</small><br><small class="mut">${x.ket}</small></span>${m==k?`<small class="dlok">${ic('check',14)} Terpasang</small><button class="sb dng" data-aidel="${k}">Hapus</button>`:`<button class="sb pri" data-aiget="${k}" ${gpu&&!AIUNDUH?'':'disabled'}>${ic('down',14)} Unduh</button>`}</div>`).join('')}
- <div id="aipr"></div><button class="btn s" data-x style="width:100%;margin-top:10px">Tutup</button></div>`;
+ <p class="mut" style="font-size:12px;margin:8px 0 0">File AI disimpan di penyimpanan aplikasi ini di perangkat (bukan di galeri atau folder Download). Bisa dihapus dengan tombol Hapus di sini, lewat Pengaturan › Offline & Data, atau dengan menghapus data situs di pengaturan browser.</p><div id="aipr"></div><button class="btn s" data-x style="width:100%;margin-top:10px">Tutup</button></div>`;
  e.onclick=async x=>{const t=x.target;if(t==e||t.closest('[data-x]'))return e.remove();
   const g=t.closest('[data-aiget]');if(g){if(!navigator.onLine)return toast('Butuh internet untuk mengunduh');const k=g.dataset.aiget;$$('[data-aiget]',e).forEach(b=>b.disabled=true);
    const pr=$('#aipr',e);pr.innerHTML=`<div class="dlp">${dlBar(0,1)}<small class="mut">Menyiapkan unduhan…</small></div><button class="sb dng" data-aibatal>Batalkan</button>`;
    try{if(m&&m!=k&&AIL){await AIL.deleteModelAllInfoInCache(AIM[m].id).catch(()=>{})}AIE&&await AIE.unload().catch(()=>{});AIE=null;AIL=AIL||await import(WEBLLM);
-    AIUNDUH=0;AIE=await AIL.CreateMLCEngine(AIM[k].id,{initProgressCallback:p=>{AIUNDUH=Math.round((p.progress||0)*100);aiStatus();const q=$('#aipr');if(q)q.firstElementChild.innerHTML=`${dlBar(AIUNDUH,100)}<small class="mut">${esc(p.text||'')}</small>`}});
+    AIUNDUH=0;AIE=await aiBuat(AIM[k].id,p=>{AIUNDUH=Math.round((p.progress||0)*100);aiStatus();const q=$('#aipr');if(q)q.firstElementChild.innerHTML=`${dlBar(AIUNDUH,100)}<small class="mut">${esc(p.text||'')}</small>`});
     localStorage.fzaim=k;AIUNDUH=null;aiStatus();e.remove();toast('AI offline siap dipakai tanpa internet')}
    catch(err){AIUNDUH=null;aiStatus();pr.innerHTML=`<p class="aiwarn">Gagal mengunduh: ${esc(err&&err.message||String(err))}</p>`;$$('[data-aiget]',e).forEach(b=>b.disabled=false)}return}
   if(t.closest('[data-aibatal]'))return konfirmasi('Batalkan unduhan?','Aplikasi akan dimuat ulang. Bagian yang sudah terunduh tetap tersimpan dan dilanjutkan saat mengunduh lagi.','Batalkan',()=>location.reload());
