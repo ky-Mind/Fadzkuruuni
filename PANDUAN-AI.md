@@ -1,8 +1,8 @@
-# Tanya AI Fadzkuruuni
+# Fadz AI (Tanya AI) Fadzkuruuni
 
-Menu **Tanya AI** (menu bawah) punya dua mode:
+Menu **Fadz AI** (menu bawah) punya dua mode:
 
-1. **Online**: jawaban dari Groq (model Llama 3.3 70B, gratis dan cepat) lewat server `api/ai.js` di Vercel.
+1. **Online**: jawaban dari Groq (model gpt-oss-120b dengan cadangan Llama; gratis dan cepat) lewat server `api/ai.js` di Vercel.
 2. **Offline**: AI kecil yang diunduh sekali ke HP (tombol "Unduh AI offline" di ruang chat), berjalan tanpa internet. Butuh browser yang mendukung WebGPU (Chrome Android versi baru). Bila tidak didukung atau belum diunduh, jawaban berupa pencarian di isi aplikasi.
 
 ## Memasang AI online (sekali saja)

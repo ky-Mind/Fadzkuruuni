@@ -786,15 +786,53 @@ input[type=range]{accent-color:var(--g)}
 .aie p{margin:6px auto 14px;max-width:420px;font-size:13.5px;line-height:1.6}
 .ais{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
 .aif{position:sticky;bottom:-24px;display:flex;align-items:flex-end;gap:8px;margin:0 -4px -24px;padding:10px 4px 16px;background:var(--bg)}
-.aif textarea{flex:1;min-height:46px;max-height:140px;padding:12px 14px;border:1px solid var(--line);border-radius:22px;background:var(--fill);color:var(--ink);resize:none;outline:0;line-height:1.4}
-.aif textarea:focus{border-color:var(--g)}
+/* Kolom ketik: satu kapsul berisi teks dan mikrofon, tanpa batang gulir yang terlihat */
+.aiin{position:relative;display:flex;flex:1;align-items:flex-end;min-width:0;border:1px solid var(--line);border-radius:24px;background:var(--fill);transition:border-color .15s,box-shadow .15s}
+.aiin:focus-within{border-color:var(--g);box-shadow:0 0 0 3px color-mix(in srgb,var(--g) 15%,transparent)}
+.aif textarea{flex:1;min-width:0;min-height:46px;max-height:140px;padding:12px 6px 12px 16px;border:0;background:0;color:var(--ink);resize:none;outline:0;line-height:1.4;overflow-y:hidden;scrollbar-width:none}
+.aif textarea::-webkit-scrollbar{display:none}
+.aimic{display:grid;flex:none;place-items:center;width:40px;height:40px;margin:3px 3px 3px 0;border:0;border-radius:50%;background:0;color:var(--mut);cursor:pointer}
+.aimic.on{background:#e0442f;color:#fff;animation:aimic 1.2s infinite}
+@keyframes aimic{50%{box-shadow:0 0 0 8px rgba(224,68,47,.18)}}
 .aik{display:grid;flex:none;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:var(--g);color:var(--on);cursor:pointer}
 .aiwarn{margin:4px 0 10px;padding:10px 12px;border-radius:10px;background:#f6e7c1;color:#5b4410;font-size:13px}
 [data-theme=dark] .aiwarn{background:#3d3010;color:#f0cf7a}
 
 /* Pilihan warna teks bacaan */
-.wtk{display:flex;flex-wrap:wrap;gap:10px;padding:6px 0 10px}
-.wtk button,.wtkb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0;background:0;color:var(--mut);font-size:11px;cursor:pointer}
-.wtk i{width:34px;height:34px;border-radius:50%;background:var(--c);border:3px solid var(--card);box-shadow:0 0 0 1px var(--line)}
-.wtk button.on i{box-shadow:0 0 0 2px var(--g)}
-.wtkb input{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:0;cursor:pointer}
+
+/* Palet warna teks bacaan: bulatan warna rapi sejajar, tanda centang pada pilihan, pelangi untuk warna lain, dan pratinjau */
+.wtk{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:4px 0 2px}
+.wtk button,.wtkb{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0;border:0;background:0;color:var(--mut);font-size:11px;cursor:pointer}
+.wtk i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--c);color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s}
+.wtk i .ic{opacity:0;transition:opacity .15s}
+.wtk .on i{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--c,var(--g));transform:scale(1.04)}
+.wtk .on i .ic{opacity:1}
+.wtk .on small{color:var(--ink);font-weight:700}
+.wtk [data-tc=auto] i{color:var(--card)}
+.wtkb i{background:var(--c,conic-gradient(#e0442f,#f0a321,#3aa35b,#2a7bd8,#8a4fd1,#e0442f))}
+.wtkb input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.wtkp{margin:12px 0 4px;padding:12px 14px;border-radius:12px;background:var(--fill);text-align:center}
+.wtkp span{display:block;color:var(--tc,var(--ink));font:24px/1.8 var(--ar);direction:rtl}
+.wtkp small{display:block;margin-top:2px;color:var(--tc,var(--mut));font-size:12px;line-height:1.5}
+
+/* Fadz AI: kepala halaman dan tombol salin/edit di bawah gelembung */
+.aibar{gap:10px}
+.aiav{display:grid;flex:none;place-items:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));color:var(--on)}
+.aibar h1{display:flex;flex-direction:column;line-height:1.2}
+.aibar h1 small{color:var(--mut);font-size:12px;font-weight:400}
+.aim{flex-direction:column}
+.aim.u{align-items:flex-end}
+.aim.a{align-items:flex-start}
+.aiak{display:flex;gap:2px;margin-top:3px;opacity:.75}
+.aiak button{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:0;border-radius:8px;background:0;color:var(--mut);font-size:11.5px;cursor:pointer}
+.aiak button:hover,.aiak button:active{background:var(--fill);color:var(--ink)}
+
+/* Mode layar penuh Fadz AI: menu bawah dan tasbih melayang disembunyikan */
+body.aipenuh #nav,body.aipenuh #ftb{display:none}
+.aibar .ib.on{background:var(--g);color:var(--on)}
+.aiak button.on{background:var(--gs);color:var(--g)}
+/* Edit pesan di dalam gelembung */
+.aim.u.edit{align-self:stretch;align-items:stretch}
+.aim.u>div.aied{display:flex;flex-direction:column;gap:8px;max-width:100%;padding:10px;border:1px solid var(--g);border-radius:16px;background:var(--card);color:var(--ink)}
+.aied textarea{width:100%;min-height:60px;max-height:160px;padding:4px;border:0;background:0;color:var(--ink);font:inherit;font-size:14.5px;line-height:1.5;resize:none;outline:0}
+.aied span{display:flex;justify-content:flex-end;gap:6px}
