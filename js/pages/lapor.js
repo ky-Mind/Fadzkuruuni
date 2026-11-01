@@ -53,8 +53,13 @@ P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRA
 /* Mode tandai: pengguna membuka halaman yang bermasalah, menekan "Tandai di sini", lalu mengetuk bagian yang salah.
    Bagian itu disorot, diambil tangkapannya (html2canvas, butuh internet), lalu kembali ke form laporan. */
 let TDM=null;
-const tdBar=(teks,tombol)=>{TDM.bar.innerHTML=`<span>${teks}</span><div>${tombol}</div>`};
-function tandaiMulai(ke){tandaiAkhir();TDM={bar:mk('tdbar',''),lap:null,box:null,el:null};TDM.bar.setAttribute('role','status');tdLangkah1();location.hash=ke}
+const tdBar=(teks,tombol)=>{TDM.bar.innerHTML=`<span>${teks}</span><div>${tombol}</div>`;tdTinggi()};
+/* Tinggi pita petunjuk dipakai untuk menurunkan aplikasi (body.td #app) */
+const tdTinggi=()=>{if(TDM)document.documentElement.style.setProperty('--tdh',TDM.bar.offsetHeight+'px')};
+addEventListener('resize',tdTinggi);
+function tdBuka(){TDM={bar:mk('tdbar',''),lap:null,box:null,el:null};TDM.bar.setAttribute('role','status');document.body.classList.add('td');tdLangkah1()}
+/* Draf ikut disimpan di sesi agar mode tandai tetap berjalan bila halaman dimuat ulang (foto tidak ikut tersimpan) */
+function tandaiMulai(ke){tandaiAkhir();try{sessionStorage.fztd=JSON.stringify({...RDRAFT,F:[],nF:(RDRAFT.F||[]).length})}catch(e){}tdBuka();location.hash=ke}
 const tdLangkah1=()=>tdBar(`${ic('flag',18)} <span>Buka halaman yang bermasalah. Sudah di halamannya? Tekan <b>Tandai di sini</b>.</span>`,'<button class="sb" data-td="x">Batal</button><button class="sb pri" data-td="1">Tandai di sini</button>');
 function tdLangkah2(){const L=TDM.lap||(TDM.lap=mk('tdlap',''));L.hidden=false;TDM.hv&&(TDM.hv.hidden=true);TDM.box&&TDM.box.remove();TDM.box=null;TDM.el=null;
  tdBar(`${ic('flag',18)} <span><b>Ketuk bagian yang bermasalah</b><br><small>Mis. sapaan, jadwal salat, satu ayat, atau satu tombol</small></span>`,'<button class="sb" data-td="0">Kembali</button><button class="sb" data-td="x">Batal</button>')}
@@ -72,7 +77,7 @@ async function tdSelesai(){const e=TDM.el;if(!e)return;tdBar('Mengambil tangkapa
   k.width=c.width+p*2;k.height=c.height+p*2;const x=k.getContext('2d');x.fillStyle=getComputedStyle(document.body).backgroundColor||'#fff';x.fillRect(0,0,k.width,k.height);x.drawImage(c,p,p);x.strokeStyle='#e0442f';x.lineWidth=4;x.strokeRect(4,4,k.width-8,k.height-8);
   foto=await new Promise(r=>k.toBlob(b=>r(b&&new File([b],'tanda.png',{type:'image/png'})),'image/png'))}catch(x){toast('Tangkapan layar tidak bisa diambil; bagian tetap ditandai')}
  RTANDA={hal:location.hash||'#/',judul:judulKini(),bagian:(e.innerText||e.alt||'').replace(/\s+/g,' ').trim().slice(0,160),nomor:tdNomor(e),foto};tandaiAkhir();location.hash='#/lapor'}
-function tandaiAkhir(){if(!TDM)return;['bar','lap','box','hv'].forEach(k=>TDM[k]&&TDM[k].remove());TDM=null}
+function tandaiAkhir(){try{delete sessionStorage.fztd}catch(e){}if(!TDM)return;document.body.classList.remove('td');['bar','lap','box','hv'].forEach(k=>TDM[k]&&TDM[k].remove());TDM=null}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-td]');if(b&&TDM){const v=b.dataset.td;
   if(v=='x'){tandaiAkhir();if(RDRAFT)location.hash='#/lapor';return}if(v=='1'||v=='2')return tdLangkah2();if(v=='0'){TDM.lap.hidden=true;TDM.hv&&(TDM.hv.hidden=true);return tdLangkah1()}if(v=='ok')return tdSelesai()}
  if(TDM&&e.target.closest('.tdlap')){const t=tdBlok(e.clientX,e.clientY);t?tdPilih(t):toast('Ketuk salah satu bagian isi halaman')}});
@@ -84,3 +89,5 @@ document.addEventListener('scroll',tdLetak,true);
 document.addEventListener('wheel',e=>{if(TDM&&e.target.closest('.tdlap'))$('#view').scrollBy(0,e.deltaY)},{passive:true});
 /* Pindah halaman saat menandai: sorotan lama dibuang; kembali ke langkah pertama */
 addEventListener('hashchange',()=>{if(!TDM)return;TDM.hv&&(TDM.hv.hidden=true);if(location.hash.startsWith('#/lapor'))return tandaiAkhir();if(TDM.box||!TDM.lap?.hidden){TDM.lap&&(TDM.lap.hidden=true);TDM.box&&TDM.box.remove();TDM.box=null;tdLangkah1()}});
+/* Lanjutkan mode tandai setelah muat ulang */
+try{const d=JSON.parse(sessionStorage.fztd||'null');if(d){RDRAFT={...d,F:[]};tdBuka();if(d.nF)setTimeout(()=>toast('Halaman dimuat ulang: foto yang tadi dipilih perlu ditambahkan lagi'),800)}}catch(e){}

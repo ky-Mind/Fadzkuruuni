@@ -669,13 +669,14 @@ html[data-vt=back]::view-transition-new(page){animation-name:vt-in-l}
 .rfs button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border:0;border-radius:50%;background:var(--ink);color:var(--bg);font-size:15px;line-height:1;cursor:pointer}
 
 /* Mode tandai halaman (laporan): bilah petunjuk gelap-blur, lapisan pemilih, dan sorotan bagian */
-.tdbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));z-index:40;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;width:min(560px,calc(100% - 20px));padding:10px 12px 10px 14px;border-radius:14px;background:rgba(10,14,12,.72);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);color:#fff;font-size:14px;line-height:1.4;box-shadow:0 8px 30px rgba(0,0,0,.3);transform:translateX(-50%);animation:tdIn .22s cubic-bezier(.22,.8,.3,1)}
-.tdbar>span{display:flex;flex:1 1 220px;align-items:center;gap:8px}
+.tdbar{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px 14px;background:rgba(10,14,12,.86);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);color:#fff;font-size:13.5px;line-height:1.4;animation:tdIn .22s cubic-bezier(.22,.8,.3,1)}
+.tdbar>span{display:flex;flex:1 1 200px;max-width:640px;align-items:center;gap:8px}
 .tdbar>span .ic{flex:none;color:#ffb4a6}
 .tdbar>div{display:flex;gap:6px}
 .tdbar .sb{background:rgba(255,255,255,.14);color:#fff}
 .tdbar .sb.pri{background:#fff;color:#1d2b25}
-@keyframes tdIn{from{opacity:0;transform:translate(-50%,-12px)}}
+@keyframes tdIn{from{opacity:0;transform:translateY(-100%)}}
+.tdbar .sb{cursor:pointer}
 .tdlap{position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.42);cursor:crosshair;animation:tdDim .2s ease}
 @keyframes tdDim{from{background:transparent}}
 .tdhv{position:fixed;z-index:36;border:2px dashed #ffb4a6;border-radius:10px;background:rgba(255,255,255,.14);pointer-events:none;transition:left .08s,top .08s,width .08s,height .08s}
@@ -687,3 +688,12 @@ html[data-vt=back]::view-transition-new(page){animation-name:vt-in-l}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 img,svg,a{-webkit-user-drag:none}
+
+/* Selama mode tandai, seluruh aplikasi turun di bawah pita petunjuk sehingga tidak ada tombol yang tertutup */
+body.td #app{top:var(--tdh,52px);height:auto;bottom:0}
+
+/* Tombol masuk akun (Google, Facebook) */
+.lgn{display:flex;flex-direction:column;gap:8px;padding:4px 14px 14px}
+.lgb{display:flex;align-items:center;justify-content:center;gap:10px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-weight:600;cursor:pointer;transition:transform .1s}
+.lgb:active{transform:scale(.98)}
+.lgb svg{flex:none}
