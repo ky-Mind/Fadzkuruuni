@@ -840,7 +840,10 @@ body.aipenuh #nav,body.aipenuh #ftb{display:none}
 /* Fadz AI: bilah rekam suara (tekan lama mikrofon), seperti pesan suara WhatsApp */
 .aif [hidden]{display:none!important}
 .airec{display:flex;flex:1;align-items:center;gap:8px;min-width:0}
-.airx{display:grid;flex:none;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:var(--fill);color:#c0392b;cursor:pointer}
+.airx{display:inline-flex;flex:none;align-items:center;gap:5px;height:46px;padding:0 14px;border:0;border-radius:24px;background:#fbe3df;color:#b3382a;font-weight:700;font-size:13px;cursor:pointer}
+[data-theme=dark] .airx{background:#3a1d19;color:#f19a8c}
+.airec{touch-action:pan-y;transition:transform .15s,opacity .15s}
+.airg{flex:none;margin-left:auto;color:var(--mut);font-size:11px;opacity:.8}
 .airt{display:flex;flex:1;align-items:center;gap:8px;min-width:0;height:46px;padding:0 14px;border-radius:24px;background:var(--fill);font-size:14px}
 .airt i{flex:none;width:10px;height:10px;border-radius:50%;background:#e0442f;animation:airt 1s infinite}
 @keyframes airt{50%{opacity:.25}}
