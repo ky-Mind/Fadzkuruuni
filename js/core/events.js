@@ -32,7 +32,9 @@ addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLow
 /* Halaman bernavigasi bagian (.pnav, lihat pnav di js/core/ui.js): geser kiri-kanan untuk pindah bagian.
    Isi mengikuti jari; dilepas cukup jauh (atau dikibas cepat) berpindah, kurang dari itu kembali ke tempat. */
 const pDir=d=>document.documentElement.dataset.vt=d>0?'fwd':'back';
-document.addEventListener('click',e=>{const a=e.target.closest('.pnav a,.bk');if(a)pDir(a.matches('[data-nx]')?1:-1)});
+document.addEventListener('click',e=>{const a=e.target.closest('.pnav a,.bk');if(!a)return;pDir(a.matches('[data-nx]')?1:-1);
+ /* Tombol kembali: bila ada halaman sebelumnya di aplikasi, kembali ke sana (bukan langsung ke induk tetap) */
+ if(a.matches('.bk')&&RIW.length>1&&!/^javascript:/.test(a.getAttribute('href')||'')){e.preventDefault();history.back()}});
 let gx=0,gy=0,gt=0,gh=0,gv=null;
 const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
 const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');

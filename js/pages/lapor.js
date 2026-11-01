@@ -13,7 +13,8 @@ async function cloudReport(r){if(!navigator.onLine)throw 0;if(!FBD)await fbInit(
 /* Laporan lama di antrean (versi sebelumnya) menyimpan satu foto sebagai teks; diubah ke bentuk baru */
 async function flushQ(){if(!(S.rq||[]).length||!navigator.onLine)return;const rest=[];for(const q of S.rq){const r={...q};if(typeof r.foto=='string')r.foto=[r.foto];try{await cloudReport(r)}catch(e){rest.push(q)}}const n=S.rq.length-rest.length;S.rq=rest;save();if(n)toast(n+' laporan tertunda sudah terkirim')}
 addEventListener('online',flushQ);setTimeout(flushQ,5000);
-async function sendReport(r){try{await cloudReport(r);return 'cloud'}catch(e){S.rq=[...(S.rq||[]),r];try{save()}catch(x){S.rq.pop();return 'gagal'}return 'queued'}}
+/* Hasil: 'cloud' terkirim; 'queued' disimpan karena offline; 'ditolak' disimpan karena server menolak (mis. aturan Firebase belum dipasang) */
+async function sendReport(r){try{await cloudReport(r);return 'cloud'}catch(e){const off=!navigator.onLine||e===0&&!navigator.onLine;S.rq=[...(S.rq||[]),r];try{save()}catch(x){S.rq.pop();return 'gagal'}return off?'queued':'ditolak'}}
 /* Judul halaman yang sedang dibuka sebelum pindah ke halaman laporan (dipanggil router) */
 const judulKini=()=>(($('#qt')||$('#view h1')||{}).textContent||'').trim();
 
@@ -48,7 +49,7 @@ P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRA
    b.textContent='Mengirim…';const st=await sendReport(r);b.disabled=false;b.textContent='Kirim laporan';
    if(st=='gagal')return toast('Laporan gagal disimpan. Coba kurangi foto, atau kirim lewat WhatsApp.');
    F.forEach(x=>URL.revokeObjectURL(x.u));
-   dlg('Terima kasih atas laporanmu',st=='cloud'?'Laporanmu sudah diterima tim Fadzkuruuni dan akan segera kami periksa.':'Belum ada internet. Laporanmu disimpan dan akan dikirim otomatis saat internet tersedia.',()=>location.hash=asal||'#/tentang')}}}};
+   dlg('Terima kasih atas laporanmu',st=='cloud'?'Laporanmu sudah diterima tim Fadzkuruuni dan akan segera kami periksa.':st=='queued'?'Belum ada internet. Laporanmu disimpan dan akan dikirim otomatis saat internet tersedia.':'Server laporan sedang tidak bisa menerima (pengaturan server belum siap). Laporanmu disimpan di perangkat dan akan dikirim ulang otomatis. Bila mendesak, kirim juga lewat WhatsApp.',()=>location.hash=asal||'#/tentang')}}}};
 
 /* Mode tandai: pengguna membuka halaman yang bermasalah, menekan "Tandai di sini", lalu mengetuk bagian yang salah.
    Bagian itu disorot, diambil tangkapannya (html2canvas, butuh internet), lalu kembali ke form laporan. */
