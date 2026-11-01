@@ -19,7 +19,7 @@ service cloud.firestore {
       allow create: if request.resource.data.keys().hasOnly(['jenis','pesan','lokasi','hal','halJudul','nama','kontak','versi','perangkat','foto','uid','email','status','t'])
         && request.resource.data.pesan is string && request.resource.data.pesan.size() <= 2000
         && request.resource.data.get('status', 'baru') == 'baru'
-        && request.resource.data.get('uid', null) == (request.auth == null ? null : request.auth.uid);
+        && (request.resource.data.get('uid', null) == null || (request.auth != null && request.resource.data.uid == request.auth.uid));
       allow read, delete: if isAdmin();
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','catatan','oleh','diubah']);

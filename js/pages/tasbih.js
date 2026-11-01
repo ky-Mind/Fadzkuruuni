@@ -1,9 +1,15 @@
 /* js/pages/tasbih.js - Tasbih dan tombol hitung melayang (bisa digeser ke mana saja di layar). Pengaturan ada di tombol kecil di layang dan di Tampilan & Bacaan. */
 S.tt=S.tt||33;
-const tUpd=()=>{const f=$('#fc');if(f)f.textContent=S.tas;const c=$('#c');if(c){c.textContent=S.tas;$('#tg').textContent=S.tas+' / '+S.tt}};
-const buzz=ms=>{if(S.vib!==false)navigator.vibrate?.(ms)};
-const tap=()=>{S.tas++;if(S.tas>=S.tt){buzz(80);toast('Target '+S.tt+' tercapai');S.tas=0}else buzz(12);save();tUpd()};
-const ftb=mk('','<button id="fc" aria-label="Tasbih: tambah hitungan">0</button><button id="fg" aria-label="Pengaturan tasbih">'+ic('sliders',13)+'</button>');
+/* Getar: tiap hitungan getar singkat; saat target tercapai getar sesuai pola pilihan (S.vpola) */
+const VPOLA={pendek:[140],panjang:[550],ganda:[160,90,160,90,320]};
+const VPOLAS=[['pendek','Pendek'],['panjang','Panjang'],['ganda','Berpola']];
+const buzz=p=>{if(S.vib!==false&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
+/* Tasbih melayang: lingkaran manik-manik (33 butir) yang terisi sesuai hitungan, angka di tengah, rumbai di bawah */
+const MANIK=33,MANIKSVG=Array.from({length:MANIK},(_,i)=>{const a=(i/MANIK)*2*Math.PI-Math.PI/2;return `<circle class="mk" cx="${(50+42*Math.cos(a)).toFixed(2)}" cy="${(50+42*Math.sin(a)).toFixed(2)}" r="3.7"/>`}).join('');
+const tUpd=()=>{const f=$('#fc');if(f){const n=Math.round(S.tas/S.tt*MANIK);$('#fcn').textContent=S.tas;$('#fct').textContent=S.tas+'/'+S.tt;$$('#fc .mk').forEach((m,i)=>m.classList.toggle('on',i<n))}const c=$('#c');if(c){c.textContent=S.tas;$('#tg').textContent=S.tas+' / '+S.tt}};
+const tap=()=>{S.tas++;const f=$('#fc');let kls='tk';if(S.tas>=S.tt){buzz(VPOLA[S.vpola]||VPOLA.ganda);toast('Target '+S.tt+' tercapai');S.tas=0;kls='penuh'}else buzz(18);
+ if(f){f.classList.remove('tk','penuh');void f.offsetWidth;f.classList.add(kls)}save();tUpd()};
+const ftb=mk('',`<button id="fc" aria-label="Tasbih: tambah hitungan"><svg class="fcr" viewBox="0 0 100 100" aria-hidden="true">${MANIKSVG}</svg><b id="fcn">0</b><small id="fct">0/33</small></button><svg class="rumbai" viewBox="0 0 20 34" aria-hidden="true"><circle cx="10" cy="4" r="3.6"/><path d="M8 7h4l1 4h-6z"/><path d="M6.5 11h7l3 21H3.5z"/></svg><button id="fg" aria-label="Pengaturan tasbih">${ic('more',18)}</button>`);
 /* Disembunyikan sampai halaman pertama siap (ftUpd), agar tidak sempat muncul sekilas saat aplikasi dimuat ulang */
 ftb.id='ftb';ftb.hidden=true;
 $('#fc').onclick=tap;
@@ -27,9 +33,9 @@ const ftpLetak=()=>{const p=$('#ftp');if(!p)return;const r=ftb.getBoundingClient
  let x=Math.min(Math.max(8,r.right-w),innerWidth-w-8),y=r.top-h-10;if(y<8)y=Math.min(r.bottom+10,innerHeight-h-8);
  p.style.left=x+'px';p.style.top=y+'px';p.style.transformOrigin=`${r.left+r.width/2-x}px ${y<r.top?h:0}px`};
 ftb.querySelector('#fg').onclick=e=>{e.stopPropagation();if($('#ftp'))return ftpTutup();
- const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Target</small>${seg('ftt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
+ const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('ftt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
  p.id='ftp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Pengaturan tasbih melayang');ftpLetak();
- $('#fvb').onchange=e=>{S.vib=e.target.checked;save()};
+ $('#fvb').onchange=e=>{S.vib=e.target.checked;save();S.vib&&buzz(18)};segBind('fvp',v=>{S.vpola=v;save();buzz(VPOLA[v])});
  segBind('ftt',v=>{S.tt=+v;S.tas=0;save();tUpd()});
  $('#frz').onclick=()=>{S.tas=0;save();tUpd();toast('Hitungan direset')};
  $('#fhd').onclick=()=>{S.ft=false;save();ftUpd();ftpTutup();toast('Tasbih melayang disembunyikan')};
