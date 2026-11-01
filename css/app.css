@@ -705,3 +705,16 @@ body.td #app{top:var(--tdh,52px);height:auto;bottom:0}
 .back-d.tgh .sheet>b{font-size:17px;color:var(--ink)}
 .back-d.tgh .act{flex-wrap:nowrap}
 @keyframes tghIn{from{opacity:0;transform:scale(.94)}}
+
+/* Masuk dengan email */
+.lge{display:grid;place-items:center;width:18px;height:18px;color:var(--g)}
+.back-d.tgh .ems{max-width:400px;text-align:left}
+.ems>b{display:block;margin-bottom:12px;text-align:center}
+.ems .seg{margin-bottom:12px}
+.ems .seg button{padding:8px 6px}
+.ems p{margin:-2px 0 10px;font-size:13px}
+.emp{position:relative}
+.emp .in{padding-right:46px}
+.emp .ib2{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:0;color:var(--mut);cursor:pointer}
+.eml{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;margin:10px 0 4px}
+.eml button{padding:4px 0;border:0;background:0;color:var(--g);font-size:13px;font-weight:600;cursor:pointer}
