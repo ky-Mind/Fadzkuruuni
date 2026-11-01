@@ -56,6 +56,7 @@ audio{width:100%;margin:6px 0}
  word-break:break-word;
  outline:0;
  view-transition-name:page;
+ overscroll-behavior-y:contain;
 }
 ::view-transition-old(page),::view-transition-new(page){animation-duration:.36s;animation-timing-function:cubic-bezier(.22,.8,.3,1);animation-fill-mode:both}
 ::view-transition-old(page){animation-name:page-out}
@@ -613,3 +614,42 @@ html[data-vt=back]::view-transition-new(page){animation-name:vt-in-l}
 @keyframes vt-out-r{to{opacity:0;transform:translateX(22%)}}
 @keyframes vt-in-r{from{opacity:0;transform:translateX(22%)}}
 @keyframes vt-in-l{from{opacity:0;transform:translateX(-22%)}}
+
+/* Panel pengaturan tasbih melayang: kecil, menempel di samping tombol tasbih */
+#ftp{position:fixed;z-index:10;width:216px;padding:10px 12px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:13px;animation:ftpIn .16s cubic-bezier(.22,.8,.3,1)}
+#ftp.out{animation:ftpOut .14s ease-in forwards}
+@keyframes ftpIn{from{opacity:0;transform:scale(.9)}}
+@keyframes ftpOut{to{opacity:0;transform:scale(.92)}}
+#ftp .ftph{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+#ftp .ftph b{font-size:14px}
+#ftp .ftph .ib2{width:26px;height:26px;border:0;border-radius:50%;background:var(--fill);color:var(--ink);font-size:16px;line-height:1;cursor:pointer}
+#ftp .ftpr{display:flex;align-items:center;justify-content:space-between;padding:6px 0 8px;border-bottom:1px solid var(--line);margin-bottom:8px}
+#ftp small{display:block;margin-bottom:4px;font-size:11px}
+#ftp .seg{padding:2px;margin:0}
+#ftp .seg button{padding:5px 0;font-size:12px}
+#ftp .ftpa{display:flex;gap:6px;margin-top:10px}
+#ftp .ftpa .sb{flex:1;height:28px;font-size:11.5px}
+
+/* Tarik untuk memuat ulang */
+#ptr{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;z-index:30;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--card);color:var(--mut);box-shadow:0 4px 16px rgba(0,0,0,.16);opacity:0;transform:translate(-50%,-44px);pointer-events:none}
+#ptr.siap{color:var(--g)}
+#ptr.muter{color:var(--g)}
+#ptr.muter .ic{animation:ptrPutar .7s linear infinite}
+@keyframes ptrPutar{to{transform:rotate(360deg)}}
+
+/* Beranda: doa hari ini */
+.dhi{display:block;color:var(--ink);text-decoration:none}
+.dhi .dar{margin:10px 0 6px;font-family:var(--ar);font-size:24px;line-height:2;text-align:right;direction:rtl}
+.dhi p{margin:0 0 10px;font-size:14px;line-height:1.6}
+.dhi .dlj{display:inline-flex;align-items:center;gap:2px;font-size:13px;font-weight:600;color:var(--g)}
+
+/* Laporkan masalah: halaman asal dan foto */
+.rhal{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 12px;background:var(--gs);border-radius:10px;color:var(--g)}
+.rhal span{display:flex;flex-direction:column;flex:1;min-width:0}
+.rhal b{color:var(--ink);font-size:14px;font-weight:600}
+.rhal small{overflow:hidden;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.rfs{display:flex;flex-wrap:wrap;gap:8px}
+.rfs:not(:empty){margin-bottom:8px}
+.rfs span{position:relative}
+.rfs img{display:block;width:84px;height:84px;object-fit:cover;border-radius:10px}
+.rfs button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border:0;border-radius:50%;background:var(--ink);color:var(--bg);font-size:15px;line-height:1;cursor:pointer}

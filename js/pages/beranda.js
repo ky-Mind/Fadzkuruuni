@@ -5,7 +5,7 @@ P['']=()=>({html:`<div class="top"><span class="bn"><img src="img/logo.png" alt=
  <div class="grid g2">${SHORT.map(s=>`<a href="#/${s[0]}"><b>${ic(s[1],26)}</b>${s[2]}</a>`).join('')}</div>
  <div class="srch">${ic('search',18)}<input id="sr" type="search" placeholder="Cari doa, wirid, surah"></div><div id="sl"></div>
  <div class="car"><a class="sl" href="#/zakat/emas"><span class="sl-i">${ic('scale',20)}</span><b>Hitung zakatmu</b><span>6 kalkulator fikih, hasil langsung dalam rupiah</span></a><a class="sl s2" href="#/tahlil"><span class="sl-i">${ic('users',20)}</span><b>Tahlil &amp; Yasin</b><span>Baca Surah Yasin lengkap, bisa offline</span></a><a class="sl s3" href="#/waris"><span class="sl-i">${ic('scale',20)}</span><b>Kalkulator waris</b><span>Simulasi pembagian harta pusaka</span></a></div>
- ${S.hist[0]?`<h2>Lanjutkan membaca</h2><a class="card" style="display:flex;gap:12px;align-items:center" href="#/quran/${S.hist[0]}">${ic('book',22)}<span>${NAMA[S.hist[0]-1]}<br><small class="mut">${ARTI[S.hist[0]-1]} · ${AYAT[S.hist[0]-1]} ayat</small></span></a>`:''}<h2>Headline</h2>${artList()}`,
+ ${S.hist[0]?`<h2>Lanjutkan membaca</h2><a class="card" style="display:flex;gap:12px;align-items:center" href="#/quran/${S.hist[0]}">${ic('book',22)}<span>${NAMA[S.hist[0]-1]}<br><small class="mut">${ARTI[S.hist[0]-1]} · ${AYAT[S.hist[0]-1]} ayat</small></span></a>`:''}${doaHariIni()}`,
  init(){qrot();$('#sr').oninput=e=>{const q=e.target.value.trim().toLowerCase();$('#sl').innerHTML=q?list(CARI.filter(x=>x[0].toLowerCase().includes(q)).slice(0,8),x=>x[1]?`<a class="row" href="${x[1]}"><span class="t">${x[0]}</span>${ic('next',18)}</a>`:`<div class="row" data-soon><span class="t">${x[0]}<br><small>Segera hadir</small></span></div>`):'';$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  const tick=()=>{if(!$('#pt'))return clearInterval(P.tk);const now=new Date(),T=waktu(now,S.loc),c=locNow(),z=v=>String(v).padStart(2,'0');
  let cur=5;T.forEach((x,i)=>{if(x[1]<=c)cur=i});
@@ -13,3 +13,7 @@ P['']=()=>({html:`<div class="top"><span class="bn"><img src="img/logo.png" alt=
  $('#nl').textContent='Sekarang · '+T[cur][0];$('#np').innerHTML=hm(c)+' <small>'+tzl()+'</small>';$('#cd').textContent='Menuju '+T[ni][0]+' · -'+z(D/3600|0)+':'+z(D%3600/60|0)+':'+z(D%60);$('#pt').innerHTML=T.map((x,i)=>`<div class="${i==cur?'n':''}">${x[0]}<b>${hm(x[1])}</b></div>`).join('')};tick();clearInterval(P.tk);P.tk=setInterval(tick,1000)}});
 const periode=()=>{const h=locNow();return h<4?'malam':h<10?'pagi':h<15?'siang':h<18?'sore':'malam'};
 const GREET=()=>`<div class="gr"><small class="mut">${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${hijri()}</small><div class="gh">Selamat ${periode()}${S.nm?', '+esc(S.nm):''}</div></div>`;
+/* Doa hari ini: satu doa (berteks Arab dan terjemah) dari Wirid & Doa, berganti tiap hari */
+const doaHariIni=()=>{const L=[];DD.forEach((g,i)=>g.forEach((x,j)=>{if(x[1]&&x[2])L.push([x,i,j])}));if(!L.length)return '';
+ const h=Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5),[x,i,j]=L[h%L.length];
+ return `<h2>Doa hari ini</h2><a class="card dhi" href="#/bacaan/d/${i}/${j}"><b>${x[0]}</b><div class="dar">${x[1]}</div><p class="mut">${x[2]}</p><span class="dlj">Baca selengkapnya ${ic('next',16)}</span></a>`};
