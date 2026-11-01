@@ -18,5 +18,10 @@ const VER='1.6.0';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';
-const setSz=()=>{const r=document.documentElement.style;r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px')};
+/* Warna teks bacaan (Arab, latin, terjemah): 'auto' = hitam (putih di tema gelap); selain itu kode warna pilihan pengguna */
+const WTEKS=[['auto','Hitam'],['#1f5a43','Hijau'],['#1f4f8f','Biru'],['#6b3f1d','Coklat'],['#7a1f2b','Merah tua']];
+const setSz=()=>{const r=document.documentElement.style;r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px');S.tc&&S.tc!='auto'?r.setProperty('--tc',S.tc):r.removeProperty('--tc')};
+/* Pilihan warna teks: bulatan warna + pemilih warna bebas; dipakai di Tampilan & Bacaan dan pengaturan baca */
+const wteksUI=()=>`<div class="wtk" id="wtk">${WTEKS.map(([v,n])=>`<button type="button" data-tc="${v}" class="${(S.tc||'auto')==v?'on':''}" style="--c:${v=='auto'?'var(--ink)':v}" aria-label="${n}"><i></i><small>${n}</small></button>`).join('')}<label class="wtkb" aria-label="Warna lain"><input type="color" id="tcx" value="${S.tc&&S.tc[0]=='#'?S.tc:'#333333'}"><small>Lainnya</small></label></div>`;
+const wteksBind=()=>{const pasang=v=>{S.tc=v;save();setSz();$$('#wtk [data-tc]').forEach(b=>b.classList.toggle('on',b.dataset.tc==v))};$$('#wtk [data-tc]').forEach(b=>b.onclick=()=>pasang(b.dataset.tc));const x=$('#tcx');if(x)x.oninput=e=>pasang(e.target.value)};
 setSz();
