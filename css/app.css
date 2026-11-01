@@ -836,3 +836,15 @@ body.aipenuh #nav,body.aipenuh #ftb{display:none}
 .aim.u>div.aied{display:flex;flex-direction:column;gap:8px;max-width:100%;padding:10px;border:1px solid var(--g);border-radius:16px;background:var(--card);color:var(--ink)}
 .aied textarea{width:100%;min-height:60px;max-height:160px;padding:4px;border:0;background:0;color:var(--ink);font:inherit;font-size:14.5px;line-height:1.5;resize:none;outline:0}
 .aied span{display:flex;justify-content:flex-end;gap:6px}
+
+/* Fadz AI: bilah rekam suara (tekan lama mikrofon), seperti pesan suara WhatsApp */
+.aif [hidden]{display:none!important}
+.airec{display:flex;flex:1;align-items:center;gap:8px;min-width:0}
+.airx{display:grid;flex:none;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:var(--fill);color:#c0392b;cursor:pointer}
+.airt{display:flex;flex:1;align-items:center;gap:8px;min-width:0;height:46px;padding:0 14px;border-radius:24px;background:var(--fill);font-size:14px}
+.airt i{flex:none;width:10px;height:10px;border-radius:50%;background:#e0442f;animation:airt 1s infinite}
+@keyframes airt{50%{opacity:.25}}
+.airt b{flex:none;font-variant-numeric:tabular-nums}
+.airt span{overflow:hidden;color:var(--mut);text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left}
+#aikb{touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .15s,background .2s}
+#aikb:active{transform:scale(1.12)}
