@@ -15,4 +15,6 @@ const zoomBar=()=>`<div class="zb"><span class="mut">Ukuran teks</span><button t
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
 const mk=(c,h)=>{const e=document.createElement('div');e.className=c;e.innerHTML=h;document.body.append(e);return e};
 function dlg(t,m,fn){const e=mk('dlg',`<div role="dialog"><div class="ok">${ic('check',30)}</div><b style="font-size:18px">${t}</b><p class="mut" style="margin:8px 0 16px">${m}</p><button class="btn" style="width:100%">Tutup</button></div>`);e.onclick=x=>{if(x.target==e||x.target.tagName=='BUTTON'){e.remove();fn&&fn()}}}
+/* Navigasi bagian sebelumnya/berikutnya. a dan b = [href, judul] atau kosong. Halaman yang memakainya bisa digeser kiri-kanan (js/core/events.js). */
+const pnav=(a,b)=>`<nav class="pnav" aria-label="Pindah bagian">${a?`<a href="${a[0]}" data-pv rel="prev">${ic('back',18)}<span><small>Sebelumnya</small><b>${esc(a[1])}</b></span></a>`:'<i></i>'}${b?`<a href="${b[0]}" data-nx rel="next"><span><small>Berikutnya</small><b>${esc(b[1])}</b></span>${ic('next',18)}</a>`:'<i></i>'}</nav>`;
 const RS=`<button class="ib" data-rs aria-label="Pengaturan baca">${ic('sliders',20)}</button>`;
