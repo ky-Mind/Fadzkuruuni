@@ -4,7 +4,8 @@
    Lihat PANDUAN-AI.md untuk cara memasang key. */
 export const config = { runtime: 'edge' };
 
-const MODEL = 'llama-3.3-70b-versatile';
+/* Model dicoba berurutan; bila satu tidak tersedia untuk akun ini, pakai berikutnya */
+const MODEL = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant'];
 const ASAL = /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 const SISTEM = `Kamu adalah "Asisten Fadzkuruuni", asisten tanya-jawab di aplikasi ibadah Fadzkuruuni milik Pondok Pesantren Fadzkuruuni.
@@ -33,12 +34,18 @@ export default async function handler(req) {
   if (!pesan.length || pesan[pesan.length - 1].role !== 'user') return json({ galat: 'Tidak ada pertanyaan' }, 400);
   const konteks = typeof b.konteks === 'string' && b.konteks ? '\n\nIsi aplikasi yang terkait:\n' + b.konteks.slice(0, 4000) : '';
 
-  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { authorization: 'Bearer ' + key, 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, stream: true, temperature: 0.4, max_tokens: 1024, messages: [{ role: 'system', content: SISTEM + konteks }, ...pesan] })
-  });
-  if (!r.ok) return json({ galat: r.status === 429 ? 'sibuk' : 'Layanan AI sedang bermasalah (' + r.status + ')' }, r.status === 429 ? 429 : 502);
+  let r, info = '';
+  for (const model of MODEL) {
+    r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { authorization: 'Bearer ' + key.trim(), 'content-type': 'application/json' },
+      body: JSON.stringify({ model, stream: true, temperature: 0.4, max_tokens: 1024, messages: [{ role: 'system', content: SISTEM + konteks }, ...pesan] })
+    });
+    if (r.ok) break;
+    try { info = ((await r.json()).error || {}).message || ''; } catch (e) { info = ''; }
+    if (r.status !== 404 && r.status !== 400) break;
+  }
+  if (!r.ok) return json({ galat: r.status === 429 ? 'sibuk' : 'Layanan AI sedang bermasalah (' + r.status + ')', info: info.slice(0, 200) }, r.status === 429 ? 429 : 502);
   /* Aliran SSE dari Groq diteruskan apa adanya; aplikasi membaca "data: {...}" per baris */
   return new Response(r.body, { headers: { 'content-type': 'text/event-stream', 'cache-control': 'no-store' } });
 }
