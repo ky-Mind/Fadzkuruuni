@@ -19,7 +19,7 @@ js/core/              fondasi bersama
   state.js icons.js ui.js waktu.js quran-api.js cloud.js adzan.js overlay.js(tombol kembali bertahap) unduh.js(unduhan offline & ke perangkat) events.js
 js/pages/             SATU BERKAS PER HALAMAN
   beranda quran wirid-doa asmaul-husna tahlil maulid salat(jadwal+kiblat) zakat waris kalender
-  tasbih kitab hadits menu segera tentang lapor kata-kata
+  tasbih kitab hadits ai(Tanya AI) menu segera tentang lapor kata-kata
   pengaturan/           pusat + satu berkas per kelompok
     index akun-profil beranda-kata tampilan salat-notifikasi offline-data tentang
 js/router.js          router
@@ -27,6 +27,7 @@ kitab/                KITAB KUNING: satu folder per kitab (daftar.js = daftar ki
   alhawi/               Al-Hawi: meta.json, alhawi.js, hal/*.webp (halaman gambar)
 audio/ img/ lisensi/  aset
 PANDUAN-FIREBASE.md   cara menyiapkan login Google & laporan
+api/ai.js             server AI online (Vercel + Groq); panduan di PANDUAN-AI.md
 admin.html            dashboard admin laporan pengguna (masuk Google, email admin saja)
 firestore.rules       aturan akses Firestore (tempel di Firebase Console)
 ```
