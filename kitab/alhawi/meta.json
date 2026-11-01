@@ -9,12 +9,14 @@
   {
    "no": 1,
    "halaman": 24,
-   "pola": "kitab/alhawi/hal/j1-{n}.webp"
+   "pola": "kitab/alhawi/hal/j1-{n}.webp",
+   "pdf": "kitab/alhawi/pdf/juz-1.pdf"
   },
   {
    "no": 2,
    "halaman": 20,
-   "pola": "kitab/alhawi/hal/j2-{n}.webp"
+   "pola": "kitab/alhawi/hal/j2-{n}.webp",
+   "pdf": "kitab/alhawi/pdf/juz-2.pdf"
   }
  ],
  "rasio": 0.7606

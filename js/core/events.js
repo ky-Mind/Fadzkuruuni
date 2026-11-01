@@ -2,7 +2,7 @@
 let tx=0,ty=0;
 addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
 addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)<70||Math.abs(dy)>50||e.target.closest('input,.cal,.car'))return;const T=$$('[data-tab]'),h=location.hash.split('/');
- if(T.length>1){const i=T.findIndex(b=>b.classList.contains('on'));T[i+(dx<0?1:-1)]?.click()}else if(h[1]=='quran'&&h[2]){const n=+h[2]+(dx<0?1:-1);if(n>=1&&n<=114)location.hash='#/quran/'+n}},{passive:true});
+ if(T.length>1){const i=T.findIndex(b=>b.classList.contains('on'));T[i+(dx<0?1:-1)]?.click()}},{passive:true});
 document.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c){const v=c.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast(v.length>30?'Teks disalin':'Disalin: '+v),()=>toast('Tidak bisa menyalin. Salin manual.'));return}
  const b=e.target.closest('[data-bm]');if(b){const k=b.dataset.bm;S.bm=S.bm||[];const i=S.bm.indexOf(k);i<0?S.bm.unshift(k):S.bm.splice(i,1);save();b.classList.toggle('on',i<0);toast(i<0?'Ayat ditandai':'Penanda dihapus')}});
 document.addEventListener('input',e=>{const c=e.target.closest('[data-calc]');if(!c)return;const g=k=>parseFloat((c.querySelector(`[data-k=${k}]`)?.value||'').replace(',','.'))||0,o=c.querySelector('.cres'),t=c.dataset.calc;if(!g('h'))return o.textContent='Isi harga per kg terlebih dahulu.';const kg=t=='fitrah'?g('j')*2.5:g('j')*g('d')*.6;o.innerHTML=`<b>${rp(kg*g('h'))}</b><br><small class="mut">${kg.toFixed(2).replace('.',',')} kg makanan pokok</small>`});

@@ -4,7 +4,9 @@ function route(){if(!location.hash.startsWith('#/lapor'))LAST=location.hash||'#/
  /* Isi halaman dipasang lalu inisialisasinya dijalankan; dipanggil di dalam transisi bila didukung */
  const paint=()=>{v.innerHTML=pg.html;v.scrollTop=0;$$('#nav a[data-r]').forEach(l=>l.classList.toggle('on',l.dataset.r==(['quran','artikel','kalender','pengaturan'].includes(a)?a:(['','menu'].includes(a)?'':'x'))));pg.init&&pg.init();$$('#view .ar2').forEach(e=>e.style.fontSize=S.fs+'px');ftUpd();$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  /* Pindah halaman dianimasikan seperti iOS (geser dan memudar) bila browser mendukung View Transitions */
- if(document.startViewTransition&&!matchMedia('(prefers-reduced-motion:reduce)').matches)document.startViewTransition(paint);else paint()}
+ /* Saat tab tersembunyi transisi dibatalkan browser; paint dijamin tetap jalan (sekali) agar halaman tidak kosong */
+ let done=0;const once=()=>{if(!done){done=1;paint()}};
+ if(document.startViewTransition&&!document.hidden&&!matchMedia('(prefers-reduced-motion:reduce)').matches){const t=document.startViewTransition(once);t.ready.catch(()=>{});t.finished.catch(()=>{}).then(once);setTimeout(once,400)}else once()}
 addEventListener('hashchange',route);
 route();
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));

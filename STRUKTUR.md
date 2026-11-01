@@ -13,10 +13,11 @@ data/                 DATA saja (mudah diperbarui tanpa menyentuh kode)
   pustaka.js            hadits & kata-kata bawaan
   artikel.js            artikel
   content.js            doa/kitab bawaan awal
-  maulid-adl.js         kerangka isi Maulid Adl-Dliya'ul Lami' (isi kosong; petunjuk pengisian ada di atas berkas)
+  maulid/daftar.js      daftar maulid; isi tiap maulid di maulid/<id>.js (dimuat saat dibuka) + <id>.pdf (versi cetak)
+  maulid/adl.js         Maulid Adl-Dliya'ul Lami' lengkap (174 bait: Arab, Latin, terjemah)
   zakat-ilmu.js         ayat, hadits, anjuran, adab untuk halaman Zakat & Sedekah (mudah diedit)
 js/core/              fondasi bersama
-  state.js icons.js ui.js waktu.js quran-api.js cloud.js adzan.js overlay.js(tombol kembali bertahap) events.js
+  state.js icons.js ui.js waktu.js quran-api.js cloud.js adzan.js overlay.js(tombol kembali bertahap) unduh.js(unduhan offline & ke perangkat) events.js
 js/pages/             SATU BERKAS PER HALAMAN
   beranda quran wirid-doa asmaul-husna tahlil maulid salat(jadwal+kiblat) zakat waris kalender
   tasbih artikel kitab hadits menu segera tentang lapor kata-kata
@@ -47,3 +48,8 @@ Lihat folder `template-kitab/` (di luar folder deploy): PANDUAN-KITAB.md, skrip 
   adalah elemen ke-5 setiap baris `h` di `data/hadits.js`.
 - Cache service worker: `V` di `sw.js` harus dinaikkan setiap kali berkas aset berubah.
 
+- Unduhan (`js/core/unduh.js`): tiap konten didaftarkan sebagai paket (`paket(id,{judul,kat,urls,berkas})`).
+  Tombol Unduh menawarkan "Simpan ke perangkat & offline" (PDF ke folder Download) atau "Hanya untuk offline",
+  selalu ada Batal/Batalkan. Isi offline disimpan di cache `fz-off`; status di `localStorage.fzoff`.
+  Pengaturan > Offline & Data: Unduh semua, per kategori, dan per item. Kitab: PDF asli di `kitab/<id>/pdf/juz-N.pdf`
+  (otomatis disalin oleh `buat_halaman.py`). Maulid baru: `template-kitab/maulid_dari_md.py` (teks + PDF cetak).
