@@ -56,10 +56,12 @@ audio{width:100%;margin:6px 0}
 :focus-visible{outline:2px solid var(--g2);outline-offset:2px}
 
 /* 3. Kerangka: menu bawah (ponsel) dan sisi (desktop), area isi */
-#app{position:fixed;inset:0;display:flex;flex-direction:column;height:100vh;height:100dvh}
+/* Ukuran mengikuti tepi layar (inset:0), bukan 100vh/100dvh: di aplikasi terpasang Android, tinggi vh kadang lebih besar dari layar sehingga menu bawah terdorong keluar */
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
 #view{
  flex:1;
  min-width:0;
+ min-height:0;
  width:100%;
  max-width:760px;
  margin:0 auto;
@@ -79,6 +81,7 @@ audio{width:100%;margin:6px 0}
 
 #nav{
  order:2;
+ flex:none;
  display:flex;
  background:var(--card);
  border-top:1px solid var(--line);
