@@ -112,7 +112,7 @@ h1{font-size:22px;margin:4px 0 12px}
 h2{font-size:15px;margin:24px 0 10px;color:var(--mut);font-weight:600}
 label{display:block;font-size:13px;color:var(--mut);margin:0 0 3px}
 .mut,.row small{color:var(--mut);font-size:13px}
-.lt{color:var(--tc,var(--g));font-style:italic;margin:6px 0 0;font-size:var(--lt,15px)}
+.lt{color:var(--tc,var(--ink));font-style:italic;margin:6px 0 0;font-size:var(--lt,15px)}
 .tr{font-size:var(--tr,14px);color:var(--tc,inherit)}
 .sec{font-size:16px;margin:28px 0 10px;padding-bottom:8px;color:var(--g);border-bottom:1px solid var(--line)}
 .sub{font-size:13px;margin:14px 0 2px;color:var(--mut)}
