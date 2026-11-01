@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.fadzkuruuni.app",
+    "sha256_cert_fingerprints": ["55:31:1E:29:F1:25:1C:F1:79:B6:A8:C0:EA:11:48:D2:CA:36:4C:60:9C:9F:D3:A4:74:22:F1:10:B6:31:60:AE"]
+  }
+}]
