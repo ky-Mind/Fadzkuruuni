@@ -9,8 +9,8 @@ function route(){if(!location.hash.startsWith('#/lapor'))LAST=location.hash||'#/
  /* Arah (data-vt: fwd/back) dari navigasi bagian, geser, atau tombol kembali */
  const de=document.documentElement,arah=de.dataset.vt;delete de.dataset.vt;
  /* Isi halaman dipasang lalu inisialisasinya dijalankan */
- const paint=()=>{if(tok!=RT)return;document.body.classList.toggle('full',!!S.full&&a=='quran'&&!!b);document.body.classList.toggle('sub',!(['','quran','wirid','kalender','pengaturan'].includes(a)&&!b));setSz();applyNav();
-  v.style.transform=v.style.opacity=v.style.transition='';v.innerHTML=pg.html;v.classList.remove('kel','kelb');v.scrollTop=0;$$('#nav a[data-r]').forEach(l=>l.classList.toggle('on',l.dataset.r==(['quran','wirid','kalender','pengaturan'].includes(a)?a:(['','menu'].includes(a)?'':'x'))));pg.init&&pg.init();baru&&masuk(v,arah);$$('#view .ar2').forEach(e=>e.style.fontSize=S.fs+'px');ftUpd();$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
+ const paint=()=>{if(tok!=RT)return;document.body.classList.toggle('full',!!S.full&&a=='quran'&&!!b);document.body.classList.toggle('sub',!(['','quran','ai','kalender','pengaturan'].includes(a)&&!b));setSz();applyNav();
+  v.style.transform=v.style.opacity=v.style.transition='';v.innerHTML=pg.html;v.classList.remove('kel','kelb');v.scrollTop=0;$$('#nav a[data-r]').forEach(l=>l.classList.toggle('on',l.dataset.r==(['quran','ai','kalender','pengaturan'].includes(a)?a:(['','menu'].includes(a)?'':'x'))));pg.init&&pg.init();baru&&masuk(v,arah);$$('#view .ar2').forEach(e=>e.style.fontSize=S.fs+'px');ftUpd();$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  ganti?keluar(v,arah).then(paint):paint()}
 /* Isi lama keluar bergiliran dari atas; saat kembali, bergeser ke kanan */
 function keluar(v,arah){const K=[...v.children];v.classList.remove('ent','entb');K.forEach((c,i)=>c.style.setProperty('--o',Math.min(i,8)));v.classList.add(arah=='back'?'kelb':'kel');return new Promise(r=>setTimeout(r,180+Math.min(K.length-1,8)*24))}
