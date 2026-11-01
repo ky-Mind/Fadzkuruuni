@@ -15,6 +15,6 @@ const P={};
 const VER='1.6.0';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let LAST='#/';
+let LAST='#/',LASTT='';
 const setSz=()=>{const r=document.documentElement.style;r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px')};
 setSz();

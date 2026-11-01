@@ -11,7 +11,6 @@ data/                 DATA saja (mudah diperbarui tanpa menyentuh kode)
   kota.js               daftar kota (lokasi salat)
   ibadah.js asma.js     wirid, doa, tahlil, Asmaul Husna
   pustaka.js            hadits & kata-kata bawaan
-  artikel.js            artikel
   content.js            doa/kitab bawaan awal
   maulid/daftar.js      daftar maulid; isi tiap maulid di maulid/<id>.js (dimuat saat dibuka) + <id>.pdf (versi cetak)
   maulid/adl.js         Maulid Adl-Dliya'ul Lami' lengkap (174 bait: Arab, Latin, terjemah)
@@ -20,7 +19,7 @@ js/core/              fondasi bersama
   state.js icons.js ui.js waktu.js quran-api.js cloud.js adzan.js overlay.js(tombol kembali bertahap) unduh.js(unduhan offline & ke perangkat) events.js
 js/pages/             SATU BERKAS PER HALAMAN
   beranda quran wirid-doa asmaul-husna tahlil maulid salat(jadwal+kiblat) zakat waris kalender
-  tasbih artikel kitab hadits menu segera tentang lapor kata-kata
+  tasbih kitab hadits menu segera tentang lapor kata-kata
   pengaturan/           pusat + satu berkas per kelompok
     index akun-profil beranda-kata tampilan salat-notifikasi offline-data tentang
 js/router.js          router
@@ -28,6 +27,8 @@ kitab/                KITAB KUNING: satu folder per kitab (daftar.js = daftar ki
   alhawi/               Al-Hawi: meta.json, alhawi.js, hal/*.webp (halaman gambar)
 audio/ img/ lisensi/  aset
 PANDUAN-FIREBASE.md   cara menyiapkan login Google & laporan
+admin.html            dashboard admin laporan pengguna (masuk Google, email admin saja)
+firestore.rules       aturan akses Firestore (tempel di Firebase Console)
 ```
 Menambah halaman baru: buat `js/pages/nama.js` berisi `P.nama=(b,c,d)=>({html:'...',init(){}})`, tambahkan ke `index.html` (sebelum `events.js`) dan ke daftar `A` di `sw.js`.
 Menambah kelompok Pengaturan: buat `js/pages/pengaturan/nama.js` berisi `SETPAGES.nama=()=>({html,init})` dan daftarkan di `SETGROUPS` pada `index.js`.

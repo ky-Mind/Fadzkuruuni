@@ -43,3 +43,12 @@ addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx
  if(L&&(Math.abs(dx)>80||cepat)){pDir(dx<0?1:-1);location.hash=L.getAttribute('href');return}
  v.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';v.style.transform='';v.style.opacity=''},{passive:true});
 addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
+/* Tarik ke bawah dari puncak halaman untuk memuat ulang: ikon berputar mengikuti tarikan, dilepas lewat batas lalu memuat ulang */
+const ptr=mk('',ic('rot',20));ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
+let py=0,px=0,pt=0,pon=0;
+const ptrSet=(y,a)=>{ptr.style.transform=`translate(-50%,${y}px) rotate(${a}deg)`;ptr.style.opacity=Math.min(1,Math.max(0,(y+44)/60))};
+addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX;ptr.style.transition='none'},{passive:true});
+addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(-44,0);return}
+ pt=Math.max(0,Math.min(d*.5,120));ptrSet(pt-44,pt*3.2);ptr.classList.toggle('siap',pt>72)},{passive:true});
+addEventListener('touchend',()=>{if(!pon)return;pon=0;ptr.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';
+ if(pt>72){ptr.classList.add('muter');ptrSet(28,0);setTimeout(()=>location.reload(),650)}else{ptrSet(-44,0);ptr.classList.remove('siap')}},{passive:true});
