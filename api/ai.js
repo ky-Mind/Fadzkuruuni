@@ -6,7 +6,8 @@ export const config = { runtime: 'edge' };
 
 /* Model dicoba berurutan; bila satu tidak tersedia untuk akun ini, pakai berikutnya */
 const MODEL = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
-const ASAL = /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+/* Asal yang diizinkan: situs di Vercel, domain sendiri (fadzkuruuni.xianzing.my.id), dan uji lokal */
+const ASAL = /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 const SISTEM = `Kamu adalah "Fadz AI", asisten tanya-jawab di aplikasi ibadah Fadzkuruuni milik Pondok Pesantren Fadzkuruuni.
 Jawab dalam bahasa Indonesia yang santun, ringkas, dan mudah dipahami santri maupun masyarakat umum.
@@ -22,7 +23,7 @@ Jangan menambahkan amalan, jumlah bacaan, atau tata cara yang tidak kamu yakini 
 Jangan menyebut frasa "Isi aplikasi yang terkait" dan jangan menyebut fitur yang tidak ada di aplikasi (misalnya audio doa); cukup sarankan membuka menu yang sesuai.`;
 
 /* Pengetahuan tetap tentang aplikasi: menu dan letak fitur, agar AI bisa menunjukkan jalan di dalam aplikasi */
-const PANDUAN = `Tentang aplikasi Fadzkuruuni (web: fadzkuruuni.vercel.app; juga aplikasi Android, unduh APK di halaman rilis GitHub). Sebagian besar isi bisa diunduh dan dipakai tanpa internet.
+const PANDUAN = `Tentang aplikasi Fadzkuruuni (web: fadzkuruuni.vercel.app atau fadzkuruuni.xianzing.my.id; juga aplikasi Android, unduh APK di halaman rilis GitHub). Sebagian besar isi bisa diunduh dan dipakai tanpa internet.
 - Menu bawah: Beranda, Al-Qur'an, Fadz AI, Kalender, Pengaturan. Fitur lain ada di pintasan Beranda dan "Semua Menu" (Lainnya).
 - Beranda: kartu waktu salat berlatar foto pondok (jam, hitung mundur ke waktu berikutnya, 6 waktu: Subuh, Terbit, Zuhur, Asar, Magrib, Isya; waktu yang sedang berjalan disorot), kata mutiara, pintasan, pencarian semua isi, lanjutkan membaca. Tarik layar ke bawah di Beranda atau Pengaturan untuk memuat ulang.
 - Al-Qur'an: 114 surah, mode Kartu (per halaman, geser kiri-kanan pindah halaman/surah) dan mode Mushaf, teks latin & terjemah bisa disembunyikan, audio murattal Syaikh Mishary Alafasy, ketuk ayat untuk menandai/putar/salin/bagikan, daftar Penanda, tombol Pengaturan baca (ukuran huruf Arab/latin/terjemah, warna teks, jenis huruf, warna aksen).
