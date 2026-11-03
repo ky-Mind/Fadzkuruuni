@@ -93,7 +93,7 @@ const aiPenuh=on=>{document.body.classList.toggle('aipenuh',!!on&&location.hash.
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel()});
 
 P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</span><h1>Fadz AI<small>Asisten tanya-jawab Fadzkuruuni</small></h1><button class="ib" data-aifull aria-label="Layar penuh">${ic('full',19)}</button><button class="ib" data-aihapus aria-label="Hapus riwayat chat">${ic('trash',19)}</button></div><div class="aist" id="aist"></div><div class="aic" id="aic"></div>
-<div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
+<div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
  init(){const L=aiRiw(),c=$('#aic'),q=$('#aiq');let suara=0;aiStatus();aiPenuh(S.aip);
   const kosong=()=>`<div class="aie"><div class="aiei">${ic('spark',30)}</div><b>Assalamu'alaikum${S.nm?', '+esc(S.nm):''}</b><p class="mut">Aku Fadz AI, asisten tanya-jawab Fadzkuruuni. Tanyakan seputar ibadah, doa, Al-Qur'an, zakat, atau isi aplikasi ini. Bisa juga lewat suara dengan tombol mikrofon. Jawaban AI bisa keliru; untuk masalah hukum, tanyakan juga kepada ustadz.</p><div class="ais">${AI_SARAN.map(s=>`<button type="button" class="chip2" data-ais>${s}</button>`).join('')}</div></div>`;
   /* Gulir seperti WhatsApp: ikut turun hanya bila pengguna sedang di bawah; bila sedang membaca pesan lama, tidak ditarik paksa.
@@ -121,7 +121,7 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
   q.addEventListener('input',()=>{if(!q.value.trim()){sv.hidden=true;suara=0}});
   sv.querySelector('[data-svx]').onclick=()=>{q.value='';tinggi();ikonKb();sv.hidden=true;suara=0};
   const jamTampil=()=>{if(!R||!R.t0)return;const d=(Date.now()-R.t0)/1000|0;$('#airt').textContent=(d/60|0)+':'+String(d%60).padStart(2,'0')};
-  const tampilan=mode=>{rc.hidden=!mode;aiin.hidden=!!mode;rc.classList.toggle('tahan',mode=='tahan');rc.classList.toggle('kunci',mode=='kunci');rc.classList.toggle('proses',mode=='proses');
+  const tampilan=mode=>{rc.hidden=!mode;if(!mode)rc.classList.remove('srm');if(mode!='kunci'){rc.classList.remove('dijeda');const j=rc.querySelector('[data-recj]');if(j){j.innerHTML=ic('pause',18);j.setAttribute('aria-label','Jeda rekaman')}}aiin.hidden=!!mode;rc.classList.toggle('tahan',mode=='tahan');rc.classList.toggle('kunci',mode=='kunci');rc.classList.toggle('proses',mode=='proses');
    kb.hidden=mode=='kunci'||mode=='proses';lk.hidden=mode!='tahan';kb.classList.toggle('rek',mode=='tahan');if(!mode){kb.style.transform='';rc.style.transform=rc.style.opacity=''}};
   /* Selesai merekam: mikrofon & pengolah suara dimatikan; di aplikasi Android, audio HP dikembalikan ke mode normal (bukan mode telepon).
      Di Android peredam gema dimatikan saat merekam karena itulah yang membuat HP masuk "mode panggilan". */
@@ -151,7 +151,7 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    try{r.rec.requestData&&r.rec.requestData()}catch(x){}r.rec.stop()};
   /* Cadangan: pengenalan suara bawaan browser (bila perekam tidak didukung), mode terkunci dengan Kirim/Batal */
   let sr=null,srTeks='',srKirim=0;
-  const srMulai=()=>{if(!navigator.onLine)return toast('Pengenalan suara butuh internet');srTeks='';srKirim=0;R={mode:'kunci',t0:Date.now(),sr:1};tampilan('kunci');$('#airtx').textContent='Bicara sekarang…';R.jam=setInterval(jamTampil,500);
+  const srMulai=()=>{if(!navigator.onLine)return toast('Pengenalan suara butuh internet');srTeks='';srKirim=0;R={mode:'kunci',t0:Date.now(),sr:1};tampilan('kunci');rc.classList.add('srm');$('#airtx').textContent='Bicara sekarang…';R.jam=setInterval(jamTampil,500);
    sr=new AISR();sr.lang='id-ID';sr.interimResults=true;sr.continuous=false;
    sr.onresult=e=>{srTeks=[...e.results].map(r=>r[0].transcript).join(' ');$('#airtx').textContent=srTeks};
    sr.onerror=e=>{if(e.error=='not-allowed')toast('Izinkan mikrofon untuk berbicara dengan Fadz AI')};
@@ -171,6 +171,12 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
   kb.addEventListener('click',e=>{if(!q.value.trim()&&AIMIC)e.preventDefault()});
   kb.addEventListener('contextmenu',e=>e.preventDefault());
   rc.querySelector('[data-reck]').onclick=()=>{if(sr){srKirim=1;sr.stop()}else rekKirim()};
+  /* Jeda / lanjutkan rekaman yang terkunci (seperti WhatsApp: Hapus · Jeda · Kirim) */
+  const jb=rc.querySelector('[data-recj]');
+  const jedaUI=on=>{rc.classList.toggle('dijeda',on);jb.innerHTML=ic(on?'mic':'pause',18);jb.setAttribute('aria-label',on?'Lanjutkan rekaman':'Jeda rekaman');$('#airtx').textContent=on?'Dijeda':''};
+  jb.onclick=()=>{const r=R;if(!r||!r.rec||sr)return;try{
+   if(r.rec.state=='recording'){r.rec.pause();r.jd=Date.now();clearInterval(r.jam);clearInterval(r.lv);jedaUI(true)}
+   else if(r.rec.state=='paused'){r.rec.resume();r.t0+=Date.now()-r.jd;r.jam=setInterval(jamTampil,500);if(r.an)r.lv=setInterval(level,80);jedaUI(false)}}catch(x){}};
   /* Geser bilah rekaman (terkunci) ke kiri untuk membatalkan, seperti WhatsApp */
   let gx0=null;rc.addEventListener('pointerdown',e=>{if(rc.classList.contains('kunci')&&!e.target.closest('button'))gx0=e.clientX});rc.addEventListener('pointermove',e=>{if(gx0==null)return;const d=Math.min(0,e.clientX-gx0);rc.style.transform=`translateX(${d}px)`;rc.style.opacity=1+d/300;if(d<-110){gx0=null;rc.style.transform=rc.style.opacity='';rc.querySelector('[data-recx]').click()}});
   ['pointerup','pointercancel','pointerleave'].forEach(t=>rc.addEventListener(t,()=>{gx0=null;if(!rc.classList.contains('tahan'))rc.style.transform=rc.style.opacity=''}));
