@@ -10,12 +10,17 @@ function androidWarna(){if(!ANDROID)return;const bg=getComputedStyle(document.do
 const andIzinStatus=()=>{try{return JSON.parse(window.FadzAndroid.statusIzin()||'{}')}catch(e){return {}}};
 const andIzinTunggu={};
 window.fadzIzinHasil=(n,st)=>{const f=andIzinTunggu[n];delete andIzinTunggu[n];f&&f(st)};
-const andMintaIzin=n=>new Promise(ok=>{andIzinTunggu[n]=ok;andPanggil('mintaIzin',n);if(n=='alarm')setTimeout(()=>ok(andIzinStatus().alarm),400)});
+/* Bila Android membuka layar pengaturan (izin pernah ditolak) jawaban tidak datang: setelah kembali ke aplikasi atau 20 detik, pakai status terbaru */
+const andMintaIzin=n=>new Promise(ok=>{let sdh=0;const sel=st=>{if(sdh)return;sdh=1;delete andIzinTunggu[n];document.removeEventListener('visibilitychange',vis);ok(st)};
+ const vis=()=>{if(!document.hidden)setTimeout(()=>sel(andIzinStatus()[n]),600)};andIzinTunggu[n]=sel;document.addEventListener('visibilitychange',vis);
+ andPanggil('mintaIzin',n);setTimeout(()=>sel(andIzinStatus()[n]),n=='alarm'?400:20000)});
 /* Suara pembaca selesai */
 window.fadzTtsSelesai=()=>{try{if(AITTS){AITTS=null;aiTtsUI()}}catch(e){}};
 /* Masuk Google: token dari tab Chrome diteruskan ke Firebase di aplikasi */
+/* Pesan bila masuk Facebook gagal (aplikasi Facebook masih menunggu verifikasi Meta) */
+const FBGAGAL='Masuk dengan Facebook belum tersedia untuk semua akun (sedang diverifikasi Meta). Pakai Google atau Email dulu.';
 window.fadzMasuk=async(p,id,at)=>{try{if(typeof fbInit=='function')await fbInit();for(let k=0;k<40&&!(window.firebase&&firebase.auth);k++)await new Promise(r=>setTimeout(r,250));
- const c=p=='fb'?firebase.auth.FacebookAuthProvider.credential(at):firebase.auth.GoogleAuthProvider.credential(id||null,at||null);await firebase.auth().signInWithCredential(c);toast('Berhasil masuk dengan '+(p=='fb'?'Facebook':'Google'))}catch(e){toast(e.code=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Masuk dengan Google dulu.':'Gagal masuk: '+(e.code||e.message))}};
+ const c=p=='fb'?firebase.auth.FacebookAuthProvider.credential(at):firebase.auth.GoogleAuthProvider.credential(id||null,at||null);await firebase.auth().signInWithCredential(c);toast('Berhasil masuk dengan '+(p=='fb'?'Facebook':'Google'))}catch(e){toast(e.code=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Masuk dengan Google dulu.':p=='fb'?FBGAGAL:'Gagal masuk: '+(e.code||e.message))}};
 window.fadzMasukGoogle=async(id,at)=>{try{if(typeof fbInit=='function')await fbInit();for(let k=0;k<40&&!(window.firebase&&firebase.auth);k++)await new Promise(r=>setTimeout(r,250));
  await firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(id||null,at||null));toast('Berhasil masuk dengan Google')}catch(e){toast('Gagal masuk: '+(e.code||e.message))}};
 /* Pengingat adzan: jadwal 7 hari ke depan dikirim ke Android (dipasang sebagai alarm). Dikirim ulang bila pengaturan/lokasi berubah. */
