@@ -717,11 +717,12 @@ html[data-vt=back]::view-transition-new(page){animation-name:vt-in-l}
 #ftp .ftpa{display:flex;gap:6px;margin-top:10px}
 #ftp .ftpa .sb{flex:1;height:28px;font-size:11.5px}
 
-/* Tarik untuk memuat ulang */
-#ptr{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;z-index:30;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--card);color:var(--mut);box-shadow:0 4px 16px rgba(0,0,0,.16);opacity:0;transform:translate(-50%,-44px);pointer-events:none}
-#ptr.siap{color:var(--g)}
-#ptr.muter{color:var(--g)}
-#ptr.muter .ic{animation:ptrPutar .7s linear infinite}
+/* Tarik untuk memuat ulang: putaran + tulisan di celah atas, halaman ikut turun */
+#ptr{position:fixed;top:env(safe-area-inset-top);left:50%;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;transform:translate(-50%,-44px);pointer-events:none;color:var(--mut)}
+#ptr i{width:22px;height:22px;border:2.5px solid var(--line);border-top-color:var(--g);border-radius:50%}
+#ptr small{font-size:11.5px;letter-spacing:.02em;white-space:nowrap}
+#ptr.siap small,#ptr.muter small{color:var(--ink)}
+#ptr.muter i{animation:ptrPutar .7s linear infinite}
 @keyframes ptrPutar{to{transform:rotate(360deg)}}
 
 /* Beranda: doa hari ini */
@@ -1111,3 +1112,23 @@ section.tb{display:contents}
 .tfb .tli{background:transparent}
 .tmap:hover,.tfb:hover{border-color:color-mix(in srgb,var(--g) 40%,var(--line))}
 @media(hover:hover){.tlb:hover{filter:brightness(1.05)}}
+
+/* Ukuran tampilan di HP: seluruh aplikasi diperkecil (Pengaturan > Tampilan & Bacaan > Ukuran tampilan) */
+@media (max-width:640px){html{zoom:var(--zm,.86)}}
+
+/* Kartu waktu salat di Beranda: foto Pondok Fadzkuruuni dengan lapisan gelap, ubin waktu kaca, waktu sekarang krem keemasan */
+.hero.hfoto{padding:20px 16px 18px;border-radius:18px;background:linear-gradient(180deg,rgba(18,32,64,.42),rgba(10,14,22,.62) 70%,rgba(8,10,14,.72)),url(../img/pondok.jpg) center 40%/cover,var(--hero);text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.hfoto .hnl{display:inline-flex;align-items:center;gap:5px;font-size:15px;opacity:1}
+.hfoto .hnl .ic{opacity:.95}
+.hfoto .big{font-size:48px;margin:4px 0 2px}
+.hfoto .mut2{font-size:18px;opacity:1;margin:0}
+.hfoto .hgr{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px auto 4px;max-width:260px;color:#fff}
+.hfoto .hgr i{flex:1;height:1px;background:rgba(255,255,255,.75)}
+.hfoto>small:not(.hnl){opacity:.95}
+.hfoto .qt{margin-top:10px}
+.hfoto .pt{gap:8px;margin-top:14px}
+.hfoto .pt div{padding:7px 0;background:rgba(40,44,48,.55);border:1px solid rgba(255,255,255,.22);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.hfoto .pt div.n,[data-theme=dark] .hfoto .pt div.n{background:linear-gradient(180deg,#fffaf0,#fbf0d4);color:#1b2233;border-color:#e8c877;box-shadow:0 0 14px rgba(240,200,110,.45);text-shadow:none}
+.hfoto .pt b{font-size:16px}
+@media (pointer:fine){.hfoto .pt div:not(.n){-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
+@media (max-width:640px){.hfoto .big{font-size:42px}.hfoto .mut2{font-size:16px}}

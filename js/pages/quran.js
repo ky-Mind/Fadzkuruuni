@@ -92,7 +92,7 @@ ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kart
 <div class="list sg ksh-c">${sl('s2','Arab',22,52,S.fs)}${sl('s6','Latin',12,26,S.fl||15)}${sl('s7','Terjemah',12,26,S.fi||14)}</div>
 <div class="ksh-l">Warna teks</div><div class="ksh-c kpad">${wteksUI()}</div>
 <div class="ksh-l">Jenis huruf Arab</div>${fontUI('af',FAR,'بِسْمِ اللّٰهِ')}
-<div class="ksh-l">Warna aksen</div><div class="ksh-c kpad"><div class="wtk acw" id="acw">${Object.entries(ACC).map(([v,a])=>`<button type="button" data-v="${v}" class="${v==(S.ac||'emerald')?'on':''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check',16)}</i><small>${a[0]}</small></button>`).join('')}</div></div>
+<div class="ksh-l">Warna aksen</div><div class="ksh-c kpad"><div class="wtk acw" id="acw">${Object.entries(ACC).map(([v,a])=>`<button type="button" data-v="${v}" class="${v==(S.ac||'hitam')?'on':''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check',16)}</i><small>${a[0]}</small></button>`).join('')}</div></div>
 </div></div>`;document.body.append(e);
  e.onclick=x=>{if(x.target==e||x.target.closest('#s4')){e.remove();typeof cb=='function'&&cb()}};
  $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();setSz()};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();setSz()};
