@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kebijakan Privasi · Fadzkuruuni</title>
+<meta name="description" content="Kebijakan privasi aplikasi Fadzkuruuni: data apa yang dipakai, untuk apa, dan cara menghapusnya.">
+<link rel="icon" href="img/favicon-48.png">
+<!-- kebijakan-privasi.html - Kebijakan privasi aplikasi Fadzkuruuni (web & Android). Ditautkan dari halaman Tentang
+     dan dipakai sebagai URL Kebijakan Privasi di Facebook Developer & Google. Penghapusan data: hapus-data.html -->
+<style>
+:root{--g:#1c1f1e;--ink:#1d2b25;--mut:#5f6d66;--bg:#fff;--fill:#f0f2f1;--line:#e5e7e5}
+@media (prefers-color-scheme:dark){:root{--g:#e6e9e7;--ink:#eef2ef;--mut:#9aa6a0;--bg:#121413;--fill:#1f2321;--line:#2a2f2c}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 'Times New Roman',Times,serif}
+main{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+header img{width:44px;height:44px;border-radius:12px}
+h1{font-size:26px;margin:0;line-height:1.2}
+h2{font-size:19px;margin:28px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+p,li{margin:0 0 8px}
+ul{padding-left:20px;margin:0 0 8px}
+small,.mut{color:var(--mut)}
+a{color:inherit}
+.kotak{padding:12px 14px;border-radius:12px;background:var(--fill);margin:14px 0}
+</style>
+</head>
+<body>
+<main>
+<header><img src="img/icon-192.png" alt=""><div><h1>Kebijakan Privasi</h1><small>Aplikasi Fadzkuruuni · berlaku sejak 3 November 2026</small></div></header>
+
+<p>Fadzkuruuni adalah aplikasi pendamping ibadah dari Pondok Pesantren Tahfidz Qur'an Fadzkuruuni (Majelis Fadzkuruuni), dikembangkan oleh KyMind bersama tim Fadzkuruuni. Kebijakan ini menjelaskan data apa yang dipakai aplikasi (situs fadzkuruuni.vercel.app dan aplikasi Android), untuk apa, dan bagaimana kamu bisa menghapusnya.</p>
+<div class="kotak">Ringkasnya: sebagian besar fitur bisa dipakai <b>tanpa akun</b>. Kami tidak menjual data, tidak menampilkan iklan, dan tidak membagikan data kepada pihak lain untuk tujuan pemasaran.</div>
+
+<h2>1. Data yang disimpan di perangkatmu saja</h2>
+<ul>
+<li>Pengaturan tampilan dan bacaan, penanda ayat, riwayat baca, hitungan tasbih, dan isi yang diunduh untuk offline.</li>
+<li>Lokasi untuk jadwal salat dan arah kiblat. Lokasi dipakai di perangkat untuk menghitung waktu salat dan tidak dikirim ke server kami.</li>
+<li>Riwayat obrolan Fadz AI.</li>
+</ul>
+
+<h2>2. Akun (opsional)</h2>
+<p>Kamu bisa masuk dengan Google, Facebook, atau Email. Saat masuk, kami menerima <b>nama, alamat email, dan foto profil</b> dari layanan tersebut (melalui Firebase Authentication milik Google). Kami tidak menerima kata sandi, daftar teman, atau unggahanmu.</p>
+<p>Bila masuk, pengaturan, penanda, dan riwayat baca disalin ke Firebase Cloud Firestore agar bisa dipakai di perangkat lain. Data ini hanya bisa dibaca oleh akunmu sendiri.</p>
+
+<h2>3. Laporan masalah</h2>
+<p>Saat mengirim laporan, kami menyimpan isi laporan, foto yang kamu lampirkan, halaman yang dilaporkan, nama dan email akunmu, nomor WhatsApp bila kamu isi, versi aplikasi, dan jenis perangkat (ukuran layar dan jenis peramban). Laporan hanya bisa dibaca oleh admin Fadzkuruuni untuk memperbaiki aplikasi dan membalas laporanmu.</p>
+
+<h2>4. Fadz AI dan pesan suara</h2>
+<p>Pertanyaan yang kamu kirim ke Fadz AI, beserta nama panggilan, kota, dan tanggal untuk konteks jawaban, diteruskan ke layanan AI Groq untuk dibuatkan jawaban. Pesan suara dikirim ke Groq untuk diubah menjadi teks. Kami tidak menyimpan pertanyaan atau rekaman suara di server kami. Jangan menulis data pribadi yang sensitif di Fadz AI.</p>
+
+<h2>5. Statistik pemakaian</h2>
+<p>Aplikasi mengirim hitungan pemakaian tanpa identitas: jumlah halaman dibuka per hari, fitur yang dibuka, kota jadwal salat, dan jenis aplikasi (web, terpasang, atau Android). Data ini tidak berisi nama, email, atau ID perangkat. Kamu bisa mematikannya di <b>Pengaturan › Tentang &amp; Bantuan › Bantu kembangkan aplikasi</b>.</p>
+
+<h2>6. Izin di HP</h2>
+<ul>
+<li><b>Notifikasi dan alarm</b>: untuk pengingat adzan.</li>
+<li><b>Lokasi</b>: untuk jadwal salat dan kiblat.</li>
+<li><b>Mikrofon</b>: hanya selama kamu merekam pesan suara untuk Fadz AI.</li>
+<li><b>Kamera dan foto</b>: hanya bila kamu melampirkan foto di laporan.</li>
+</ul>
+<p>Semua izin bisa dicabut kapan saja lewat pengaturan HP.</p>
+
+<h2>7. Layanan pihak ketiga</h2>
+<p>Google Firebase (akun, penyimpanan data, dan hosting), Vercel (hosting situs), Groq (AI dan pengenalan suara), Google, Facebook (Meta), dan Email (cara masuk), serta penyedia teks dan audio Al-Qur'an (api.alquran.cloud, everyayah.com). Masing-masing tunduk pada kebijakan privasinya sendiri.</p>
+
+<h2>8. Menghapus data</h2>
+<p>Kamu bisa menghapus akun dan semua data cloud-mu sendiri lewat <b>Pengaturan › Akun &amp; Profil › Hapus akun &amp; data</b>, atau meminta kami menghapusnya. Caranya lengkap ada di <a href="hapus-data.html">halaman Penghapusan Data</a>. Data di perangkat terhapus bila kamu menghapus data aplikasi atau mencopot aplikasi.</p>
+
+<h2>9. Anak-anak</h2>
+<p>Aplikasi ini boleh dipakai santri dari segala usia. Kami tidak sengaja mengumpulkan data pribadi anak. Untuk anak di bawah 13 tahun, sebaiknya masuk akun dan mengirim laporan didampingi orang tua atau wali.</p>
+
+<h2>10. Perubahan dan kontak</h2>
+<p>Kebijakan ini bisa diperbarui sewaktu-waktu. Tanggal berlaku di atas akan ikut berubah. Bila ada pertanyaan, hubungi kami lewat email <a href="mailto:ponpesfadzkuruuni@gmail.com">ponpesfadzkuruuni@gmail.com</a> atau WhatsApp <a href="https://wa.me/6289506138191">+62 895-0613-8191</a>.</p>
+<p class="mut">Ponpes Tahfidz Qur'an Fadzkuruuni, Kp. Cibuntu Kaler, Sukamaju, Kec. Kadudampit, Kab. Sukabumi, Jawa Barat 43153.</p>
+<p><a href="./">← Kembali ke aplikasi</a></p>
+</main>
+</body>
+</html>
