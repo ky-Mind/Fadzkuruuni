@@ -83,15 +83,15 @@ addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest?.('input,t
 const ptr=mk('',`<span class="plg"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" pathLength="100"/><circle class="pj" cx="24" cy="24" r="21" pathLength="100"/></svg><img src="img/logo.png" alt=""></span><small>Tarik untuk memuat ulang</small>`);ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
 const ptrBoleh=()=>['','#','#/','#/pengaturan'].includes(location.hash);
 let py=0,px=0,pt=0,pon=0;
-const PTB=64;
+const PTB=72,PTH=70;/* batas tarik; tinggi logo + tulisan (indikator selalu di atas isi halaman, tidak menimpa) */
 const ptrSet=(y,anim)=>{const v=$('#view'),tr=anim?'transform .32s cubic-bezier(.22,.8,.3,1)':'none';v.style.transition=ptr.style.transition=tr+(anim?',opacity .32s':'');
- v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${y/2-22}px)`;ptr.style.opacity=Math.min(1,y/40);
+ v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${Math.max(y-PTH-6,(y-PTH)/2)}px)`;ptr.style.opacity=Math.min(1,Math.max(0,(y-24)/40));
  if(!ptr.classList.contains('muter')){const k=Math.min(1,y/PTB);ptr.style.setProperty('--pk',k);$('.pj',ptr).style.strokeDashoffset=100-k*100}};
 addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX},{passive:true});
 addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(0,1);return}
- pt=Math.max(0,Math.min(d*.45/zmKini(),110));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
+ pt=Math.max(0,Math.min(d*.5/zmKini(),130));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
 addEventListener('touchend',()=>{if(!pon)return;pon=0;
- if(pt>PTB){ptr.classList.add('muter');$('small',ptr).textContent='Memuat…';ptrSet(PTB,1);setTimeout(()=>location.reload(),700)}else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
+ if(pt>PTB){ptr.classList.add('muter');$('small',ptr).textContent='Memuat…';ptrSet(PTH+18,1);setTimeout(()=>location.reload(),700)}else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
 /* Cegah salin, potong, seret, dan menu klik kanan pada isi aplikasi; kolom isian tetap bisa diketik dan ditempel */
 const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contenteditable]');
 ['copy','cut','dragstart','contextmenu','selectstart'].forEach(t=>document.addEventListener(t,e=>{if(!bebasSalin(e))e.preventDefault()}));
