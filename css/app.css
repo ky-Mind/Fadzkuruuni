@@ -719,11 +719,21 @@ html[data-vt=back]::view-transition-new(page){animation-name:vt-in-l}
 
 /* Tarik untuk memuat ulang: putaran + tulisan di celah atas, halaman ikut turun */
 #ptr{position:fixed;top:env(safe-area-inset-top);left:50%;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;transform:translate(-50%,-44px);pointer-events:none;color:var(--mut)}
-#ptr i{width:22px;height:22px;border:2.5px solid var(--line);border-top-color:var(--g);border-radius:50%}
+/* Logo Fadzkuruuni dikelilingi lingkaran: terisi mengikuti tarikan, lalu berputar saat memuat */
+#ptr .plg{position:relative;display:grid;place-items:center;width:44px;height:44px;transform:scale(calc(.7 + var(--pk,0)*.3))}
+#ptr .plg img{width:30px;height:30px;border-radius:50%;object-fit:contain;transition:transform .3s}
+#ptr .plg svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#ptr .plg circle{fill:none;stroke:var(--line);stroke-width:2.5}
+#ptr .plg circle.pj{stroke:var(--g);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+#ptr.siap .plg img{transform:scale(1.08)}
+#ptr.muter .plg{transform:none}
+#ptr.muter .plg circle.pj{stroke-dasharray:28 72;stroke-dashoffset:0}
+#ptr.muter .plg svg{animation:ptrPutar .8s linear infinite}
+#ptr.muter .plg img{animation:ptrDenyut 1.2s ease-in-out infinite}
+@keyframes ptrDenyut{50%{transform:scale(.9)}}
 #ptr small{font-size:11.5px;letter-spacing:.02em;white-space:nowrap}
 #ptr.siap small,#ptr.muter small{color:var(--ink)}
-#ptr.muter i{animation:ptrPutar .7s linear infinite}
-@keyframes ptrPutar{to{transform:rotate(360deg)}}
+@keyframes ptrPutar{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}
 
 /* Beranda: doa hari ini */
 .dhi{display:block;color:var(--ink);text-decoration:none}

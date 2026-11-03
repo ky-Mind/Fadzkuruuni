@@ -80,12 +80,13 @@ addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx
 addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest?.('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
 /* Tarik ke bawah untuk memuat ulang (seperti Instagram): seluruh halaman ikut turun, di celah atas muncul putaran + tulisan.
    Hanya di Beranda dan Pengaturan; halaman lain (Al-Qur'an, bacaan, dll.) tidak bisa ditarik. */
-const ptr=mk('',`<i></i><small>Tarik untuk memuat ulang</small>`);ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
+const ptr=mk('',`<span class="plg"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" pathLength="100"/><circle class="pj" cx="24" cy="24" r="21" pathLength="100"/></svg><img src="img/logo.png" alt=""></span><small>Tarik untuk memuat ulang</small>`);ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
 const ptrBoleh=()=>['','#','#/','#/pengaturan'].includes(location.hash);
 let py=0,px=0,pt=0,pon=0;
 const PTB=64;
 const ptrSet=(y,anim)=>{const v=$('#view'),tr=anim?'transform .32s cubic-bezier(.22,.8,.3,1)':'none';v.style.transition=ptr.style.transition=tr+(anim?',opacity .32s':'');
- v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${y/2-22}px)`;ptr.style.opacity=Math.min(1,y/40);$('i',ptr).style.transform=`rotate(${y*4}deg)`};
+ v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${y/2-22}px)`;ptr.style.opacity=Math.min(1,y/40);
+ if(!ptr.classList.contains('muter')){const k=Math.min(1,y/PTB);ptr.style.setProperty('--pk',k);$('.pj',ptr).style.strokeDashoffset=100-k*100}};
 addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX},{passive:true});
 addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(0,1);return}
  pt=Math.max(0,Math.min(d*.45/zmKini(),110));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
