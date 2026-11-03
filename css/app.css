@@ -972,7 +972,7 @@ body.ovl #view{overflow:hidden}
 @keyframes kshTengah{from{opacity:0;transform:scale(.94)}}
 
 /* Isi tab bisa digeser kiri/kanan (js/core/events.js) */
-#tb{touch-action:pan-y;will-change:transform}
+#tb{touch-action:pan-y}
 
 /* Bilah tab: pil hijau meluncur halus ke tab aktif (kurva sama dengan geser halaman) */
 .tabs.pil{position:relative;isolation:isolate}
@@ -1056,3 +1056,57 @@ body.ovl #view{overflow:hidden}
 .ailk.dekat{color:var(--g);border-color:var(--g)}
 @keyframes ailkIn{from{opacity:0;transform:translateY(10px)}}
 @keyframes ailkPanah{50%{transform:rotate(90deg) translateX(-4px)}}
+
+/* Tampilkan Latin / Terjemah (Pengaturan): berlaku di semua halaman baca & contoh di panel pengaturan */
+.no-lt #view .lt,.no-lt .qpv .qpl,.no-lt .ukp-lt{display:none}
+.no-tr #view .tr,.no-tr .qpv .qpt,.no-tr .ukp-tr{display:none}
+.qpv .qpa{color:var(--tc,var(--ink))}
+.qpv .qpl{display:block;margin-top:2px;color:var(--tc,var(--ink));font-style:italic;line-height:1.6}
+.qpv .qpt{display:block;margin-top:4px;color:var(--tc,var(--mut));line-height:1.6}
+
+/* Anti-kedip di HP: latar gelap di belakang lembar tanpa efek blur (blur bertumpuk di atas kepala halaman yang juga blur
+   membuat layar berkedip saat diam); kartu contoh font berukuran tetap agar tidak melompat saat font selesai dimuat */
+@media (hover:none),(pointer:coarse){.back-d{background:rgba(0,0,0,.5);-webkit-backdrop-filter:none;backdrop-filter:none}}
+.back-d .bar.lekat,.ovl .bar.lekat,.ovl .ktb,.ovl .rh.lekat{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
+.fnl button span{display:block;height:1.6em;line-height:1.6em;overflow:hidden}
+.fnl.ar button span{height:1.75em;line-height:1.75em}
+
+/* Beranda: tiap bagian dibungkus section.tb (tidak memengaruhi tata letak) */
+section.tb{display:contents}
+/* Pengumuman admin di Beranda */
+.umum{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--g) 30%,var(--line));border-radius:16px;background:var(--gs);color:var(--ink);text-decoration:none}
+.umi{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--g);color:var(--on)}
+.umt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.45}
+.umt b{font-size:15px}
+.uml{flex:none;display:inline-flex;align-items:center;gap:2px;color:var(--g);font-weight:700;font-size:13px}
+/* Mode admin di aplikasi */
+.tadm{position:fixed;z-index:30;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:6px;border:1px solid var(--line);border-radius:99px;background:var(--card);box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:13px;white-space:nowrap}
+.tadm button,.tadm a{height:34px;padding:0 14px;border:0;border-radius:99px;background:var(--fill);color:var(--ink);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.tadm .pri{background:var(--g);color:var(--on)}
+.tadm b{padding:0 6px 0 10px;color:var(--g)}
+@media(min-width:900px){.tadm{bottom:24px;left:calc(50% + 115px)}}
+.tadmon section.tb{display:block;position:relative;margin:10px 0;padding:34px 8px 6px;border:2px dashed color-mix(in srgb,var(--g) 45%,transparent);border-radius:14px}
+.tadmon section.tb>.tak{position:absolute;top:4px;right:6px}
+.tadmon [data-ta]{position:relative}
+.tadmon .grid [data-ta]>.tak,.tadmon .list [data-ta]>.tak{position:absolute;z-index:2;top:2px;right:2px}
+.tak{display:flex;gap:3px}
+.tak button{height:24px;min-width:24px;padding:0 7px;border:0;border-radius:8px;background:var(--g);color:var(--on);font-size:11px;font-weight:700;cursor:pointer}
+.tah{opacity:.4}
+.tadmon .tah{opacity:.45;filter:grayscale(1)}
+.tak-kosong{padding:8px;color:var(--mut);font-size:13px}
+
+/* Tentang: tombol lokasi pondok & media sosial, sepasang sama lebar dan sama tinggi */
+.tlk{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tlb{display:flex;align-items:center;gap:10px;min-width:0;height:54px;padding:0 14px 0 8px;border-radius:16px;text-decoration:none;transition:transform .12s,filter .2s}
+.tlb:active{transform:scale(.97)}
+.tli{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:12px}
+.tlt{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.tlt b{font-size:14px}
+.tlt small{overflow:hidden;font-size:11.5px;white-space:nowrap;text-overflow:ellipsis;opacity:.8}
+/* Kedua tombol mengikuti warna tema aplikasi; hanya ikon bulat kecil yang memakai warna khas (Maps merah, Facebook biru) */
+.tmap,.tfb{border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.tli{border-radius:50%}
+.tmap .tli{background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.tfb .tli{background:transparent}
+.tmap:hover,.tfb:hover{border-color:color-mix(in srgb,var(--g) 40%,var(--line))}
+@media(hover:hover){.tlb:hover{filter:brightness(1.05)}}

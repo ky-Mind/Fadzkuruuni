@@ -45,6 +45,7 @@ async function dlMulai(id,lokal,diam){const p=PAKET[id];if(!p||(DLJ[id]&&DLJ[id]
 /* Simpan file paket (PDF) ke folder Download perangkat */
 async function dlSimpan(id){const p=PAKET[id];if(!p||!p.berkas)return;let F=[];try{F=await p.berkas()}catch(e){}
  if(!F.length)return toast('Versi PDF untuk '+p.judul+' belum tersedia');
+ if(window.ANDROID){F.forEach(f=>andPanggil('unduh',dlAbs(f.url),f.nama));return}
  for(const f of F){try{const r=await caches.match(dlAbs(f.url))||await fetch(f.url);if(!r.ok)throw 0;const u=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=u;a.download=f.nama;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}
   catch(e){return toast('Gagal menyimpan '+f.nama+'. Butuh internet untuk mengambil file PDF.')}}
  toast(F.length>1?F.length+' file PDF disimpan ke folder Download':'File PDF disimpan ke folder Download')}

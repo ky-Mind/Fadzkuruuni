@@ -83,7 +83,7 @@ function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#
  e.innerHTML=`<div class="sheet ksh" role="dialog" aria-label="Pengaturan baca">
 <div class="ksh-h"><span class="si">${ic('sliders',20)}</span><div><b>${qr?"Pengaturan Al-Qur'an":'Pengaturan baca'}</b><small class="mut">${esc(jd)}</small></div><button type="button" class="ksh-x" id="s4" aria-label="Tutup">×</button></div>
 <div class="ksh-b">
-<div class="qpv"><span class="qpa" id="qpa">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span><small class="mut" id="qpl">Bismillaahir Rahmaanir Raheem</small></div>
+<div class="qpv"><span class="qpa" id="qpa">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span><small class="qpl" id="qpl">Bismillaahir Rahmaanir Raheem</small><small class="qpt" id="qpt">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</small></div>
 <div class="ksh-l">Tema aplikasi</div>${seg('sth',[['auto','Perangkat'],['light','Terang'],['dark','Gelap'],['blue','Biru']],S.theme||'auto')}
 ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kartu'],['1','Mushaf']],(qr?S.full:S.mbaca=='mushaf')?'1':'0')}`:''}
 <div class="ksh-l">Tampilkan</div>
@@ -95,13 +95,13 @@ ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kart
 <div class="ksh-l">Warna aksen</div><div class="ksh-c kpad"><div class="wtk acw" id="acw">${Object.entries(ACC).map(([v,a])=>`<button type="button" data-v="${v}" class="${v==(S.ac||'emerald')?'on':''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check',16)}</i><small>${a[0]}</small></button>`).join('')}</div></div>
 </div></div>`;document.body.append(e);
  e.onclick=x=>{if(x.target==e||x.target.closest('#s4')){e.remove();typeof cb=='function'&&cb()}};
- $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();$$('.ay .tr').forEach(p=>p.hidden=!S.tr)};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();$$('.ay .lt').forEach(p=>p.hidden=!S.lt)};
+ $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();setSz()};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();setSz()};
  $('#s6',e).oninput=x=>{S.fl=+x.target.value;save();setSz()};$('#s7',e).oninput=x=>{S.fi=+x.target.value;save();setSz()};
  $('#s2',e).oninput=x=>{S.fs=+x.target.value;save();$$('#view .ay .ar,#view .ay2 .ar,#view .ar2,#view .mushaf').forEach(a=>a.style.fontSize=S.fs+'px');$$('#view .bsm').forEach(a=>a.style.fontSize=Math.round(S.fs*.85)+'px')};
  if($('#smd',e))segBind('smd',v=>window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1'));
  segBind('sth',v=>{S.theme=v;save();theme()});wteksBind();fontBind('af',FAR);segBind('acw',v=>{S.ac=v;save();accent()});
  /* Pratinjau dan angka di samping penggeser ikut berubah */
- const prv=()=>{$('#qpa',e).style.fontSize=S.fs+'px';$('#qpl',e).style.fontSize=(S.fl||15)+'px';$$('[data-for]',e).forEach(b=>b.textContent=$('#'+b.dataset.for,e).value)};prv();e.addEventListener('input',prv);e.addEventListener('click',()=>setTimeout(prv))}
+ const prv=()=>{$('#qpa',e).style.fontSize=S.fs+'px';$('#qpl',e).style.fontSize=(S.fl||15)+'px';$('#qpt',e).style.fontSize=(S.fi||14)+'px';$$('[data-for]',e).forEach(b=>b.textContent=$('#'+b.dataset.for,e).value)};prv();e.addEventListener('input',prv);e.addEventListener('click',()=>setTimeout(prv))}
 P.bookmark=()=>({html:head('Penanda ayat')+`<p class="mut">Penanda menyimpan ayat yang ingin kamu baca lagi. Ketuk ikon bintang pada sebuah ayat saat membaca, lalu temukan semuanya di sini.</p><div id="bl"></div>`,
  init(){const B=S.bm||[],el=$('#bl');if(!B.length){el.innerHTML='<div class="card mut">Belum ada penanda. Buka sebuah surah, lalu ketuk ikon bintang pada ayat.</div>';return}
   el.innerHTML=list(B,k=>{const [n,a]=k.split(':');return `<div class="row"><a class="t" href="#/quran/${n}/${a}" style="flex:1;min-width:0"><b>${NAMA[n-1]}</b> · ayat ${a}<br><small data-s="${k}">${ARTI[n-1]}</small></a><button class="btn s" data-x="${k}">Hapus</button></div>`});
@@ -117,7 +117,7 @@ function ayMenu(n,k){const x=window.QR&&QR.A&&QR.A[k-1];if(!x)return;const key=n
   if(a=='bm'){S.bm=S.bm||[];const i=S.bm.indexOf(key);i<0?S.bm.unshift(key):S.bm.splice(i,1);save();$$(`[data-bm="${key}"]`).forEach(s=>s.classList.toggle('on',i<0));toast(i<0?'Ayat ditandai':'Penanda dihapus')}
   else if(a=='play')window.QR&&QR.dari(k);
   else if(a=='copy')salin();
-  else if(a=='share'){navigator.share?navigator.share({text:teks}).catch(()=>{}):salin()}}}
+  else if(a=='share'){window.ANDROID?andPanggil('bagikan',teks):navigator.share?navigator.share({text:teks}).catch(()=>{}):salin()}}}
 /* Gambar ayat. Mode mushaf: semua ayat bersambung (bismillah di luar blok bergaris). Mode kartu: halaman p (QPER ayat); p null = semua. */
 const drawAy=(el,A,n,p)=>{const {b,w}=bsmSplit(A,n);if(S.full){el.innerHTML=`${b}<div class="mushaf" style="font-size:${S.fs}px">${w.map((t,i)=>`<span class="ayt" id="a${i+1}">${t}<span class="mk">${(i+1).toLocaleString('ar-EG')}</span></span>`).join(' ')}</div>`;return}
- const s=(p||0)*QPER,e=p==null?A.length:s+QPER;el.innerHTML=(s?'':b)+A.slice(s,e).map((x,j)=>{const i=s+j;return `<div class="ay" id="a${i+1}"><div class="ah"><span class="n">${i+1}</span><button class="bm ${(S.bm||[]).includes(n+':'+(i+1))?'on':''}" data-bm="${n}:${i+1}" aria-label="Penanda ayat">${ic('star',18)}</button></div><div class="ar" style="font-size:${S.fs}px">${w[i]}</div><p class="lt" ${S.lt?'':'hidden'}>${x.l}</p><p class="mut tr" style="margin:6px 0 0" ${S.tr?'':'hidden'}>${x.t}</p></div>`}).join('')};
+ const s=(p||0)*QPER,e=p==null?A.length:s+QPER;el.innerHTML=(s?'':b)+A.slice(s,e).map((x,j)=>{const i=s+j;return `<div class="ay" id="a${i+1}"><div class="ah"><span class="n">${i+1}</span><button class="bm ${(S.bm||[]).includes(n+':'+(i+1))?'on':''}" data-bm="${n}:${i+1}" aria-label="Penanda ayat">${ic('star',18)}</button></div><div class="ar" style="font-size:${S.fs}px">${w[i]}</div><p class="lt">${x.l}</p><p class="mut tr" style="margin:6px 0 0">${x.t}</p></div>`}).join('')};

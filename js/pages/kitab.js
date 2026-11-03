@@ -17,7 +17,7 @@ KITAB_DAFTAR.filter(d=>d.berkas).forEach(d=>paket('kitab:'+d.id,{judul:d.judul,k
 const kwarna=()=>S.kw||(S.kinv===false?'asli':'tema'),kwKls=()=>({tema:'inv',sepia:'sep',malam:'mlm'})[kwarna()]||'';
 /* Layar penuh pembaca kitab: menyembunyikan menu dan tasbih melayang, dan memakai layar penuh peramban bila didukung.
    Saat halaman dibuka ulang (tanpa ketukan) hanya tampilannya yang dipulihkan, karena peramban menolak layar penuh tanpa ketukan. */
-function kitabFull(on,pulih){S.kfull=on;save();document.body.classList.toggle('kfull',on);const b=$('[data-kfs]');if(b)b.classList.toggle('on',on);const R=window.KR;if(R&&$('#kp')){const n=R.cur();setTimeout(()=>{R.ke(n);on&&R.tampil&&R.tampil()},40)}if(pulih)return;
+function kitabFull(on,pulih){S.kfull=on;save();document.body.classList.toggle('kfull',on);if(window.ANDROID)andPanggil('layarPenuh',!!on);const b=$('[data-kfs]');if(b)b.classList.toggle('on',on);const R=window.KR;if(R&&$('#kp')){const n=R.cur();setTimeout(()=>{R.ke(n);on&&R.tampil&&R.tampil()},40)}if(pulih)return;
  const de=document.documentElement,fe=document.fullscreenElement||document.webkitFullscreenElement;
  if(on&&!fe)(de.requestFullscreen||de.webkitRequestFullscreen||(()=>Promise.reject())).call(de).catch(()=>{});else if(!on&&fe)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}
 /* Keluar layar penuh lewat tombol Esc/kembali di perangkat: tampilan ikut kembali normal */

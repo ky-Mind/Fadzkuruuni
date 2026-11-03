@@ -2,11 +2,19 @@ rules_version = '2';
 // Firestore Rules Fadzkuruuni. Tempel di Firebase Console > Firestore Database > Rules, lalu Publish.
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Admin dashboard (admin.html): samakan dengan daftar ADMIN di admin.html
-    function isAdmin() {
+    // Pemilik: selalu admin dan satu-satunya yang bisa mengubah daftar admin. Samakan dengan ADMIN di admin.html
+    function isPemilik() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
+        && request.auth.token.email.lower() in ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
+    }
+    // Admin = pemilik + email di dokumen config/admin (diatur dari dashboard > Admin)
+    function isAdmin() {
+      return isPemilik()
+        || (request.auth != null
+          && request.auth.token.email_verified == true
+          && exists(/databases/$(database)/documents/config/admin)
+          && request.auth.token.email.lower() in get(/databases/$(database)/documents/config/admin).data.emails);
     }
 
     match /users/{uid} {
@@ -15,6 +23,28 @@ service cloud.firestore {
 
     // Laporan dari halaman "Laporkan masalah": siapa pun boleh mengirim, hanya admin yang bisa membaca dan mengubah.
     // Ukuran dokumen otomatis dibatasi Firestore (maks. 1 MB, termasuk foto).
+    // Tata letak aplikasi yang diatur admin: semua orang boleh membaca (aplikasi mengambilnya), hanya admin yang menerbitkan
+    match /config/tampilan {
+      allow read: if true;
+      allow write: if isAdmin();
+      match /riwayat/{id} {
+        allow read, create: if isAdmin();
+      }
+    }
+    // Daftar admin tambahan: dibaca pengguna yang masuk (untuk Mode admin), diubah hanya oleh pemilik
+    match /config/admin {
+      allow read: if request.auth != null;
+      allow write: if isPemilik();
+    }
+    // Statistik pemakaian tanpa data pribadi: satu dokumen per hari, aplikasi hanya menambah hitungan; hanya admin yang membaca
+    match /stat/{hari} {
+      allow read: if isAdmin();
+      allow create, update: if hari.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(['pv', 'aktif', 'hal', 'kota', 'jenis'])
+        && request.resource.data.get('hal', {}).size() <= 150
+        && request.resource.data.get('kota', {}).size() <= 1000;
+    }
+
     match /laporan/{id} {
       allow create: if request.resource.data.keys().hasOnly(['jenis','pesan','lokasi','hal','halJudul','nama','kontak','versi','perangkat','foto','uid','email','status','t'])
         && request.resource.data.pesan is string && request.resource.data.pesan.size() <= 2000

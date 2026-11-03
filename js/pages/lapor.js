@@ -60,7 +60,9 @@ const tdTinggi=()=>{if(TDM)document.documentElement.style.setProperty('--tdh',TD
 addEventListener('resize',tdTinggi);
 function tdBuka(){TDM={bar:mk('tdbar',''),lap:null,box:null,el:null};TDM.bar.setAttribute('role','status');document.body.classList.add('td');tdLangkah1()}
 /* Draf ikut disimpan di sesi agar mode tandai tetap berjalan bila halaman dimuat ulang (foto tidak ikut tersimpan) */
-function tandaiMulai(ke){tandaiAkhir();try{sessionStorage.fztd=JSON.stringify({...RDRAFT,F:[],nF:(RDRAFT.F||[]).length})}catch(e){}tdBuka();location.hash=ke}
+/* Halaman laporan diganti (bukan ditumpuk) di riwayat: tombol Kembali selama menandai berpindah antarhalaman aplikasi
+   tanpa keluar dari mode tandai; draf laporan tetap tersimpan dan kembali lewat Batal atau setelah menandai */
+function tandaiMulai(ke){tandaiAkhir();try{sessionStorage.fztd=JSON.stringify({...RDRAFT,F:[],nF:(RDRAFT.F||[]).length})}catch(e){}tdBuka();location.replace(location.pathname+location.search+ke)}
 const tdLangkah1=()=>tdBar(`${ic('flag',18)} <span>Buka halaman yang bermasalah. Sudah di halamannya? Tekan <b>Tandai di sini</b>.</span>`,'<button class="sb" data-td="x">Batal</button><button class="sb pri" data-td="1">Tandai di sini</button>');
 function tdLangkah2(){const L=TDM.lap||(TDM.lap=mk('tdlap',''));L.hidden=false;TDM.hv&&(TDM.hv.hidden=true);TDM.box&&TDM.box.remove();TDM.box=null;TDM.el=null;
  tdBar(`${ic('flag',18)} <span><b>Ketuk bagian yang bermasalah</b><br><small>Mis. sapaan, jadwal salat, satu ayat, atau satu tombol</small></span>`,'<button class="sb" data-td="0">Kembali</button><button class="sb" data-td="x">Batal</button>')}

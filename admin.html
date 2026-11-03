@@ -10,13 +10,29 @@
      Hanya email di ADMIN yang bisa masuk; aksesnya dijaga Firestore Rules (lihat PANDUAN-FIREBASE.md). Tidak disimpan offline oleh sw.js. -->
 <style>
 :root{--bg:#f6f7f6;--card:#fff;--ink:#1d2b25;--mut:#6b7a72;--line:#e5e7e5;--g:#24584a;--gs:#e7eeea;--fill:#f0f2f1;--on:#fff;--red:#b3382a;--amb:#9a6b00;--ambs:#fbf1d9;--reds:#f8e3df}
-@media (prefers-color-scheme:dark){:root{--bg:#0e100f;--card:#161917;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--g:#7fb5a2;--gs:#1d2a26;--fill:#1f2321;--on:#06140f;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}}
+@media (prefers-color-scheme:dark){:root:not([data-tema=terang]){--bg:#0e100f;--card:#161917;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--g:#7fb5a2;--gs:#1d2a26;--fill:#1f2321;--on:#06140f;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}}
+:root[data-tema=gelap]{--bg:#0e100f;--card:#161917;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--g:#7fb5a2;--gs:#1d2a26;--fill:#1f2321;--on:#06140f;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 a{color:var(--g)}
 button,input,select,textarea{font:inherit;color:inherit}
 .wrap{max-width:980px;margin:0 auto;padding:16px}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+/* Bilah atas (judul + tab) menempel; bersembunyi saat digulir ke bawah dan muncul lagi saat digulir ke atas, seperti di aplikasi */
+.atas{position:sticky;top:0;z-index:6;background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .28s cubic-bezier(.32,.72,0,1),box-shadow .2s}
+.atas.lyg{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.atas.smb{transform:translateY(-100%);box-shadow:none}
+.atas header,.atas .atab{background:transparent}
+.atas .atab{position:static!important}
+.ikb{width:38px;height:38px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:var(--fill);color:var(--ink);cursor:pointer}
+.ikb svg{width:20px;height:20px}
+.mnu{position:absolute;right:12px;top:58px;z-index:7;min-width:230px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.mnu b{display:block;padding:6px 8px;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.mnu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 10px;border:0;border-radius:9px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.mnu button:hover{background:var(--fill)}
+.mnu button.on::after{content:'✓';color:var(--g);font-weight:700}
+.mnu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.hp{top:136px}
 header img{width:32px;height:32px;border-radius:8px}
 header b{flex:1;font-size:16px}
 header small{color:var(--mut);font-size:12px}
@@ -61,6 +77,39 @@ header small{color:var(--mut);font-size:12px}
 #toast{position:fixed;left:50%;bottom:20px;z-index:30;padding:10px 16px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:14px;opacity:0;transform:translate(-50%,10px);transition:.2s;pointer-events:none}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.meta{grid-template-columns:1fr}.meta dt{margin-top:4px}}
+
+/* Tab dashboard */
+.atab{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:57px;z-index:4;scrollbar-width:none}
+.atab a{flex:none;padding:8px 14px;border-radius:99px;color:var(--mut);font-weight:600;text-decoration:none}
+.atab a.on{background:var(--g);color:var(--on)}
+.wrap.lebar{max-width:1240px}
+/* Tampilan: editor + pratinjau HP */
+.ted{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+@media(max-width:980px){.ted{grid-template-columns:1fr}.hp{position:static!important}}
+.blok{margin:0 0 14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.blok>h3{margin:0 0 4px;font-size:15px}.blok>p{margin:0 0 10px;color:var(--mut);font-size:13px}
+.ls{display:flex;flex-direction:column;gap:6px}
+.it{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.it.mati{opacity:.5}.it span{flex:1;min-width:0}.it small{color:var(--mut)}
+.ib{width:30px;height:30px;border:0;border-radius:8px;background:var(--fill);color:var(--ink);cursor:pointer;font-size:13px}
+.ib:disabled{opacity:.35;cursor:default}
+.sw{position:relative;width:42px;height:24px;flex:none}.sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}.sw i{position:absolute;inset:0;border-radius:12px;background:var(--line)}.sw i::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}.sw input:checked+i{background:var(--g)}.sw input:checked+i::after{transform:translateX(18px)}
+.tam{display:flex;gap:6px;margin-top:8px}.tam select,.tam input,.fl input,.fl select,.fl textarea{flex:1;min-width:0;height:36px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+.fl{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center}.fl label{color:var(--mut);font-size:13px}.fl textarea{height:64px;padding:8px 10px}
+.grp{padding:10px;border:1px dashed var(--line);border-radius:12px;margin-bottom:8px}.grp .gh{display:flex;gap:6px;margin-bottom:8px}.grp .gh input{flex:1;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-weight:700}
+.aksi{position:sticky;bottom:0;z-index:3;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;margin:0 0 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 -6px 18px rgba(0,0,0,.06)}
+.aksi input{flex:1;min-width:160px;height:36px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+.hp{position:sticky;top:120px}
+.hpf{width:375px;max-width:100%;height:720px;margin:0 auto;border:10px solid #1d2b25;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.hpf iframe{width:100%;height:100%;border:0;display:block}
+.hpk{display:flex;gap:6px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}.hpk button{height:30px;padding:0 12px;border:0;border-radius:99px;background:var(--fill);color:var(--ink);font-weight:600;cursor:pointer}.hpk button.on{background:var(--g);color:var(--on)}
+.draf{display:inline-flex;align-items:center;gap:6px;color:var(--amb);font-weight:700;font-size:13px}.draf::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--amb)}
+/* Peta & statistik */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tbl th{color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.tg{display:inline-block;margin:0 4px 4px 0;padding:2px 8px;border-radius:99px;background:var(--gs);color:var(--g);font-size:12px;font-weight:600}.tg.no{background:var(--reds);color:var(--red)}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.kp div{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}.kp b{display:block;font-size:26px}.kp span{color:var(--mut);font-size:13px}
+.grafik{display:flex;align-items:flex-end;gap:3px;height:160px;padding:8px 0}.grafik div{flex:1;min-width:4px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}.grafik i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--g);min-height:2px}.grafik small{font-size:10px;color:var(--mut)}
+.bt{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px}.bt span{width:170px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt em{flex:1;min-width:0;height:10px;border-radius:5px;background:var(--fill)}.bt i{display:block;height:100%;border-radius:5px;background:var(--g)}.bt b{flex:none;min-width:30px;text-align:right}
 </style>
 </head>
 <body>
@@ -85,15 +134,26 @@ let L=[],F={st:'baru',j:'',q:''},stop=null,tunda=0;
 const gate=(judul,isi,tombol)=>$('#root').innerHTML=`<div class="gate"><img src="img/icon-192.png" alt=""><h1>${judul}</h1><p>${isi}</p>${tombol||''}</div>`;
 const masuk=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());if(c!='auth/popup-closed-by-user')toast('Gagal masuk: '+(c=='auth/unauthorized-domain'?'domain ini belum diizinkan di Firebase':c))});
 
-auth.onAuthStateChanged(u=>{stop&&stop();stop=null;
- if(!u)return gate('Dashboard Admin','Masuk dengan akun Google admin untuk melihat laporan pengguna.','<button class="btn" id="in">Masuk dengan Google</button>'),$('#in').onclick=masuk;
- if(!ADMIN.includes((u.email||'').toLowerCase()))return gate('Akses ditolak',`Akun <b>${esc(u.email)}</b> bukan admin Fadzkuruuni.`,'<button class="btn s" id="out">Ganti akun</button>'),$('#out').onclick=()=>auth.signOut();
- $('#root').innerHTML=`<header><img src="img/icon-192.png" alt=""><b>Laporan Fadzkuruuni</b><small>${esc(u.email)}</small><button class="btn s" id="out">Keluar</button></header><div class="wrap"><div class="stats" id="stats"></div><div class="bar"><input id="q" type="search" placeholder="Cari isi laporan, nama, halaman…"><select id="j"><option value="">Semua jenis</option><option>Bug</option><option>Salah tulis</option><option>Konten kurang</option><option>Saran</option></select></div><div id="list"><div class="empty">Memuat laporan…</div></div></div>`;
- $('#out').onclick=()=>auth.signOut();
+/* Admin = pemilik (ADMIN, tetap) + daftar tambahan di Firestore config/admin (diatur di tab Admin) */
+let ADMX=[],PEMILIK=false;
+const TABS=[['laporan','Laporan'],['tampilan','Tampilan'],['peta','Peta aplikasi'],['statistik','Statistik'],['admin','Admin']];
+auth.onAuthStateChanged(async u=>{stop&&stop();stop=null;
+ if(!u)return gate('Dashboard Admin','Masuk dengan akun Google admin untuk mengelola Fadzkuruuni.','<button class="btn" id="in">Masuk dengan Google</button>'),$('#in').onclick=masuk;
+ const em=(u.email||'').toLowerCase();try{const d=await db.collection('config').doc('admin').get();ADMX=(d.exists&&d.data().emails)||[]}catch(e){ADMX=[]}
+ PEMILIK=ADMIN.includes(em);
+ if(!u.emailVerified||!(PEMILIK||ADMX.includes(em)))return gate('Akses ditolak',`Akun <b>${esc(u.email)}</b> bukan admin Fadzkuruuni.`,'<button class="btn s" id="out">Ganti akun</button>'),$('#out').onclick=()=>auth.signOut();
+ $('#root').innerHTML=`<div class="atas" id="atas"><header><img src="img/icon-192.png" alt=""><b>Dashboard Fadzkuruuni</b><small>${esc(u.email)}${PEMILIK?' · pemilik':''}</small><button class="ikb" id="set" aria-label="Pengaturan dashboard" title="Pengaturan dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button></header><nav class="atab" id="atab">${TABS.map(([k,t])=>`<a href="#${k}" data-tab="${k}">${t}</a>`).join('')}</nav></div><div class="wrap" id="isi"></div>`;
+ $('#set').onclick=e=>{e.stopPropagation();menuSet()};bukaTab()});
+addEventListener('hashchange',()=>{if($('#atab'))bukaTab()});
+function bukaTab(){const k=TABS.some(t=>t[0]==location.hash.slice(1))?location.hash.slice(1):'laporan';stop&&stop();stop=null;
+ document.querySelectorAll('#atab a').forEach(a=>a.classList.toggle('on',a.dataset.tab==k));$('#isi').className='wrap'+(k=='tampilan'?' lebar':'');
+ ({laporan:tabLaporan,tampilan:tabTampilan,peta:tabPeta,statistik:tabStatistik,admin:tabAdmin})[k]()}
+function tabLaporan(){
+ $('#isi').innerHTML=`<div class="stats" id="stats"></div><div class="bar"><input id="q" type="search" placeholder="Cari isi laporan, nama, halaman…"><select id="j"><option value="">Semua jenis</option><option>Bug</option><option>Salah tulis</option><option>Konten kurang</option><option>Saran</option></select></div><div id="list"><div class="empty">Memuat laporan…</div></div>`;
  $('#q').oninput=e=>{F.q=e.target.value.trim().toLowerCase();tampil()};
  $('#j').onchange=e=>{F.j=e.target.value;tampil()};
  /* Laporan baru muncul langsung tanpa memuat ulang */
- stop=db.collection('laporan').orderBy('t','desc').limit(500).onSnapshot(s=>{L=s.docs.map(d=>({id:d.id,...d.data()}));/* Jangan gambar ulang saat admin sedang mengetik catatan */if(document.activeElement?.matches('[data-cat]'))tunda=1;else tampil()},e=>{$('#list').innerHTML=`<div class="empty">Tidak bisa membaca laporan (${esc(e.code||e.message)}).<br>Pastikan Firestore Rules untuk admin sudah dipasang (lihat PANDUAN-FIREBASE.md).</div>`})});
+ stop=db.collection('laporan').orderBy('t','desc').limit(500).onSnapshot(s=>{L=s.docs.map(d=>({id:d.id,...d.data()}));/* Jangan gambar ulang saat admin sedang mengetik catatan */if(document.activeElement?.matches('[data-cat]'))tunda=1;else tampil()},e=>{$('#list').innerHTML=`<div class="empty">Tidak bisa membaca laporan (${esc(e.code||e.message)}).<br>Pastikan Firestore Rules untuk admin sudah dipasang (lihat PANDUAN-FIREBASE.md).</div>`})}
 
 const stOf=r=>r.status||'baru';
 function tampil(){
@@ -117,6 +177,126 @@ document.addEventListener('click',e=>{const t=e.target;
 document.addEventListener('change',e=>{const t=e.target;if(t.matches('[data-ss]'))ubah(t.closest('[data-id]').dataset.id,{status:t.value}).then(()=>toast('Status diperbarui'))});
 document.addEventListener('focusout',e=>{const t=e.target;if(!t.matches('[data-cat]'))return;if(tunda){tunda=0;setTimeout(tampil,300)}const id=t.closest('[data-id]').dataset.id,r=L.find(x=>x.id==id);if(r&&(r.catatan||'')!=t.value.trim())ubah(id,{catatan:t.value.trim()}).then(()=>toast('Catatan disimpan'))});
 addEventListener('keydown',e=>{if(e.key=='Escape')document.querySelector('.lb')?.remove()});
+
+/* ===================== TAMPILAN: atur susunan aplikasi + pratinjau HP ===================== */
+/* Data tata letak dibaca dari aplikasi di iframe pratinjau (js/core/tata.js > window.TATAINFO), jadi selalu sama dengan aplikasi */
+let TI=null,DRAF=null,TERBIT=null,TERBITV=0,UBAH=false,KE='#/';
+const salin=o=>JSON.parse(JSON.stringify(o));
+const nm=r=>(DRAF.label[r]||(TI.TPOOL[r]||[])[1]||r);
+const pindah=(A,i,d)=>{const t=i+d;if(t<0||t>=A.length)return;[A[i],A[t]]=[A[t],A[i]]};
+const sakelar=(on,attr)=>`<label class="sw"><input type="checkbox" ${on?'checked':''} ${attr}><i></i></label>`;
+const tombolUrut=(i,n,ex='')=>`<button class="ib" data-u="-1" data-i="${i}" ${i==0?'disabled':''} aria-label="Naikkan">▲</button><button class="ib" data-u="1" data-i="${i}" ${i==n-1?'disabled':''} aria-label="Turunkan">▼</button>${ex}`;
+const pilihRute=(id,kecuali,atas)=>`<select id="${id}"><option value="">+ Tambah…</option>${Object.entries(TI.TPOOL).filter(([r])=>!kecuali.includes(r)&&(!atas||!r.includes('/'))).map(([r,v])=>`<option value="${esc(r)}">${esc(DRAF.label[r]||v[1])}${r?` (#/${esc(r)})`:''}</option>`).join('')}</select>`;
+function tabTampilan(){
+ $('#isi').innerHTML=`<div class="ted"><div id="ed"><div class="empty">Memuat aplikasi untuk pratinjau…</div></div><div class="hp"><div class="hpk" id="hpk">${[['#/','Beranda'],['#/menu','Semua Menu'],['#/pengaturan','Pengaturan']].map(([h,t])=>`<button data-ke="${h}" class="${h==KE?'on':''}">${t}</button>`).join('')}</div><div class="hpf"><iframe id="fr" title="Pratinjau aplikasi" src="index.html?pratinjau=1${KE}"></iframe></div></div></div>`;
+ $('#fr').onload=async()=>{const w=$('#fr').contentWindow;for(let k=0;k<40&&!w.TATAINFO;k++)await new Promise(r=>setTimeout(r,100));TI=w.TATAINFO;if(!TI)return $('#ed').innerHTML='<div class="empty">Pratinjau gagal dimuat.</div>';
+  if(!DRAF){try{const d=await db.collection('config').doc('tampilan').get();TERBITV=d.exists?d.data().v||0:0;TERBIT=d.exists?JSON.parse(d.data().json||'{}'):{}}catch(e){TERBIT={};toast('Belum bisa membaca tampilan terbit: '+(e.code||e.message))}
+   DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[];UBAH=false}
+  gambarEd();kirimPratinjau()};
+ $('#hpk').onclick=e=>{const b=e.target.closest('[data-ke]');if(!b)return;KE=b.dataset.ke;$$('#hpk button').forEach(x=>x.classList.toggle('on',x==b));kirimPratinjau()}}
+const $$=(s,e=document)=>[...e.querySelectorAll(s)];
+function kirimPratinjau(){const f=$('#fr');if(f&&TI&&DRAF)f.contentWindow.postMessage({tata:DRAF,ke:KE},location.origin)}
+function tUbah(){UBAH=true;gambarEd();kirimPratinjau()}
+function gambarEd(){const D=DRAF,G=TI.setelan(),Gm=new Map(G.map(x=>[x[0],x]));
+ const blokUrut=(id,judul,ket,isi)=>`<div class="blok" data-blok="${id}"><h3>${judul}</h3><p>${ket}</p>${isi}</div>`;
+ $('#ed').innerHTML=`<div class="aksi">${UBAH?'<span class="draf">Belum diterbitkan</span>':'<span class="mut" style="color:var(--mut);font-size:13px">Sesuai tampilan yang sedang terbit</span>'}<input id="ket" placeholder="Keterangan perubahan (opsional)"><button class="btn" id="terbit" ${UBAH?'':'disabled'}>Terbitkan</button><button class="btn s" id="buang" ${UBAH?'':'disabled'}>Buang perubahan</button><button class="btn s" id="asli">Kembalikan ke bawaan</button><button class="btn s" id="riw">Riwayat</button></div><div id="riwl"></div>
+ ${blokUrut('beranda','Beranda','Urutan bagian dari atas ke bawah. Matikan sakelar untuk menyembunyikan.',`<div class="ls">${D.beranda.map((x,i)=>`<div class="it ${x.on?'':'mati'}" data-i="${i}"><span>${esc(TI.TBAG[x.id])}</span>${sakelar(x.on,`data-on="${i}"`)}${tombolUrut(i,D.beranda.length)}</div>`).join('')}</div>`)}
+ ${blokUrut('pintasan','Pintasan Beranda','Kotak pintasan di Beranda (disarankan kelipatan 4).',`<div class="ls">${D.pintasan.map((r,i)=>`<div class="it" data-i="${i}"><span>${esc(nm(r))} <small>#/${esc(r)}</small></span>${tombolUrut(i,D.pintasan.length,`<button class="ib" data-x="${i}" aria-label="Hapus">✕</button>`)}</div>`).join('')}</div><div class="tam">${pilihRute('tpin',D.pintasan)}</div>`)}
+ ${blokUrut('nav','Menu bawah','2 sampai 5 menu di bilah bawah (HP) atau samping (komputer).',`<div class="ls">${D.nav.map((r,i)=>`<div class="it" data-i="${i}"><span>${esc(nm(r))}</span>${tombolUrut(i,D.nav.length,`<button class="ib" data-x="${i}" ${D.nav.length<=2?'disabled':''} aria-label="Hapus">✕</button>`)}</div>`).join('')}</div>${D.nav.length<5?`<div class="tam">${pilihRute('tnav',D.nav,1)}</div>`:''}`)}
+ ${blokUrut('menu','Semua Menu','Kelompok dan isinya di halaman Semua Menu.',D.menu.map((g,gi)=>`<div class="grp" data-g="${gi}"><div class="gh"><input data-gn="${gi}" value="${esc(g.nama)}" aria-label="Nama kelompok"><button class="ib" data-gu="-1" ${gi==0?'disabled':''}>▲</button><button class="ib" data-gu="1" ${gi==D.menu.length-1?'disabled':''}>▼</button><button class="ib" data-gx aria-label="Hapus kelompok">✕</button></div><div class="ls">${g.isi.map((r,i)=>`<div class="it" data-i="${i}"><span>${esc(nm(r))} <small>#/${esc(r)}</small></span>${tombolUrut(i,g.isi.length,`<button class="ib" data-x="${i}" aria-label="Hapus">✕</button>`)}</div>`).join('')}</div><div class="tam">${pilihRute('tmenu'+gi,g.isi)}</div></div>`).join('')+'<button class="btn s" id="grpbaru">+ Kelompok baru</button>')}
+ ${blokUrut('setelan','Halaman Pengaturan','Urutan kelompok pengaturan. Matikan sakelar untuk menyembunyikan.',`<div class="ls">${D.setelan.filter(k=>Gm.has(k)).map((k,i,A)=>`<div class="it ${D.sembunyiSet.includes(k)?'mati':''}" data-i="${i}"><span>${esc(Gm.get(k)[2])}</span>${sakelar(!D.sembunyiSet.includes(k),`data-son="${esc(k)}"`)}${tombolUrut(i,A.length)}</div>`).join('')}</div>`)}
+ ${blokUrut('umum','Pengumuman di Beranda','Kartu pengumuman (aktifkan juga bagian "Pengumuman admin" di Beranda).',`<div class="fl"><label>Tampilkan</label><div>${sakelar(D.umum.on,'id="uon"')}</div><label>Judul</label><input id="uj" value="${esc(D.umum.judul)}" maxlength="80"><label>Isi</label><textarea id="ut" maxlength="300">${esc(D.umum.teks)}</textarea><label>Tautan (opsional)</label><input id="ul" value="${esc(D.umum.tautan)}" placeholder="#/kalender atau https://…"><label>Teks tombol</label><input id="ub" value="${esc(D.umum.label)}" maxlength="20"></div>`)}
+ ${blokUrut('label','Nama menu','Ganti nama yang tampil di pintasan, Semua Menu, dan menu bawah. Kosongkan untuk nama asli.',`<div class="fl">${Object.entries(TI.TPOOL).map(([r,v])=>`<label>${esc(v[1])}</label><input data-lb="${esc(r)}" value="${esc(D.label[r]||'')}" placeholder="${esc(v[1])}">`).join('')}</div>`)}
+ ${blokUrut('bawaan','Tampilan bawaan pengguna baru','Berlaku untuk pengguna yang belum pernah mengubah pengaturannya sendiri. "Ikuti aplikasi" = tidak diubah.',`<div class="fl">${[
+   ['theme','Tema',[['auto','Perangkat'],['light','Terang'],['dark','Gelap'],['blue','Biru']]],
+   ['ac','Warna aksen',Object.entries(TI.ACC).map(([k,a])=>[k,a[0]])],
+   ['lf','Huruf Latin',Object.entries(TI.FLT).map(([k,a])=>[k,a[0]])],
+   ['af','Huruf Arab',Object.entries(TI.FAR).map(([k,a])=>[k,a[0]])],
+   ['fs','Ukuran Arab',[22,26,28,32,36,40,44].map(n=>[n,n+' px'])],
+   ['fl','Ukuran Latin',[13,14,15,16,18,20].map(n=>[n,n+' px'])],
+   ['fi','Ukuran terjemah',[13,14,15,16,18,20].map(n=>[n,n+' px'])],
+   ['lt','Teks Latin',[[true,'Tampil'],[false,'Sembunyi']]],
+   ['tr','Terjemah',[[true,'Tampil'],[false,'Sembunyi']]]].map(([k,t,o])=>`<label>${t}</label><select data-bw="${k}"><option value="">Ikuti aplikasi</option>${o.map(([v,n])=>`<option value="${esc(JSON.stringify(v))}" ${D.bawaan[k]!==undefined&&JSON.stringify(D.bawaan[k])==JSON.stringify(v)?'selected':''}>${esc(n)}</option>`).join('')}</select>`).join('')}</div>`)}`;
+ ikatEd()}
+function ikatEd(){const D=DRAF,ed=$('#ed');
+ ed.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const bl=b.closest('[data-blok]')?.dataset.blok,it=b.closest('[data-i]'),i=it?+it.dataset.i:-1;
+  if(b.id=='terbit')return terbitkan();if(b.id=='buang'){DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[];UBAH=false;gambarEd();return kirimPratinjau()}
+  if(b.id=='asli'){if(!confirm('Kembalikan semua susunan ke bawaan aplikasi? (Belum terbit sampai Anda menekan Terbitkan.)'))return;DRAF=TI.gabung({});DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=[];return tUbah()}
+  if(b.id=='riw')return riwayat();if(b.dataset.pulih){DRAF=TI.gabung(JSON.parse(RIW[+b.dataset.pulih].json||'{}'));if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[];toast('Versi dipulihkan ke draf. Tekan Terbitkan untuk memakainya.');return tUbah()}
+  if(b.id=='grpbaru'){D.menu.push({nama:'Kelompok baru',isi:[]});return tUbah()}
+  const g=b.closest('[data-g]');
+  if(g&&(b.dataset.gu||b.hasAttribute('data-gx'))){const gi=+g.dataset.g;if(b.dataset.gu)pindah(D.menu,gi,+b.dataset.gu);else if(confirm('Hapus kelompok ini?'))D.menu.splice(gi,1);return tUbah()}
+  const A=bl=='beranda'?D.beranda:bl=='pintasan'?D.pintasan:bl=='nav'?D.nav:bl=='setelan'?D.setelan:bl=='menu'&&g?D.menu[+g.dataset.g].isi:null;if(!A||i<0)return;
+  if(b.dataset.u)pindah(A,i,+b.dataset.u);else if(b.dataset.x!=null)A.splice(i,1);tUbah()};
+ ed.onchange=e=>{const t=e.target;
+  if(t.dataset.on!=null){D.beranda[+t.dataset.on].on=t.checked;return tUbah()}
+  if(t.dataset.son!=null){const k=t.dataset.son,j=D.sembunyiSet.indexOf(k);t.checked?j>=0&&D.sembunyiSet.splice(j,1):j<0&&D.sembunyiSet.push(k);return tUbah()}
+  if(t.id=='tpin'&&t.value!==''){D.pintasan.push(t.value);return tUbah()}
+  if(t.id=='tnav'&&t.value!==''){D.nav.push(t.value);return tUbah()}
+  if(t.id&&t.id.startsWith('tmenu')&&t.value!==''){D.menu[+t.id.slice(5)].isi.push(t.value);return tUbah()}
+  if(t.dataset.bw){const k=t.dataset.bw;t.value===''?delete D.bawaan[k]:D.bawaan[k]=JSON.parse(t.value);return tUbah()}
+  if(t.id=='uon'){D.umum.on=t.checked;return tUbah()}};
+ /* Ketik: simpan ke draf & perbarui pratinjau tanpa menggambar ulang editor (fokus tetap) */
+ ed.oninput=e=>{const t=e.target;let kena=1;
+  if(t.dataset.gn!=null)D.menu[+t.dataset.gn].nama=t.value;else if(t.dataset.lb!=null){t.value.trim()?D.label[t.dataset.lb]=t.value.trim():delete D.label[t.dataset.lb]}
+  else if(t.id=='uj')D.umum.judul=t.value;else if(t.id=='ut')D.umum.teks=t.value;else if(t.id=='ul')D.umum.tautan=t.value.trim();else if(t.id=='ub')D.umum.label=t.value;else kena=0;
+  if(kena){UBAH=true;const a=$('.aksi');if(a&&!$('.draf',a)){a.firstElementChild.outerHTML='<span class="draf">Belum diterbitkan</span>';$('#terbit').disabled=$('#buang').disabled=false}kirimPratinjau()}}}
+let RIW=[];
+async function riwayat(){const w=$('#riwl');if(w.innerHTML){w.innerHTML='';return}w.innerHTML='<div class="blok">Memuat riwayat…</div>';
+ try{const q=await db.collection('config').doc('tampilan').collection('riwayat').orderBy('t','desc').limit(20).get();RIW=q.docs.map(d=>d.data());
+  w.innerHTML=`<div class="blok"><h3>Riwayat terbit</h3><p>Pulihkan versi lama ke draf, lalu Terbitkan.</p><div class="ls">${RIW.map((r,i)=>`<div class="it"><span>${tgl(r.t)} · ${esc(r.oleh||'')}${r.ket?`<br><small>${esc(r.ket)}</small>`:''}</span><button class="btn s" data-pulih="${i}">Pulihkan</button></div>`).join('')||'<div class="empty">Belum ada riwayat.</div>'}</div></div>`}
+ catch(e){w.innerHTML=`<div class="blok">Tidak bisa membaca riwayat (${esc(e.code||e.message)}).</div>`}}
+async function terbitkan(){const b=$('#terbit');b.disabled=true;const c=salin(DRAF),v=Date.now(),json=JSON.stringify(c),ket=$('#ket').value.trim(),oleh=auth.currentUser.email;
+ try{const ref=db.collection('config').doc('tampilan');await ref.set({json,v,t:v,oleh,ket});await ref.collection('riwayat').add({json,v,t:v,oleh,ket});TERBIT=c;TERBITV=v;UBAH=false;gambarEd();toast('Diterbitkan. Pengguna mendapat tampilan baru saat membuka aplikasi.')}
+ catch(e){b.disabled=false;toast('Gagal menerbitkan: '+(e.code=='permission-denied'?'Firestore Rules belum dipasang (lihat PANDUAN-FIREBASE.md)':(e.code||e.message)))}}
+addEventListener('beforeunload',e=>{if(UBAH){e.preventDefault();e.returnValue=''}});
+
+/* ===================== PETA APLIKASI: di mana setiap fitur berada ===================== */
+async function siapTI(){if(TI)return true;$('#isi').innerHTML='<div class="empty">Memuat…</div><iframe id="frx" src="index.html?pratinjau=1#/" style="display:none"></iframe>';
+ await new Promise(r=>$('#frx').onload=r);const w=$('#frx').contentWindow;for(let k=0;k<40&&!w.TATAINFO;k++)await new Promise(r=>setTimeout(r,100));TI=w.TATAINFO;if(!TI)return false;
+ if(!DRAF){try{const d=await db.collection('config').doc('tampilan').get();TERBIT=d.exists?JSON.parse(d.data().json||'{}'):{}}catch(e){TERBIT={}}DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[]}return true}
+async function tabPeta(){if(!await siapTI())return $('#isi').innerHTML='<div class="empty">Gagal memuat data aplikasi.</div>';const T=TI.gabung(TERBIT||{});
+ const letak=r=>{const L=[];const p=T.pintasan.indexOf(r);if(p>=0)L.push(`Pintasan Beranda (ke-${p+1})`);const n=T.nav.indexOf(r);if(n>=0)L.push(`Menu bawah (ke-${n+1})`);T.menu.forEach(g=>{const i=g.isi.indexOf(r);if(i>=0)L.push(`Semua Menu › ${g.nama} (ke-${i+1})`)});return L};
+ const baris=Object.entries(TI.TPOOL).map(([r,v])=>{const L=letak(r);return `<tr><td><b>${esc(T.label[r]||v[1])}</b>${T.label[r]?`<br><small style="color:var(--mut)">asli: ${esc(v[1])}</small>`:''}</td><td><code>#/${esc(r)}</code></td><td>${L.length?L.map(x=>`<span class="tg">${esc(x)}</span>`).join(''):'<span class="tg no">Tidak ada di menu mana pun</span>'}</td><td><a href="${esc(APP+'#/'+r)}" target="_blank" rel="noopener">Buka</a></td></tr>`}).join('');
+ $('#isi').innerHTML=`<div class="blok"><h3>Peta aplikasi</h3><p>Setiap fitur dan di mana ia muncul di aplikasi (sesuai tampilan yang sedang terbit). Klik "Buka" untuk melihat halamannya.</p><table class="tbl"><thead><tr><th>Fitur</th><th>Alamat</th><th>Letak</th><th></th></tr></thead><tbody>${baris}</tbody></table></div>
+ <div class="blok"><h3>Bagian Beranda (urutan dari atas)</h3><div class="ls">${T.beranda.map((x,i)=>`<div class="it ${x.on?'':'mati'}"><span>${i+1}. ${esc(TI.TBAG[x.id])}</span><small>${x.on?'tampil':'disembunyikan'}</small></div>`).join('')}</div></div>
+ <div class="blok"><h3>Halaman Pengaturan</h3><div class="ls">${(T.setelan||TI.setelan().map(x=>x[0])).map((k,i)=>{const g=TI.setelan().find(x=>x[0]==k);return g?`<div class="it ${(T.sembunyiSet||[]).includes(k)?'mati':''}"><span>${i+1}. ${esc(g[2])}<br><small>${esc(g[3])}</small></span><a href="${esc(APP+(k[0]=='#'?k:'#/pengaturan/'+k))}" target="_blank" rel="noopener">Buka</a></div>`:''}).join('')}</div></div>`}
+
+/* ===================== STATISTIK: dari koleksi "stat" (satu dokumen per hari, tanpa data pribadi) ===================== */
+let SR=30;
+async function tabStatistik(){if(!TI)await siapTI();$('#isi').innerHTML='<div class="empty">Memuat statistik…</div>';
+ const hari=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ let H=[];try{const q=await db.collection('stat').where(firebase.firestore.FieldPath.documentId(),'>=',hari(SR-1)).get();H=q.docs.map(d=>({h:d.id,...d.data()})).sort((a,b)=>a.h<b.h?-1:1)}
+ catch(e){return $('#isi').innerHTML=`<div class="empty">Tidak bisa membaca statistik (${esc(e.code||e.message)}).<br>Pastikan Firestore Rules terbaru sudah dipasang (lihat PANDUAN-FIREBASE.md).</div>`}
+ const sum=(k)=>{const o={};H.forEach(d=>Object.entries(d[k]||{}).forEach(([a,n])=>o[a]=(o[a]||0)+n));return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+ const tot=k=>H.reduce((a,d)=>a+(d[k]||0),0),hi=H.find(d=>d.h==hari(0))||{};
+ const nmHal=k=>{const r=Object.keys(TI?TI.TPOOL:{}).find(x=>(x||'beranda').toLowerCase().replace(/[^a-z0-9]+/g,'_')==k);return r!==undefined?((TERBIT&&TERBIT.label&&TERBIT.label[r])||TI.TPOOL[r][1]):k.replace(/_/g,' ')};
+ const bar=(L,nmf,maks=12)=>{const m=Math.max(1,...L.map(x=>x[1]));return L.slice(0,maks).map(([k,n])=>`<div class="bt"><span title="${esc(nmf(k))}">${esc(nmf(k))}</span><em><i style="width:${Math.max(2,n/m*100)}%"></i></em><b>${n}</b></div>`).join('')||'<div class="empty">Belum ada data.</div>'};
+ const hariL=[...Array(SR)].map((_,i)=>hari(SR-1-i)),mA=Math.max(1,...H.map(d=>d.aktif||0));
+ $('#isi').innerHTML=`<div class="hpk" style="justify-content:flex-start">${[7,30,90].map(n=>`<button data-sr="${n}" class="${n==SR?'on':''}">${n} hari</button>`).join('')}</div>
+ <div class="kp"><div><b>${hi.aktif||0}</b><span>Perangkat aktif hari ini</span></div><div><b>${hi.pv||0}</b><span>Halaman dibuka hari ini</span></div><div><b>${tot('aktif')}</b><span>Perangkat aktif (${SR} hari, dijumlah per hari)</span></div><div><b>${tot('pv')}</b><span>Halaman dibuka (${SR} hari)</span></div></div>
+ <div class="blok"><h3>Perangkat aktif per hari</h3><div class="grafik">${hariL.map(h=>{const d=H.find(x=>x.h==h)||{};return `<div title="${h}: ${d.aktif||0} perangkat, ${d.pv||0} halaman"><i style="height:${(d.aktif||0)/mA*100}%"></i><small>${SR<=31?h.slice(8):''}</small></div>`}).join('')}</div></div>
+ <div class="ted" style="grid-template-columns:1fr 1fr"><div class="blok"><h3>Fitur paling sering dibuka</h3>${bar(sum('hal'),nmHal,15)}</div><div><div class="blok"><h3>Kota pengguna</h3>${bar(sum('kota'),k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()))}</div><div class="blok"><h3>Jenis aplikasi</h3>${bar(sum('jenis'),k=>({android:'Aplikasi Android',terpasang:'Dipasang dari browser (PWA)',browser:'Browser biasa'})[k]||k)}</div></div></div>
+ <p style="color:var(--mut);font-size:13px">Statistik dicatat tanpa data pribadi: hanya hitungan halaman per fitur, perangkat aktif per hari (dihitung sekali per perangkat per hari), kota pilihan untuk jadwal salat, dan jenis aplikasi. Pengguna bisa mematikannya di Pengaturan › Tentang & Bantuan.</p>`;
+ $('#isi').onclick=e=>{const b=e.target.closest('[data-sr]');if(b){SR=+b.dataset.sr;tabStatistik()}}}
+
+/* ===================== ADMIN: kelola daftar admin (hanya pemilik yang bisa mengubah) ===================== */
+function tabAdmin(){
+ $('#isi').innerHTML=`<div class="blok"><h3>Pemilik</h3><p>Selalu menjadi admin dan satu-satunya yang bisa menambah atau menghapus admin lain.</p><div class="ls">${ADMIN.map(e=>`<div class="it"><span>${esc(e)}</span><small>pemilik</small></div>`).join('')}</div></div>
+ <div class="blok"><h3>Admin lain</h3><p>Admin bisa membaca laporan, mengatur tampilan, melihat peta dan statistik, serta memakai Mode admin di aplikasi. Mereka harus masuk dengan akun Google memakai email ini.</p><div class="ls" id="adl">${ADMX.map((e,i)=>`<div class="it"><span>${esc(e)}</span>${PEMILIK?`<button class="btn d" data-ah="${i}">Hapus</button>`:''}</div>`).join('')||'<div class="empty">Belum ada admin lain.</div>'}</div>
+ ${PEMILIK?`<div class="tam"><input id="ae" type="email" placeholder="email@gmail.com"><button class="btn" id="at">Tambah admin</button></div>`:'<p style="margin-top:10px">Hanya pemilik yang bisa mengubah daftar ini.</p>'}</div>`;
+ const simpan=async L=>{try{await db.collection('config').doc('admin').set({emails:L,oleh:auth.currentUser.email,t:Date.now()});ADMX=L;tabAdmin();toast('Daftar admin disimpan')}catch(e){toast('Gagal menyimpan: '+(e.code=='permission-denied'?'Firestore Rules belum dipasang':(e.code||e.message)))}};
+ $('#isi').onclick=e=>{const h=e.target.closest('[data-ah]');if(h&&confirm('Hapus admin ini?'))simpan(ADMX.filter((_,i)=>i!=+h.dataset.ah));if(e.target.id=='at'){const v=$('#ae').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return toast('Email tidak valid');if(ADMIN.includes(v)||ADMX.includes(v))return toast('Sudah admin');simpan([...ADMX,v])}}}
+
+/* ===== Pengaturan dashboard (pojok kanan atas): tema Ikuti perangkat / Terang / Gelap, buka aplikasi, keluar ===== */
+const temaDash=t=>{try{t?localStorage.fzadmtema=t:delete localStorage.fzadmtema}catch(e){}t&&t!='auto'?document.documentElement.dataset.tema=t:delete document.documentElement.dataset.tema};
+temaDash((()=>{try{return localStorage.fzadmtema}catch(e){return ''}})()||'');
+function menuSet(){const ada=$('.mnu');if(ada)return ada.remove();const kini=document.documentElement.dataset.tema||'auto';
+ const m=document.createElement('div');m.className='mnu';m.innerHTML=`<b>Tema dashboard</b>${[['auto','Ikuti perangkat'],['terang','Terang'],['gelap','Gelap']].map(([k,t])=>`<button data-tm="${k}" class="${k==kini?'on':''}">${t}</button>`).join('')}<hr><button data-mn="app">Buka aplikasi</button><button data-mn="out">Keluar (${esc(auth.currentUser?.email||'')})</button>`;
+ $('#atas').append(m);m.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm){temaDash(b.dataset.tm);m.remove();return}if(b.dataset.mn=='app')open(APP,'_blank');if(b.dataset.mn=='out')auth.signOut();m.remove()}}
+document.addEventListener('click',e=>{if(!e.target.closest('.mnu,#set'))$('.mnu')?.remove()});
+/* Bilah atas bersembunyi saat digulir ke bawah, muncul saat digulir ke atas */
+{let y0=scrollY;addEventListener('scroll',()=>{const a=$('#atas');if(!a)return;const y=scrollY,d=y-y0;a.classList.toggle('lyg',y>4);if(Math.abs(d)>6){a.classList.toggle('smb',d>0&&y>120&&!a.contains(document.activeElement)&&!$('.mnu'));y0=y}},{passive:true})}
 </script>
 </body>
 </html>
