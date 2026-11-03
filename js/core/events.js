@@ -36,7 +36,7 @@ document.addEventListener('click',e=>{const t=e.target;
 document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-rs]'))return qsheet(()=>route());
  if(t.closest('[data-stop]'))return stopAdzan();
- if(t.closest('[data-tsub]'))return play(0,1);
+ if(t.closest('[data-tsub]'))return window.ANDROID?ujiNotif(1):play(0,1);
  if(t.closest('[data-notif]')){await askNotif();return permFill()}
  const gi=t.closest('[data-gin]');if(gi){const fb=gi.dataset.gin=='fb',nm=fb?'Facebook':'Google';if(window.ANDROID&&!fb){if(!navigator.onLine)return toast('Butuh internet untuk masuk dengan Google');return andPanggil('masukGoogle')}if(!window.firebase||!firebase.auth)return toast('Butuh internet untuk masuk dengan '+nm);const pr=fb?new firebase.auth.FacebookAuthProvider():new firebase.auth.GoogleAuthProvider();return firebase.auth().signInWithPopup(pr).catch(err=>{const c=err.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return firebase.auth().signInWithRedirect(pr);toast(c=='auth/unauthorized-domain'?'Domain ini belum diizinkan di Firebase (Authentication > Settings > Authorized domains)':c=='auth/popup-closed-by-user'?'Masuk dibatalkan':c=='auth/operation-not-allowed'||c=='auth/configuration-not-found'?'Masuk dengan '+nm+' belum diaktifkan oleh pengelola aplikasi':c=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Coba masuk dengan Google.':'Gagal masuk: '+c)})}
  if(t.closest('[data-gout]'))return konfirmasi('Keluar dari akun?','Data di perangkat tetap tersimpan. Kamu bisa masuk lagi kapan saja.','Keluar',()=>firebase.auth().signOut().then(()=>{FBU=null;route()}));
@@ -55,8 +55,19 @@ addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLow
    Isi mengikuti jari; dilepas cukup jauh (atau dikibas cepat) berpindah, kurang dari itu kembali ke tempat. */
 const pDir=d=>document.documentElement.dataset.vt=d>0?'fwd':'back';
 document.addEventListener('click',e=>{const a=e.target.closest('.pnav a,.bk');if(!a)return;pDir(a.matches('[data-nx]')?1:-1);
- /* Tombol kembali: bila ada halaman sebelumnya di aplikasi, kembali ke sana (bukan langsung ke induk tetap) */
- if(a.matches('.bk')&&RIW.length>1&&!/^javascript:/.test(a.getAttribute('href')||'')){e.preventDefault();history.back()}});
+ /* Tombol kembali: naik ke halaman induknya, seperti aplikasi pada umumnya (bukan menelusuri riwayat satu per satu) */
+ if(a.matches('.bk')&&!/^javascript:/.test(a.getAttribute('href')||'')){e.preventDefault();keInduk(a.getAttribute('href'))}});
+/* Pindah ke halaman induk dengan mengganti entri riwayat (tidak menambah, dan tidak pernah keluar dari aplikasi) */
+function keInduk(up){pDir(-1);location.replace(up)}
+/* Tombol kembali HP (aplikasi Android memanggil ini): tutup lembar/dialog atau layar penuh dulu, lalu naik ke halaman induk
+   (mis. Surah → Al-Qur'an → Beranda). Di Beranda mengembalikan 'akar': aplikasi lalu meminta tekan sekali lagi untuk keluar. */
+window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){o[o.length-1].remove();return 'ok'}
+ if(document.body.classList.contains('kfull')){kitabFull(false);return 'ok'}
+ if(document.body.classList.contains('full')){fsSet(false);return 'ok'}
+ const h=location.hash||'#/';if(['#','#/'].includes(h))return 'akar';
+ const [r,b]=h.slice(2).split('/'),bk=$('#view .bk')?.getAttribute('href');
+ let up=tataNavR().includes(r)&&!b?'#/':bk&&!/^javascript:/.test(bk)?bk:'#/';if(up==h)up='#/';
+ keInduk(up);return 'ok'};
 let gx=0,gy=0,gt=0,gh=0,gv=null;
 const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
 const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
@@ -67,15 +78,19 @@ addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx
  if(L&&(Math.abs(dx)>80||cepat)){pDir(dx<0?1:-1);location.hash=L.getAttribute('href');return}
  v.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';v.style.transform='';v.style.opacity=''},{passive:true});
 addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest?.('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
-/* Tarik ke bawah dari puncak halaman untuk memuat ulang: ikon berputar mengikuti tarikan, dilepas lewat batas lalu memuat ulang */
-const ptr=mk('',ic('rot',20));ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
+/* Tarik ke bawah untuk memuat ulang (seperti Instagram): seluruh halaman ikut turun, di celah atas muncul putaran + tulisan.
+   Hanya di Beranda dan Pengaturan; halaman lain (Al-Qur'an, bacaan, dll.) tidak bisa ditarik. */
+const ptr=mk('',`<i></i><small>Tarik untuk memuat ulang</small>`);ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
+const ptrBoleh=()=>['','#','#/','#/pengaturan'].includes(location.hash);
 let py=0,px=0,pt=0,pon=0;
-const ptrSet=(y,a)=>{ptr.style.transform=`translate(-50%,${y}px) rotate(${a}deg)`;ptr.style.opacity=Math.min(1,Math.max(0,(y+44)/60))};
-addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX;ptr.style.transition='none'},{passive:true});
-addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(-44,0);return}
- pt=Math.max(0,Math.min(d*.5,120));ptrSet(pt-44,pt*3.2);ptr.classList.toggle('siap',pt>72)},{passive:true});
-addEventListener('touchend',()=>{if(!pon)return;pon=0;ptr.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';
- if(pt>72){ptr.classList.add('muter');ptrSet(28,0);setTimeout(()=>location.reload(),650)}else{ptrSet(-44,0);ptr.classList.remove('siap')}},{passive:true});
+const PTB=64;
+const ptrSet=(y,anim)=>{const v=$('#view'),tr=anim?'transform .32s cubic-bezier(.22,.8,.3,1)':'none';v.style.transition=ptr.style.transition=tr+(anim?',opacity .32s':'');
+ v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${y/2-22}px)`;ptr.style.opacity=Math.min(1,y/40);$('i',ptr).style.transform=`rotate(${y*4}deg)`};
+addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX},{passive:true});
+addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(0,1);return}
+ pt=Math.max(0,Math.min(d*.45/zmKini(),110));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
+addEventListener('touchend',()=>{if(!pon)return;pon=0;
+ if(pt>PTB){ptr.classList.add('muter');$('small',ptr).textContent='Memuat…';ptrSet(PTB,1);setTimeout(()=>location.reload(),700)}else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
 /* Cegah salin, potong, seret, dan menu klik kanan pada isi aplikasi; kolom isian tetap bisa diketik dan ditempel */
 const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contenteditable]');
 ['copy','cut','dragstart','contextmenu','selectstart'].forEach(t=>document.addEventListener(t,e=>{if(!bebasSalin(e))e.preventDefault()}));

@@ -1,17 +1,20 @@
 /* js/core/state.js - Keadaan aplikasi, penyimpanan, tema, registri halaman (P) */
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
-const S=Object.assign({theme:'auto',fs:32,tr:true,gold:'',loc:{lat:-6.9175,lng:107.6191,n:'Bandung',tz:7},hist:[],tas:0},JSON.parse(localStorage.fz||'{}'));
+/* Bawaan: tema terang, aksen hitam, huruf Latin Times New Roman, huruf Arab Amiri, ukuran teks bacaan terkecil (bisa diubah di Tampilan & Bacaan) */
+const S=Object.assign({theme:'light',ac:'hitam',lf:'times',af:'amiri',fs:22,fl:12,fi:12,tr:true,gold:'',loc:{lat:-6.9175,lng:107.6191,n:'Bandung',tz:7},hist:[],tas:0},JSON.parse(localStorage.fz||'{}'));
+/* Sekali saja (S.dv<2): pengaturan yang masih bernilai bawaan lama ikut pindah ke bawaan baru; pilihan pengguna sendiri tidak diubah */
+if((S.dv||0)<2){if(S.theme=='auto')S.theme='light';if(!S.ac||S.ac=='emerald')S.ac='hitam';if(!S.af||S.af=='times')S.af='amiri';if(S.fs==32)S.fs=22;if(!S.fl||S.fl==15)S.fl=12;if(!S.fi||S.fi==14)S.fi=12;S.dv=2;try{localStorage.fz=JSON.stringify(S)}catch(e){}}
 const save=()=>{localStorage.fz=JSON.stringify(S);window.cloudPush&&window.cloudPush()};
 const rp=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200)};
 /* Tema: auto (ikut perangkat), light, dark, blue */
 const theme=()=>{const t=S.theme=='blue'?'blue':S.theme=='dark'||(S.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;accent()};
 /* Warna aksen: [nama, terang utama, terang turunan, gelap utama, gelap turunan] */
-const ACC={emerald:['Hijau','#24584a','#3a7363','#7fb5a2','#9fcdbb'],teal:['Teal','#0f5f63','#2b7f83','#7cc7cb','#a6dadd'],blue:['Biru','#24497d','#3b68a6','#8fb6e6','#adcbf0'],
+const ACC={hitam:['Hitam','#1c1f1e','#3d4341','#e6e9e7','#ffffff'],emerald:['Hijau','#24584a','#3a7363','#7fb5a2','#9fcdbb'],teal:['Teal','#0f5f63','#2b7f83','#7cc7cb','#a6dadd'],blue:['Biru','#24497d','#3b68a6','#8fb6e6','#adcbf0'],
  ungu:['Ungu','#563d7c','#7257a0','#b9a3df','#cfbfec'],marun:['Marun','#7a2633','#9a3b4a','#e59aa6','#f0b8c1'],coklat:['Coklat','#6b4423','#8a5c34','#d6aa7f','#e6c4a2'],
  emas:['Emas','#8a6512','#a8801f','#e2c068','#ecd393'],oranye:['Oranye','#a2481a','#c0602c','#f2a679','#f6c0a0'],merahmuda:['Merah muda','#a03366','#bd4f80','#efa0c4','#f5bfd7'],abu:['Abu','#3f4b55','#5a6873','#aebbc6','#c7d1d9']};
 /* Jenis huruf: [nama, font-family CSS, nama di Google Fonts ('' = sudah ada di perangkat)]. Huruf Arab untuk teks Arab, huruf Latin untuk seluruh tampilan. */
-const FAR={times:['Times (bawaan)',"'Times New Roman',Times,serif",''],amiri:['Amiri',"'Amiri',serif",'Amiri'],scheh:['Scheherazade',"'Scheherazade New',serif",'Scheherazade New'],
+const FAR={amiri:['Amiri (bawaan)',"'Amiri',serif",'Amiri'],times:['Times',"'Times New Roman',Times,serif",''],scheh:['Scheherazade',"'Scheherazade New',serif",'Scheherazade New'],
  naskh:['Noto Naskh',"'Noto Naskh Arabic',serif",'Noto Naskh Arabic'],lateef:['Lateef',"'Lateef',serif",'Lateef'],markazi:['Markazi',"'Markazi Text',serif",'Markazi Text'],
  kufi:['Reem Kufi',"'Reem Kufi',sans-serif",'Reem Kufi'],cairo:['Cairo',"'Cairo',sans-serif",'Cairo'],tajawal:['Tajawal',"'Tajawal',sans-serif",'Tajawal'],harmattan:['Harmattan',"'Harmattan',sans-serif",'Harmattan']};
 const FLT={times:['Times (bawaan)',"'Times New Roman',Times,serif",''],sistem:['Sistem',"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif",''],inter:['Inter',"'Inter',sans-serif",'Inter'],
@@ -20,7 +23,7 @@ const FLT={times:['Times (bawaan)',"'Times New Roman',Times,serif",''],sistem:['
 /* Font lain bebas (S.afx / S.lfx) diambil dari Google Fonts menurut namanya; tanpa internet jatuh ke font bawaan */
 const fontDari=(M,id,x,cad)=>id=='x'&&x?[x,`'${x}',${cad}`,x]:M[id]||M.times;
 const fontMuat=g=>{if(!g)return;const id='gf-'+g.replace(/\W/g,'');if(document.getElementById(id))return;const l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(g).replace(/%20/g,'+')+':wght@400;600;700&display=swap';document.head.append(l)};
-const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC.blue:ACC[S.ac]||ACC.emerald,r=document.documentElement.style,dk=t=='dark';r.setProperty('--g',dk?a[3]:a[1]);r.setProperty('--g2',dk?a[4]:a[2]);
+const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC.blue:ACC[S.ac]||ACC.hitam,r=document.documentElement.style,dk=t=='dark';r.setProperty('--g',dk?a[3]:a[1]);r.setProperty('--g2',dk?a[4]:a[2]);
  if(t!='blue'&&ACC[S.ac]&&S.ac!='emerald')r.setProperty('--gs',`color-mix(in srgb,var(--g) ${dk?16:11}%,var(--bg))`);else r.removeProperty('--gs');
  const fa=fontDari(FAR,S.af,S.afx,'serif'),fl=fontDari(FLT,S.lf,S.lfx,'sans-serif');fontMuat(fa[2]);fontMuat(fl[2]);r.setProperty('--ar',fa[1]);r.setProperty('--ui',fl[1]);
  window.androidWarna&&setTimeout(androidWarna);
@@ -28,14 +31,17 @@ const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
-const VER='1.8.1';
+const VER='1.9.0';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';
 /* Warna teks bacaan (Arab, latin, terjemah): 'auto' = hitam (putih di tema gelap); selain itu kode warna pilihan pengguna */
 const WTEKS=[['auto','Hitam'],['#1f5a43','Hijau'],['#1f4f8f','Biru'],['#6b3f1d','Coklat'],['#7a1f2b','Merah tua']];
 /* Ukuran teks bacaan + tampil/sembunyi Latin & terjemah untuk SEMUA halaman (lewat kelas di <html>, langsung berlaku tanpa memuat ulang) */
-const setSz=()=>{const r=document.documentElement.style,h=document.documentElement.classList;h.toggle('no-lt',!S.lt);h.toggle('no-tr',S.tr===false);r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px');S.tc&&S.tc!='auto'?r.setProperty('--tc',S.tc):r.removeProperty('--tc')};
+/* Ukuran tampilan di HP (layar sempit): seluruh aplikasi diperkecil lewat zoom. Bawaan 'kecil'. */
+const ZM={kecil:.86,sedang:.93,besar:1};
+const zmKini=()=>parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+const setSz=()=>{const r=document.documentElement.style,h=document.documentElement.classList;r.setProperty('--zm',ZM[S.uz]||ZM.kecil);h.toggle('no-lt',!S.lt);h.toggle('no-tr',S.tr===false);r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px');S.tc&&S.tc!='auto'?r.setProperty('--tc',S.tc):r.removeProperty('--tc')};
 /* Pilihan warna teks: bulatan warna + pemilih warna bebas; dipakai di Tampilan & Bacaan dan pengaturan baca */
 const wteksUI=()=>{const tc=S.tc||'auto',lain=tc[0]=='#'&&!WTEKS.some(w=>w[0]==tc)?tc:'';return `<div class="wtk" id="wtk">${WTEKS.map(([v,n])=>`<button type="button" data-tc="${v}" class="${tc==v?'on':''}" style="--c:${v=='auto'?'var(--ink)':v}" aria-label="${n}"><i>${ic('check',16)}</i><small>${n}</small></button>`).join('')}<label class="wtkb${lain?' on':''}" style="${lain?'--c:'+lain:''}" aria-label="Pilih warna lain"><i>${ic('check',16)}</i><input type="color" id="tcx" value="${lain||'#333333'}"><small>Lainnya</small></label></div><div class="wtkp"><span>بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</span><small>Bismillāhir-raḥmānir-raḥīm · Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</small></div>`};
 const wteksBind=()=>{const pasang=v=>{S.tc=v;save();setSz();const lain=v[0]=='#'&&!WTEKS.some(w=>w[0]==v);$$('#wtk [data-tc]').forEach(b=>b.classList.toggle('on',b.dataset.tc==v));const l=$('#wtk .wtkb');if(l){l.classList.toggle('on',lain);l.style.setProperty('--c',lain?v:'')}};$$('#wtk [data-tc]').forEach(b=>b.onclick=()=>pasang(b.dataset.tc));const x=$('#tcx');if(x)x.oninput=e=>pasang(e.target.value)};

@@ -15,7 +15,8 @@ ftb.id='ftb';ftb.hidden=true;
 $('#fc').onclick=tap;
 
 /* Posisi disimpan dalam piksel dan dijepit agar tetap di dalam layar */
-const place=(x,y)=>{x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight);Object.assign(ftb.style,{left:x+'px',top:y+'px',right:'auto',bottom:'auto'});return {x,y}};
+/* x,y dalam koordinat layar; dibagi skala tampilan (zoom di HP) saat dipasang sebagai left/top */
+const place=(x,y)=>{const z=zmKini();x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth*z);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight*z);Object.assign(ftb.style,{left:x/z+'px',top:y/z+'px',right:'auto',bottom:'auto'});return {x,y}};
 
 /* Geser dilacak di dokumen (bukan di tombol), jadi tetap jalan walau kursor atau jari keluar dari tombol.
    Ketukan biasa tidak diubah: klik tetap sampai ke tombol. */
@@ -29,9 +30,9 @@ addEventListener('resize',()=>{if(S.ftp)place(S.ftp.x,S.ftp.y)});
 /* Pengaturan tasbih melayang: panel kecil yang ikut melayang di samping tombol (getar, target, reset, sembunyikan).
    Tutup dengan ketuk di luar panel, tombol pengaturan lagi, atau Esc. */
 const ftpTutup=()=>{const p=$('#ftp');if(!p)return;p.classList.add('out');setTimeout(()=>p.remove(),140)};
-const ftpLetak=()=>{const p=$('#ftp');if(!p)return;const r=ftb.getBoundingClientRect(),w=p.offsetWidth,h=p.offsetHeight;
+const ftpLetak=()=>{const p=$('#ftp');if(!p)return;const z=zmKini(),r=ftb.getBoundingClientRect(),w=p.offsetWidth*z,h=p.offsetHeight*z;
  let x=Math.min(Math.max(8,r.right-w),innerWidth-w-8),y=r.top-h-10;if(y<8)y=Math.min(r.bottom+10,innerHeight-h-8);
- p.style.left=x+'px';p.style.top=y+'px';p.style.transformOrigin=`${r.left+r.width/2-x}px ${y<r.top?h:0}px`};
+ p.style.left=x/z+'px';p.style.top=y/z+'px';p.style.transformOrigin=`${(r.left+r.width/2-x)/z}px ${y<r.top?h/z:0}px`};
 ftb.querySelector('#fg').onclick=e=>{e.stopPropagation();if($('#ftp'))return ftpTutup();
  const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('ftt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
  p.id='ftp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Pengaturan tasbih melayang');ftpLetak();
