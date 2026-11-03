@@ -47,6 +47,6 @@ addEventListener('keydown',e=>{if(e.key=='Escape')ftpTutup()});
 addEventListener('resize',ftpLetak);
 addEventListener('hashchange',ftpTutup);
 
-const ftUpd=()=>{if(S.ft===false)ftpTutup();ftb.hidden=S.ft===false||location.hash.slice(2).split('/')[0]=='tasbih';if(S.ftp)place(S.ftp.x,S.ftp.y);tUpd()};
+const ftUpd=()=>{if(S.ft===false)ftpTutup();/* Tidak tampil di halaman Tasbih dan Fadz AI (agar tidak menutupi tombol kirim/mikrofon) */ftb.hidden=S.ft===false||['tasbih','ai'].includes(location.hash.slice(2).split('/')[0]);if(S.ftp)place(S.ftp.x,S.ftp.y);tUpd()};
 P.tasbih=()=>({html:head('Tasbih')+`<button class="cnt" id="c">0</button><div class="mut" style="text-align:center" id="tg"></div><div class="mut" style="text-align:center;margin:16px 0 6px">Target hitungan</div>${seg('tt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<div style="text-align:center;margin-top:14px"><button class="btn s" id="rz">Reset</button></div>`,
  init(){tUpd();$('#c').onclick=tap;$('#rz').onclick=()=>{S.tas=0;save();tUpd()};segBind('tt',v=>{S.tt=+v;S.tas=0;save();tUpd()})}});
