@@ -6,7 +6,7 @@
  --bg:#ffffff;
  --card:#ffffff;
  --ink:#1d2b25;
- --mut:#6b7a72;
+ --mut:#5f6d66;
  --line:#e5e7e5;
  --g:#24584a;
  --g2:#3a7363;
@@ -483,9 +483,9 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 
 /* Ponsel: di bawah 900px, menu sisi disembunyikan dan halaman anak tanpa menu bawah */
 @media(max-width:899px){
- .sub #nav{display:none}
- .sub #ftb{bottom:calc(16px + env(safe-area-inset-bottom))}
- .sub .pl{bottom:calc(16px + env(safe-area-inset-bottom))}
+  body.subhal #nav{display:none}
+  body.subhal #ftb{bottom:calc(16px + env(safe-area-inset-bottom))}
+  body.subhal .pl{bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 
 /* Ponsel kecil: di bawah 420px */
@@ -1144,3 +1144,29 @@ section.tb{display:contents}
 @media (max-width:640px){.hfoto .big{font-size:42px}.hfoto .mut2{font-size:16px}}
 /* HP: tombol kembali dan baris atas Beranda agak ke dalam, tidak menempel di pojok layar */
 @media (max-width:640px){.bar>.bk:first-child,.rh>.bk:first-child{margin-left:8px}.top{padding-left:10px;padding-right:10px}}
+/* Halaman Tentang: kepala dengan logo, paragraf terbaca, daftar isi aplikasi berbutir, data pondok berbaris */
+.tab1{color:var(--ink);font-size:14px;line-height:1.65}
+.tkep{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.tkep img{width:44px;height:44px;border-radius:12px;background:var(--fill);padding:4px;object-fit:contain}
+.tkep b{display:block;font-size:17px;color:var(--ink)}
+.tkep small{display:block;color:var(--mut);font-size:12.5px}
+.tpar{margin:0 0 4px;color:var(--ink)}
+.tsub{margin:14px 0 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.tfit{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tfit>div{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:12px;background:var(--fill);min-width:0}
+.tfit .ic{flex:none;margin-top:2px;color:var(--g)}
+.tfit b{display:block;font-size:13px;line-height:1.35;color:var(--ink)}
+.tfit small{display:block;font-size:11.5px;line-height:1.35;color:var(--mut)}
+.tcat{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
+.tjud{display:block;font-size:16px;color:var(--ink)}
+.tals{display:block;color:var(--mut);margin:2px 0 12px}
+.tbrs{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.tbrs>span{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--fill);color:var(--g)}
+.tbrs small{display:block;font-size:11.5px;color:var(--mut)}
+.tbrs b{color:var(--ink)}
+.tbrs p{margin:0;color:var(--ink)}
+.tab1 .tlk{margin-top:12px}
+@media (max-width:360px){.tfit{grid-template-columns:1fr}}
+/* Keterbacaan teks: jarak baris lega untuk paragraf di semua halaman */
+#view p{line-height:1.65}
+#view .card>p+p{margin-top:8px}
