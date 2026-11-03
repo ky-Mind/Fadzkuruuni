@@ -50,7 +50,8 @@ const gagal=e=>{const c=e&&e.code||'';if(c=='auth/popup-closed-by-user'||c=='aut
 /* Hasil masuk cara alihkan (bila jendela sembul diblokir) */
 firebase.auth().getRedirectResult().then(r=>{if(r&&r.user)selesai(r)}).catch(gagal);
 $('#g').onclick=()=>firebase.auth().signInWithPopup(pr).then(selesai).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return firebase.auth().signInWithRedirect(pr);gagal(e)});
-$('#x').onclick=()=>kembali({galat:'dibatalkan'},'Dibatalkan','Kembali ke aplikasi.');
+/* Batal: langsung pindah ke aplikasi di dalam ketukan (Chrome hanya membuka aplikasi bila dipicu ketukan pengguna) */
+$('#x').onclick=()=>{const u=keApp({galat:'dibatalkan'});location.href=u;setTimeout(()=>kembali({galat:'dibatalkan'},'Dibatalkan','Ketuk tombol di bawah untuk kembali ke aplikasi.'),400)};
 if(!state)$('#ket').textContent='Halaman ini dibuka dari aplikasi Android Fadzkuruuni. Buka aplikasinya lalu ketuk Masuk dengan '+NM+'.';
 </script>
 </body>
