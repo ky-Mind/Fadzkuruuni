@@ -5,7 +5,7 @@ const LG_F='<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><
 const LG_E=`<span class="lge">${ic('mail',16)}</span>`;
 /* Masuk dengan Facebook: selama aplikasi Facebook belum diterbitkan (menunggu verifikasi bisnis Meta) hanya akun admin/penguji yang bisa masuk;
    pengguna lain mendapat pesan yang jelas (lihat FBGAGAL di js/core/android.js dan events.js) */
-const FBMASUK=true;
+const FBMASUK=false;
 const AKUN=()=>`<h2>Akun</h2><div class="list sg" id="cl">${cloudOn()?(FBU?row('user',esc(FBU.displayName||S.nm||FBU.email||'Akun'),esc(FBU.email||'')+' · '+({'google.com':'Google','facebook.com':'Facebook','password':'Email','emailLink':'Email'}[FBU.providerData?.[0]?.providerId]||'Akun')+' · data tersinkron ke cloud','<button class="btn s" data-gout>Keluar</button>'):`<p class="lgi mut">Masuk agar penanda ayat, riwayat bacaan, dan pengaturanmu tersimpan di cloud dan ikut pindah ke perangkat lain.</p><div class="lgn"><button class="lgb" data-gin>${LG_G}Masuk dengan Google</button>${FBMASUK?`<button class="lgb" data-gin="fb">${LG_F}Masuk dengan Facebook</button>`:''}<button class="lgb" data-gem>${LG_E}Masuk dengan Email</button></div>`):row('user','Masuk dengan Google','Belum diaktifkan. Isi konfigurasi Firebase (lihat PANDUAN-FIREBASE.md).','<button class="btn s" disabled>Segera</button>')}</div>`;
 const NAMEBOX=()=>`<h2>Profil</h2><div class="card"><label>Nama panggilan</label><input class="in" id="nm" maxlength="24" value="${esc(S.nm||'')}" placeholder="Dipakai pada sapaan di Beranda"><div class="act"><button class="sb pri" data-nsave>Simpan nama</button><button class="sb" data-ndel>Hapus nama</button></div></div>`;
 /* Hapus akun & data cloud (wajib untuk kebijakan Facebook/Google; petunjuk publik di hapus-data.html) */
