@@ -19,6 +19,7 @@ Key hanya tersimpan di Vercel dan tidak pernah dikirim ke HP pengguna, jadi aman
 Kuota gratis Groq terbatas per menit dan per hari. Bila habis, aplikasi otomatis memakai mode offline.
 
 ## Catatan
+- **Pesan suara** (tombol mikrofon, seperti WhatsApp: ketuk = terus merekam, tahan = bicara lalu lepas untuk kirim, geser atas = kunci, geser kiri = batal) direkam di HP lalu diubah jadi teks oleh `api/stt.js` memakai Whisper di Groq, dengan `GROQ_API_KEY` yang sama. Tidak perlu key tambahan.
 - Server hanya menerima permintaan dari domain `*.vercel.app` dan localhost.
 - Aturan menjawab (bahasa, manhaj Ahlussunnah wal Jama'ah, mazhab Syafi'i, tidak mengarang dalil) ada di `SISTEM` pada `api/ai.js`; ubah di sana bila perlu.
 - Saat dicoba di komputer dengan `python3 -m http.server`, `api/ai.js` tidak berjalan; halaman chat otomatis memakai mode pencarian isi aplikasi.
