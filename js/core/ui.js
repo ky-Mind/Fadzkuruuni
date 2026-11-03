@@ -3,7 +3,9 @@ const list=(a,fn)=>`<div class="list">${a.map(fn).join('')}</div>`;
 const head=(t,back='#/',x='')=>`<div class="bar"><a class="bk" href="${back=='back'?'javascript:history.back()':back}" aria-label="Kembali">${ic('back',22)}</a><h1>${t}</h1>${x}</div>`;
 const tabs=(a,i=0)=>`<div class="tabs">${a.map((x,k)=>`<button data-tab="${k}" class="${k==i?'on':''}">${x}</button>`).join('')}</div>`;
 const soon=a=>list(a,(x,i)=>`<a class="row" href="#/segera/${encodeURIComponent(x)}"><span class="num">${i+1}</span><span class="t">${x}<br><small>Segera hadir</small></span>${ic('next',18)}</a>`);
-function twoTabs(t,l,r,A,B,back='#/'){return {html:head(t,back)+tabs([l,r])+`<div id="tb">${A}</div>`,init(){$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.classList.toggle('on',x==b));$('#tb').innerHTML=b.dataset.tab==0?A:B})}}}
+/* Halaman dua tab mengingat tab terakhir yang dibuka (mis. kembali dari Doa keseharian tetap di tab Doa, bukan Wirid) */
+const TABI={};
+function twoTabs(t,l,r,A,B,back='#/',awal){const i=awal??TABI[t]??0;TABI[t]=i;return {html:head(t,back)+tabs([l,r],i)+`<div id="tb">${i?B:A}</div>`,init(){$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.classList.toggle('on',x==b));TABI[t]=+b.dataset.tab;$('#tb').innerHTML=b.dataset.tab==0?A:B})}}}
 const row=(i,t,sb,r)=>`<div class="srw"><span class="si">${ic(i,20)}</span><span class="t">${t}${sb?`<br><small class="mut">${sb}</small>`:''}</span>${r}</div>`;
 const tg=(id,on)=>`<label class="tg"><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></label>`;
 const lk=(h,i,t)=>`<a class="srw" href="${h}"><span class="si">${ic(i,20)}</span><span class="t">${t}</span>${ic('next',18)}</a>`;
