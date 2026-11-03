@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "fathul-qarib", "judul": "Fathul Qarib", "arab": "فتح القريب", "pengarang": "Syekh Muhammad bin Qasim Al-Ghazi", "ket": "Penjelasan Matan Abi Syuja'", "juzTotal": 1, "juz": [{"no": 1, "halaman": 368, "pola": "kitab/fathul-qarib/hal/j1-{n}.webp", "pdf": "kitab/fathul-qarib/pdf/juz-1.pdf"}], "rasio": 0.6992});

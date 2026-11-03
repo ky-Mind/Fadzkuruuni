@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "riyadhus-shalihin", "judul": "Riyadhus Shalihin", "arab": "رياض الصالحين", "pengarang": "Imam An-Nawawi", "ket": "Kumpulan hadits", "juzTotal": 1, "juz": [{"no": 1, "halaman": 704, "pola": "kitab/riyadhus-shalihin/hal/j1-{n}.webp", "pdf": "kitab/riyadhus-shalihin/pdf/juz-1.pdf"}], "rasio": 0.6803});

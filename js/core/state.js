@@ -6,11 +6,24 @@ const rp=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200)};
 /* Tema: auto (ikut perangkat), light, dark, blue */
 const theme=()=>{const t=S.theme=='blue'?'blue':S.theme=='dark'||(S.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;accent()};
-/* Warna aksen: [terang utama, terang turunan, gelap utama, gelap turunan] */
-const ACC={emerald:['#24584a','#3a7363','#7fb5a2','#9fcdbb'],teal:['#0f5f63','#2b7f83','#7cc7cb','#a6dadd'],blue:['#24497d','#3b68a6','#8fb6e6','#adcbf0']};
-const ARF={times:"'Times New Roman',Times,serif",amiri:"'Amiri',serif",scheh:"'Scheherazade New',serif"};
-const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC.blue:ACC[S.ac]||ACC.emerald,r=document.documentElement.style,dk=t=='dark';r.setProperty('--g',dk?a[2]:a[0]);r.setProperty('--g2',dk?a[3]:a[1]);r.setProperty('--ar',ARF[S.af]||ARF.times);
- const m=$('meta[name=theme-color]');m&&m.setAttribute('content',dk?'#121413':t=='blue'?'#24497d':'#1f5a43')};
+/* Warna aksen: [nama, terang utama, terang turunan, gelap utama, gelap turunan] */
+const ACC={emerald:['Hijau','#24584a','#3a7363','#7fb5a2','#9fcdbb'],teal:['Teal','#0f5f63','#2b7f83','#7cc7cb','#a6dadd'],blue:['Biru','#24497d','#3b68a6','#8fb6e6','#adcbf0'],
+ ungu:['Ungu','#563d7c','#7257a0','#b9a3df','#cfbfec'],marun:['Marun','#7a2633','#9a3b4a','#e59aa6','#f0b8c1'],coklat:['Coklat','#6b4423','#8a5c34','#d6aa7f','#e6c4a2'],
+ emas:['Emas','#8a6512','#a8801f','#e2c068','#ecd393'],oranye:['Oranye','#a2481a','#c0602c','#f2a679','#f6c0a0'],merahmuda:['Merah muda','#a03366','#bd4f80','#efa0c4','#f5bfd7'],abu:['Abu','#3f4b55','#5a6873','#aebbc6','#c7d1d9']};
+/* Jenis huruf: [nama, font-family CSS, nama di Google Fonts ('' = sudah ada di perangkat)]. Huruf Arab untuk teks Arab, huruf Latin untuk seluruh tampilan. */
+const FAR={times:['Times (bawaan)',"'Times New Roman',Times,serif",''],amiri:['Amiri',"'Amiri',serif",'Amiri'],scheh:['Scheherazade',"'Scheherazade New',serif",'Scheherazade New'],
+ naskh:['Noto Naskh',"'Noto Naskh Arabic',serif",'Noto Naskh Arabic'],lateef:['Lateef',"'Lateef',serif",'Lateef'],markazi:['Markazi',"'Markazi Text',serif",'Markazi Text'],
+ kufi:['Reem Kufi',"'Reem Kufi',sans-serif",'Reem Kufi'],cairo:['Cairo',"'Cairo',sans-serif",'Cairo'],tajawal:['Tajawal',"'Tajawal',sans-serif",'Tajawal'],harmattan:['Harmattan',"'Harmattan',sans-serif",'Harmattan']};
+const FLT={times:['Times (bawaan)',"'Times New Roman',Times,serif",''],sistem:['Sistem',"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif",''],inter:['Inter',"'Inter',sans-serif",'Inter'],
+ poppins:['Poppins',"'Poppins',sans-serif",'Poppins'],jakarta:['Plus Jakarta',"'Plus Jakarta Sans',sans-serif",'Plus Jakarta Sans'],nunito:['Nunito',"'Nunito',sans-serif",'Nunito'],
+ lora:['Lora',"'Lora',serif",'Lora'],merri:['Merriweather',"'Merriweather',serif",'Merriweather'],playfair:['Playfair',"'Playfair Display',serif",'Playfair Display'],mono:['Mono',"'JetBrains Mono',monospace",'JetBrains Mono']};
+/* Font lain bebas (S.afx / S.lfx) diambil dari Google Fonts menurut namanya; tanpa internet jatuh ke font bawaan */
+const fontDari=(M,id,x,cad)=>id=='x'&&x?[x,`'${x}',${cad}`,x]:M[id]||M.times;
+const fontMuat=g=>{if(!g)return;const id='gf-'+g.replace(/\W/g,'');if(document.getElementById(id))return;const l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(g).replace(/%20/g,'+')+':wght@400;600;700&display=swap';document.head.append(l)};
+const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC.blue:ACC[S.ac]||ACC.emerald,r=document.documentElement.style,dk=t=='dark';r.setProperty('--g',dk?a[3]:a[1]);r.setProperty('--g2',dk?a[4]:a[2]);
+ if(t!='blue'&&ACC[S.ac]&&S.ac!='emerald')r.setProperty('--gs',`color-mix(in srgb,var(--g) ${dk?16:11}%,var(--bg))`);else r.removeProperty('--gs');
+ const fa=fontDari(FAR,S.af,S.afx,'serif'),fl=fontDari(FLT,S.lf,S.lfx,'sans-serif');fontMuat(fa[2]);fontMuat(fl[2]);r.setProperty('--ar',fa[1]);r.setProperty('--ui',fl[1]);
+ const m=$('meta[name=theme-color]');m&&m.setAttribute('content',dk?'#121413':a[1])};
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};

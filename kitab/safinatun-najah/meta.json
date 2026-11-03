@@ -1,0 +1,17 @@
+{
+ "id": "safinatun-najah",
+ "judul": "Safinatun Najah",
+ "arab": "سفينة النجاة",
+ "pengarang": "Syekh Salim bin Sumair Al-Hadrami",
+ "ket": "Fikih dasar ibadah",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 78,
+   "pola": "kitab/safinatun-najah/hal/j1-{n}.webp",
+   "pdf": "kitab/safinatun-najah/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.7077
+}
