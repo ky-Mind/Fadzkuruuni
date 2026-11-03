@@ -1029,3 +1029,10 @@ body.ovl #view{overflow:hidden}
 .mushaf.mbc{margin:6px 0 18px;color:var(--tc,var(--ink))}
 .bar.lekat .mseg{margin-left:auto}
 .bar.lekat .mseg+.ib{margin-left:0}
+
+/* Pengaturan Tampilan: contoh langsung ukuran teks bacaan (Arab, Latin, terjemah) */
+.ukp{margin:10px 0 4px;padding:12px 14px 14px;border-radius:14px;background:var(--fill)}
+.ukp>small{display:block;margin-bottom:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ukp-ar{color:var(--tc,var(--ink));font-family:var(--ar);line-height:2;text-align:right;direction:rtl;transition:font-size .15s}
+.ukp-lt{margin:2px 0 4px;color:var(--tc,var(--ink));font-style:italic;line-height:1.6;transition:font-size .15s}
+.ukp-tr{margin:0;color:var(--tc,var(--mut));line-height:1.6;transition:font-size .15s}
