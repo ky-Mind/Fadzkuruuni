@@ -33,7 +33,7 @@ P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRA
 <label>Atas nama</label><input class="in" id="rn" maxlength="60" placeholder="Nama kamu (opsional)" value="${esc(D.nama??(S.nm||(FBU&&FBU.displayName)||''))}">
 <label>Kontak untuk dihubungi (opsional)</label><input class="in" id="rc" maxlength="80" placeholder="Email atau nomor WhatsApp" value="${esc(D.kontak??((FBU&&FBU.email)||''))}">
 <p class="mut" style="font-size:12px;margin:0 0 4px">Versi aplikasi dan jenis perangkat ikut terkirim untuk membantu mencari penyebab bug.</p>
-<button class="btn" id="rk" style="width:100%;margin-top:8px">Kirim laporan</button><p style="text-align:center;margin:12px 0 0"><a class="mut" style="font-size:13px;text-decoration:underline" href="#" id="rwa">Atau kirim lewat WhatsApp</a></p>`,
+<button class="btn" id="rk" style="width:100%;margin-top:8px">Kirim laporan</button><p style="text-align:center;margin:12px 0 0"><a class="mut" style="font-size:13px;text-decoration:underline" href="#" id="rwa">Atau kirim lewat WhatsApp</a></p><p class="mut tkred">Laporan diterima tim pengembang <b>KyMind</b></p>`,
  init(){let J=D.J||'Bug',F=D.F||[];
   if(T&&T.foto&&F.length<RFOTO)F.push({f:T.foto,u:URL.createObjectURL(T.foto)});
   segBind('rj',v=>{J=v;$('#rm').placeholder=RCONTOH[v]});
