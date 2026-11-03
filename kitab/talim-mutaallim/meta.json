@@ -1,0 +1,17 @@
+{
+ "id": "talim-mutaallim",
+ "judul": "Ta'lim Muta'allim",
+ "arab": "تعليم المتعلم",
+ "pengarang": "Syekh Burhanuddin Az-Zarnuji",
+ "ket": "Metodologi belajar",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 162,
+   "pola": "kitab/talim-mutaallim/hal/j1-{n}.webp",
+   "pdf": "kitab/talim-mutaallim/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.6507
+}

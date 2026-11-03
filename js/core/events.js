@@ -1,8 +1,30 @@
 /* js/core/events.js - Pendengar peristiwa bersama (klik, input, geser) */
-let tx=0,ty=0;
-addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
-addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)<70||Math.abs(dy)>50||e.target.closest('input,.cal,.car'))return;const T=$$('[data-tab]'),h=location.hash.split('/');
- if(T.length>1){const i=T.findIndex(b=>b.classList.contains('on'));T[i+(dx<0?1:-1)]?.click()}},{passive:true});
+/* Geser kiri/kanan untuk pindah tab (mis. Tahlil | Yasin, Menu | Kalkulator): isi ikut jari, lalu tab berikutnya masuk dari samping.
+   Juga bisa dengan geser dua jari di trackpad. Tidak aktif di dalam lembar, isian, kalender, carousel, atau halaman kitab. */
+let tx=0,ty=0,tAx=0,tEl=null;
+const tabSemua=()=>$$('#view .tabs [data-tab]'),tabIsi=()=>$('#tb')||$('#view .tabs')?.nextElementSibling;
+/* Pindah tab dengan gerak yang sama seperti geser halaman Al-Qur'an (kelas sl-out dan sl-in di css): keluar 0,17 s, masuk 0,28 s */
+let tabSibuk=0;
+const tabGanti=d=>{const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on')),nb=T[i+d];if(!nb||tabSibuk)return false;tabKe(nb,d);return true};
+function tabKe(nb,d){const el=tabIsi();if(!el){nb.click();return}tabSibuk=1;const kurang=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ /* Lanjutkan dari posisi jari (bila sedang digeser) menuju posisi keluar, dengan kurva & durasi yang sama */
+ const dari=el.style.transform;el.classList.remove('sl-in-l','sl-in-r');el.style.transition='';
+ if(dari&&!kurang){el.style.transition='transform .17s ease-in,opacity .17s ease-in';void el.offsetWidth;el.style.transform=`translateX(${d>0?-36:36}px)`;el.style.opacity=0}else el.classList.add(d>0?'sl-out-l':'sl-out-r');
+ setTimeout(()=>{nb.click();tabPil();const t=tabIsi()||el;[el,t].forEach(x=>{x.style.transition=x.style.transform=x.style.opacity='';x.classList.remove('sl-out-l','sl-out-r')});
+  void t.offsetWidth;t.classList.add(d>0?'sl-in-r':'sl-in-l');setTimeout(()=>{t.classList.remove('sl-in-l','sl-in-r');tabSibuk=0},290)},kurang?0:170)}
+/* Ketukan tombol tab juga memakai gerak yang sama; klik dari kode (bukan pengguna) dibiarkan lewat */
+document.addEventListener('click',e=>{const b=e.target.closest('#view .tabs [data-tab]');if(!b||!e.isTrusted||b.classList.contains('on'))return;
+ const T=tabSemua(),i=T.findIndex(x=>x.classList.contains('on')),k=T.indexOf(b);if(i<0||k<0)return;e.stopImmediatePropagation();e.preventDefault();if(!tabSibuk)tabKe(b,k>i?1:-1)},true);
+/* Pil hijau di bilah tab meluncur ke tab yang aktif */
+function tabPil(){const tb=$('#view .tabs');if(!tb)return;const T=$$('[data-tab]',tb),i=T.findIndex(b=>b.classList.contains('on'));tb.style.setProperty('--n',T.length);tb.style.setProperty('--ti',Math.max(i,0));tb.classList.add('pil')}
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tAx=0;tEl=tabSemua().length>1&&!e.target.closest('input,textarea,.cal,.car,.kp,.back-d,.tabs')?tabIsi():null},{passive:true});
+addEventListener('touchmove',e=>{if(!tEl)return;const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
+ if(!tAx&&(Math.abs(dx)>10||Math.abs(dy)>10))tAx=Math.abs(dx)>Math.abs(dy)*1.2?1:-1;if(tAx!=1)return;
+ const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on')),ada=!!T[i+(dx<0?1:-1)];tEl.style.transition='none';tEl.style.transform=`translateX(${dx*(ada?.45:.12)}px)`;tEl.style.opacity=ada?1-Math.min(Math.abs(dx)/600,.35):1},{passive:true});
+addEventListener('touchend',e=>{if(!tEl)return;const el=tEl;tEl=null;const dx=e.changedTouches[0].clientX-tx;
+ if(tAx==1&&Math.abs(dx)>60&&tabGanti(dx<0?1:-1))return;el.style.transition='transform .28s cubic-bezier(.22,.8,.3,1),opacity .28s cubic-bezier(.22,.8,.3,1)';el.style.transform='';el.style.opacity=''},{passive:true});
+let tWx=0,tWt=0;addEventListener('wheel',e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)||tabSemua().length<2||e.target.closest('.back-d,.kp,.car'))return;
+ if(Date.now()-tWt<600)return;tWx+=e.deltaX;if(Math.abs(tWx)>90){tabGanti(tWx>0?1:-1);tWx=0;tWt=Date.now()}},{passive:true});
 document.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c){const v=c.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast(v.length>30?'Teks disalin':'Disalin: '+v),()=>toast('Tidak bisa menyalin. Salin manual.'));return}
  const b=e.target.closest('[data-bm]');if(b){const k=b.dataset.bm;S.bm=S.bm||[];const i=S.bm.indexOf(k);i<0?S.bm.unshift(k):S.bm.splice(i,1);save();b.classList.toggle('on',i<0);toast(i<0?'Ayat ditandai':'Penanda dihapus')}});
 document.addEventListener('input',e=>{const c=e.target.closest('[data-calc]');if(!c)return;const g=k=>parseFloat((c.querySelector(`[data-k=${k}]`)?.value||'').replace(',','.'))||0,o=c.querySelector('.cres'),t=c.dataset.calc;if(!g('h'))return o.textContent='Isi harga per kg terlebih dahulu.';const kg=t=='fitrah'?g('j')*2.5:g('j')*g('d')*.6;o.innerHTML=`<b>${rp(kg*g('h'))}</b><br><small class="mut">${kg.toFixed(2).replace('.',',')} kg makanan pokok</small>`});

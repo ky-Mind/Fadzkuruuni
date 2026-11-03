@@ -1,9 +1,11 @@
 /* js/core/overlay.js - Tombol kembali bertahap: satu lapisan per tekan (lembar/dialog, lalu layar penuh, baru halaman). Plus dialog konfirmasi. */
 let OVN=0,OVSKIP=0,OVPOP=0,FSPUSH=0;
-new MutationObserver(ms=>ms.forEach(m=>{
+/* Kunci guliran latar selama ada lembar/dialog terbuka */
+const ovlKunci=()=>document.body.classList.toggle('ovl',!!document.querySelector('.back-d'));
+new MutationObserver(ms=>{ovlKunci();ms.forEach(m=>{
  m.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('back-d')){history.pushState({ov:1},'');OVN++}});
  m.removedNodes.forEach(n=>{if(n.classList&&n.classList.contains('back-d')&&OVN>0){OVN--;if(OVPOP>0){OVPOP--;return}if(history.state&&history.state.ov){OVSKIP++;history.back()}}})
-})).observe(document.body,{childList:true});
+})}).observe(document.body,{childList:true});
 addEventListener('popstate',e=>{
  if(OVSKIP>0){OVSKIP--;return}
  const o=document.querySelectorAll('.back-d');if(o.length){OVPOP++;o[o.length-1].remove();return}

@@ -17,6 +17,7 @@
  --rl:14px;
  --shadow:none;
  --ar:'Times New Roman',Times,serif;
+ --ui:'Times New Roman',Times,serif;
  --hero:var(--g);
 }
 [data-theme=dark]{
@@ -48,7 +49,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;overflow:hidden}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--ink);font:16px/1.5 'Times New Roman',Times,serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--ui);-webkit-tap-highlight-color:transparent}
 a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit}
 img{max-width:100%}
@@ -218,7 +219,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:0 0 3px}
 
 /* Tab dan segmen */
 .tabs{display:flex;gap:3px;margin:0 0 16px;padding:3px;background:var(--fill);border:0;border-radius:10px;position:static}
-.tabs button{flex:1;padding:11px 8px;background:0;border:0;border-radius:6px;color:var(--mut);cursor:pointer}
+.tabs button{flex:1;padding:11px 8px;background:0;border:0;border-radius:6px;color:var(--mut);cursor:pointer;transition:background-color .28s cubic-bezier(.22,.8,.3,1),color .28s cubic-bezier(.22,.8,.3,1)}
 .tabs button.on{background:var(--g);color:var(--on);font-weight:600}
 .seg{display:flex;gap:3px;padding:3px;background:var(--fill);border:0;border-radius:10px}
 .seg button{flex:1;padding:10px 6px;border:0;border-radius:9px;background:0;color:var(--mut);font-weight:600;white-space:nowrap;cursor:pointer}
@@ -344,10 +345,73 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .bdg.no{background:#f8d7d2;color:#a3392b}
 .bdg.mid{background:#f6e7c1;color:#7a5a10}
 
-.ktb{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 -16px 12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
-.ktb .sb{height:34px;padding:0 12px;border:0;border-radius:10px;background:var(--fill)}
-.ktb .in{width:78px;height:30px;margin:0;padding:0 8px;font-size:13px}
-.ktb b{min-width:44px;text-align:center;font-size:13px}
+/* Bilah pembaca kitab: satu baris ramping, menempel rapat ke tepi atas & samping; bersembunyi saat menggulir ke bawah */
+.ktb{position:sticky;top:-16px;z-index:5;display:flex;align-items:center;gap:8px;margin:-16px -16px 12px;padding:8px 12px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line);transition:transform .28s cubic-bezier(.32,.72,0,1),box-shadow .2s}
+.ktb.lyg{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.ktb.smb{transform:translateY(-100%);box-shadow:none}
+.ktb .bar{flex:1;min-width:0;margin:0;gap:6px}
+.ktb .bar h1{font-size:16px;font-weight:700}
+.ktb .bar .bk{width:34px;height:34px}
+.ktb .bar .bk .ic{width:20px;height:20px}
+.ktb .kib{display:flex;gap:4px}
+.ktb .ib{width:34px;height:34px;background:transparent;color:var(--ink)}
+.ktb .ib:hover{background:var(--fill)}
+.ktb .ib.on{background:var(--g);color:var(--on)}
+.ktb .ktr{display:flex;align-items:center;gap:6px;flex:none}
+.ktb .kzg,.ktb .kgo{display:flex;align-items:center;height:34px;margin:0;padding:2px;background:var(--fill);border-radius:17px}
+.ktb .kzg .sb{width:30px;height:30px;padding:0;border-radius:50%;background:transparent;font-size:16px;color:var(--ink)}
+.ktb .kzg .sb:hover{background:var(--card)}
+.ktb .kzg b{min-width:40px;text-align:center;font-size:12px;font-weight:600;color:var(--ink)}
+.ktb .kgo{gap:2px;padding:2px 12px 2px 2px;font-size:12px}
+.ktb .kgo .in{width:44px;height:30px;margin:0;padding:0 4px;border:0;border-radius:15px;background:var(--card);font-size:13px;font-weight:700;color:var(--ink);text-align:center;-moz-appearance:textfield}
+.ktb .kgo .in:focus{outline:2px solid var(--g);outline-offset:0}
+.ktb .kgo .in::-webkit-inner-spin-button,.ktb .kgo .in::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.ktb .kpr{position:absolute;left:0;right:0;bottom:-1px;height:2px}
+.ktb .kpr i{display:block;height:100%;background:var(--g);transition:width .25s}
+/* Ponsel: perbesar/perkecil cukup lewat Pengaturan (penggeser ukuran), supaya bilah tetap satu baris */
+@media(max-width:520px){.ktb .kzg{display:none}}
+@media(max-width:420px){.ktb{top:-12px;margin-top:-12px}}
+@media(min-width:600px){.ktb{top:-20px;margin:-20px -24px 14px;padding:8px 20px}}
+/* Layar penuh kitab: tanpa menu dan tasbih melayang, isi memakai seluruh lebar */
+.kfull #nav,.kfull #ftb{display:none}
+.kfull #view{max-width:none}
+/* Lembar Pengaturan kitab: kepala dengan tombol tutup, kelompok berlabel, kartu */
+.ksh{max-height:88vh;padding:0;overflow:hidden;display:flex;flex-direction:column}
+.ksh-h{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.ksh-h>div{flex:1;min-width:0}
+.ksh-h b{display:block;font-size:17px;color:var(--ink)}
+.ksh-h small{display:block;overflow:hidden;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.ksh-x{flex:none;width:34px;height:34px;border:0;border-radius:50%;background:var(--fill);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.ksh-b{padding:4px 16px calc(18px + env(safe-area-inset-bottom));overflow-y:auto}
+.ksh-l{margin:16px 2px 8px;color:var(--mut);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ksh-c{border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.ksh .list.sg.ksh-c{border:1px solid var(--line);border-radius:14px}
+.ksh .srw{padding:10px 12px}
+.ksh .srw .t{flex:1;min-width:0;color:var(--ink);font-size:14px}
+.ksh .srw small{font-size:12px}
+.ksz{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.ksz input{flex:1;min-width:60px;accent-color:var(--g)}
+.ksz .sb{flex:none;height:32px}
+.ksz [data-kzs]{width:32px;padding:0;border-radius:50%;font-size:17px}
+.ksz b{min-width:42px;text-align:center;font-size:13px;color:var(--ink)}
+.kwc{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kwc button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 8px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--mut);cursor:pointer;transition:border-color .2s,background-color .2s}
+.kwc button.on{border-color:var(--g);background:var(--gs);color:var(--g)}
+.kwc small{font-size:12px;font-weight:600}
+.kwp{display:flex;flex-direction:column;justify-content:center;gap:4px;width:38px;height:48px;padding:0 7px;border-radius:5px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.kwp u{display:block;height:3px;border-radius:2px;background:#333}
+.kwp u:nth-child(2){width:80%;margin-left:auto}.kwp u:nth-child(4){width:60%;margin-left:auto}
+.kw-sepia{background:#f3e6c8}.kw-sepia u{background:#5b4630}
+.kw-malam{background:#1e2321}.kw-malam u{background:#d9dfdb}
+.kw-tema{background:linear-gradient(135deg,#fff 50%,#1e2321 50%)}.kw-tema u{background:#888}
+.ksh .seg{background:var(--fill)}
+.kdl{padding:12px}
+.kdl-t{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.kdl-t b{display:block;font-size:14px;color:var(--ink)}
+.kdl-t small{display:block;margin-top:2px;font-size:12px;line-height:1.45}
+.ksh .dlw{justify-content:flex-start;margin-left:0}
+.kp.sep img{filter:sepia(.45) brightness(.98)}
+.kp.mlm img{filter:invert(.9) hue-rotate(180deg)}
 .kp{overflow-x:auto}
 .kp img{display:block;height:auto;max-width:none;margin:0 auto 16px;aspect-ratio:var(--r,.7606);background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.14)}
 [data-theme=dark] .kp.inv img{filter:invert(.9) hue-rotate(180deg)}
@@ -494,7 +558,7 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
  #nav .sbt .ic{width:20px;height:20px}
  /* Tooltip melayang di kanan (seperti Gemini): tombol sidebar, dan menu saat mode ringkas */
  body.nav-off #nav a{position:relative}
- #nav [data-tip]::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;z-index:50;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--bg);font:500 13px/1.3 'Times New Roman',Times,serif;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-4px,-50%);transition:opacity .15s,transform .15s}
+ #nav [data-tip]::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;z-index:50;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--bg);font:500 13px/1.3 var(--ui);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-4px,-50%);transition:opacity .15s,transform .15s}
  #nav a[data-tip]::after{display:none}
  body.nav-off #nav a[data-tip]::after{display:block}
  #nav [data-tip]:hover::after,#nav [data-tip]:focus-visible::after{opacity:1;transform:translate(0,-50%)}
@@ -851,3 +915,59 @@ body.aipenuh #nav,body.aipenuh #ftb{display:none}
 .airt span{overflow:hidden;color:var(--mut);text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left}
 #aikb{touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .15s,background .2s}
 #aikb:active{transform:scale(1.12)}
+
+/* Pengaturan Tampilan: warna aksen dan pilihan jenis huruf */
+.wtk.acw button i{background:var(--c)}
+.fnl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:4px 0}
+.fnl button{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .2s,background-color .2s}
+.fnl button span{max-width:100%;overflow:hidden;font-size:19px;line-height:1.5;white-space:nowrap;text-overflow:ellipsis}
+.fnl.ar button span{width:100%;font-size:22px;direction:rtl;text-align:right}
+.fnl button small{color:var(--mut);font-size:11.5px}
+.fnl button.on{border-color:var(--g);background:var(--gs)}
+.fnl button.on small{color:var(--g);font-weight:700}
+.fnl button.on::after{content:"✓";position:absolute;top:6px;right:9px;font-size:12px;color:var(--g)}
+.fnx{display:flex;gap:8px;margin-top:8px}
+.fnx .in{flex:1;margin:0}
+@media(min-width:600px){.fnl{grid-template-columns:repeat(3,1fr)}}
+
+/* Lembar Pengaturan baca: baris penggeser ukuran huruf, kartu berisi, pratinjau */
+.ksh .ksl{gap:10px}
+.ksh .ksl .t{flex:none;width:70px}
+.ksh .ksl input{flex:1;min-width:0;accent-color:var(--g)}
+.ksh .ksl b{min-width:28px;text-align:right;font-size:13px;color:var(--ink)}
+.ksh .kpad{padding:10px 8px}
+.ksh .kpad .wtkp{margin-bottom:0}
+.ksh .qpv{margin:14px 0 2px}
+.ksh .fnl{padding:0}
+/* Lembar terbuka: latar di belakangnya tidak ikut tergulir */
+body.ovl #view{overflow:hidden}
+#view{scrollbar-gutter:stable}
+.back-d{overscroll-behavior:contain;touch-action:none}
+.back-d .sheet,.ksh-b{touch-action:pan-y;overscroll-behavior:contain}
+
+/* Kepala halaman baca yang menempel (barLekat di js/router.js): rapat ke tepi atas & samping, bersembunyi saat menggulir ke bawah */
+.bar.lekat{position:sticky;top:-16px;z-index:5;margin:-16px -16px 10px;padding:8px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line)}
+.bar.lekat h1{font-size:17px}
+.bar.lekat .bk,.bar.lekat .ib{width:36px;height:36px}
+.bar.lekat,.rh.lekat{transition:transform .28s cubic-bezier(.32,.72,0,1),box-shadow .2s}
+.bar.lekat.lyg,.rh.lekat.lyg{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.bar.lekat.smb,.rh.lekat.smb{transform:translateY(-100%);box-shadow:none}
+.rh.lekat{background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+@media(max-width:420px){.bar.lekat{top:-12px;margin-top:-12px}}
+@media(min-width:600px){.bar.lekat{top:-20px;margin:-20px -24px 12px;padding:8px 24px}}
+
+/* Semua lembar & dialog tampil di tengah layar (bukan menempel di bawah), bersudut bulat, muncul dengan efek membesar halus */
+.back-d{align-items:center;padding:16px}
+.back-d>.sheet{max-height:min(86vh,760px);overflow-y:auto;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding-bottom:18px;animation:kshTengah .22s cubic-bezier(.22,.8,.3,1)}
+.back-d>.sheet.ksh{overflow:hidden;padding-bottom:0}
+.back-d.tgh>.sheet{border-radius:20px}
+@keyframes kshTengah{from{opacity:0;transform:scale(.94)}}
+
+/* Isi tab bisa digeser kiri/kanan (js/core/events.js) */
+#tb{touch-action:pan-y;will-change:transform}
+
+/* Bilah tab: pil hijau meluncur halus ke tab aktif (kurva sama dengan geser halaman) */
+.tabs.pil{position:relative;isolation:isolate}
+.tabs.pil::before{content:'';position:absolute;z-index:-1;top:3px;bottom:3px;left:3px;width:calc((100% - 6px - (var(--n,2) - 1) * 3px) / var(--n,2));border-radius:6px;background:var(--g);transform:translateX(calc(var(--ti,0) * (100% + 3px)));transition:transform .28s cubic-bezier(.22,.8,.3,1)}
+.tabs.pil button.on{background:transparent}
+@media(prefers-reduced-motion:reduce){.tabs.pil::before{transition:none}}

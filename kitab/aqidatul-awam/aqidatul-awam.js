@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "aqidatul-awam", "judul": "Aqidatul Awam", "arab": "عقيدة العوام", "pengarang": "Syekh Ahmad Al-Marzuqi", "ket": "Akidah dasar (dengan syarah Jalaul Afham)", "juzTotal": 1, "juz": [{"no": 1, "halaman": 122, "pola": "kitab/aqidatul-awam/hal/j1-{n}.webp", "pdf": "kitab/aqidatul-awam/pdf/juz-1.pdf"}], "rasio": 0.6508});
