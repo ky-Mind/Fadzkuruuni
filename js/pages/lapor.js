@@ -30,20 +30,27 @@ P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRA
 <label>Bagian tepatnya (opsional)</label><input class="in" id="rl" maxlength="120" placeholder="Mis. Surah Al-Baqarah ayat 5, bait 12, halaman 34" value="${esc(D.lokasi||(T&&T.nomor)||'')}">
 <label>Rincian</label><textarea class="in" id="rm" rows="5" maxlength="2000" placeholder="${RCONTOH[D.J||'Bug']}">${esc(D.pesan||'')}</textarea>
 <label>Foto atau tangkapan layar (opsional, maks. ${RFOTO})</label><div class="rfs" id="rfs"></div><label class="ph" for="rf" id="rfl">${ic('camera',20)} <span>Tambah foto</span></label><input type="file" id="rf" accept="image/*" multiple hidden>
-<label>Atas nama</label><input class="in" id="rn" maxlength="60" placeholder="Nama kamu (opsional)" value="${esc(D.nama??(S.nm||(FBU&&FBU.displayName)||''))}">
-<label>Kontak untuk dihubungi (opsional)</label><input class="in" id="rc" maxlength="80" placeholder="Email atau nomor WhatsApp" value="${esc(D.kontak??((FBU&&FBU.email)||''))}">
+<label>Atas nama</label><div id="rakun"></div>
+<label>Nomor WhatsApp (opsional)</label><input class="in" id="rc" maxlength="40" inputmode="tel" placeholder="Bila ingin dihubungi lewat WhatsApp" value="${esc(D.kontak||'')}">
 <p class="mut" style="font-size:12px;margin:0 0 4px">Versi aplikasi dan jenis perangkat ikut terkirim untuk membantu mencari penyebab bug.</p>
 <button class="btn" id="rk" style="width:100%;margin-top:8px">Kirim laporan</button><p style="text-align:center;margin:12px 0 0"><a class="mut" style="font-size:13px;text-decoration:underline" href="#" id="rwa">Atau kirim lewat WhatsApp</a></p><p class="mut tkred">Laporan diterima tim pengembang <b>KyMind</b></p>`,
- init(){let J=D.J||'Bug',F=D.F||[];
+ init(){let J=D.J||'Bug',F=D.F||[],nama=D.nama??'';
+  /* Pelapor wajib masuk (Google, Facebook, atau Email): nama & email diambil dari akun agar tim bisa membalas */
+  const wajib=cloudOn();
+  const akunUI=()=>{const el=$('#rakun');if(!el)return;const n=$('#rn');if(n)nama=n.value;
+   if(wajib&&!FBU){el.innerHTML=`<div class="rak rakm"><b>Masuk dulu untuk mengirim laporan</b><p class="mut">Nama dan email dari akunmu dipakai sebagai pengirim, agar tim bisa membalas laporanmu.</p><div class="lgn"><button type="button" class="lgb" data-gin>${LG_G}Masuk dengan Google</button><button type="button" class="lgb" data-gin="fb">${LG_F}Masuk dengan Facebook</button><button type="button" class="lgb" data-gem>${LG_E}Masuk dengan Email</button></div></div>`;return}
+   const em=FBU&&FBU.email||'',jl={'google.com':'Google','facebook.com':'Facebook','password':'Email','emailLink':'Email'}[FBU&&FBU.providerData?.[0]?.providerId]||'Akun';
+   el.innerHTML=`<div class="rak">${FBU?`<div class="rakh">${ic('user',16)}<span><small class="mut">Masuk dengan ${jl}</small><b>${esc(em||'(akun tanpa email)')}</b></span></div>`:''}<input class="in" id="rn" maxlength="60" placeholder="Nama kamu" value="${esc(nama||FBU&&FBU.displayName||S.nm||'')}"></div>`};
+  akunUI();addEventListener('fbu',function f(){if(!$('#rakun'))return removeEventListener('fbu',f);akunUI()});
   if(T&&T.foto&&F.length<RFOTO)F.push({f:T.foto,u:URL.createObjectURL(T.foto)});
   segBind('rj',v=>{J=v;$('#rm').placeholder=RCONTOH[v]});
   const fotoUI=()=>{$('#rfs').innerHTML=F.map((f,i)=>`<span><img src="${f.u}" alt="Foto ${i+1}"><button type="button" data-rfx="${i}" aria-label="Hapus foto">×</button></span>`).join('');$('#rfl').style.display=F.length>=RFOTO?'none':''};fotoUI();
   $('#rf').onchange=e=>{for(const f of [...e.target.files].slice(0,RFOTO-F.length))F.push({f,u:URL.createObjectURL(f)});e.target.value='';fotoUI()};
   $('#rfs').onclick=e=>{const b=e.target.closest('[data-rfx]');if(!b)return;URL.revokeObjectURL(F[+b.dataset.rfx].u);F.splice(+b.dataset.rfx,1);fotoUI()};
   /* Tandai halaman lain: simpan isian, buka aplikasi dalam mode tandai */
-  $('.rhal').onclick=e=>{if(!e.target.closest('#rhx'))return;RDRAFT={J,pesan:$('#rm').value,lokasi:$('#rl').value,nama:$('#rn').value,kontak:$('#rc').value,F,hal,halJ,bagian};tandaiMulai(hal||asal||'#/')};
-  const isi=async()=>{const pesan=$('#rm').value.trim();if(pesan.length<5){toast('Tulis rincian laporan terlebih dahulu');$('#rm').focus();return null}
-   return {jenis:J,pesan,lokasi:[$('#rl').value.trim(),bagian&&!$('#rl').value.includes(bagian)?'Ditandai: '+bagian:''].filter(Boolean).join(' · ').slice(0,300),hal,halJudul:hal?halJ||'':'',nama:$('#rn').value.trim(),kontak:$('#rc').value.trim(),versi:VER,perangkat:perangkat(),foto:F.length?await fotoMuat(F.map(x=>x.f)):[]}};
+  $('.rhal').onclick=e=>{if(!e.target.closest('#rhx'))return;RDRAFT={J,pesan:$('#rm').value,lokasi:$('#rl').value,nama:$('#rn')?.value??nama,kontak:$('#rc').value,F,hal,halJ,bagian};tandaiMulai(hal||asal||'#/')};
+  const isi=async()=>{if(wajib&&!FBU){toast('Masuk dulu dengan Google, Facebook, atau Email');$('#rakun').scrollIntoView({behavior:'smooth',block:'center'});return null}const pesan=$('#rm').value.trim();if(pesan.length<5){toast('Tulis rincian laporan terlebih dahulu');$('#rm').focus();return null}
+   return {jenis:J,pesan,lokasi:[$('#rl').value.trim(),bagian&&!$('#rl').value.includes(bagian)?'Ditandai: '+bagian:''].filter(Boolean).join(' · ').slice(0,300),hal,halJudul:hal?halJ||'':'',nama:($('#rn')?.value||'').trim(),kontak:$('#rc').value.trim(),versi:VER,perangkat:perangkat(),foto:F.length?await fotoMuat(F.map(x=>x.f)):[]}};
   $('#rwa').onclick=async e=>{e.preventDefault();const r=await isi();if(!r)return;const u='https://wa.me/'+REPORT.wa+'?text='+encodeURIComponent(rtxt(r)+(r.foto.length?'\n\n(Foto belum ikut terkirim; lampirkan di WhatsApp)':''));const w=open(u,'_blank');if(!w)location.href=u};
   $('#rk').onclick=async()=>{const b=$('#rk');b.disabled=true;b.textContent='Menyiapkan…';const r=await isi();if(!r){b.disabled=false;b.textContent='Kirim laporan';return}
    b.textContent='Mengirim…';const st=await sendReport(r);b.disabled=false;b.textContent='Kirim laporan';

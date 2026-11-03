@@ -14,6 +14,8 @@ const andMintaIzin=n=>new Promise(ok=>{andIzinTunggu[n]=ok;andPanggil('mintaIzin
 /* Suara pembaca selesai */
 window.fadzTtsSelesai=()=>{try{if(AITTS){AITTS=null;aiTtsUI()}}catch(e){}};
 /* Masuk Google: token dari tab Chrome diteruskan ke Firebase di aplikasi */
+window.fadzMasuk=async(p,id,at)=>{try{if(typeof fbInit=='function')await fbInit();for(let k=0;k<40&&!(window.firebase&&firebase.auth);k++)await new Promise(r=>setTimeout(r,250));
+ const c=p=='fb'?firebase.auth.FacebookAuthProvider.credential(at):firebase.auth.GoogleAuthProvider.credential(id||null,at||null);await firebase.auth().signInWithCredential(c);toast('Berhasil masuk dengan '+(p=='fb'?'Facebook':'Google'))}catch(e){toast(e.code=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Masuk dengan Google dulu.':'Gagal masuk: '+(e.code||e.message))}};
 window.fadzMasukGoogle=async(id,at)=>{try{if(typeof fbInit=='function')await fbInit();for(let k=0;k<40&&!(window.firebase&&firebase.auth);k++)await new Promise(r=>setTimeout(r,250));
  await firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(id||null,at||null));toast('Berhasil masuk dengan Google')}catch(e){toast('Gagal masuk: '+(e.code||e.message))}};
 /* Pengingat adzan: jadwal 7 hari ke depan dikirim ke Android (dipasang sebagai alarm). Dikirim ulang bila pengaturan/lokasi berubah. */
