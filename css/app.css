@@ -1170,3 +1170,29 @@ section.tb{display:contents}
 /* Keterbacaan teks: jarak baris lega untuk paragraf di semua halaman */
 #view p{line-height:1.65}
 #view .card>p+p{margin-top:8px}
+/* Fadz AI: mikrofon belum siap (titik merah redup, belum berkedip) */
+.airec.siapan .airt i{animation:none;background:#e0442f66}
+/* Petunjuk hasil pesan suara: diperiksa dulu sebelum dikirim */
+.aisv{display:flex;align-items:center;gap:8px;margin:0 2px 6px;padding:8px 10px 8px 12px;border-radius:12px;background:var(--gs,var(--fill));color:var(--ink);font-size:12.5px;line-height:1.4;animation:qin .3s}
+.aisv>.ic{flex:none;color:var(--g)}
+.aisv span{flex:1;min-width:0}
+.aisv button{flex:none;width:26px;height:26px;border:0;border-radius:50%;background:var(--fill);color:var(--ink);font-size:16px;line-height:1;cursor:pointer}
+/* Saran isi aplikasi di gelembung jawaban: tetap di dalam gelembung, teks panjang dipotong rapi */
+.aim .aih{max-width:100%}
+.aih .chip2{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.4}
+.aim.a>div{min-width:0;overflow-wrap:anywhere}
+/* Fadz AI: tombol bulat "ke pesan terbaru" seperti WhatsApp, muncul saat membaca pesan lama */
+.aitn{position:absolute;right:10px;top:-50px;z-index:2;display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.14);cursor:pointer;animation:qin .25s}
+.aitn .ic{transform:rotate(90deg)}
+.aitn[hidden]{display:none}
+/* Daftar obrolan: gulir halus, tanpa tarikan memantul ke halaman */
+body:has(#aic) #view{scroll-behavior:auto;overscroll-behavior-y:contain}
+/* Gembok kunci rekaman lebih tinggi di atas mikrofon (±1,5 cm), panah menunjuk jalurnya */
+.ailk{bottom:118px}
+.ailk::after{content:'';position:absolute;left:50%;top:100%;width:2px;height:40px;margin-left:-1px;background:linear-gradient(var(--line),transparent);border-radius:2px}
+/* Bilah ketik Fadz AI menutup penuh dari tepi ke tepi layar dan menempel ke menu bawah: pesan tidak terlihat di sela-selanya */
+.aif{margin:0 -16px -24px;padding:10px 16px 10px;bottom:-24px;box-shadow:0 -1px 0 var(--line)}
+@media(min-width:600px){.aif{margin:0 -24px -20px;padding:10px 24px 12px;bottom:-20px}}
+.aisv[hidden]{display:none}
+/* Tombol ke pesan terbaru di tengah, tidak tertutup tasbih melayang di pojok kanan */
+.aitn{right:auto;left:50%;margin-left:-20px}

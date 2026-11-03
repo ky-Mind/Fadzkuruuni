@@ -3,11 +3,18 @@
    dengan kunci GROQ_API_KEY yang sama dengan api/ai.js. Lebih andal di HP daripada pengenalan suara bawaan browser. */
 export const config = { runtime: 'edge' };
 
-const MODEL = ['whisper-large-v3-turbo', 'whisper-large-v3'];
+/* large-v3 (lebih teliti untuk ucapan campuran Indonesia-Arab) didahulukan; turbo sebagai cadangan */
+const MODEL = ['whisper-large-v3', 'whisper-large-v3-turbo'];
 const ASAL = /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const MAKS = 4 * 1024 * 1024;
-/* Petunjuk ejaan istilah keagamaan agar Whisper menulisnya dengan benar */
-const PETUNJUK = 'Pertanyaan berbahasa Indonesia tentang Islam: salat, wudu, zakat, doa, Al-Qur\'an, surah Yasin, tahlil, maulid, sholawat, hadis, fikih, mazhab Syafi\'i, Fadzkuruuni.';
+/* Petunjuk ejaan: daftar istilah (bukan kalimat), agar Whisper menulis salam & istilah keagamaan dengan benar.
+   Bila suara tidak jelas Whisper kadang mengulang petunjuk ini; hasil seperti itu dibuang di bawah (mirip()). */
+const PETUNJUK = "Assalamu'alaikum, wa'alaikumussalam, bismillah, alhamdulillah, insya Allah, masya Allah, salat, wudu, zakat, doa, Al-Qur'an, Yasin, tahlil, maulid, sholawat, hadis, Fadzkuruuni.";
+/* Kalimat yang sering "dikarang" Whisper saat hening atau berisik */
+const HALU = /^(selamat menikmati|terima kasih (sudah|telah) menonton|terima kasih\.?|sampai jumpa|jangan lupa (like|subscribe)|subtitle|terjemahan oleh|pertanyaan berbahasa|thank you|thanks for watching|bye)\b/i;
+const norm = t => t.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+/* Hasil hanya mengulang potongan petunjuk = suara tidak tertangkap */
+const mirip = t => { const n = norm(t); return n.length > 0 && norm(PETUNJUK).includes(n) && n.split(' ').length > 3; };
 
 const json = (o, s) => new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json' } });
 const ekstensi = t => /mp4|m4a|aac/.test(t) ? 'm4a' : /ogg/.test(t) ? 'ogg' : /wav/.test(t) ? 'wav' : /mpeg|mp3/.test(t) ? 'mp3' : 'webm';
@@ -33,7 +40,7 @@ export default async function handler(req) {
     fd.append('language', 'id');
     fd.append('temperature', '0');
     fd.append('prompt', PETUNJUK);
-    fd.append('response_format', 'json');
+    fd.append('response_format', 'verbose_json');
     r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { authorization: 'Bearer ' + key.trim() }, body: fd });
     if (r.ok) break;
     try { info = ((await r.json()).error || {}).message || ''; } catch (e) { info = ''; }
@@ -41,5 +48,9 @@ export default async function handler(req) {
   }
   if (!r.ok) return json({ galat: r.status === 429 ? 'sibuk' : 'Pengenal suara bermasalah (' + r.status + ')', info: info.slice(0, 200) }, r.status === 429 ? 429 : 502);
   const h = await r.json();
-  return json({ teks: String(h.text || '').trim() }, 200);
+  /* Buang potongan yang kemungkinan besar bukan ucapan (hening/berisik), kalimat karangan, dan pengulangan petunjuk */
+  const seg = Array.isArray(h.segments) ? h.segments.filter(x => !((x.no_speech_prob ?? 0) > 0.6 && (x.avg_logprob ?? 0) < -0.7) && (x.compression_ratio ?? 1) < 2.6) : null;
+  let teks = String(seg ? seg.map(x => x.text).join(' ') : h.text || '').replace(/\s+/g, ' ').trim();
+  if (HALU.test(teks) || mirip(teks)) teks = '';
+  return json({ teks }, 200);
 }
