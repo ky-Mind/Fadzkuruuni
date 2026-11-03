@@ -372,9 +372,16 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 @media(max-width:520px){.ktb .kzg{display:none}}
 @media(max-width:420px){.ktb{top:-12px;margin-top:-12px}}
 @media(min-width:600px){.ktb{top:-20px;margin:-20px -24px 14px;padding:8px 20px}}
-/* Layar penuh kitab: tanpa menu dan tasbih melayang, isi memakai seluruh lebar */
-.kfull #nav,.kfull #ftb{display:none}
-.kfull #view{max-width:none}
+/* Layar penuh kitab: tanpa menu, bilah, dan tasbih; satu halaman memenuhi layar, geser kanan/kiri (kanan-ke-kiri) untuk pindah halaman */
+.kfull #nav,.kfull #ftb,.kfull .ktb,.kfull #kd .pnav{display:none}
+.kfull #view{max-width:none;overflow:hidden}
+.kfull #kp{position:fixed;inset:0;z-index:15;display:flex;direction:rtl;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:contain;background:var(--bg);scrollbar-width:none}
+.kfull #kp::-webkit-scrollbar{display:none}
+.kfull #kp img{flex:0 0 100%;width:100%!important;height:100%;max-width:none;margin:0;object-fit:contain;aspect-ratio:auto;border-radius:0;box-shadow:none;background:transparent;scroll-snap-align:start;scroll-snap-stop:always}
+.kfo{display:none}
+.kfull .kfo{position:fixed;z-index:16;top:calc(10px + env(safe-area-inset-top));left:50%;display:flex;align-items:center;gap:8px;padding:4px 4px 4px 14px;border-radius:99px;background:rgba(20,24,22,.72);color:#fff;font-size:13px;font-weight:600;transform:translate(-50%,-8px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s cubic-bezier(.22,.8,.3,1);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.kfull .kfo.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.kfo-x{order:2;display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:20px;line-height:1;cursor:pointer}
 /* Lembar Pengaturan kitab: kepala dengan tombol tutup, kelompok berlabel, kartu */
 .ksh{max-height:88vh;padding:0;overflow:hidden;display:flex;flex-direction:column}
 .ksh-h{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
@@ -451,7 +458,8 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 
 /* Mushaf, ayat, dan teks Arab */
 .mushaf{direction:rtl;padding:8px 2px;font-family:var(--ar);line-height:2.5;text-align:justify;text-align-last:center}
-.bsm{margin:6px 0 10px;text-align:center}
+/* Bismillah di atas surah: huruf Arab pilihan pengguna, ukurannya mengikuti ukuran huruf Arab, berdiri di atas garis seperti baris mushaf */
+.bsm{margin:18px 0 12px;padding:0 0 8px;border-bottom:1px solid var(--line);color:var(--tc,var(--ink));font-family:var(--ar);font-size:27px;line-height:2;text-align:center;direction:rtl}
 .mk{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin:0 .3em;border:1px solid var(--g);border-radius:50%;font-family:'Times New Roman',Times,serif;font-size:.5em;color:var(--g);vertical-align:middle}
 #ay{padding-bottom:90px}
 .stick{position:sticky;top:0;z-index:4;max-height:38vh;overflow:auto;margin-bottom:12px;box-shadow:0 6px 14px rgba(0,0,0,.1)}
@@ -971,3 +979,53 @@ body.ovl #view{overflow:hidden}
 .tabs.pil::before{content:'';position:absolute;z-index:-1;top:3px;bottom:3px;left:3px;width:calc((100% - 6px - (var(--n,2) - 1) * 3px) / var(--n,2));border-radius:6px;background:var(--g);transform:translateX(calc(var(--ti,0) * (100% + 3px)));transition:transform .28s cubic-bezier(.22,.8,.3,1)}
 .tabs.pil button.on{background:transparent}
 @media(prefers-reduced-motion:reduce){.tabs.pil::before{transition:none}}
+
+/* Ponsel: lembar & dialog lebih ringkas, bersudut membulat, tidak memenuhi layar */
+@media(max-width:600px){
+ .back-d{padding:14px}
+ .back-d>.sheet{width:100%;max-width:400px;max-height:78vh;border-radius:24px;padding:16px 14px}
+ .back-d>.sheet.ksh{padding:0}
+ .back-d.tgh>.sheet{max-width:320px;border-radius:22px}
+ .ksh-h{gap:10px;padding:12px 14px 10px}
+ .ksh-h .si{width:32px;height:32px}
+ .ksh-h .si .ic{width:17px;height:17px}
+ .ksh-h b{font-size:15px}
+ .ksh-h small{font-size:11px}
+ .ksh-x{width:30px;height:30px;font-size:20px}
+ .ksh-b{padding:2px 12px 14px}
+ .ksh-l{margin:12px 2px 6px;font-size:10.5px}
+ .ksh-c,.ksh .list.sg.ksh-c{border-radius:16px}
+ .ksh .srw{gap:10px;padding:8px 10px}
+ .ksh .srw .si{width:32px;height:32px}
+ .ksh .srw .si .ic{width:17px;height:17px}
+ .ksh .srw .t{font-size:13.5px}
+ .ksh .srw small{font-size:11px}
+ .ksh .ksl .t{width:60px}
+ .ksh .qpv{margin-top:10px;padding:10px}
+ .ksh .qpa{max-height:64px;overflow:hidden}
+ .ksh .seg button{padding:8px 4px;font-size:12.5px}
+ .ksh .wtk{gap:2px}
+ .ksh .wtk i{width:30px;height:30px}
+ .ksh .wtk small{font-size:10px}
+ .ksh .wtkp{padding:8px 10px}
+ .ksh .wtkp span{font-size:20px}
+ .ksh .fnl{grid-template-columns:repeat(3,1fr);gap:6px}
+ .ksh .fnl button{padding:7px 8px;border-radius:12px}
+ .ksh .fnl.ar button span{font-size:17px}
+ .ksh .fnl button small{font-size:10.5px}
+ .ksh .fnx .in{height:36px;font-size:13px}
+ .kwc{gap:6px}
+ .kwc button{padding:8px 2px 6px;border-radius:12px}
+ .kwp{width:28px;height:36px;padding:0 5px;gap:3px}
+ .kwp u{height:2px}
+ .ksz{gap:6px;padding:8px 10px}
+ .ksz .sb{height:30px}
+ .ksz [data-kzs]{width:30px}
+ .kdl{padding:10px}
+}
+
+/* Mode mushaf di Tahlil, Maulid, Wirid & Doa: kartu (.ay2) disembunyikan, diganti paragraf Arab bersambung */
+.ay2.mbh{display:none}
+.mushaf.mbc{margin:6px 0 18px;color:var(--tc,var(--ink))}
+.bar.lekat .mseg{margin-left:auto}
+.bar.lekat .mseg+.ib{margin-left:0}
