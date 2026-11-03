@@ -1142,3 +1142,5 @@ section.tb{display:contents}
 .hfoto .pt b{font-size:16px}
 @media (pointer:fine){.hfoto .pt div:not(.n){-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 @media (max-width:640px){.hfoto .big{font-size:42px}.hfoto .mut2{font-size:16px}}
+/* HP: tombol kembali dan baris atas Beranda agak ke dalam, tidak menempel di pojok layar */
+@media (max-width:640px){.bar>.bk:first-child,.rh>.bk:first-child{margin-left:8px}.top{padding-left:10px;padding-right:10px}}
