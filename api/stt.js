@@ -32,6 +32,8 @@ export default async function handler(req) {
   if (data.byteLength < 800) return json({ galat: 'kosong' }, 400);
   if (data.byteLength > MAKS) return json({ galat: 'Rekaman terlalu panjang' }, 413);
 
+  /* ?p=1 memakai petunjuk istilah (uji coba); bawaan tanpa petunjuk karena petunjuk bisa 'diulang' Whisper saat suara kurang jelas */
+  const petunjuk = new URL(req.url).searchParams.get('p') === '1';
   let r, info = '';
   for (const model of MODEL) {
     const fd = new FormData();
@@ -39,7 +41,7 @@ export default async function handler(req) {
     fd.append('model', model);
     fd.append('language', 'id');
     fd.append('temperature', '0');
-    fd.append('prompt', PETUNJUK);
+    if (petunjuk) fd.append('prompt', PETUNJUK);
     fd.append('response_format', 'verbose_json');
     r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { authorization: 'Bearer ' + key.trim() }, body: fd });
     if (r.ok) break;
