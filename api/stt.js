@@ -11,7 +11,7 @@ const MAKS = 4 * 1024 * 1024;
    Bila suara tidak jelas Whisper kadang mengulang petunjuk ini; hasil seperti itu dibuang di bawah (mirip()). */
 const PETUNJUK = "Assalamu'alaikum, wa'alaikumussalam, bismillah, alhamdulillah, insya Allah, masya Allah, salat, wudu, zakat, doa, Al-Qur'an, Yasin, tahlil, maulid, sholawat, hadis, Fadzkuruuni.";
 /* Kalimat yang sering "dikarang" Whisper saat hening atau berisik */
-const HALU = /^(selamat menikmati|terima kasih (sudah|telah) menonton|terima kasih\.?|sampai jumpa|jangan lupa (like|subscribe)|subtitle|terjemahan oleh|pertanyaan berbahasa|thank you|thanks for watching|bye)\b/i;
+const HALU = /^(selamat menikmati|terima kasih (sudah|telah) menonton|terima kasih\.?|sampai jumpa|jangan lupa (like|subscribe)|subtitle|terjemahan oleh|pertanyaan berbahasa|thank you|thanks for watching|bye)[.!]?$/i;
 const norm = t => t.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 /* Hasil hanya mengulang potongan petunjuk = suara tidak tertangkap */
 const mirip = t => { const n = norm(t); return n.length > 0 && norm(PETUNJUK).includes(n) && n.split(' ').length > 3; };
