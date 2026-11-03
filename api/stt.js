@@ -52,5 +52,7 @@ export default async function handler(req) {
   const seg = Array.isArray(h.segments) ? h.segments.filter(x => !((x.no_speech_prob ?? 0) > 0.6 && (x.avg_logprob ?? 0) < -0.7) && (x.compression_ratio ?? 1) < 2.6) : null;
   let teks = String(seg ? seg.map(x => x.text).join(' ') : h.text || '').replace(/\s+/g, ' ').trim();
   if (HALU.test(teks) || mirip(teks)) teks = '';
-  return json({ teks }, 200);
+  /* Ringkasan keyakinan per potongan (untuk menyetel saringan; tidak berisi data pribadi) */
+  const ukur = (h.segments || []).map(x => [+(x.no_speech_prob ?? -1).toFixed(3), +(x.avg_logprob ?? 0).toFixed(2), +(x.compression_ratio ?? 0).toFixed(2), String(x.text || '').slice(0, 40)]);
+  return json({ teks, ukur }, 200);
 }
