@@ -9,7 +9,7 @@ function route(){if(!location.hash.startsWith('#/lapor'))LAST=location.hash||'#/
  /* Arah (data-vt: fwd/back) dari navigasi bagian, geser, atau tombol kembali */
  const de=document.documentElement,arah=de.dataset.vt;delete de.dataset.vt;
  /* Isi halaman dipasang lalu inisialisasinya dijalankan */
- const paint=()=>{if(tok!=RT)return;document.body.classList.toggle('full',!!S.full&&a=='quran'&&!!b);document.body.classList.toggle('sub',!(tataNavR().includes(a)&&!b));setSz();applyNav();
+ const paint=()=>{if(tok!=RT)return;document.body.classList.toggle('full',!!S.full&&a=='quran'&&!!b);document.body.classList.toggle('subhal',!(tataNavR().includes(a)&&!b));setSz();applyNav();
   v.style.transform=v.style.opacity=v.style.transition='';v.innerHTML=pg.html;v.classList.remove('kel','kelb');v.scrollTop=0;$$('#nav a[data-r]').forEach(l=>l.classList.toggle('on',l.dataset.r==(tataNavR().includes(a)&&a?a:(['','menu'].includes(a)?'':'x'))));pg.init&&pg.init();barLekat();tabPil();tataAdminUI();tataAdminPasang();if(baru)tataCatat(a);layarBaca(a=='kitab'&&!!b);baru&&masuk(v,arah);$$('#view .ar2').forEach(e=>e.style.fontSize=S.fs+'px');ftUpd();$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  ganti?keluar(v,arah).then(paint):paint()}
 /* Isi lama keluar bergiliran dari atas; saat kembali, bergeser ke kanan */
