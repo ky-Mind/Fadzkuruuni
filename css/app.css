@@ -1036,3 +1036,23 @@ body.ovl #view{overflow:hidden}
 .ukp-ar{color:var(--tc,var(--ink));font-family:var(--ar);line-height:2;text-align:right;direction:rtl;transition:font-size .15s}
 .ukp-lt{margin:2px 0 4px;color:var(--tc,var(--ink));font-style:italic;line-height:1.6;transition:font-size .15s}
 .ukp-tr{margin:0;color:var(--tc,var(--mut));line-height:1.6;transition:font-size .15s}
+
+/* Fadz AI pesan suara (seperti WhatsApp): batang level suara, indikator kunci di atas mikrofon, tiga keadaan bilah
+   tahan = sedang ditekan (geser kiri batal, geser atas kunci) · kunci = terus merekam, ada Batal/Kirim · proses = mengubah jadi teks */
+.aif{position:sticky}
+.airl{display:flex;flex:1;align-items:center;gap:2px;min-width:0;height:22px;overflow:hidden}
+.airl u{flex:1;max-width:4px;height:100%;border-radius:2px;background:var(--g);transform:scaleY(.15);transform-origin:center;transition:transform .08s linear}
+.airt span#airtx{flex:none;max-width:55%}
+.airt span#airtx:empty{display:none}
+.airec.tahan .airx,.airec.tahan [data-reck],.airec.proses .airx,.airec.proses [data-reck]{display:none}
+.airec.kunci .airg,.airec.proses .airg,.airec.proses .airl,.airec.proses .airt i{display:none}
+.airec.proses #airtx{max-width:none;color:var(--ink)}
+.airec.proses .airt b{display:none}
+.airec.proses .airt::before{content:'';flex:none;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--g);border-radius:50%;animation:aiputar .8s linear infinite}
+@keyframes aiputar{to{transform:rotate(360deg)}}
+#aikb.rek{background:#e0442f;color:#fff;box-shadow:0 0 0 8px color-mix(in srgb,#e0442f 18%,transparent);transition:transform .05s,background .2s,box-shadow .2s}
+.ailk{position:absolute;right:4px;bottom:74px;display:flex;flex-direction:column;align-items:center;gap:2px;width:46px;padding:10px 0 8px;border:1px solid var(--line);border-radius:23px;background:var(--card);color:var(--mut);box-shadow:0 4px 14px rgba(0,0,0,.12);animation:ailkIn .2s cubic-bezier(.22,.8,.3,1)}
+.ailk i{font-style:normal;font-size:18px;line-height:1;transform:rotate(90deg);animation:ailkPanah 1.1s ease-in-out infinite}
+.ailk.dekat{color:var(--g);border-color:var(--g)}
+@keyframes ailkIn{from{opacity:0;transform:translateY(10px)}}
+@keyframes ailkPanah{50%{transform:rotate(90deg) translateX(-4px)}}
