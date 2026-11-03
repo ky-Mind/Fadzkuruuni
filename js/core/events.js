@@ -66,7 +66,7 @@ addEventListener('touchmove',e=>{if(!gv)return;if(e.touches.length>1){gh=-1;gv.s
 addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx=e.changedTouches[0].clientX-gx,cepat=Math.abs(dx)>40&&Date.now()-gt<250,L=gLink(dx);
  if(L&&(Math.abs(dx)>80||cepat)){pDir(dx<0?1:-1);location.hash=L.getAttribute('href');return}
  v.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';v.style.transform='';v.style.opacity=''},{passive:true});
-addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
+addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest?.('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
 /* Tarik ke bawah dari puncak halaman untuk memuat ulang: ikon berputar mengikuti tarikan, dilepas lewat batas lalu memuat ulang */
 const ptr=mk('',ic('rot',20));ptr.id='ptr';ptr.setAttribute('aria-hidden','true');
 let py=0,px=0,pt=0,pon=0;

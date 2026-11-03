@@ -21,7 +21,7 @@ function kitabFull(on,pulih){S.kfull=on;save();document.body.classList.toggle('k
  const de=document.documentElement,fe=document.fullscreenElement||document.webkitFullscreenElement;
  if(on&&!fe)(de.requestFullscreen||de.webkitRequestFullscreen||(()=>Promise.reject())).call(de).catch(()=>{});else if(!on&&fe)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}
 /* Keluar layar penuh lewat tombol Esc/kembali di perangkat: tampilan ikut kembali normal */
-addEventListener('keydown',e=>{if(!document.body.classList.contains('kfull')||!window.KR||!$('#kp')||e.target.closest('input'))return;
+addEventListener('keydown',e=>{if(!document.body.classList.contains('kfull')||!window.KR||!$('#kp')||e.target.closest?.('input'))return;
  if(e.key=='ArrowLeft'||e.key=='ArrowRight'){e.preventDefault();KR.ke(KR.cur()+(e.key=='ArrowLeft'?1:-1))}else if(e.key=='Escape')kitabFull(false)});
 addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('kfull'))kitabFull(false,1)});
 function kitabHalaman(el,k,j){let cur=0;const key=k.id+'-'+j.no,last=S.klj===false?1:(S.kh||{})[key]||1,jn=x=>k.juz.find(y=>y.no==x),z=()=>S.kz||100;

@@ -24,8 +24,7 @@ let BLY=0,BLU=0;
 function layarBaca(kitab){const baca=kitab,on=!!S.kfull&&baca;document.body.classList.toggle('kfull',on);
  if(!baca&&(document.fullscreenElement||document.webkitFullscreenElement))(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}
 function barLekat(){BLY=0;const h=$('#view > .rh')||$('#view > .bar [data-rs]')?.closest('.bar');if(!h)return;h.classList.add('lekat');
- /* Halaman baca selain Al-Qur'an: pilihan Kartu | Mushaf di kepala halaman, sama seperti di surah */
- if(h.matches('.bar')&&!$('.mseg',h)){$('[data-rs]',h).insertAdjacentHTML('beforebegin',mbacaUI());$$('[data-mb]',h).forEach(b=>b.onclick=()=>mbacaSet(b.dataset.mb=='1'))}mushafBaca()}
+ mbacaCek()}
 {const v=$('#view');['touchmove','wheel','keydown'].forEach(n=>v.addEventListener(n,()=>BLU=Date.now(),{passive:true}));
  v.addEventListener('scroll',()=>{const h=$('#view > .lekat');if(!h)return;const y=v.scrollTop,d=y-BLY;h.classList.toggle('lyg',y>4);if(Math.abs(d)>6){if(Date.now()-BLU<400)h.classList.toggle('smb',d>0&&y>140&&!h.contains(document.activeElement));else if(d<0)h.classList.remove('smb');BLY=y}},{passive:true})}
 addEventListener('hashchange',route);

@@ -70,8 +70,13 @@ function mushafBaca(){const v=$('#view');if(!v||$('#ay'))return;const on=S.mbaca
    m.innerHTML=run.map((a,i)=>{const t=$('.ar,.ar2',a),n=$('.n',a);return `<span class="ayt">${t?esc(t.textContent.trim()):''}<span class="mk">${(+(n&&n.textContent)||i+1).toLocaleString('ar-EG')}</span></span>`}).join(' ');
    run[0].before(m);run.forEach(a=>a.classList.add('mbh'));run=[]};
   [...par.children].forEach(c=>{if(c.classList.contains('ay2')&&!c.classList.contains('mbh'))run.push(c);else tutup()});tutup()})}
-/* Isi yang dimuat belakangan (mis. tab Yasin) ikut dijadikan mushaf */
-{let mt=0;new MutationObserver(()=>{if(S.mbaca!='mushaf')return;clearTimeout(mt);mt=setTimeout(()=>{if($('#view .ay2:not(.mbh)'))mushafBaca()},30)}).observe($('#view'),{childList:true,subtree:true})}
+/* Pilihan Kartu | Mushaf hanya muncul di halaman yang memang punya bagian ayat/bait (.ay2), mis. Tahlil, Yasin, Maulid.
+   Halaman tanpa itu (Asmaul Husna, doa tunggal, dll.) tidak menampilkannya karena tidak ada efeknya. */
+function mbacaCek(){const h=$('#view > .bar.lekat');if(!h)return;const ada=!!$('#view .ay2'),m=$('.mseg',h);
+ if(ada&&!m){$('[data-rs]',h).insertAdjacentHTML('beforebegin',mbacaUI());$$('[data-mb]',h).forEach(b=>b.onclick=()=>mbacaSet(b.dataset.mb=='1'))}else if(!ada&&m)m.remove();
+ if(ada)mushafBaca()}
+/* Isi yang dimuat belakangan (mis. tab Yasin) ikut diperiksa: pilihan muncul/hilang dan dijadikan mushaf bila perlu */
+{let mt=0;new MutationObserver(()=>{clearTimeout(mt);mt=setTimeout(()=>{const h=$('#view > .bar.lekat');if(!h)return;if(!!$('#view .ay2')!=!!$('.mseg',h)||(S.mbaca=='mushaf'&&$('#view .ay2:not(.mbh)')))mbacaCek()},30)}).observe($('#view'),{childList:true,subtree:true})}
 /* Lembar "Pengaturan baca" bersama (Al-Qur'an, Tahlil, Maulid, Wirid & Doa); tata letaknya sama dengan Pengaturan kitab */
 function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#view h1')||{}).textContent||'';e.className='back-d';
  const sl=(id,lb,min,max,v)=>`<div class="srw ksl"><span class="t">${lb}</span><input type="range" id="${id}" min="${min}" max="${max}" value="${v}" aria-label="${lb}"><b data-for="${id}">${v}</b></div>`;
@@ -80,7 +85,7 @@ function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#
 <div class="ksh-b">
 <div class="qpv"><span class="qpa" id="qpa">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span><small class="mut" id="qpl">Bismillaahir Rahmaanir Raheem</small></div>
 <div class="ksh-l">Tema aplikasi</div>${seg('sth',[['auto','Perangkat'],['light','Terang'],['dark','Gelap'],['blue','Biru']],S.theme||'auto')}
-<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kartu'],['1','Mushaf']],(qr?S.full:S.mbaca=='mushaf')?'1':'0')}
+${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kartu'],['1','Mushaf']],(qr?S.full:S.mbaca=='mushaf')?'1':'0')}`:''}
 <div class="ksh-l">Tampilkan</div>
 <div class="list sg ksh-c">${row('search','Teks Latin','Transliterasi di bawah teks Arab',tg('s5',S.lt))}${row('news','Terjemah','Arti dalam bahasa Indonesia',tg('s1',S.tr))}</div>
 <div class="ksh-l">Ukuran huruf</div>
@@ -93,7 +98,7 @@ function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#
  $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();$$('.ay .tr').forEach(p=>p.hidden=!S.tr)};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();$$('.ay .lt').forEach(p=>p.hidden=!S.lt)};
  $('#s6',e).oninput=x=>{S.fl=+x.target.value;save();setSz()};$('#s7',e).oninput=x=>{S.fi=+x.target.value;save();setSz()};
  $('#s2',e).oninput=x=>{S.fs=+x.target.value;save();$$('#view .ay .ar,#view .ay2 .ar,#view .ar2,#view .mushaf').forEach(a=>a.style.fontSize=S.fs+'px');$$('#view .bsm').forEach(a=>a.style.fontSize=Math.round(S.fs*.85)+'px')};
- segBind('smd',v=>window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1'));
+ if($('#smd',e))segBind('smd',v=>window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1'));
  segBind('sth',v=>{S.theme=v;save();theme()});wteksBind();fontBind('af',FAR);segBind('acw',v=>{S.ac=v;save();accent()});
  /* Pratinjau dan angka di samping penggeser ikut berubah */
  const prv=()=>{$('#qpa',e).style.fontSize=S.fs+'px';$('#qpl',e).style.fontSize=(S.fl||15)+'px';$$('[data-for]',e).forEach(b=>b.textContent=$('#'+b.dataset.for,e).value)};prv();e.addEventListener('input',prv);e.addEventListener('click',()=>setTimeout(prv))}
