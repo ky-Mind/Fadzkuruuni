@@ -1,12 +1,35 @@
 /* js/pages/beranda.js - Beranda */
-const CARI=[...NAMA.map((n,i)=>[n+' (surah)','#/quran/'+(i+1)]),...[...MENU.wirid,...MENU.doa,...MENU.maulid].map(x=>[x,null])];
+/* Pencarian Beranda: dibangun dari isi yang benar-benar ada di aplikasi (surah, wirid & doa beserta tiap bacaannya, maulid, kitab,
+   Asmaul Husna, dan fitur), jadi setiap hasil langsung membuka halamannya. Yang memang belum ada isinya ditandai "Segera hadir". */
+let CARIX=null;
+const cariNorm=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j)=>L.push([n,h,j,cariNorm(n)]);
+ NAMA.forEach((n,i)=>tb(n+' · '+ARTI[i],'#/quran/'+(i+1),'Surah'));
+ [['w',WN,WD,'Wirid'],['d',MENU.doa,DD,'Doa']].forEach(([t,N,D,j])=>N.forEach((n,i)=>{const isi=D[i]||[];const as=t=='w'&&i==2;tb(n,as?'#/asma':isi.length?`#/baca/${t}/${i}`:null,j);isi.forEach((x,k)=>x&&x[0]&&tb(x[0],`#/bacaan/${t}/${i}/${k}`,j+' · '+n))}));
+ MAULID_DAFTAR.forEach(m=>tb(m.judul,m.berkas?'#/maulid/'+m.id:null,'Maulid'));
+ KITAB_DAFTAR.forEach(k=>tb(k.judul,k.berkas?'#/kitab/'+k.id:null,'Kitab'));
+ ASMA.forEach(a=>tb(a[1]+' · '+a[2],'#/asma/'+a[0],'Asmaul Husna'));
+ Object.entries(TPOOL).forEach(([r,v])=>tb(tNama(r,v[1]),'#/'+r,'Fitur'));
+ return CARIX=L};
+const cariHasil=q=>{const w=cariNorm(q).split(' ').filter(Boolean);if(!w.length)return [];return cariIndeks().filter(x=>w.every(k=>x[3].includes(k))).sort((a,b)=>(b[3].startsWith(w[0])-a[3].startsWith(w[0]))||(!!b[1]-!!a[1])).slice(0,12)};
 const SK='<svg class="sk" viewBox="0 0 300 40" preserveAspectRatio="none"><path d="M0 40V30h28v-8l3-6 3 6v8h22c0-12 12-18 22-18s22 6 22 18h26v-6h10v-10l4-6 4 6v10h10v6h22v16z" fill="rgba(255,255,255,.12)"/></svg>';
-P['']=()=>({html:`<div class="top"><span class="bn"><img src="img/logo.png" alt="" width="30" height="30">Fadzkuruuni</span><a href="#/jadwal">${ic('pin',16)} ${S.loc.n} <b>(Ganti)</b></a></div>${S.nb?'':NOTE}${GREET()}<div class="hero">${SK}<small id="nl"></small><div class="big" id="np">--</div><div id="cd" class="mut2"></div><small>${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})} / ${hf(new Date(),{day:'numeric',month:'long',year:'numeric'})}</small><div class="qt"><span id="qtx"></span></div><div class="pt" id="pt"></div></div>
- <div class="grid g2">${SHORT.map(s=>`<a href="#/${s[0]}"><b>${ic(s[1],26)}</b>${s[2]}</a>`).join('')}</div>
- <div class="srch">${ic('search',18)}<input id="sr" type="search" placeholder="Cari doa, wirid, surah"></div><div id="sl"></div>
- <div class="car"><a class="sl" href="#/zakat/emas"><span class="sl-i">${ic('scale',20)}</span><b>Hitung zakatmu</b><span>6 kalkulator fikih, hasil langsung dalam rupiah</span></a><a class="sl s2" href="#/tahlil"><span class="sl-i">${ic('users',20)}</span><b>Tahlil &amp; Yasin</b><span>Baca Surah Yasin lengkap, bisa offline</span></a><a class="sl s3" href="#/waris"><span class="sl-i">${ic('scale',20)}</span><b>Kalkulator waris</b><span>Simulasi pembagian harta pusaka</span></a></div>
- ${S.hist[0]?`<h2>Lanjutkan membaca</h2><a class="card" style="display:flex;gap:12px;align-items:center" href="#/quran/${S.hist[0]}">${ic('book',22)}<span>${NAMA[S.hist[0]-1]}<br><small class="mut">${ARTI[S.hist[0]-1]} · ${AYAT[S.hist[0]-1]} ayat</small></span></a>`:''}${doaHariIni()}`,
- init(){qrot();$('#sr').oninput=e=>{const q=e.target.value.trim().toLowerCase();$('#sl').innerHTML=q?list(CARI.filter(x=>x[0].toLowerCase().includes(q)).slice(0,8),x=>x[1]?`<a class="row" href="${x[1]}"><span class="t">${x[0]}</span>${ic('next',18)}</a>`:`<div class="row" data-soon><span class="t">${x[0]}<br><small>Segera hadir</small></span></div>`):'';$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
+/* Bagian Beranda (urutan & tampil/sembunyi diatur admin lewat TATA.beranda, js/core/tata.js) */
+const BAG={
+ lokasi:()=>`<div class="top"><span class="bn"><img src="img/logo.png" alt="" width="30" height="30">Fadzkuruuni</span><a href="#/jadwal">${ic('pin',16)} ${S.loc.n} <b>(Ganti)</b></a></div>`,
+ catatan:()=>S.nb?'':NOTE,
+ pengumuman:()=>{const u=TATA.umum;if(!u||!u.on||!(u.judul||u.teks))return '';const isi=`<span class="umi">${ic('bell',20)}</span><span class="umt">${u.judul?`<b>${esc(u.judul)}</b>`:''}${u.teks?`<span>${esc(u.teks)}</span>`:''}</span>${u.tautan?`<span class="uml">${esc(u.label||'Buka')} ${ic('next',14)}</span>`:''}`;
+  return u.tautan?`<a class="umum" href="${esc(u.tautan)}"${/^https?:/.test(u.tautan)?' target="_blank" rel="noopener"':''}>${isi}</a>`:`<div class="umum">${isi}</div>`},
+ sapa:()=>GREET(),
+ jadwal:()=>`<div class="hero">${SK}<small id="nl"></small><div class="big" id="np">--</div><div id="cd" class="mut2"></div><small>${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})} / ${hf(new Date(),{day:'numeric',month:'long',year:'numeric'})}</small><div class="qt"><span id="qtx"></span></div><div class="pt" id="pt"></div></div>`,
+ pintasan:()=>`<div class="grid g2">${tataPintasan().map(s=>`<a href="#/${s[0]}" data-ta="pin:${s[0]}"><b>${ic(s[1],26)}</b>${esc(s[2])}</a>`).join('')}</div>`,
+ cari:()=>`<div class="srch">${ic('search',18)}<input id="sr" type="search" placeholder="Cari doa, wirid, surah"></div><div id="sl"></div>`,
+ promo:()=>`<div class="car"><a class="sl" href="#/zakat/emas"><span class="sl-i">${ic('scale',20)}</span><b>Hitung zakatmu</b><span>6 kalkulator fikih, hasil langsung dalam rupiah</span></a><a class="sl s2" href="#/tahlil"><span class="sl-i">${ic('users',20)}</span><b>Tahlil &amp; Yasin</b><span>Baca Surah Yasin lengkap, bisa offline</span></a><a class="sl s3" href="#/waris"><span class="sl-i">${ic('scale',20)}</span><b>Kalkulator waris</b><span>Simulasi pembagian harta pusaka</span></a></div>`,
+ lanjut:()=>S.hist[0]?`<h2>Lanjutkan membaca</h2><a class="card" style="display:flex;gap:12px;align-items:center" href="#/quran/${S.hist[0]}">${ic('book',22)}<span>${NAMA[S.hist[0]-1]}<br><small class="mut">${ARTI[S.hist[0]-1]} · ${AYAT[S.hist[0]-1]} ayat</small></span></a>`:'',
+ doa:()=>doaHariIni()};
+/* Tiap bagian dibungkus <section data-ta> (display:contents) agar mode admin bisa memasang tombol geser; yang disembunyikan hanya terlihat (redup) di mode admin */
+const berandaHtml=()=>TATA.beranda.map(x=>{if(!x.on&&!TADMON)return '';let h=BAG[x.id]?BAG[x.id]():'';if(!h&&TADMON)h=`<div class="tak-kosong">${esc(TBAG[x.id])} (kosong saat ini)</div>`;return h?`<section class="tb${x.on?'':' tah'}" data-ta="beranda:${x.id}">${h}</section>`:''}).join('');
+P['']=()=>({html:berandaHtml(),
+ init(){qrot();if($('#sr'))$('#sr').oninput=e=>{const q=e.target.value.trim(),H=cariHasil(q);$('#sl').innerHTML=q?(H.length?list(H,x=>x[1]?`<a class="row" href="${x[1]}"><span class="t">${esc(x[0])}<br><small>${esc(x[2])}</small></span>${ic('next',18)}</a>`:`<div class="row" data-soon><span class="t">${esc(x[0])}<br><small>${esc(x[2])} · Segera hadir</small></span></div>`):`<p class="mut" style="margin:8px 4px">Tidak ada hasil untuk "${esc(q)}".</p>`):'';$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  const tick=()=>{if(!$('#pt'))return clearInterval(P.tk);const now=new Date(),T=waktu(now,S.loc),c=locNow(),z=v=>String(v).padStart(2,'0');
  let cur=5;T.forEach((x,i)=>{if(x[1]<=c)cur=i});
  const nx=T.findIndex((x,i)=>i!=1&&x[1]>c),ni=nx<0?0:nx;let df=T[ni][1]-c;if(nx<0)df+=24;const D=Math.max(0,Math.round(df*3600));

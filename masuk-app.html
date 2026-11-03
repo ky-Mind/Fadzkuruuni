@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masuk ke Fadzkuruuni</title>
+<!-- masuk-app.html - Masuk dengan Google untuk aplikasi Android Fadzkuruuni.
+     Google tidak mengizinkan masuk di dalam WebView aplikasi, jadi aplikasi membuka halaman ini di tab Chrome yang aman.
+     Setelah berhasil, token dikirim kembali ke aplikasi lewat fadzkuruuni://masuk bersama kode "state" sekali pakai dari aplikasi.
+     Tidak disimpan offline oleh sw.js. -->
+<style>
+:root{--g:#24584a;--ink:#1d2b25;--mut:#6b7a72;--bg:#fff;--fill:#f0f2f1}
+@media (prefers-color-scheme:dark){:root{--g:#7fb5a2;--ink:#eef2ef;--mut:#9aa6a0;--bg:#121413;--fill:#1f2321}}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;text-align:center}
+.k{max-width:340px;padding:24px}
+img{width:72px;height:72px;border-radius:18px}
+h1{font-size:20px;margin:14px 0 6px}
+p{color:var(--mut);margin:0 0 18px}
+button,a.b{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;height:48px;border:0;border-radius:24px;background:var(--g);color:#fff;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+button.s{background:var(--fill);color:var(--ink);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="k" id="k">
+ <img src="img/icon-192.png" alt="">
+ <h1>Masuk ke Fadzkuruuni</h1>
+ <p id="ket">Masuk dengan akun Google untuk menyinkronkan penanda, riwayat baca, dan pengaturan.</p>
+ <button id="g">Lanjutkan dengan Google</button>
+ <button class="s" id="x">Batal, kembali ke aplikasi</button>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+/* Sama dengan FBCFG di js/core/cloud.js */
+const FBCFG={apiKey:'AIzaSyDBSyWkPR0ZBDDaHuHAfSzPJfdmx_H0hmE',authDomain:'fadzkuruuni-88a8b.firebaseapp.com',projectId:'fadzkuruuni-88a8b',storageBucket:'fadzkuruuni-88a8b.firebasestorage.app',messagingSenderId:'530459763811',appId:'1:530459763811:web:db2a65d6d2e72201544456'};
+const q=new URLSearchParams(location.search),state=q.get('state')||sessionStorage.getItem('fzstate')||'';
+if(q.get('state'))sessionStorage.setItem('fzstate',q.get('state'));
+const $=s=>document.querySelector(s);
+/* Kembali ke aplikasi: tautan intent:// (Chrome membuka aplikasi Fadzkuruuni dengan data ini) */
+const keApp=p=>'intent://masuk?'+new URLSearchParams({state,...p}).toString()+'#Intent;scheme=fadzkuruuni;package=com.fadzkuruuni.app;end';
+function kembali(p,judul,teks){const u=keApp(p);$('#k').innerHTML=`<img src="img/icon-192.png" alt=""><h1>${judul}</h1><p>${teks}</p><a class="b" href="${u}">Kembali ke aplikasi</a>`;setTimeout(()=>{location.href=u},300)}
+firebase.initializeApp(FBCFG);
+const pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({prompt:'select_account'});
+const selesai=r=>{const c=firebase.auth.GoogleAuthProvider.credentialFromResult(r);if(!c||!c.idToken)return kembali({galat:'token tidak diterima'},'Gagal masuk','Coba lagi dari aplikasi.');
+ kembali({id:c.idToken,at:c.accessToken||''},'Berhasil masuk','Ketuk tombol di bawah bila aplikasi belum terbuka otomatis.')};
+const gagal=e=>{const c=e&&e.code||'';if(c=='auth/popup-closed-by-user'||c=='auth/cancelled-popup-request')return;$('#ket').textContent='Gagal masuk ('+(c||e.message)+'). Coba lagi.'};
+/* Hasil masuk cara alihkan (bila jendela sembul diblokir) */
+firebase.auth().getRedirectResult().then(r=>{if(r&&r.user)selesai(r)}).catch(gagal);
+$('#g').onclick=()=>firebase.auth().signInWithPopup(pr).then(selesai).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return firebase.auth().signInWithRedirect(pr);gagal(e)});
+$('#x').onclick=()=>kembali({galat:'dibatalkan'},'Dibatalkan','Kembali ke aplikasi.');
+if(!state)$('#ket').textContent='Halaman ini dibuka dari aplikasi Android Fadzkuruuni. Buka aplikasinya lalu ketuk Masuk dengan Google.';
+</script>
+</body>
+</html>

@@ -83,11 +83,11 @@ const aiBacaTeks=t=>String(t).replace(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+/g,' ').replac
 let AITTS=null;
 const aiTtsBtn=i=>AITTS&&AITTS.i==i?`<button type="button" data-aijeda>${ic(AITTS.p?'play':'pause',13)} ${AITTS.p?'Lanjutkan':'Jeda'}</button><button type="button" data-aistop>${ic('stop',13)} Berhenti</button>`:`<button type="button" data-aitts="${i}">${ic('play',13)} Dengarkan</button>`;
 const aiTtsUI=()=>$$('[data-aittsw]').forEach(w=>w.innerHTML=aiTtsBtn(+w.dataset.aittsw));
-function aiBicara(t,i){const sp=window.speechSynthesis;if(!sp)return toast('Perangkat tidak mendukung suara');sp.cancel();
+function aiBicara(t,i){if(window.ANDROID){aiStop();AITTS={i,p:0,android:1};andPanggil('bicara',aiBacaTeks(t));aiTtsUI();return}const sp=window.speechSynthesis;if(!sp)return toast('Perangkat tidak mendukung suara');sp.cancel();
  const u=new SpeechSynthesisUtterance(aiBacaTeks(t));u.lang='id-ID';if(!AIVOX)aiPilihSuara();if(AIVOX)u.voice=AIVOX;u.rate=1;
  u.onend=u.onerror=()=>{if(AITTS&&AITTS.u==u){AITTS=null;aiTtsUI()}};AITTS={i,p:0,u};sp.speak(u);aiTtsUI()}
-const aiJeda=()=>{const sp=window.speechSynthesis;if(!AITTS||!sp)return;if(AITTS.p){sp.resume();AITTS.p=0}else{sp.pause();AITTS.p=1}aiTtsUI()};
-const aiStop=()=>{AITTS=null;window.speechSynthesis&&speechSynthesis.cancel();aiTtsUI()};
+const aiJeda=()=>{if(AITTS&&AITTS.android)return aiStop();const sp=window.speechSynthesis;if(!AITTS||!sp)return;if(AITTS.p){sp.resume();AITTS.p=0}else{sp.pause();AITTS.p=1}aiTtsUI()};
+const aiStop=()=>{if(window.ANDROID)andPanggil('berhentiBicara');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel();aiTtsUI()};
 /* Mode layar penuh: menu bawah dan tasbih melayang disembunyikan selama di halaman Fadz AI */
 const aiPenuh=on=>{document.body.classList.toggle('aipenuh',!!on&&location.hash.startsWith('#/ai'));const b=$('[data-aifull]');if(b){b.classList.toggle('on',!!on);b.setAttribute('aria-label',on?'Keluar layar penuh':'Layar penuh')}};
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel()});
