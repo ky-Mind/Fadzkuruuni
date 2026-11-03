@@ -35,20 +35,23 @@ button.s{background:var(--fill);color:var(--ink);margin-top:10px}
 const FBCFG={apiKey:'AIzaSyDBSyWkPR0ZBDDaHuHAfSzPJfdmx_H0hmE',authDomain:'fadzkuruuni-88a8b.firebaseapp.com',projectId:'fadzkuruuni-88a8b',storageBucket:'fadzkuruuni-88a8b.firebasestorage.app',messagingSenderId:'530459763811',appId:'1:530459763811:web:db2a65d6d2e72201544456'};
 const q=new URLSearchParams(location.search),state=q.get('state')||sessionStorage.getItem('fzstate')||'';
 if(q.get('state'))sessionStorage.setItem('fzstate',q.get('state'));
+/* p=fb: masuk dengan Facebook (Facebook juga tidak mengizinkan masuk dari WebView aplikasi) */
+if(q.get('p'))sessionStorage.setItem('fzp',q.get('p'));const FB=(q.get('p')||sessionStorage.getItem('fzp'))=='fb',NM=FB?'Facebook':'Google';
 const $=s=>document.querySelector(s);
 /* Kembali ke aplikasi: tautan intent:// (Chrome membuka aplikasi Fadzkuruuni dengan data ini) */
-const keApp=p=>'intent://masuk?'+new URLSearchParams({state,...p}).toString()+'#Intent;scheme=fadzkuruuni;package=com.fadzkuruuni.app;end';
+const keApp=p=>'intent://masuk?'+new URLSearchParams({state,p:FB?'fb':'g',...p}).toString()+'#Intent;scheme=fadzkuruuni;package=com.fadzkuruuni.app;end';
 function kembali(p,judul,teks){const u=keApp(p);$('#k').innerHTML=`<img src="img/icon-192.png" alt=""><h1>${judul}</h1><p>${teks}</p><a class="b" href="${u}">Kembali ke aplikasi</a>`;setTimeout(()=>{location.href=u},300)}
 firebase.initializeApp(FBCFG);
-const pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({prompt:'select_account'});
-const selesai=r=>{const c=firebase.auth.GoogleAuthProvider.credentialFromResult(r);if(!c||!c.idToken)return kembali({galat:'token tidak diterima'},'Gagal masuk','Coba lagi dari aplikasi.');
- kembali({id:c.idToken,at:c.accessToken||''},'Berhasil masuk','Ketuk tombol di bawah bila aplikasi belum terbuka otomatis.')};
+const pr=FB?new firebase.auth.FacebookAuthProvider():new firebase.auth.GoogleAuthProvider();if(!FB)pr.setCustomParameters({prompt:'select_account'});
+document.title='Masuk ke Fadzkuruuni dengan '+NM;$('#g').textContent='Lanjutkan dengan '+NM;$('#ket').textContent='Masuk dengan akun '+NM+' untuk menyinkronkan penanda, riwayat baca, dan pengaturan.';
+const selesai=r=>{const c=(FB?firebase.auth.FacebookAuthProvider:firebase.auth.GoogleAuthProvider).credentialFromResult(r);if(!c||!(c.idToken||c.accessToken))return kembali({galat:'token tidak diterima'},'Gagal masuk','Coba lagi dari aplikasi.');
+ kembali({id:c.idToken||'',at:c.accessToken||''},'Berhasil masuk','Ketuk tombol di bawah bila aplikasi belum terbuka otomatis.')};
 const gagal=e=>{const c=e&&e.code||'';if(c=='auth/popup-closed-by-user'||c=='auth/cancelled-popup-request')return;$('#ket').textContent='Gagal masuk ('+(c||e.message)+'). Coba lagi.'};
 /* Hasil masuk cara alihkan (bila jendela sembul diblokir) */
 firebase.auth().getRedirectResult().then(r=>{if(r&&r.user)selesai(r)}).catch(gagal);
 $('#g').onclick=()=>firebase.auth().signInWithPopup(pr).then(selesai).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return firebase.auth().signInWithRedirect(pr);gagal(e)});
 $('#x').onclick=()=>kembali({galat:'dibatalkan'},'Dibatalkan','Kembali ke aplikasi.');
-if(!state)$('#ket').textContent='Halaman ini dibuka dari aplikasi Android Fadzkuruuni. Buka aplikasinya lalu ketuk Masuk dengan Google.';
+if(!state)$('#ket').textContent='Halaman ini dibuka dari aplikasi Android Fadzkuruuni. Buka aplikasinya lalu ketuk Masuk dengan '+NM+'.';
 </script>
 </body>
 </html>

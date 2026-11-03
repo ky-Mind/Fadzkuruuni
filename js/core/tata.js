@@ -33,7 +33,7 @@ const tataNavR=()=>TATA.nav;
 function tataNav(){const n=$('#nav');if(!n)return;$$('a[data-r]',n).forEach(a=>a.remove());n.insertAdjacentHTML('beforeend',TATA.nav.map(r=>`<a href="#/${r}" data-r="${r}" data-tip="${esc(tNama(r))}">${ic(tIkon(r))}<span>${esc(tNama(r))}</span></a>`).join(''))}
 
 /* Tampilan bawaan dari admin: hanya untuk pengguna baru (pengaturan yang belum pernah disimpan di perangkat) */
-const TSU=(()=>{try{return Object.keys(JSON.parse(localStorage.fz||'{}'))}catch(e){return []}})();
+const TSU=(()=>{if(TPRATINJAU)return [];try{return Object.keys(JSON.parse(localStorage.fz||'{}'))}catch(e){return []}})();
 function tataBawaan(){const b=TATA.bawaan||{};let ub=0;['theme','ac','af','lf','fs','fl','fi','lt','tr'].forEach(k=>{if(b[k]!==undefined&&b[k]!==''&&!TSU.includes(k)&&S[k]!==b[k]){S[k]=b[k];ub=1}});if(ub){theme();setSz()}}
 
 function tataTerap(c,v,simpan){TATA=tataGabung(c);if(v)TATAV=v;if(simpan)try{localStorage.fztata=JSON.stringify({v,c})}catch(e){}tataBawaan();tataNav();

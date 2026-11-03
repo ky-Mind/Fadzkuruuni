@@ -1,10 +1,12 @@
 /* js/core/state.js - Keadaan aplikasi, penyimpanan, tema, registri halaman (P) */
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
+/* Pratinjau dashboard admin (?pratinjau=1): memakai pengaturan bawaan pengguna baru, tidak membaca atau menyimpan pengaturan perangkat admin */
+const PRAT=new URLSearchParams(location.search).has('pratinjau');
 /* Bawaan: tema terang, aksen hitam, huruf Latin Times New Roman, huruf Arab Amiri, ukuran teks bacaan terkecil (bisa diubah di Tampilan & Bacaan) */
-const S=Object.assign({theme:'light',ac:'hitam',lf:'times',af:'amiri',fs:22,fl:12,fi:12,tr:true,gold:'',loc:{lat:-6.9175,lng:107.6191,n:'Bandung',tz:7},hist:[],tas:0},JSON.parse(localStorage.fz||'{}'));
+const S=Object.assign({theme:'light',ac:'hitam',lf:'times',af:'amiri',fs:22,fl:12,fi:12,tr:true,gold:'',loc:{lat:-6.9175,lng:107.6191,n:'Bandung',tz:7},hist:[],tas:0},PRAT?{}:JSON.parse(localStorage.fz||'{}'));
 /* Sekali saja (S.dv<2): pengaturan yang masih bernilai bawaan lama ikut pindah ke bawaan baru; pilihan pengguna sendiri tidak diubah */
-if((S.dv||0)<2){if(S.theme=='auto')S.theme='light';if(!S.ac||S.ac=='emerald')S.ac='hitam';if(!S.af||S.af=='times')S.af='amiri';if(S.fs==32)S.fs=22;if(!S.fl||S.fl==15)S.fl=12;if(!S.fi||S.fi==14)S.fi=12;S.dv=2;try{localStorage.fz=JSON.stringify(S)}catch(e){}}
-const save=()=>{localStorage.fz=JSON.stringify(S);window.cloudPush&&window.cloudPush()};
+if((S.dv||0)<2){if(S.theme=='auto')S.theme='light';if(!S.ac||S.ac=='emerald')S.ac='hitam';if(!S.af||S.af=='times')S.af='amiri';if(S.fs==32)S.fs=22;if(!S.fl||S.fl==15)S.fl=12;if(!S.fi||S.fi==14)S.fi=12;S.dv=2;if(!PRAT)try{localStorage.fz=JSON.stringify(S)}catch(e){}}
+const save=()=>{if(PRAT)return;localStorage.fz=JSON.stringify(S);window.cloudPush&&window.cloudPush()};
 const rp=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200)};
 /* Tema: auto (ikut perangkat), light, dark, blue */
@@ -31,7 +33,7 @@ const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
-const VER='1.9.1';
+const VER='1.9.2';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';

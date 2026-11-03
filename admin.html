@@ -104,6 +104,20 @@ header small{color:var(--mut);font-size:12px}
 .hpf iframe{width:100%;height:100%;border:0;display:block}
 .hpk{display:flex;gap:6px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}.hpk button{height:30px;padding:0 12px;border:0;border-radius:99px;background:var(--fill);color:var(--ink);font-weight:600;cursor:pointer}.hpk button.on{background:var(--g);color:var(--on)}
 .draf{display:inline-flex;align-items:center;gap:6px;color:var(--amb);font-weight:700;font-size:13px}.draf::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--amb)}
+/* Pratinjau muncul halus setelah siap (tanpa kedip/lompatan) */
+.hp{opacity:0;transition:opacity .3s}.hp.siap{opacity:1}
+/* Baris yang bisa diurutkan: pegangan ⠿, tahan lama untuk menggeser */
+.ls>.it[data-i]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:pan-y;transition:box-shadow .15s,background-color .15s}
+.ls>.it[data-i]::before{content:'⠿';flex:none;color:var(--mut);font-size:15px;line-height:1;cursor:grab}
+.ls>.it.seret{position:relative;z-index:5;background:var(--card);box-shadow:0 10px 26px rgba(0,0,0,.18);transition:none;cursor:grabbing}
+.ls.menyeret>.it:not(.seret){transition:transform .15s}
+/* Peta aplikasi: letak ditulis per baris (bukan gelembung); di HP setiap fitur jadi kartu ringkas */
+.lk{display:block;position:relative;padding-left:12px;font-size:13px;line-height:1.5;color:var(--ink)}.lk::before{content:'';position:absolute;left:0;top:.6em;width:5px;height:5px;border-radius:50%;background:var(--g)}
+.lk.no{color:var(--red)}.lk.no::before{background:var(--red)}
+@media(max-width:700px){.tbl.peta thead{display:none}.tbl.peta tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+ .tbl.peta td{display:block;padding:0;border:0}.tbl.peta td:nth-child(1){grid-column:1;grid-row:1}.tbl.peta td:nth-child(4){grid-column:2;grid-row:1;align-self:center}
+ .tbl.peta td:nth-child(2){grid-column:1/-1;grid-row:2;font-size:12px;color:var(--mut)}.tbl.peta td:nth-child(3){grid-column:1/-1;grid-row:3;margin-top:6px}
+ .tbl.peta td:nth-child(4) a{display:inline-block;padding:5px 12px;border-radius:99px;background:var(--fill);font-size:13px;font-weight:600;text-decoration:none}}
 /* Peta & statistik */
 .tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tbl th{color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .tg{display:inline-block;margin:0 4px 4px 0;padding:2px 8px;border-radius:99px;background:var(--gs);color:var(--g);font-size:12px;font-weight:600}.tg.no{background:var(--reds);color:var(--red)}
@@ -189,7 +203,7 @@ const tombolUrut=(i,n,ex='')=>`<button class="ib" data-u="-1" data-i="${i}" ${i=
 const pilihRute=(id,kecuali,atas)=>`<select id="${id}"><option value="">+ Tambah…</option>${Object.entries(TI.TPOOL).filter(([r])=>!kecuali.includes(r)&&(!atas||!r.includes('/'))).map(([r,v])=>`<option value="${esc(r)}">${esc(DRAF.label[r]||v[1])}${r?` (#/${esc(r)})`:''}</option>`).join('')}</select>`;
 function tabTampilan(){
  $('#isi').innerHTML=`<div class="ted"><div id="ed"><div class="empty">Memuat aplikasi untuk pratinjau…</div></div><div class="hp"><div class="hpk" id="hpk">${[['#/','Beranda'],['#/menu','Semua Menu'],['#/pengaturan','Pengaturan']].map(([h,t])=>`<button data-ke="${h}" class="${h==KE?'on':''}">${t}</button>`).join('')}</div><div class="hpf"><iframe id="fr" title="Pratinjau aplikasi" src="index.html?pratinjau=1${KE}"></iframe></div></div></div>`;
- $('#fr').onload=async()=>{const w=$('#fr').contentWindow;for(let k=0;k<40&&!w.TATAINFO;k++)await new Promise(r=>setTimeout(r,100));TI=w.TATAINFO;if(!TI)return $('#ed').innerHTML='<div class="empty">Pratinjau gagal dimuat.</div>';
+ $('#fr').onload=async()=>{const w=$('#fr').contentWindow;for(let k=0;k<40&&!w.TATAINFO;k++)await new Promise(r=>setTimeout(r,100));TI=w.TATAINFO;setTimeout(()=>$('.hp')?.classList.add('siap'),350);if(!TI)return $('#ed').innerHTML='<div class="empty">Pratinjau gagal dimuat.</div>';
   if(!DRAF){try{const d=await db.collection('config').doc('tampilan').get();TERBITV=d.exists?d.data().v||0:0;TERBIT=d.exists?JSON.parse(d.data().json||'{}'):{}}catch(e){TERBIT={};toast('Belum bisa membaca tampilan terbit: '+(e.code||e.message))}
    DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[];UBAH=false}
   gambarEd();kirimPratinjau()};
@@ -198,7 +212,7 @@ const $$=(s,e=document)=>[...e.querySelectorAll(s)];
 function kirimPratinjau(){const f=$('#fr');if(f&&TI&&DRAF)f.contentWindow.postMessage({tata:DRAF,ke:KE},location.origin)}
 function tUbah(){UBAH=true;gambarEd();kirimPratinjau()}
 function gambarEd(){const D=DRAF,G=TI.setelan(),Gm=new Map(G.map(x=>[x[0],x]));
- const blokUrut=(id,judul,ket,isi)=>`<div class="blok" data-blok="${id}"><h3>${judul}</h3><p>${ket}</p>${isi}</div>`;
+ const blokUrut=(id,judul,ket,isi)=>`<div class="blok" data-blok="${id}"><h3>${judul}</h3><p>${ket}${['beranda','pintasan','nav','menu','setelan'].includes(id)?' Urutkan dengan ▲▼, atau tahan baris lalu geser ke atas/bawah.':''}</p>${isi}</div>`;
  $('#ed').innerHTML=`<div class="aksi">${UBAH?'<span class="draf">Belum diterbitkan</span>':'<span class="mut" style="color:var(--mut);font-size:13px">Sesuai tampilan yang sedang terbit</span>'}<input id="ket" placeholder="Keterangan perubahan (opsional)"><button class="btn" id="terbit" ${UBAH?'':'disabled'}>Terbitkan</button><button class="btn s" id="buang" ${UBAH?'':'disabled'}>Buang perubahan</button><button class="btn s" id="asli">Kembalikan ke bawaan</button><button class="btn s" id="riw">Riwayat</button></div><div id="riwl"></div>
  ${blokUrut('beranda','Beranda','Urutan bagian dari atas ke bawah. Matikan sakelar untuk menyembunyikan.',`<div class="ls">${D.beranda.map((x,i)=>`<div class="it ${x.on?'':'mati'}" data-i="${i}"><span>${esc(TI.TBAG[x.id])}</span>${sakelar(x.on,`data-on="${i}"`)}${tombolUrut(i,D.beranda.length)}</div>`).join('')}</div>`)}
  ${blokUrut('pintasan','Pintasan Beranda','Kotak pintasan di Beranda (disarankan kelipatan 4).',`<div class="ls">${D.pintasan.map((r,i)=>`<div class="it" data-i="${i}"><span>${esc(nm(r))} <small>#/${esc(r)}</small></span>${tombolUrut(i,D.pintasan.length,`<button class="ib" data-x="${i}" aria-label="Hapus">✕</button>`)}</div>`).join('')}</div><div class="tam">${pilihRute('tpin',D.pintasan)}</div>`)}
@@ -218,7 +232,23 @@ function gambarEd(){const D=DRAF,G=TI.setelan(),Gm=new Map(G.map(x=>[x[0],x]));
    ['lt','Teks Latin',[[true,'Tampil'],[false,'Sembunyi']]],
    ['tr','Terjemah',[[true,'Tampil'],[false,'Sembunyi']]]].map(([k,t,o])=>`<label>${t}</label><select data-bw="${k}"><option value="">Ikuti aplikasi</option>${o.map(([v,n])=>`<option value="${esc(JSON.stringify(v))}" ${D.bawaan[k]!==undefined&&JSON.stringify(D.bawaan[k])==JSON.stringify(v)?'selected':''}>${esc(n)}</option>`).join('')}</select>`).join('')}</div>`)}`;
  ikatEd()}
-function ikatEd(){const D=DRAF,ed=$('#ed');
+/* Urutkan dengan tahan lama lalu geser (selain tombol ▲▼): tahan ±0,35 detik pada baris, geser ke atas/bawah, lepas */
+const arrDari=it=>{const D=DRAF,bl=it.closest('[data-blok]')?.dataset.blok,g=it.closest('[data-g]');return bl=='beranda'?D.beranda:bl=='pintasan'?D.pintasan:bl=='nav'?D.nav:bl=='setelan'?D.setelan:bl=='menu'&&g?D.menu[+g.dataset.g].isi:null};
+function seretPasang(ed){let sr=null;
+ ed.addEventListener('pointerdown',e=>{const it=e.target.closest('.ls>.it[data-i]');if(!it||e.button>0||e.target.closest('button,input,select,textarea,label')||!arrDari(it))return;
+  const x0=e.clientX,y0=e.clientY;let tm=setTimeout(()=>{tm=0;const ls=it.parentElement;sr={it,ls,y0,top0:it.offsetTop};it.classList.add('seret');ls.classList.add('menyeret');navigator.vibrate&&navigator.vibrate(20);try{it.setPointerCapture(e.pointerId)}catch(x){}},350);
+  const gerak=ev=>{if(tm){if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>8){clearTimeout(tm);tm=0}return}if(!sr)return;
+   const {it:i2,ls}=sr;const pos=ev.clientY;for(const c of ls.children){if(c==i2)continue;const r=c.getBoundingClientRect(),mid=r.top+r.height/2;
+    if(pos<mid&&c.compareDocumentPosition(i2)&Node.DOCUMENT_POSITION_FOLLOWING){ls.insertBefore(i2,c);break}if(pos>mid&&c.compareDocumentPosition(i2)&Node.DOCUMENT_POSITION_PRECEDING&&c.nextSibling!==i2){ls.insertBefore(i2,c.nextSibling);break}}
+   i2.style.transform=`translateY(${(pos-sr.y0)-(i2.offsetTop-sr.top0)}px)`};
+  const akhir=()=>{clearTimeout(tm);removeEventListener('pointermove',gerak);removeEventListener('pointerup',akhir);removeEventListener('pointercancel',akhir);if(!sr)return;
+   const {it:i2,ls}=sr;sr=null;i2.style.transform='';i2.classList.remove('seret');ls.classList.remove('menyeret');const A=arrDari(i2),urut=[...ls.children].filter(c=>c.dataset.i!=null).map(c=>+c.dataset.i);
+   if(A&&urut.some((v,k)=>v!==k)){const B=urut.map(k=>A[k]);A.splice(0,A.length,...B);tUbah()}};
+  addEventListener('pointermove',gerak);addEventListener('pointerup',akhir);addEventListener('pointercancel',akhir)});
+ /* Selama menyeret, halaman tidak ikut bergulir */
+ ed.addEventListener('touchmove',e=>{if(ed.querySelector('.menyeret'))e.preventDefault()},{passive:false});
+ ed.addEventListener('contextmenu',e=>{if(e.target.closest('.ls>.it'))e.preventDefault()})}
+function ikatEd(){const D=DRAF,ed=$('#ed');if(!ed.dataset.seret){ed.dataset.seret=1;seretPasang(ed)}
  ed.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const bl=b.closest('[data-blok]')?.dataset.blok,it=b.closest('[data-i]'),i=it?+it.dataset.i:-1;
   if(b.id=='terbit')return terbitkan();if(b.id=='buang'){DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[];UBAH=false;gambarEd();return kirimPratinjau()}
   if(b.id=='asli'){if(!confirm('Kembalikan semua susunan ke bawaan aplikasi? (Belum terbit sampai Anda menekan Terbitkan.)'))return;DRAF=TI.gabung({});DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=[];return tUbah()}
@@ -257,8 +287,8 @@ async function siapTI(){if(TI)return true;$('#isi').innerHTML='<div class="empty
  if(!DRAF){try{const d=await db.collection('config').doc('tampilan').get();TERBIT=d.exists?JSON.parse(d.data().json||'{}'):{}}catch(e){TERBIT={}}DRAF=TI.gabung(TERBIT);if(!DRAF.setelan)DRAF.setelan=TI.setelan().map(x=>x[0]);DRAF.sembunyiSet=DRAF.sembunyiSet||[]}return true}
 async function tabPeta(){if(!await siapTI())return $('#isi').innerHTML='<div class="empty">Gagal memuat data aplikasi.</div>';const T=TI.gabung(TERBIT||{});
  const letak=r=>{const L=[];const p=T.pintasan.indexOf(r);if(p>=0)L.push(`Pintasan Beranda (ke-${p+1})`);const n=T.nav.indexOf(r);if(n>=0)L.push(`Menu bawah (ke-${n+1})`);T.menu.forEach(g=>{const i=g.isi.indexOf(r);if(i>=0)L.push(`Semua Menu › ${g.nama} (ke-${i+1})`)});return L};
- const baris=Object.entries(TI.TPOOL).map(([r,v])=>{const L=letak(r);return `<tr><td><b>${esc(T.label[r]||v[1])}</b>${T.label[r]?`<br><small style="color:var(--mut)">asli: ${esc(v[1])}</small>`:''}</td><td><code>#/${esc(r)}</code></td><td>${L.length?L.map(x=>`<span class="tg">${esc(x)}</span>`).join(''):'<span class="tg no">Tidak ada di menu mana pun</span>'}</td><td><a href="${esc(APP+'#/'+r)}" target="_blank" rel="noopener">Buka</a></td></tr>`}).join('');
- $('#isi').innerHTML=`<div class="blok"><h3>Peta aplikasi</h3><p>Setiap fitur dan di mana ia muncul di aplikasi (sesuai tampilan yang sedang terbit). Klik "Buka" untuk melihat halamannya.</p><table class="tbl"><thead><tr><th>Fitur</th><th>Alamat</th><th>Letak</th><th></th></tr></thead><tbody>${baris}</tbody></table></div>
+ const baris=Object.entries(TI.TPOOL).map(([r,v])=>{const L=letak(r);return `<tr><td><b>${esc(T.label[r]||v[1])}</b>${T.label[r]?`<br><small style="color:var(--mut)">asli: ${esc(v[1])}</small>`:''}</td><td><code>#/${esc(r)}</code></td><td>${L.length?L.map(x=>`<span class="lk">${esc(x)}</span>`).join(''):'<span class="lk no">Tidak ada di menu mana pun</span>'}</td><td><a href="${esc(APP+'#/'+r)}" target="_blank" rel="noopener">Buka</a></td></tr>`}).join('');
+ $('#isi').innerHTML=`<div class="blok"><h3>Peta aplikasi</h3><p>Setiap fitur dan di mana ia muncul di aplikasi (sesuai tampilan yang sedang terbit). Klik "Buka" untuk melihat halamannya.</p><table class="tbl peta"><thead><tr><th>Fitur</th><th>Alamat</th><th>Letak</th><th></th></tr></thead><tbody>${baris}</tbody></table></div>
  <div class="blok"><h3>Bagian Beranda (urutan dari atas)</h3><div class="ls">${T.beranda.map((x,i)=>`<div class="it ${x.on?'':'mati'}"><span>${i+1}. ${esc(TI.TBAG[x.id])}</span><small>${x.on?'tampil':'disembunyikan'}</small></div>`).join('')}</div></div>
  <div class="blok"><h3>Halaman Pengaturan</h3><div class="ls">${(T.setelan||TI.setelan().map(x=>x[0])).map((k,i)=>{const g=TI.setelan().find(x=>x[0]==k);return g?`<div class="it ${(T.sembunyiSet||[]).includes(k)?'mati':''}"><span>${i+1}. ${esc(g[2])}<br><small>${esc(g[3])}</small></span><a href="${esc(APP+(k[0]=='#'?k:'#/pengaturan/'+k))}" target="_blank" rel="noopener">Buka</a></div>`:''}).join('')}</div></div>`}
 
