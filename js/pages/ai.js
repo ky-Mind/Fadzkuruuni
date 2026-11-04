@@ -49,7 +49,7 @@ function aiCari(q,n=4){const T=aiNorm(q).split(/\s+/).filter(w=>w.length>2&&!AI_
 const aiMd=s=>esc(s).replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<i>$2</i>').replace(/^\s*&gt;\s?/gm,'').replace(/^\s*-{3,}\s*$/gm,'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*•]\s+(.+)$/gm,'<span class="aili">$1</span>').replace(/\n/g,'<br>');
 const AI_MODE={online:'Dijawab AI online',lokal:'Dijawab AI offline di perangkat',cari:'Mode offline: hasil dari isi aplikasi'};
 /* Gelembung chat; di bawahnya tombol Salin (dan Edit untuk pesan pengguna) */
-const aiGelembung=(m,i)=>m.role=='user'?`<div class="aim u" data-i="${i}"><div>${esc(m.content).replace(/\n/g,'<br>')}</div><span class="aiak"><button type="button" data-aied="${i}">${ic('edit',14)} Edit</button><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button></span></div>`:`<div class="aim a" data-i="${i}"><div>${aiMd(m.content)}${m.hits&&m.hits.length?`<div class="aih">${m.hits.map(h=>`<a class="chip2" href="${h[1]}">${esc(h[0])}</a>`).join('')}</div>`:''}${m.mode?`<small class="aimd">${AI_MODE[m.mode]||''}</small>`:''}</div>${i!=null?`<span class="aiak"><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button>${window.speechSynthesis||window.ANDROID?`<span data-aittsw="${i}">${aiTtsBtn(i)}</span>`:''}</span>`:''}</div>`;
+const aiGelembung=(m,i)=>m.role=='user'?`<div class="aim u" data-i="${i}"><div>${esc(m.content).replace(/\n/g,'<br>')}</div><span class="aiak"><button type="button" data-aied="${i}">${ic('edit',14)} Edit</button><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button></span></div>`:`<div class="aim a" data-i="${i}"><div>${aiMd(m.content)}${m.hits&&m.hits.length?`<div class="aih">${m.hits.map(h=>`<a class="chip2" href="${h[1]}">${esc(h[0])}</a>`).join('')}</div>`:''}${m.mode?`<small class="aimd">${AI_MODE[m.mode]||''}</small>`:''}</div>${i!=null?`<span class="aiak"><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button><span data-aittsw="${i}">${aiTtsBtn(i)}</span></span>`:''}</div>`;
 
 /* Profil singkat untuk AI online: nama, lokasi, tanggal, jadwal salat hari ini, dan isi yang tersedia */
 function aiProfil(){const d=new Date(),T=waktu(d,S.loc),L=[];
@@ -94,21 +94,32 @@ const aiBacaTeks=t=>String(t).replace(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+/g,' ').replac
 let AITTS=null;
 const aiTtsBtn=i=>AITTS&&AITTS.i==i?`<button type="button" data-aijeda>${ic(AITTS.p?'play':'pause',13)} ${AITTS.p?'Lanjutkan':'Jeda'}</button><button type="button" data-aistop>${ic('stop',13)} Berhenti</button>`:`<button type="button" data-aitts="${i}">${ic('play',13)} Dengarkan</button>`;
 const aiTtsUI=()=>$$('[data-aittsw]').forEach(w=>w.innerHTML=aiTtsBtn(+w.dataset.aittsw));
-function aiBicara(t,i){if(window.ANDROID){aiStop();AITTS={i,p:0,android:1};andPanggil('bicara',aiBacaTeks(t));aiTtsUI();return}const sp=window.speechSynthesis;if(!sp)return toast('Perangkat tidak mendukung suara');sp.cancel();
+/* Suara cadangan dari server (api/tts): dipakai bila mesin suara HP tidak ada, tidak punya suara Indonesia, atau tidak
+   mulai berbicara dalam 3,5 detik. Teks dibagi per ±900 huruf dan diputar berurutan. */
+function aiAwan(t,i){aiStop();const L=[];let s=aiBacaTeks(t);while(s.length>900){let k=s.lastIndexOf('. ',900);if(k<300)k=s.lastIndexOf(' ',900);L.push(s.slice(0,k+1));s=s.slice(k+1).trim()}if(s)L.push(s);
+ const a=new Audio();a.preload='auto';AITTS={i,p:0,awan:a};let n=0;
+ const putar=()=>{if(!AITTS||AITTS.awan!==a)return;if(n>=L.length){AITTS=null;return aiTtsUI()}a.src='api/tts?t='+encodeURIComponent(L[n++]);a.play().catch(()=>{})};
+ a.onended=putar;a.onerror=()=>{if(AITTS&&AITTS.awan===a){AITTS=null;aiTtsUI();toast(navigator.onLine?'Suara sedang tidak tersedia, coba lagi nanti':'Suara butuh internet')}};putar();aiTtsUI()}
+function aiBicara(t,i){if(window.ANDROID){aiStop();const tk=aiBacaTeks(t);AITTS={i,p:0,android:1,t};andPanggil('bicara',tk);aiTtsUI();
+  /* Mesin suara HP diam (tidak ada, gagal, atau tanpa suara Indonesia): pindah ke suara server */
+  AITTS.tunggu=setTimeout(()=>{if(AITTS&&AITTS.android&&AITTS.i==i&&!AITTS.mulai){andPanggil('berhentiBicara');aiAwan(t,i)}},3500);return}
+ const sp=window.speechSynthesis;if(!sp||!sp.getVoices().length)return aiAwan(t,i);sp.cancel();
  const u=new SpeechSynthesisUtterance(aiBacaTeks(t));u.lang='id-ID';if(!AIVOX)aiPilihSuara();if(AIVOX)u.voice=AIVOX;u.rate=1;
  u.onend=u.onerror=()=>{if(AITTS&&AITTS.u==u){AITTS=null;aiTtsUI()}};AITTS={i,p:0,u};sp.speak(u);aiTtsUI()}
-const aiJeda=()=>{if(AITTS&&AITTS.android)return aiStop();const sp=window.speechSynthesis;if(!AITTS||!sp)return;if(AITTS.p){sp.resume();AITTS.p=0}else{sp.pause();AITTS.p=1}aiTtsUI()};
-const aiStop=()=>{if(window.ANDROID)andPanggil('berhentiBicara');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel();aiTtsUI()};
+const aiJeda=()=>{if(AITTS&&AITTS.awan){const a=AITTS.awan;if(AITTS.p){a.play().catch(()=>{});AITTS.p=0}else{a.pause();AITTS.p=1}return aiTtsUI()}if(AITTS&&AITTS.android)return aiStop();const sp=window.speechSynthesis;if(!AITTS||!sp)return;if(AITTS.p){sp.resume();AITTS.p=0}else{sp.pause();AITTS.p=1}aiTtsUI()};
+const aiStop=()=>{if(window.ANDROID)andPanggil('berhentiBicara');if(AITTS){clearTimeout(AITTS.tunggu);if(AITTS.awan){AITTS.awan.onended=AITTS.awan.onerror=null;AITTS.awan.pause()}}AITTS=null;window.speechSynthesis&&speechSynthesis.cancel();aiTtsUI()};
 /* Mode layar penuh: menu bawah dan tasbih melayang disembunyikan selama di halaman Fadz AI */
 const aiPenuh=on=>{document.body.classList.toggle('aipenuh',!!on&&location.hash.startsWith('#/ai'));const b=$('[data-aifull]');if(b){b.classList.toggle('on',!!on);b.setAttribute('aria-label',on?'Keluar layar penuh':'Layar penuh')}};
-addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel()});
+addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');aiStop()});
 /* Keluar dari Fadz AI saat masih ada obrolan: tanya simpan di perangkat atau hapus (tidak ditanya lagi bila obrolan tidak berubah) */
 addEventListener('hashchange',e=>{let lama='';try{lama=new URL(e.oldURL).hash}catch(x){}if(!/^#\/ai(\/|$)/.test(lama)||location.hash.startsWith('#/ai'))return;
  aiBersihDev();const n=aiRiw().length;if(!n||+localStorage.fzaiok===n)return;setTimeout(()=>aiTanyaSimpan(n),450)});
-function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d tgh';
+/* Dialog wajib dijawab: tidak tertutup oleh ketukan di luar, tombol kembali, atau tombol lain; hanya Hapus atau Simpan */
+function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d tgh';e.dataset.wajib='1';
  e.innerHTML=`<div class="sheet" role="alertdialog" aria-label="Simpan obrolan Fadz AI"><b>Simpan obrolan Fadz AI?</b><p class="mut" style="margin:6px 0 14px">Obrolan bisa disimpan di perangkat ini untuk dilanjutkan nanti, atau dihapus sekarang.</p><div class="act"><button class="btn s" data-aih style="flex:1">Hapus</button><button class="btn" data-ais2 style="flex:1">Simpan</button></div></div>`;
  document.body.append(e);e.onclick=x=>{if(x.target.closest('[data-aih]')){aiSimpan([]);try{localStorage.removeItem('fzaiok')}catch(y){}e.remove();toast('Obrolan dihapus')}
-  else if(x.target.closest('[data-ais2]')||x.target==e){try{localStorage.fzaiok=n}catch(y){}e.remove();x.target!=e&&toast('Obrolan disimpan di perangkat')}}}
+  else if(x.target.closest('[data-ais2]')){try{localStorage.fzaiok=n}catch(y){}e.remove();toast('Obrolan disimpan di perangkat')}
+  else if(x.target==e)wajibGoyang(e)}}
 
 P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</span><h1>Fadz AI<small>Asisten tanya-jawab Fadzkuruuni</small></h1><button class="ib" data-aifull aria-label="Layar penuh">${ic('full',19)}</button><button class="ib" data-aihapus aria-label="Hapus riwayat chat">${ic('trash',19)}</button></div><div class="aist" id="aist"></div><div class="aic" id="aic"></div>
 <div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,

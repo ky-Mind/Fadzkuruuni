@@ -15,7 +15,10 @@ const andMintaIzin=n=>new Promise(ok=>{let sdh=0;const sel=st=>{if(sdh)return;sd
  const vis=()=>{if(!document.hidden)setTimeout(()=>sel(andIzinStatus()[n]),600)};andIzinTunggu[n]=sel;document.addEventListener('visibilitychange',vis);
  andPanggil('mintaIzin',n);setTimeout(()=>sel(andIzinStatus()[n]),n=='alarm'?400:20000)});
 /* Suara pembaca selesai */
-window.fadzTtsSelesai=()=>{try{if(AITTS){AITTS=null;aiTtsUI()}}catch(e){}};
+window.fadzTtsSelesai=()=>{try{if(AITTS&&AITTS.android){clearTimeout(AITTS.tunggu);AITTS=null;aiTtsUI()}}catch(e){}};
+/* Mesin suara HP mulai berbicara / gagal (tidak ada mesin, tanpa suara Indonesia, galat): gagal → suara server */
+window.fadzTtsMulai=()=>{try{if(AITTS&&AITTS.android)AITTS.mulai=1}catch(e){}};
+window.fadzTtsGagal=()=>{try{if(AITTS&&AITTS.android&&!AITTS.mulai){const {t,i}=AITTS;aiAwan(t,i)}}catch(e){}};
 /* Masuk Google: token dari tab Chrome diteruskan ke Firebase di aplikasi */
 /* Pesan bila masuk Facebook gagal (aplikasi Facebook masih menunggu verifikasi Meta) */
 const FBGAGAL='Masuk dengan Facebook belum tersedia untuk semua akun (sedang diverifikasi Meta). Pakai Google atau Email dulu.';
