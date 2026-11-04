@@ -24,7 +24,7 @@ const rhalHTML=(hal,judul,bagian)=>hal?`${ic('pin',16)}<span><b>${esc(judul||'Ha
 
 P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRAFT=RTANDA=null;
  let hal=T?T.hal:D.hal!==undefined?D.hal:asal,halJ=T?T.judul:D.halJ!==undefined?D.halJ:LASTT,bagian=T?T.bagian:D.bagian||'';
- return {html:head('Laporkan masalah',asal||'#/tentang')+`<p class="mut" style="margin:0 0 12px">Laporanmu langsung masuk ke tim Fadzkuruuni. Sertakan foto atau tangkapan layar bila ada, agar kami cepat menemukan bagian yang salah. <a href="#/tutorial" style="color:inherit;font-weight:600">Lihat video caranya</a></p>
+ return {html:head('Laporkan masalah',asal||'#/tentang')+`<p class="mut" style="margin:0 0 12px">Laporanmu langsung masuk ke tim Fadzkuruuni. Sertakan foto atau tangkapan layar bila ada, agar kami cepat menemukan bagian yang salah. <a href="#/tutorial/lapor" style="color:inherit;font-weight:600">Lihat video caranya</a></p>
 <label>Jenis laporan</label>${seg('rj',RJENIS,D.J||'Bug')}
 <label style="margin-top:12px">Halaman yang dilaporkan</label><div class="rhal">${rhalHTML(hal,halJ,bagian)}</div>
 <label>Bagian tepatnya (opsional)</label><input class="in" id="rl" maxlength="120" placeholder="Mis. Surah Al-Baqarah ayat 5, bait 12, halaman 34" value="${esc(D.lokasi||(T&&T.nomor)||'')}">
