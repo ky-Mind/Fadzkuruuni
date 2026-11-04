@@ -1,7 +1,10 @@
 /* js/pages/kitab.js - Kitab Kuning: daftar kitab (kitab/daftar.js) dan pembaca.
    Dua mode per juz: halaman gambar (juz.pola) untuk PDF seperti Al-Hawi, dan teks (juz.bab) untuk kitab yang ditempel sendiri.
    Kitab satu juz (tanpaJuz) langsung dibuka tanpa daftar juz; tombol unduhnya pindah ke bilah pembaca. */
-const padn=n=>String(n).padStart(2,'0'),pgUrl=(j,n)=>j.pola.replace('{n}',padn(n));
+/* Gambar halaman & PDF kitab (±180 MB) dilayani GitHub Pages dari repo yang sama, bukan Vercel, agar setiap deployment Vercel kecil.
+   Saat uji lokal tetap dari folder sendiri. */
+const KITAB_ASAL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'':'https://ky-mind.github.io/Fadzkuruuni/';
+const padn=n=>String(n).padStart(2,'0'),pgUrl=(j,n)=>KITAB_ASAL+j.pola.replace('{n}',padn(n));
 const kitabCss=h=>{if(!h||document.querySelector('link[data-kc="'+h+'"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=h;l.dataset.kc=h;document.head.append(l)};
 const kitabAmbil=async id=>{const d=KITAB_DAFTAR.find(x=>x.id==id);if(!d||!d.berkas)return null;if(!KITAB_ISI[id])await ldjs(d.berkas);const k=KITAB_ISI[id];if(k&&k.css)kitabCss(k.css);return k||null};
 const tanpaJuz=k=>(k.juzTotal||k.juz.length)==1;
@@ -12,7 +15,7 @@ function kitabDetail(el,k){const kh=S.kh||{};el.innerHTML=`<div class="card" sty
 /* Paket unduhan per kitab: semua halaman gambar (offline) dan PDF tiap juz (ke perangkat) */
 KITAB_DAFTAR.filter(d=>d.berkas).forEach(d=>paket('kitab:'+d.id,{judul:d.judul,kat:'kitab',
  urls:async()=>{const k=await kitabAmbil(d.id),U=[d.berkas];k.juz.forEach(j=>{if(j.pola)for(let i=1;i<=j.halaman;i++)U.push(pgUrl(j,i))});return U},
- berkas:async()=>{const k=await kitabAmbil(d.id);return k.juz.filter(j=>j.pdf).map(j=>({url:j.pdf,nama:k.judul+(k.juz.length>1?' - Juz '+j.no:'')+'.pdf'}))}}));
+ berkas:async()=>{const k=await kitabAmbil(d.id);return k.juz.filter(j=>j.pdf).map(j=>({url:KITAB_ASAL+j.pdf,nama:k.judul+(k.juz.length>1?' - Juz '+j.no:'')+'.pdf'}))}}));
 /* Warna halaman: tema (malam saat tema gelap), asli, sepia, malam. Nilai lama S.kinv===false dibaca sebagai "asli". */
 const kwarna=()=>S.kw||(S.kinv===false?'asli':'tema'),kwKls=()=>({tema:'inv',sepia:'sep',malam:'mlm'})[kwarna()]||'';
 /* Layar penuh pembaca kitab: menyembunyikan menu dan tasbih melayang, dan memakai layar penuh peramban bila didukung.

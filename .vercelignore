@@ -1,0 +1,4 @@
+# Gambar halaman & PDF kitab dilayani GitHub Pages (https://ky-mind.github.io/Fadzkuruuni/), tidak ikut deployment Vercel
+# agar tiap deployment kecil (kuota penyimpanan deployment Vercel 10 GB).
+kitab/*/hal/
+kitab/*/pdf/
