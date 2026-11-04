@@ -2,3 +2,5 @@
 # agar tiap deployment kecil (kuota penyimpanan deployment Vercel 10 GB).
 kitab/*/hal/
 kitab/*/pdf/
+# Video tutorial juga dilayani GitHub Pages (js/pages/tutorial.js, TUT_ASAL)
+video/

@@ -24,7 +24,7 @@ const rhalHTML=(hal,judul,bagian)=>hal?`${ic('pin',16)}<span><b>${esc(judul||'Ha
 
 P.lapor=()=>{const asal=LAST&&LAST!='#/lapor'?LAST:'',D=RDRAFT||{},T=RTANDA;RDRAFT=RTANDA=null;
  let hal=T?T.hal:D.hal!==undefined?D.hal:asal,halJ=T?T.judul:D.halJ!==undefined?D.halJ:LASTT,bagian=T?T.bagian:D.bagian||'';
- return {html:head('Laporkan masalah',asal||'#/tentang')+`<p class="mut" style="margin:0 0 12px">Laporanmu langsung masuk ke tim Fadzkuruuni. Sertakan foto atau tangkapan layar bila ada, agar kami cepat menemukan bagian yang salah.</p>
+ return {html:head('Laporkan masalah',asal||'#/tentang')+`<p class="mut" style="margin:0 0 12px">Laporanmu langsung masuk ke tim Fadzkuruuni. Sertakan foto atau tangkapan layar bila ada, agar kami cepat menemukan bagian yang salah. <a href="#/tutorial" style="color:inherit;font-weight:600">Lihat video caranya</a></p>
 <label>Jenis laporan</label>${seg('rj',RJENIS,D.J||'Bug')}
 <label style="margin-top:12px">Halaman yang dilaporkan</label><div class="rhal">${rhalHTML(hal,halJ,bagian)}</div>
 <label>Bagian tepatnya (opsional)</label><input class="in" id="rl" maxlength="120" placeholder="Mis. Surah Al-Baqarah ayat 5, bait 12, halaman 34" value="${esc(D.lokasi||(T&&T.nomor)||'')}">
@@ -78,12 +78,22 @@ function tdLangkah2(){const L=TDM.lap||(TDM.lap=mk('tdlap',''));L.hidden=false;T
 const TDSEL='.pt>div,.gr,.top,.note,.srch,.car>a,.grid>a,.hero,.ay,.ay2,.ayt,.mushaf,.card,.row,.srw,.pnav a,.tabs,.seg,.zb,.dlw,li,p,h1,h2,h3,img,.ar2,.bar';
 const tdBlok=(x,y)=>{const e=document.elementsFromPoint(x,y).find(n=>n.closest('#view'));if(!e)return null;const b=e.closest(TDSEL);return b&&b.closest('#view')&&b!=$('#view')?b:null};
 const tdNomor=e=>{const a=e.closest('[id^="a"]');if(a&&$('#ay')&&/^a\d+$/.test(a.id))return 'Ayat '+a.id.slice(1);const n=e.closest('.ay2')?.querySelector('.n');if(n)return 'No. '+n.textContent.trim();const p=e.closest('[data-p]');return p?'Halaman '+p.dataset.p:''};
-function tdPilih(e){const r=e.getBoundingClientRect(),b=TDM.box||(TDM.box=mk('tdbox',''));TDM.el=e;
- Object.assign(b.style,{left:r.left-4+'px',top:r.top-4+'px',width:r.width+8+'px',height:r.height+8+'px'});TDM.lap.hidden=true;
- TDM.hv&&(TDM.hv.hidden=true);tdBar(`${ic('check',18)} <span><b>Laporkan bagian ini?</b><br><small>Bagian yang disorot akan diambil gambarnya untuk laporan</small></span>`,'<button class="sb" data-td="2">Pilih ulang</button><button class="sb pri" data-td="ok">Ya, laporkan</button>')}
+/* Letakkan kotak sorotan tepat di atas elemen. Di HP seluruh halaman diperkecil (html zoom, --zm), sedangkan
+   getBoundingClientRect memberi piksel layar; maka dibagi zoom agar kotak tidak mengecil dan bergeser */
+const tdKotak=(b,e)=>{const r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+ Object.assign(b.style,{left:(r.left-4)/z+'px',top:(r.top-4)/z+'px',width:(r.width+8)/z+'px',height:(r.height+8)/z+'px'})};
+function tdPilih(e){const b=TDM.box||(TDM.box=mk('tdbox',''));TDM.el=e;
+ tdKotak(b,e);TDM.lap.hidden=true;
+ TDM.hv&&(TDM.hv.hidden=true);tdBar(`${ic('check',18)} <span><b>Laporkan bagian ini?</b><br><small>Bagian yang disorot akan diambil gambarnya untuk laporan</small></span>`,'<button class="sb" data-td="2">Pilih ulang</button><button class="sb pri" data-td="ok">Ya, laporkan</button>')
+ /* Pita petunjuk bisa berubah tinggi (isi halaman ikut bergeser): letakkan ulang sorotan setelah tata letak baru */
+ requestAnimationFrame(()=>{if(TDM&&TDM.el==e)tdKotak(b,e)})}
 async function tdSelesai(){const e=TDM.el;if(!e)return;tdBar('Mengambil tangkapan…','');let foto=null;
  try{if(!window.html2canvas)await ldjs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-  const c=await html2canvas(e,{backgroundColor:getComputedStyle(document.body).backgroundColor,scale:Math.min(2,devicePixelRatio||1),logging:false,useCORS:true}),k=document.createElement('canvas'),p=12;
+  /* html2canvas tidak memahami zoom halaman (di HP): matikan zoom sebentar selama gambar diambil */
+  const hz=document.documentElement.style;hz.zoom='1';
+  const c=await html2canvas(e,{backgroundColor:getComputedStyle(document.body).backgroundColor,scale:Math.min(2,devicePixelRatio||1),logging:false,useCORS:true,
+   /* Salinan halaman untuk gambar: animasi masuk dimatikan agar isi tidak tertangkap saat masih transparan */
+   onclone:d=>{const t=d.createElement('style');t.textContent='*,*::before,*::after{animation:none!important;transition:none!important}';d.head.append(t)}}).finally(()=>{hz.zoom=''}),k=document.createElement('canvas'),p=12;
   k.width=c.width+p*2;k.height=c.height+p*2;const x=k.getContext('2d');x.fillStyle=getComputedStyle(document.body).backgroundColor||'#fff';x.fillRect(0,0,k.width,k.height);x.drawImage(c,p,p);x.strokeStyle='#e0442f';x.lineWidth=4;x.strokeRect(4,4,k.width-8,k.height-8);
   foto=await new Promise(r=>k.toBlob(b=>r(b&&new File([b],'tanda.png',{type:'image/png'})),'image/png'))}catch(x){toast('Tangkapan layar tidak bisa diambil; bagian tetap ditandai')}
  RTANDA={hal:location.hash||'#/',judul:judulKini(),bagian:(e.innerText||e.alt||'').replace(/\s+/g,' ').trim().slice(0,160),nomor:tdNomor(e),foto};tandaiAkhir();location.hash='#/lapor'}
@@ -92,9 +102,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-td]');if(b
   if(v=='x'){tandaiAkhir();if(RDRAFT)location.hash='#/lapor';return}if(v=='1'||v=='2')return tdLangkah2();if(v=='0'){TDM.lap.hidden=true;TDM.hv&&(TDM.hv.hidden=true);return tdLangkah1()}if(v=='ok')return tdSelesai()}
  if(TDM&&e.target.closest('.tdlap')){const t=tdBlok(e.clientX,e.clientY);t?tdPilih(t):toast('Ketuk salah satu bagian isi halaman')}});
 /* Di laptop, bagian di bawah kursor sudah disorot terang sebelum diklik */
-document.addEventListener('pointermove',e=>{if(!TDM||!TDM.lap||TDM.lap.hidden||e.pointerType!='mouse')return;const t=tdBlok(e.clientX,e.clientY),h=TDM.hv||(TDM.hv=mk('tdhv',''));h.hidden=!t;if(!t)return;const r=t.getBoundingClientRect();Object.assign(h.style,{left:r.left-4+'px',top:r.top-4+'px',width:r.width+8+'px',height:r.height+8+'px'})});
+document.addEventListener('pointermove',e=>{if(!TDM||!TDM.lap||TDM.lap.hidden||e.pointerType!='mouse')return;const t=tdBlok(e.clientX,e.clientY),h=TDM.hv||(TDM.hv=mk('tdhv',''));h.hidden=!t;if(t)tdKotak(h,t)});
 /* Sorotan ikut bergeser saat halaman digulir; roda tetikus tetap bisa menggulir saat memilih */
-const tdLetak=()=>{if(!TDM||!TDM.box||!TDM.el)return;const r=TDM.el.getBoundingClientRect();Object.assign(TDM.box.style,{left:r.left-4+'px',top:r.top-4+'px'})};
+const tdLetak=()=>{if(TDM&&TDM.box&&TDM.el)tdKotak(TDM.box,TDM.el)};
 document.addEventListener('scroll',tdLetak,true);
 document.addEventListener('wheel',e=>{if(TDM&&e.target.closest('.tdlap'))$('#view').scrollBy(0,e.deltaY)},{passive:true});
 /* Pindah halaman saat menandai: sorotan lama dibuang; kembali ke langkah pertama */
