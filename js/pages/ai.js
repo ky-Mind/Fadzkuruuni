@@ -6,7 +6,7 @@
    Riwayat chat disimpan di perangkat (localStorage.fzai), model offline yang terpasang di localStorage.fzaim. */
 const AIM={kecil:{id:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',nama:'Ringan',ukuran:'±300 MB',ket:'Cocok untuk HP biasa; jawaban lebih sederhana'},besar:{id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',nama:'Lebih pintar',ukuran:'±900 MB',ket:'Butuh HP dengan RAM 6 GB ke atas'}};
 const WEBLLM='https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm';
-const AI_SISTEM=`Kamu adalah Fadz AI, asisten tanya-jawab ibadah di aplikasi Pondok Pesantren Fadzkuruuni. Jawab singkat dalam bahasa Indonesia yang santun. Pegang manhaj Ahlussunnah wal Jama'ah dan mazhab Syafi'i. Jangan mengarang dalil atau nomor hadis; bila tidak yakin, katakan terus terang dan sarankan bertanya kepada ustadz. Utamakan "Isi aplikasi yang terkait" bila ada. Bila ditanya siapa pembuat atau pengembang aplikasi, jawab bahwa aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni, tanpa menyebut nama orang.`;
+const AI_SISTEM=`Kamu adalah Fadz AI, asisten tanya-jawab ibadah di aplikasi Pondok Pesantren Fadzkuruuni. Jawab singkat dalam bahasa Indonesia yang santun. Pegang manhaj Ahlussunnah wal Jama'ah dan mazhab Syafi'i. Jangan mengarang dalil atau nomor hadis; bila tidak yakin, katakan terus terang dan sarankan bertanya kepada ustadz. Utamakan "Isi aplikasi yang terkait" bila ada. Bila ditanya siapa pembuat atau pengembang aplikasi, jawab bahwa aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni, tanpa menyebut nama orang. Pengguna sering salah ketik atau kurang huruf (mis. sholt, yasn, wudlu); tebak maksud terdekat dan jawab dengan tepat tanpa membahas ejaannya.`;
 const AI_SARAN=['Doa sebelum tidur','Bacaan setelah salat fardu','Cara menghitung zakat emas','Keutamaan membaca Surah Yasin','Apa arti Ar-Rahman?','Kapan waktu salat Duha?'];
 const AI_FITUR=[['Jadwal salat & pengingat adzan','waktu salat subuh zuhur asar magrib isya imsak pengingat adzan notifikasi','#/jadwal'],['Arah kiblat','kiblat kompas arah','#/kiblat'],['Kalkulator zakat','zakat mal emas perak penghasilan perdagangan fitrah nisab hitung','#/zakat/emas'],['Zakat & sedekah','infak sedekah zakat kurban','#/zakat'],['Kalkulator waris','waris faraid pembagian harta warisan','#/waris'],['Tasbih digital','tasbih hitung dzikir zikir','#/tasbih'],['Kalender Hijriah','kalender tanggal hijriah bulan islam','#/kalender'],['Unduh untuk offline','unduh offline tanpa internet download simpan','#/pengaturan/offline'],['Laporkan masalah','bug salah tulis laporan error','#/lapor'],['Tahlil & Yasin','tahlil yasin arwah','#/tahlil']];
 
@@ -25,12 +25,20 @@ function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k)=>X.push({j,t:Stri
  NAMA.forEach((n,i)=>tam('Surah '+n,ARTI[i]+' · '+AYAT[i]+' ayat','#/quran/'+(i+1),"Al-Qur'an"));
  MAULID_DAFTAR.forEach(m=>tam(m.judul,'maulid shalawat sholawat',m.berkas?'#/maulid/'+m.id:'#/maulid','Maulid'));
  (typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).forEach(k=>tam(k.judul,k.ket||'kitab',k.berkas?'#/kitab/'+k.id:'#/kitab','Kitab'));
+ /* Bab-bab kitab dari daftar isi (data/kitab-indeks.js): jawaban bisa menunjuk kitab & halaman yang membahas suatu topik */
+ if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=(KITAB_DAFTAR||[]).find(x=>x.id==id);if(k)E.forEach(e=>tam(e[1]+' — '+k.judul+' hal. '+e[4],e[0]+' '+e[2],`#/kitab/${id}/${e[3]}`,'Kitab'))});
  AI_FITUR.forEach(f=>tam(f[0],f[1],f[2],'Fitur'));
  return AIX=X}
 const aiNorm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9؀-ۿ ]+/g,' ');
 const AI_STOP=new Set('apa yang dan di ke dari untuk dengan itu ini ada bagaimana cara gimana tolong saya aku kamu bisa adalah atau juga pada dalam tentang mohon minta tahu jelaskan kapan mana siapa kenapa mengapa berapa boleh tidak'.split(' '));
 /* Skor: kata yang cocok di judul bernilai 3, di isi 1, dikali bobot kelangkaan kata (kata umum seperti "doa" bernilai kecil) */
-function aiCari(q,n=4){const T=aiNorm(q).split(/\s+/).filter(w=>w.length>2&&!AI_STOP.has(w));if(!T.length)return [];
+/* Salah ketik / kurang huruf: kata yang tidak dikenal diganti kata terdekat dari kosakata isi aplikasi (jarak edit 1–2) */
+let AIKOSA=null;
+const jarak=(a,b)=>{if(Math.abs(a.length-b.length)>2)return 9;const d=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]==b[j-1]?0:1));p=t}}return d[b.length]};
+const aiKoreksi=w=>{if(!AIKOSA){AIKOSA=new Set('salat sholat shalat subuh zuhur dzuhur asar ashar magrib maghrib isya wudu wudhu tayamum zakat fitrah infak sedekah puasa ramadhan haji umrah doa wirid dzikir zikir tahlil yasin maulid sholawat shalawat burdah barzanji diba asmaul husna quran surah ayat juz tajwid hadits hadis kitab fikih aqidah akhlak waris nikah talak kiblat adzan azan iqamah jenazah tasbih istighfar istighasah ratib hizib tidur makan bangun safar musafir qadha jamak qasar sunnah fardhu witir tahajud dhuha tarawih'.split(' '));
+  aiIndeks().forEach(x=>aiNorm(x.j).split(/\s+/).forEach(k=>k.length>3&&AIKOSA.add(k)))}
+ if(w.length<4||AIKOSA.has(w))return w;let b=w,bd=w.length>6?2:1;for(const k of AIKOSA){const d=jarak(w,k);if(d<=bd&&(d<bd||b==w)){b=k;bd=d}}return b};
+function aiCari(q,n=4){const T=aiNorm(q).split(/\s+/).filter(w=>w.length>2&&!AI_STOP.has(w)).map(aiKoreksi);if(!T.length)return [];
  const X=aiIndeks().map(x=>[x,aiNorm(x.j),aiNorm(x.t)]),N=X.length,W=T.map(w=>Math.log((N+1)/(1+X.filter(a=>a[1].includes(w)||a[2].includes(w)).length)));
  return X.map(([x,j,t])=>{let s=0;T.forEach((w,i)=>{if(j.includes(w))s+=3*W[i];else if(t.includes(w))s+=W[i]});return [s,x]}).filter(a=>a[0]>0.5).sort((a,b)=>b[0]-a[0]).slice(0,n).map(a=>a[1])}
 
@@ -91,6 +99,13 @@ const aiStop=()=>{if(window.ANDROID)andPanggil('berhentiBicara');AITTS=null;wind
 /* Mode layar penuh: menu bawah dan tasbih melayang disembunyikan selama di halaman Fadz AI */
 const aiPenuh=on=>{document.body.classList.toggle('aipenuh',!!on&&location.hash.startsWith('#/ai'));const b=$('[data-aifull]');if(b){b.classList.toggle('on',!!on);b.setAttribute('aria-label',on?'Keluar layar penuh':'Layar penuh')}};
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel()});
+/* Keluar dari Fadz AI saat masih ada obrolan: tanya simpan di perangkat atau hapus (tidak ditanya lagi bila obrolan tidak berubah) */
+addEventListener('hashchange',e=>{let lama='';try{lama=new URL(e.oldURL).hash}catch(x){}if(!/^#\/ai(\/|$)/.test(lama)||location.hash.startsWith('#/ai'))return;
+ const n=aiRiw().length;if(!n||+localStorage.fzaiok===n)return;setTimeout(()=>aiTanyaSimpan(n),450)});
+function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d tgh';
+ e.innerHTML=`<div class="sheet" role="alertdialog" aria-label="Simpan obrolan Fadz AI"><b>Simpan obrolan Fadz AI?</b><p class="mut" style="margin:6px 0 14px">Obrolan bisa disimpan di perangkat ini untuk dilanjutkan nanti, atau dihapus sekarang.</p><div class="act"><button class="btn s" data-aih style="flex:1">Hapus</button><button class="btn" data-ais2 style="flex:1">Simpan</button></div></div>`;
+ document.body.append(e);e.onclick=x=>{if(x.target.closest('[data-aih]')){aiSimpan([]);try{localStorage.removeItem('fzaiok')}catch(y){}e.remove();toast('Obrolan dihapus')}
+  else if(x.target.closest('[data-ais2]')||x.target==e){try{localStorage.fzaiok=n}catch(y){}e.remove();x.target!=e&&toast('Obrolan disimpan di perangkat')}}}
 
 P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</span><h1>Fadz AI<small>Asisten tanya-jawab Fadzkuruuni</small></h1><button class="ib" data-aifull aria-label="Layar penuh">${ic('full',19)}</button><button class="ib" data-aihapus aria-label="Hapus riwayat chat">${ic('trash',19)}</button></div><div class="aist" id="aist"></div><div class="aic" id="aic"></div>
 <div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
@@ -198,15 +213,18 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    /* Salam & basa-basi singkat tidak perlu saran isi aplikasi */
    const sapa=/^(assalamu?\W?alaikum|asalamualaikum|salam|wa\W?alaikum|halo|hai|hi|hello|selamat (pagi|siang|sore|malam)|terima ?kasih|makasih|apa kabar|oke?|baik|sip)\b/i.test(t)&&t.split(/\s+/).length<=7;
    /* Pertanyaan siapa pembuat/pengembang dihitung (lihat api/ai.js: nama pengembang baru disebut setelah ditanya berkali-kali) */
-   if(/(siapa|who).{0,40}(pembuat|pengembang|developer|dev\b|programmer|kreator|creator|pencipta|membuat|bikin|buat|ngembangin|mengembangkan|founder)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t)){S.aidev=(S.aidev||0)+1;save()}
+   const tanyaDev=/(siapa|who).{0,40}(pembuat|pengembang|developer|dev\b|programmer|kreator|creator|pencipta|membuat|bikin|buat|ngembangin|mengembangkan|founder)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t);if(tanyaDev){S.aidev=(S.aidev||0)+1;save()}
+   /* Setelah nama pengembang terbuka (ditanya >= 10 kali): dalam satu chat nama disebut paling banyak 3 kali, lalu jawaban makin tegas */
+   const nDev=L.filter(m=>m.dev).length,ESK=['Kenapa kau nanya ini?','Dia tuanku.','Jangan pernah tanya tentangnya.','Stop bertanya tentangnya, atau saya blok atau saya laporkan kepada tuanku, "Zia".'];
+   const eskTeks=tanyaDev&&S.aidev>=10&&nDev>=3?ESK[Math.min(nDev-3,ESK.length-1)]:'';
    const hits=sapa?[]:aiCari(t),konteks=hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,300)}`).join('\n');
    c.insertAdjacentHTML('beforeend','<div class="aim a"><div class="aiw"><i></i><i></i><i></i></div></div>');const b=c.lastElementChild.firstElementChild;ikut=1;turun(1);
    /* Teks digambar paling sering sekali per bingkai layar agar tetap mulus saat jawaban mengalir cepat */
    let bk=0,isi='';const tulis=s=>{isi=s;if(bk)return;bk=requestAnimationFrame(()=>{bk=0;b.className='';b.innerHTML=aiMd(isi);if(ikut)turun()})};let teks='',mode='online';
-   try{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L,konteks,tulis)}
+   try{if(eskTeks){teks=eskTeks;tulis(teks)}else{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L.filter(m=>!m.esk),konteks,tulis)}}
    catch(er){if(er&&er.galat=='belum-dipasang')toast('AI online belum diaktifkan pengelola aplikasi');else if(er&&er.kode==429)toast('AI online sedang ramai, memakai mode offline');
     try{if(!aiTerpasang())throw 0;mode='lokal';teks=await aiLokal(L,konteks,tulis)}catch(e2){mode='cari';teks=aiJawabCari(hits)}}
-   L.push({role:'assistant',content:teks,mode,hits:hits.map(h=>[h.j,h.h])});aiSimpan(L);
+   L.push({role:'assistant',content:teks,mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(tanyaDev&&S.aidev>=10?{dev:1}:{}),...(eskTeks?{esk:1}:{})});aiSimpan(L);
    if($('#aic')){b.parentElement.outerHTML=aiGelembung(L[L.length-1],L.length-1);if(ikut)turun(1);if(lewatSuara)aiBicara(teks,L.length-1)}AISIBUK=0};
   $('[data-aihapus]').onclick=()=>konfirmasi('Hapus riwayat chat?','Semua percakapan di perangkat ini akan dihapus.','Hapus',()=>{L.length=0;aiSimpan(L);gambar()})}});
 

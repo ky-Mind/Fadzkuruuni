@@ -6,6 +6,7 @@
  --bg:#ffffff;
  --card:#ffffff;
  --ink:#1d2b25;
+ --bc:#000000;
  --mut:#5f6d66;
  --line:#e5e7e5;
  --g:#24584a;
@@ -25,6 +26,7 @@
  --card:#121413;
  --fill:#1f2321;
  --ink:#eef2ef;
+ --bc:#ffffff;
  --mut:#9aa6a0;
  --line:#2c312e;
  --g:#7fb5a2;
@@ -39,6 +41,7 @@
  --card:#f7faff;
  --fill:#e2ebf6;
  --ink:#12263d;
+ --bc:#000000;
  --mut:#55687e;
  --line:#d5e0ed;
  --gs:#dce8f6;
@@ -113,8 +116,8 @@ h1{font-size:22px;margin:4px 0 12px}
 h2{font-size:15px;margin:24px 0 10px;color:var(--mut);font-weight:600}
 label{display:block;font-size:13px;color:var(--mut);margin:0 0 3px}
 .mut,.row small{color:var(--mut);font-size:13px}
-.lt{color:var(--tc,var(--ink));font-style:italic;margin:6px 0 0;font-size:var(--lt,15px)}
-.tr{font-size:var(--tr,14px);color:var(--tc,inherit)}
+.lt{color:var(--tc,var(--bc,var(--ink)));font-style:italic;margin:6px 0 0;font-size:var(--lt,15px)}
+.tr{font-size:var(--tr,14px);color:var(--tc,var(--bc,inherit))}
 .sec{font-size:16px;margin:28px 0 10px;padding-bottom:8px;color:var(--g);border-bottom:1px solid var(--line)}
 .sub{font-size:13px;margin:14px 0 2px;color:var(--mut)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:2px 4px 10px;font-size:14px}
@@ -459,15 +462,15 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 /* Mushaf, ayat, dan teks Arab */
 .mushaf{direction:rtl;padding:8px 2px;font-family:var(--ar);line-height:2.5;text-align:justify;text-align-last:center}
 /* Bismillah di atas surah: huruf Arab pilihan pengguna, ukurannya mengikuti ukuran huruf Arab, berdiri di atas garis seperti baris mushaf */
-.bsm{margin:18px 0 12px;padding:0 0 8px;border-bottom:1px solid var(--line);color:var(--tc,var(--ink));font-family:var(--ar);font-size:27px;line-height:2;text-align:center;direction:rtl}
+.bsm{margin:18px 0 12px;padding:0 0 8px;border-bottom:1px solid var(--line);color:var(--tc,var(--bc,var(--ink)));font-family:var(--ar);font-size:27px;line-height:2;text-align:center;direction:rtl}
 .mk{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin:0 .3em;border:1px solid var(--g);border-radius:50%;font-family:'Times New Roman',Times,serif;font-size:.5em;color:var(--g);vertical-align:middle}
 #ay{padding-bottom:90px}
 .stick{position:sticky;top:0;z-index:4;max-height:38vh;overflow:auto;margin-bottom:12px;box-shadow:0 6px 14px rgba(0,0,0,.1)}
-.ar2{color:var(--tc,var(--ink));margin:8px 0;font:26px/2 var(--ar);text-align:right;direction:rtl}
+.ar2{color:var(--tc,var(--bc,var(--ink)));margin:8px 0;font:26px/2 var(--ar);text-align:right;direction:rtl}
 .ay{padding:20px 0;border-bottom:1px solid var(--line)}
 .ay2{padding:16px 0;border-bottom:1px solid var(--line)}
 .ay2:last-child{border-bottom:0}
-.ay .ar,.ay2 .ar{color:var(--tc,var(--ink));font-family:var(--ar);line-height:2.3;text-align:right;direction:rtl}
+.ay .ar,.ay2 .ar{color:var(--tc,var(--bc,var(--ink)));font-family:var(--ar);line-height:2.3;text-align:right;direction:rtl}
 .ay .tr,.ay .lt{line-height:1.7}
 .ay2 .ar2{line-height:2.3}
 .ay2 .tr,.ay2 .lt{margin-top:8px;line-height:1.7}
@@ -895,7 +898,7 @@ input[type=range]{accent-color:var(--g)}
 .wtkb i{background:var(--c,conic-gradient(#e0442f,#f0a321,#3aa35b,#2a7bd8,#8a4fd1,#e0442f))}
 .wtkb input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .wtkp{margin:12px 0 4px;padding:12px 14px;border-radius:12px;background:var(--fill);text-align:center}
-.wtkp span{display:block;color:var(--tc,var(--ink));font:24px/1.8 var(--ar);direction:rtl}
+.wtkp span{display:block;color:var(--tc,var(--bc,var(--ink)));font:24px/1.8 var(--ar);direction:rtl}
 .wtkp small{display:block;margin-top:2px;color:var(--tc,var(--mut));font-size:12px;line-height:1.5}
 
 /* Fadz AI: kepala halaman dan tombol salin/edit di bawah gelembung */
@@ -1037,15 +1040,15 @@ body.ovl #view{overflow:hidden}
 
 /* Mode mushaf di Tahlil, Maulid, Wirid & Doa: kartu (.ay2) disembunyikan, diganti paragraf Arab bersambung */
 .ay2.mbh{display:none}
-.mushaf.mbc{margin:6px 0 18px;color:var(--tc,var(--ink))}
+.mushaf.mbc{margin:6px 0 18px;color:var(--tc,var(--bc,var(--ink)))}
 .bar.lekat .mseg{margin-left:auto}
 .bar.lekat .mseg+.ib{margin-left:0}
 
 /* Pengaturan Tampilan: contoh langsung ukuran teks bacaan (Arab, Latin, terjemah) */
 .ukp{margin:10px 0 4px;padding:12px 14px 14px;border-radius:14px;background:var(--fill)}
 .ukp>small{display:block;margin-bottom:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.ukp-ar{color:var(--tc,var(--ink));font-family:var(--ar);line-height:2;text-align:right;direction:rtl;transition:font-size .15s}
-.ukp-lt{margin:2px 0 4px;color:var(--tc,var(--ink));font-style:italic;line-height:1.6;transition:font-size .15s}
+.ukp-ar{color:var(--tc,var(--bc,var(--ink)));font-family:var(--ar);line-height:2;text-align:right;direction:rtl;transition:font-size .15s}
+.ukp-lt{margin:2px 0 4px;color:var(--tc,var(--bc,var(--ink)));font-style:italic;line-height:1.6;transition:font-size .15s}
 .ukp-tr{margin:0;color:var(--tc,var(--mut));line-height:1.6;transition:font-size .15s}
 
 /* Fadz AI pesan suara (seperti WhatsApp): batang level suara, indikator kunci di atas mikrofon, tiga keadaan bilah
@@ -1071,8 +1074,8 @@ body.ovl #view{overflow:hidden}
 /* Tampilkan Latin / Terjemah (Pengaturan): berlaku di semua halaman baca & contoh di panel pengaturan */
 .no-lt #view .lt,.no-lt .qpv .qpl,.no-lt .ukp-lt{display:none}
 .no-tr #view .tr,.no-tr .qpv .qpt,.no-tr .ukp-tr{display:none}
-.qpv .qpa{color:var(--tc,var(--ink))}
-.qpv .qpl{display:block;margin-top:2px;color:var(--tc,var(--ink));font-style:italic;line-height:1.6}
+.qpv .qpa{color:var(--tc,var(--bc,var(--ink)))}
+.qpv .qpl{display:block;margin-top:2px;color:var(--tc,var(--bc,var(--ink)));font-style:italic;line-height:1.6}
 .qpv .qpt{display:block;margin-top:4px;color:var(--tc,var(--mut));line-height:1.6}
 
 /* Anti-kedip di HP: latar gelap di belakang lembar tanpa efek blur (blur bertumpuk di atas kepala halaman yang juga blur
@@ -1209,3 +1212,33 @@ body:has(#aic) #view{scroll-behavior:auto;overscroll-behavior-y:contain}
 .airec.dijeda .airt i{animation:none;background:var(--mut)}
 .airec.dijeda .airl u{opacity:.45}
 .airec.dijeda .airj{background:var(--g);color:var(--on)}
+/* Pengaturan suara adzan */
+.sua label{margin-top:6px}
+.suar{display:flex;gap:8px;align-items:center;margin-bottom:8px}.suar select{flex:1;min-width:0;margin:0}
+.sus{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--fill)}.sus[hidden]{display:none}
+.sus>span{flex:1 1 100%;font-size:12.5px}
+.sbf{display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer}
+/* Tasbih melayang: ukuran bisa diatur (--fts), posisi bawaan lebih ke bawah */
+#ftb{transform:scale(var(--fts,1));transform-origin:100% 100%;transition:transform .2s}
+#ftb{bottom:calc(68px + env(safe-area-inset-bottom))}
+body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
+@media(min-width:600px){#ftb{bottom:16px}}
+/* Kata-kata Beranda: pilihan waktu tampil saat menambah & mengedit */
+.qa .qwk,.qedit .qwk{flex:none;width:auto;min-width:0;max-width:130px;margin:0}
+.qedit{flex-wrap:wrap;gap:8px}.qedit #qv{flex:1 1 220px}
+/* Kitab layar penuh: saat halaman dicubit-perbesar, geser antarhalaman dikunci */
+.kfull #kp.kzum{overflow:hidden;touch-action:none}
+.kfull #kp img{transform-origin:center;will-change:auto}
+/* Kompas kiblat: piringan berputar mengikuti arah HP, jarum menunjuk Ka'bah */
+.kbl{position:relative;width:min(280px,78vw);margin:18px auto 8px}
+.kbl .kbm{position:absolute;left:50%;top:-10px;z-index:2;width:0;height:0;margin-left:-9px;border:9px solid transparent;border-bottom:0;border-top:14px solid var(--ink)}
+.kbd{transition:transform .2s ease-out}
+.kbd svg{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 20px rgba(0,0,0,.08))}
+.kbc{fill:var(--card);stroke:var(--line);stroke-width:2}
+.kbi{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.tk{stroke:var(--mut);stroke-width:1;opacity:.5}.tkm{stroke:var(--mut);stroke-width:1.5}.tkp{stroke:var(--ink);stroke-width:2.5}
+.ma,.mau{font:700 15px var(--ui);text-anchor:middle;fill:var(--mut)}.mau{fill:#c0392b}
+.kbj{fill:var(--g)}.kbe{fill:var(--line)}
+.kka{fill:#1c1c1c;stroke:#000;stroke-width:1}.kkb{fill:#d4a63a}
+.kbp{fill:var(--card);stroke:var(--g);stroke-width:3}.kbq{fill:var(--g)}
+.kbl.pas .kbc{stroke:#2e9b5f;stroke-width:4}.kbl.pas .kbj{fill:#2e9b5f}.kbl.pas .kbm{border-top-color:#2e9b5f}
