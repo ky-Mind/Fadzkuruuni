@@ -66,7 +66,7 @@ function keInduk(up){pDir(-1);location.replace(up)}
 /* Tombol kembali HP (aplikasi Android memanggil ini): tutup lembar/dialog atau layar penuh kitab dulu, lalu naik ke halaman induk
    (mis. Surah → Al-Qur'an → Beranda). Di Beranda mengembalikan 'akar': aplikasi lalu meminta tekan sekali lagi untuk keluar.
    Mode Kartu/Mushaf Al-Qur'an bukan lapisan: kembali langsung keluar dari surah, tidak berganti mode. */
-window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){o[o.length-1].remove();return 'ok'}
+window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){const d=o[o.length-1];if(d.dataset.wajib)wajibGoyang(d);else d.remove();return 'ok'}
  if(document.body.classList.contains('kfull')){kitabFull(false);return 'ok'}
  const h=location.hash||'#/';if(['#','#/'].includes(h))return 'akar';
  keInduk(tujuanKembali());return 'ok'};

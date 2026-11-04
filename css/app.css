@@ -1260,3 +1260,7 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 .tutv.desktop{width:100%;aspect-ratio:16/9}
 .tutd{margin-top:12px}.tutd summary{cursor:pointer;font-weight:600;padding:6px 0}
 .tutl{margin:6px 0 0;padding-left:22px;line-height:1.6}.tutl li{margin:2px 0}.tutl b{font-weight:700}
+
+/* Dialog wajib dijawab (mis. Simpan obrolan Fadz AI): digoyang bila diketuk di luar atau ditutup dengan tombol kembali */
+.back-d .sheet.goyang{animation:goyang .32s ease}
+@keyframes goyang{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
