@@ -12,6 +12,9 @@ const AI_FITUR=[['Jadwal salat & pengingat adzan','waktu salat subuh zuhur asar 
 
 const aiRiw=()=>{try{return JSON.parse(localStorage.fzai||'[]')}catch(e){return []}};
 const aiSimpan=L=>{try{localStorage.fzai=JSON.stringify(L.slice(-40))}catch(e){}};
+/* Selesai satu sesi obrolan: tanya-jawab tentang pengembang (yang menyebut nama) dihapus dan hitungan diulang dari nol,
+   agar Fadz AI tidak menyebut nama itu lagi sampai ditanya 3 kali lagi */
+const aiBersihDev=()=>{const L=aiRiw(),B=L.filter(m=>!m.dev&&!m.esk);if(B.length!=L.length)aiSimpan(B);if(S.aidev){S.aidev=0;save()}};
 const aiTerpasang=()=>{try{return localStorage.fzaim||''}catch(e){return ''}};
 let AIE=null,AIL=null,AIX=null,AISIBUK=0,AIUNDUH=null;
 
@@ -101,7 +104,7 @@ const aiPenuh=on=>{document.body.classList.toggle('aipenuh',!!on&&location.hash.
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#/ai'))document.body.classList.remove('aipenuh');AITTS=null;window.speechSynthesis&&speechSynthesis.cancel()});
 /* Keluar dari Fadz AI saat masih ada obrolan: tanya simpan di perangkat atau hapus (tidak ditanya lagi bila obrolan tidak berubah) */
 addEventListener('hashchange',e=>{let lama='';try{lama=new URL(e.oldURL).hash}catch(x){}if(!/^#\/ai(\/|$)/.test(lama)||location.hash.startsWith('#/ai'))return;
- const n=aiRiw().length;if(!n||+localStorage.fzaiok===n)return;setTimeout(()=>aiTanyaSimpan(n),450)});
+ aiBersihDev();const n=aiRiw().length;if(!n||+localStorage.fzaiok===n)return;setTimeout(()=>aiTanyaSimpan(n),450)});
 function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d tgh';
  e.innerHTML=`<div class="sheet" role="alertdialog" aria-label="Simpan obrolan Fadz AI"><b>Simpan obrolan Fadz AI?</b><p class="mut" style="margin:6px 0 14px">Obrolan bisa disimpan di perangkat ini untuk dilanjutkan nanti, atau dihapus sekarang.</p><div class="act"><button class="btn s" data-aih style="flex:1">Hapus</button><button class="btn" data-ais2 style="flex:1">Simpan</button></div></div>`;
  document.body.append(e);e.onclick=x=>{if(x.target.closest('[data-aih]')){aiSimpan([]);try{localStorage.removeItem('fzaiok')}catch(y){}e.remove();toast('Obrolan dihapus')}
@@ -109,7 +112,7 @@ function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement(
 
 P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</span><h1>Fadz AI<small>Asisten tanya-jawab Fadzkuruuni</small></h1><button class="ib" data-aifull aria-label="Layar penuh">${ic('full',19)}</button><button class="ib" data-aihapus aria-label="Hapus riwayat chat">${ic('trash',19)}</button></div><div class="aist" id="aist"></div><div class="aic" id="aic"></div>
 <div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
- init(){const L=aiRiw(),c=$('#aic'),q=$('#aiq');let suara=0;aiStatus();aiPenuh(S.aip);
+ init(){aiBersihDev();const L=aiRiw(),c=$('#aic'),q=$('#aiq');let suara=0;aiStatus();aiPenuh(S.aip);
   const kosong=()=>`<div class="aie"><div class="aiei">${ic('spark',30)}</div><b>Assalamu'alaikum${S.nm?', '+esc(S.nm):''}</b><p class="mut">Aku Fadz AI, asisten tanya-jawab Fadzkuruuni. Tanyakan seputar ibadah, doa, Al-Qur'an, zakat, atau isi aplikasi ini. Bisa juga lewat suara dengan tombol mikrofon. Jawaban AI bisa keliru; untuk masalah hukum, tanyakan juga kepada ustadz.</p><div class="ais">${AI_SARAN.map(s=>`<button type="button" class="chip2" data-ais>${s}</button>`).join('')}</div></div>`;
   /* Gulir seperti WhatsApp: ikut turun hanya bila pengguna sedang di bawah; bila sedang membaca pesan lama, tidak ditarik paksa.
      Tombol panah muncul untuk kembali ke pesan terbaru. */
@@ -213,18 +216,21 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    /* Salam & basa-basi singkat tidak perlu saran isi aplikasi */
    const sapa=/^(assalamu?\W?alaikum|asalamualaikum|salam|wa\W?alaikum|halo|hai|hi|hello|selamat (pagi|siang|sore|malam)|terima ?kasih|makasih|apa kabar|oke?|baik|sip)\b/i.test(t)&&t.split(/\s+/).length<=7;
    /* Pertanyaan siapa pembuat/pengembang dihitung (lihat api/ai.js: nama pengembang baru disebut setelah ditanya berkali-kali) */
-   const tanyaDev=/(siapa|who).{0,40}(pembuat|pengembang|developer|dev\b|programmer|kreator|creator|pencipta|membuat|bikin|buat|ngembangin|mengembangkan|founder)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t);if(tanyaDev){S.aidev=(S.aidev||0)+1;save()}
-   /* Setelah nama pengembang terbuka (ditanya >= 10 kali): dalam satu chat nama disebut paling banyak 3 kali, lalu jawaban makin tegas */
-   const nDev=L.filter(m=>m.dev).length,ESK=['Kenapa kau nanya ini?','Dia tuanku.','Jangan pernah tanya tentangnya.','Stop bertanya tentangnya, atau saya blok atau saya laporkan kepada tuanku, "Zia".'];
-   const eskTeks=tanyaDev&&S.aidev>=10&&nDev>=3?ESK[Math.min(nDev-3,ESK.length-1)]:'';
+   /* "Who is KyMind ?" persis (bahasa Inggris, huruf besar-kecil sama) langsung dijawab namanya; tulisan lain tidak */
+   const kym=/^Who is KyMind ?\?$/.test(t);
+   const tanyaDev=!kym&&/(siapa|who).{0,40}(pembuat|pengembang|developer|dev\b|programmer|kreator|creator|pencipta|membuat|bikin|buat|ngembangin|mengembangkan|founder)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t);if(tanyaDev){S.aidev=(S.aidev||0)+1;save()}
+   /* Setelah nama pengembang terbuka (ditanya >= 3 kali): dalam satu chat nama disebut paling banyak 3 kali, lalu jawaban makin tegas */
+   const nDev=L.filter(m=>m.dev&&m.role=='assistant').length,ESK=['Kenapa kau nanya ini?','Dia tuanku.','Jangan pernah tanya tentangnya.','Stop bertanya tentangnya, atau saya blok atau saya laporkan kepada tuanku, "Zia".'];
+   const eskTeks=kym?'KyMind is Muhammad Hilmi Azkia Rahman.':tanyaDev&&S.aidev>=3&&nDev>=3?ESK[Math.min(nDev-3,ESK.length-1)]:'';
    const hits=sapa?[]:aiCari(t),konteks=hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,300)}`).join('\n');
    c.insertAdjacentHTML('beforeend','<div class="aim a"><div class="aiw"><i></i><i></i><i></i></div></div>');const b=c.lastElementChild.firstElementChild;ikut=1;turun(1);
    /* Teks digambar paling sering sekali per bingkai layar agar tetap mulus saat jawaban mengalir cepat */
    let bk=0,isi='';const tulis=s=>{isi=s;if(bk)return;bk=requestAnimationFrame(()=>{bk=0;b.className='';b.innerHTML=aiMd(isi);if(ikut)turun()})};let teks='',mode='online';
-   try{if(eskTeks){teks=eskTeks;tulis(teks)}else{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L.filter(m=>!m.esk),konteks,tulis)}}
+   try{if(eskTeks){teks=eskTeks;tulis(teks)}else{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L.filter(m=>!m.esk&&!m.dev),konteks,tulis)}}
    catch(er){if(er&&er.galat=='belum-dipasang')toast('AI online belum diaktifkan pengelola aplikasi');else if(er&&er.kode==429)toast('AI online sedang ramai, memakai mode offline');
     try{if(!aiTerpasang())throw 0;mode='lokal';teks=await aiLokal(L,konteks,tulis)}catch(e2){mode='cari';teks=aiJawabCari(hits)}}
-   L.push({role:'assistant',content:teks,mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(tanyaDev&&S.aidev>=10?{dev:1}:{}),...(eskTeks?{esk:1}:{})});aiSimpan(L);
+   const dev=kym||tanyaDev&&S.aidev>=3;if(dev||eskTeks)L[L.length-1][eskTeks&&!kym?'esk':'dev']=1;
+   L.push({role:'assistant',content:teks,mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(dev?{dev:1}:{}),...(eskTeks&&!kym?{esk:1}:{})});aiSimpan(L);
    if($('#aic')){b.parentElement.outerHTML=aiGelembung(L[L.length-1],L.length-1);if(ikut)turun(1);if(lewatSuara)aiBicara(teks,L.length-1)}AISIBUK=0};
   $('[data-aihapus]').onclick=()=>konfirmasi('Hapus riwayat chat?','Semua percakapan di perangkat ini akan dihapus.','Hapus',()=>{L.length=0;aiSimpan(L);gambar()})}});
 
