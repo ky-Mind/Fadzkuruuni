@@ -21,7 +21,9 @@ const azBunyi=k=>{if(window.ANDROID)return;const md=azMode(k);if(md=='adzan')pla
 const stopAdzan=()=>{if(ADZ){ADZ.pause();ADZ=null}};
 /* Pilihan suara adzan: bawaan, beberapa muadzin (rekaman berlisensi bebas dari Wikimedia Commons, lihat lisensi/ATRIBUSI-ADZAN.txt),
    atau rekaman/berkas sendiri (disimpan di IndexedDB; di Android juga disalin ke aplikasi agar dipakai alarm adzan) */
-const SUARA=[['bawaan','Bawaan aplikasi'],['makkah','Masjidil Haram, Makkah'],['merdu','Adzan merdu'],['syam','Sabah Fakhri (Syam)'],['aaqib','Aaqib Azeez'],['istanbul','Istanbul'],['subuh-malmo','Adzan Subuh (Masjid Malmö)'],['sendiri','Rekaman / berkas sendiri']];
+const SUARA=[['bawaan','Bawaan aplikasi'],['madinah','Masjid Nabawi, Madinah'],['makkah','Masjidil Haram, Makkah'],['adlan','Adlan al-Furqani'],['asim','Asim Javed'],['ahmedabad','Moazzam Mirza (Ahmedabad)'],['subuh-doha','Adzan Subuh (Doha, Qatar)'],['sendiri','Rekaman / berkas sendiri']];
+/* Pilihan suara lama yang sudah diganti (kurang jernih) kembali ke bawaan */
+{const ada=v=>!v||SUARA.some(x=>x[0]==v),ub=v=>ada(v)?v:(v=='subuh-malmo'?'subuh-doha':'bawaan');let u=0;['sa','ss'].forEach(k=>{if(!ada(S.az[k])){S.az[k]=ub(S.az[k]);u=1}});if(S.az.v)S.az.v=S.az.v.map(v=>{if(ada(v))return v;u=1;return ub(v)=='bawaan'?'':ub(v)});if(u)try{save()}catch(e){}}
 const idbBuka=()=>new Promise((ok,no)=>{const r=indexedDB.open('fz-suara',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
 const idbSimpan=async(k,v)=>{const d=await idbBuka();return new Promise((ok,no)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})};
 const idbAmbil=async k=>{try{const d=await idbBuka();return await new Promise(ok=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}};
