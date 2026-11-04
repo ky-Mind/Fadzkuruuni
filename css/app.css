@@ -1371,3 +1371,6 @@ html.tgt .vtbtn{view-transition-name:temabtn}
 .jns button{min-height:48px}
 .kmf .sb.on{background:var(--g);color:var(--on)}
 .kmp .leaflet-control-zoom a{width:36px;height:36px;line-height:36px;font-size:20px}
+/* Blok ayat tujuan lebih tegas */
+.ay.aytuju{border-color:var(--g);box-shadow:0 0 0 2px var(--g),0 6px 18px color-mix(in srgb,var(--g) 18%,transparent)}
+@keyframes aykedip{50%{background:color-mix(in srgb,var(--g) 30%,var(--card));box-shadow:0 0 0 5px color-mix(in srgb,var(--g) 55%,transparent)}}
