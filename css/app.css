@@ -1264,3 +1264,9 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 /* Dialog wajib dijawab (mis. Simpan obrolan Fadz AI): digoyang bila diketuk di luar atau ditutup dengan tombol kembali */
 .back-d .sheet.goyang{animation:goyang .32s ease}
 @keyframes goyang{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+/* Dukung kami (js/pages/dukung.js) */
+.dkh{text-align:center;padding:22px 18px;border:1px solid var(--line);border-radius:16px}
+.dkh>b{display:block;font-size:18px;margin:10px 0 6px}.dkh p{margin:0}
+.dki{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--bg)}
+.dkr .t b{font-weight:700;letter-spacing:.02em}

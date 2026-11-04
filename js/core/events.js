@@ -32,7 +32,7 @@ document.addEventListener('click',e=>{const t=e.target;
  if(t.closest('[data-loc]'))return lsheet();
  const z=t.closest('[data-z]');if(z){S.fs=Math.max(22,Math.min(56,S.fs+ +z.dataset.z));save();$$('#view .ay .ar,#view .ay2 .ar,#view .ar2,#view .mushaf').forEach(x=>x.style.fontSize=S.fs+'px');$$('.zb b').forEach(b=>b.textContent=S.fs);return}
  if(t.closest('[data-nb]')){S.nb=1;save();t.closest('.note').remove();return}
- const l=t.closest('[data-lanjut]');if(l){const c=l.closest('[data-pay]'),r=c.querySelector('input[name=pm]:checked'),b=BANK[r?+r.value:0],nom=(c.querySelector('[data-nom]').value||'').replace(/\D/g,'');(navigator.clipboard?navigator.clipboard.writeText(b[1]):Promise.reject()).catch(()=>{});msheet('Pembayaran langsung segera hadir',`<p>Fitur lanjut pembayaran langsung ke aplikasi ${b[0]} masih dalam tahap pengembangan.</p><p>Nomor tujuan <b>${b[1]}</b> (${b[0]}) ${nom?'dengan nominal <b>'+rp(nom)+'</b> ':''}sudah disalin. Silakan buka aplikasi ${b[0]} atau bank pilihanmu, lalu tempel nomor tersebut.</p>`)}});
+});
 document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-rs]'))return qsheet(()=>route());
  if(t.closest('[data-stop]')){if(window.ANDROID)andPanggil('hentikanAdzan');return stopAdzan()}
