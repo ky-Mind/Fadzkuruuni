@@ -1270,3 +1270,10 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 .dkh>b{display:block;font-size:18px;margin:10px 0 6px}.dkh p{margin:0}
 .dki{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--bg)}
 .dkr .t b{font-weight:700;letter-spacing:.02em}
+.dkbtn{flex:none;min-width:76px;height:34px;padding:0 18px;border:1.5px solid var(--g);border-radius:999px;background:transparent;color:var(--g);font:inherit;font-size:13.5px;font-weight:700;letter-spacing:.01em;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.dkbtn:hover{background:var(--g);color:var(--on)}.dkbtn:active{transform:scale(.95);background:var(--g);color:var(--on)}
+/* Ganti tema: tampilan baru melebar melingkar dari tombol yang dipencet (View Transitions, lihat temaGanti di js/core/ui.js) */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){z-index:2}
+/* Selama ganti tema hanya satu gambar (seluruh layar) yang dilingkarkan; transisi halaman (page) dimatikan sementara */
+html.tgt *{view-transition-name:none!important}

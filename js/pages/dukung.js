@@ -22,7 +22,7 @@ function bukaBank(b){salinTeks(b[1]);
 P.dukung=()=>({html:head('Dukung kami','back')+`<div class="card dkh"><span class="dki">${ic('heart',26)}</span><b>Bantu Fadzkuruuni terus berkembang</b>
 <p class="mut">Fadzkuruuni gratis dan tanpa iklan, dikembangkan oleh <b>KyMind</b> bersama tim Pondok Pesantren Fadzkuruuni. Dukunganmu dipakai untuk biaya server dan Fadz AI, membuat fitur-fitur baru, dan menyemangati pengembang agar terus memperbaiki aplikasi ini.</p></div>
 <h3 class="sec">Donasi untuk pengembangan</h3>
-<div class="list">${BANK.map((b,i)=>`<div class="row dkr"><span class="t">${b[0]}<br><b>${b[1]}</b></span><button type="button" class="sb pri" data-dkb="${i}">${DKHP?ic('next',14)+' Buka':ic('copy',14)+' Salin'}</button></div>`).join('')}</div>
+<div class="list">${BANK.map((b,i)=>`<div class="row dkr"><span class="t">${b[0]}<br><b>${b[1]}</b></span><button type="button" class="dkbtn" data-dkb="${i}">${DKHP?'Buka':'Salin'}</button></div>`).join('')}</div>
 <p class="mut" style="font-size:13px;margin:8px 0 0">${DKHP?'Ketuk <b>Buka</b>: nomor tujuan langsung tersalin dan aplikasinya terbuka (bila belum ada, diarahkan ke Play Store).':'Ketuk <b>Salin</b>, lalu buka aplikasi bank atau dompet digital di HP-mu dan tempel nomornya.'} Berapa pun nominalnya sangat berarti. Nama penerima yang muncul saat transfer adalah nama pengembang Fadzkuruuni.</p>
 <button type="button" class="btn" id="dkkf" style="width:100%;margin-top:12px">Sudah berdonasi? Kabari kami</button>
 <h3 class="sec">Dukungan tanpa biaya</h3>
