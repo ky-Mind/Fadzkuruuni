@@ -87,6 +87,8 @@ header small{color:var(--mut);font-size:12px}
 /* Tampilan: editor + pratinjau HP */
 .ted{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
 @media(max-width:980px){.ted{grid-template-columns:1fr}.hp{position:static!important}}
+.ted2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.ted2{grid-template-columns:1fr}}
 .blok{margin:0 0 14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
 .blok>h3{margin:0 0 4px;font-size:15px}.blok>p{margin:0 0 10px;color:var(--mut);font-size:13px}
 .ls{display:flex;flex-direction:column;gap:6px}
@@ -124,7 +126,7 @@ header small{color:var(--mut);font-size:12px}
 .tg{display:inline-block;margin:0 4px 4px 0;padding:2px 8px;border-radius:99px;background:var(--gs);color:var(--g);font-size:12px;font-weight:600}.tg.no{background:var(--reds);color:var(--red)}
 .kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.kp div{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}.kp b{display:block;font-size:26px}.kp span{color:var(--mut);font-size:13px}
 .grafik{display:flex;align-items:flex-end;gap:3px;height:160px;padding:8px 0}.grafik div{flex:1;min-width:4px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}.grafik i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--g);min-height:2px}.grafik small{font-size:10px;color:var(--mut)}
-.bt{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px}.bt span{width:170px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt em{flex:1;min-width:0;height:10px;border-radius:5px;background:var(--fill)}.bt i{display:block;height:100%;border-radius:5px;background:var(--g)}.bt b{flex:none;min-width:30px;text-align:right}
+.bt{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px}.bt span{width:clamp(96px,38%,190px);flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt em{flex:1;min-width:0;height:10px;border-radius:5px;background:var(--fill)}.bt i{display:block;height:100%;border-radius:5px;background:var(--g)}.bt b{flex:none;min-width:30px;text-align:right}
 </style>
 </head>
 <body>
@@ -147,7 +149,16 @@ firebase.initializeApp(FBCFG);const auth=firebase.auth(),db=firebase.firestore()
 let L=[],F={st:'baru',j:'',q:''},stop=null,tunda=0,DON=0;
 
 const gate=(judul,isi,tombol)=>$('#root').innerHTML=`<div class="gate"><img src="img/icon-192.png" alt=""><h1>${judul}</h1><p>${isi}</p>${tombol||''}</div>`;
-const masuk=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());if(c!='auth/popup-closed-by-user')toast('Gagal masuk: '+(c=='auth/unauthorized-domain'?'domain ini belum diizinkan di Firebase':c))});
+/* Di aplikasi Android (WebView): masuk lewat pemilih akun Google bawaan HP (jembatan FadzAndroid.masukGoogle),
+   bukan jendela pop-up yang terlempar ke Chrome. Token dikembalikan aplikasi ke fadzMasuk/fadzMasukGoogle di halaman ini. */
+const DIAPP=!!(window.FadzAndroid&&FadzAndroid.masukGoogle);
+window.fadzMasuk=(p,id,at)=>auth.signInWithCredential(p=='fb'?firebase.auth.FacebookAuthProvider.credential(at):firebase.auth.GoogleAuthProvider.credential(id||null,at||null)).then(()=>toast('Berhasil masuk')).catch(e=>toast('Gagal masuk: '+(e.code||e.message)));
+window.fadzMasukGoogle=(id,at)=>window.fadzMasuk('g',id,at);
+window.toast=m=>toast(m);
+/* Kembali ke aplikasi: di aplikasi Android tetap di WebView yang sama (tidak membuka Chrome) */
+const keApp=(h='')=>{if(DIAPP)location.href=APP+h;else open(APP+h,'_blank')};
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[target=_blank]');if(!a||!DIAPP||!a.href.startsWith(APP))return;e.preventDefault();location.href=a.href},true);
+const masuk=()=>DIAPP?(navigator.onLine?FadzAndroid.masukGoogle():toast('Butuh internet untuk masuk')):auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());if(c!='auth/popup-closed-by-user')toast('Gagal masuk: '+(c=='auth/unauthorized-domain'?'domain ini belum diizinkan di Firebase':c))});
 
 /* Admin = pemilik (ADMIN, tetap) + daftar tambahan di Firestore config/admin (diatur di tab Admin) */
 let ADMX=[],PEMILIK=false;
@@ -298,6 +309,8 @@ async function tabPeta(){if(!await siapTI())return $('#isi').innerHTML='<div cla
 
 /* ===================== STATISTIK: dari koleksi "stat" (satu dokumen per hari, tanpa data pribadi) ===================== */
 let SR=30;
+/* Lokasi tanpa nama kota (dari GPS/peta di versi lama) diberi label yang jelas */
+const KOTA_NM={lokasi_saya:'Lokasi GPS (tanpa nama kota)',titik_di_peta:'Titik di peta (tanpa nama kota)',lainnya:'Lainnya'};
 async function tabStatistik(){if(!TI)await siapTI();$('#isi').innerHTML='<div class="empty">Memuat statistik…</div>';
  const hari=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
  let H=[];try{const q=await db.collection('stat').where(firebase.firestore.FieldPath.documentId(),'>=',hari(SR-1)).get();H=q.docs.map(d=>({h:d.id,...d.data()})).sort((a,b)=>a.h<b.h?-1:1)}
@@ -310,7 +323,7 @@ async function tabStatistik(){if(!TI)await siapTI();$('#isi').innerHTML='<div cl
  $('#isi').innerHTML=`<div class="hpk" style="justify-content:flex-start">${[7,30,90].map(n=>`<button data-sr="${n}" class="${n==SR?'on':''}">${n} hari</button>`).join('')}</div>
  <div class="kp"><div><b>${hi.aktif||0}</b><span>Perangkat aktif hari ini</span></div><div><b>${hi.pv||0}</b><span>Halaman dibuka hari ini</span></div><div><b>${tot('aktif')}</b><span>Perangkat aktif (${SR} hari, dijumlah per hari)</span></div><div><b>${tot('pv')}</b><span>Halaman dibuka (${SR} hari)</span></div></div>
  <div class="blok"><h3>Perangkat aktif per hari</h3><div class="grafik">${hariL.map(h=>{const d=H.find(x=>x.h==h)||{};return `<div title="${h}: ${d.aktif||0} perangkat, ${d.pv||0} halaman"><i style="height:${(d.aktif||0)/mA*100}%"></i><small>${SR<=31?h.slice(8):''}</small></div>`}).join('')}</div></div>
- <div class="ted" style="grid-template-columns:1fr 1fr"><div class="blok"><h3>Fitur paling sering dibuka</h3>${bar(sum('hal'),nmHal,15)}</div><div><div class="blok"><h3>Kota pengguna</h3>${bar(sum('kota'),k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()))}</div><div class="blok"><h3>Jenis aplikasi</h3>${bar(sum('jenis'),k=>({android:'Aplikasi Android',terpasang:'Dipasang dari browser (PWA)',browser:'Browser biasa'})[k]||k)}</div></div></div>
+ <div class="ted ted2"><div class="blok"><h3>Fitur paling sering dibuka</h3>${bar(sum('hal'),nmHal,15)}</div><div><div class="blok"><h3>Kota pengguna</h3>${bar(sum('kota'),k=>KOTA_NM[k]||k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()))}</div><div class="blok"><h3>Jenis aplikasi</h3>${bar(sum('jenis'),k=>({android:'Aplikasi Android',terpasang:'Dipasang dari browser (PWA)',browser:'Browser biasa'})[k]||k)}</div></div></div>
  <p style="color:var(--mut);font-size:13px">Statistik dicatat tanpa data pribadi: hanya hitungan halaman per fitur, perangkat aktif per hari (dihitung sekali per perangkat per hari), kota pilihan untuk jadwal salat, dan jenis aplikasi. Pengguna bisa mematikannya di Pengaturan › Tentang & Bantuan.</p>`;
  $('#isi').onclick=e=>{const b=e.target.closest('[data-sr]');if(b){SR=+b.dataset.sr;tabStatistik()}}}
 
@@ -327,7 +340,7 @@ const temaDash=t=>{try{t?localStorage.fzadmtema=t:delete localStorage.fzadmtema}
 temaDash((()=>{try{return localStorage.fzadmtema}catch(e){return ''}})()||'');
 function menuSet(){const ada=$('.mnu');if(ada)return ada.remove();const kini=document.documentElement.dataset.tema||'auto';
  const m=document.createElement('div');m.className='mnu';m.innerHTML=`<b>Tema dashboard</b>${[['auto','Ikuti perangkat'],['terang','Terang'],['gelap','Gelap']].map(([k,t])=>`<button data-tm="${k}" class="${k==kini?'on':''}">${t}</button>`).join('')}<hr><button data-mn="app">Buka aplikasi</button><button data-mn="out">Keluar (${esc(auth.currentUser?.email||'')})</button>`;
- $('#atas').append(m);m.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm){temaDash(b.dataset.tm);m.remove();return}if(b.dataset.mn=='app')open(APP,'_blank');if(b.dataset.mn=='out')auth.signOut();m.remove()}}
+ $('#atas').append(m);m.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm){temaDash(b.dataset.tm);m.remove();return}if(b.dataset.mn=='app')keApp();if(b.dataset.mn=='out')auth.signOut().then(()=>toast('Kamu sudah keluar')).catch(e=>toast('Gagal keluar: '+(e.code||e.message)));m.remove()}}
 document.addEventListener('click',e=>{if(!e.target.closest('.mnu,#set'))$('.mnu')?.remove()});
 /* Bilah atas bersembunyi saat digulir ke bawah, muncul saat digulir ke atas */
 {let y0=scrollY;addEventListener('scroll',()=>{const a=$('#atas');if(!a)return;const y=scrollY,d=y-y0;a.classList.toggle('lyg',y>4);if(Math.abs(d)>6){a.classList.toggle('smb',d>0&&y>120&&!a.contains(document.activeElement)&&!$('.mnu'));y0=y}},{passive:true})}

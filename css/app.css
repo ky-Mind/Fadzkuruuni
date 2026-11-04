@@ -378,9 +378,12 @@ html,#view{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 /* Layar penuh kitab: tanpa menu, bilah, dan tasbih; satu halaman memenuhi layar, geser kanan/kiri (kanan-ke-kiri) untuk pindah halaman */
 .kfull #nav,.kfull #ftb,.kfull .ktb,.kfull #kd .pnav{display:none}
 .kfull #view{max-width:none;overflow:hidden}
-.kfull #kp{position:fixed;inset:0;z-index:15;display:flex;direction:rtl;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:contain;background:var(--bg);scrollbar-width:none}
+.kfull #kp{position:fixed;inset:0;z-index:15;background:var(--bg)}
+.kfull.kgulir #kp{overflow:auto;overscroll-behavior:contain;padding:8px 0}
+.kfull:not(.kgulir) .kpi{display:contents}
+.kfull:not(.kgulir) #kp{position:fixed;inset:0;z-index:15;display:flex;direction:rtl;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:contain;background:var(--bg);scrollbar-width:none}
 .kfull #kp::-webkit-scrollbar{display:none}
-.kfull #kp img{flex:0 0 100%;width:100%!important;height:100%;max-width:none;margin:0;object-fit:contain;aspect-ratio:auto;border-radius:0;box-shadow:none;background:transparent;scroll-snap-align:start;scroll-snap-stop:always}
+.kfull:not(.kgulir) #kp img{flex:0 0 100%;width:100%!important;height:100%;max-width:none;margin:0;object-fit:contain;aspect-ratio:auto;border-radius:0;box-shadow:none;background:transparent;scroll-snap-align:start;scroll-snap-stop:always}
 .kfo{display:none}
 .kfull .kfo{position:fixed;z-index:16;top:calc(10px + env(safe-area-inset-top));left:50%;display:flex;align-items:center;gap:8px;padding:4px 4px 4px 14px;border-radius:99px;background:rgba(20,24,22,.72);color:#fff;font-size:13px;font-weight:600;transform:translate(-50%,-8px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s cubic-bezier(.22,.8,.3,1);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .kfull .kfo.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
@@ -1231,6 +1234,12 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 .qedit{flex-wrap:wrap;gap:8px}.qedit #qv{flex:1 1 220px}
 /* Kitab layar penuh: saat halaman dicubit-perbesar, geser antarhalaman dikunci */
 .kfull #kp.kzum{overflow:hidden;touch-action:none}
+#kp{touch-action:pan-x pan-y}
+#kp img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
+.kfull:not(.kgulir) #kp img{touch-action:pan-x}
+.kpi{transform-origin:0 0;will-change:auto}
+.kfo-s{order:1}
+.ksh-n{font-size:12.5px;margin:8px 2px 0}
 .kfull #kp img{transform-origin:center;will-change:auto}
 /* Kompas kiblat: piringan berputar mengikuti arah HP, jarum menunjuk Ka'bah */
 .kbl{position:relative;width:min(280px,78vw);margin:18px auto 8px}
@@ -1286,3 +1295,77 @@ html.tgt .vtbtn{view-transition-name:temabtn}
 .dkno{margin:12px 0;padding:12px;border:1px dashed var(--line);border-radius:12px;background:var(--fill)}
 .dkno small{display:block;font-size:12px}.dkno>b{display:block;font-size:22px;letter-spacing:.04em;margin:4px 0;color:var(--ink)}
 .dkok{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--g)}
+/* Teks sementara pesan suara (saat rekaman dijeda) */
+.aivt{display:flex;align-items:flex-start;gap:8px;margin:0 2px 6px;padding:8px 12px;border-radius:12px;background:var(--fill);color:var(--ink);font-size:13.5px;line-height:1.45;max-height:30vh;overflow:auto;animation:qin .25s}
+.aivt>.ic{flex:none;margin-top:2px;color:var(--g)}
+.aivt span{flex:1;min-width:0;white-space:pre-wrap}
+.aivt em{color:var(--mut);font-style:normal}
+.aivt.proses>i{flex:none;width:14px;height:14px;margin-top:2px;border:2px solid var(--line);border-top-color:var(--g);border-radius:50%;animation:aiputar .8s linear infinite}
+.aivt[hidden]{display:none}
+.aisv [data-svm]{display:grid;place-items:center;color:var(--g)}
+/* Tasbih layar penuh: seluruh area di bawah bilah atas adalah tombol hitung */
+#view:has(>.tsf){display:flex;flex-direction:column}
+#view:has(>.tsf) .bar{flex:none}
+.tsf{--p:0;position:relative;flex:1;min-height:340px;width:100%;margin:0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:0;border-radius:28px;background:var(--g);color:var(--on);cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:0 14px 36px rgba(0,0,0,.18);transition:transform .09s ease}
+.tsf:active{transform:scale(.985)}
+.tsf::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),transparent 60%);opacity:0;pointer-events:none}
+.tsf.tk::after{animation:tsdenyut .35s ease-out}
+.tsf.penuh::after{animation:tsdenyut .9s ease-out}
+@keyframes tsdenyut{0%{opacity:1}100%{opacity:0}}
+.tsr{position:relative;width:min(62vmin,300px);aspect-ratio:1;border-radius:50%;background:conic-gradient(currentColor calc(var(--p)*1%),color-mix(in srgb,currentColor 18%,transparent) 0);-webkit-mask:radial-gradient(circle,transparent 63%,#000 64%);mask:radial-gradient(circle,transparent 63%,#000 64%);transition:background .2s}
+.tsw{position:relative;display:grid;place-items:center}
+.tsw>*{grid-area:1/1}
+.tsf b{font-size:clamp(56px,16vmin,104px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tsk{font-size:15px;opacity:.85;font-variant-numeric:tabular-nums}
+.tsh{position:absolute;bottom:14px;font-size:12px;opacity:.6}
+.tss .tsl{display:block;margin:14px 2px 6px}
+.tss .list{margin:0}
+
+/* Mode mushaf ikut warna teks bacaan; ayat dipilih/dituju diberi blok warna, ayat dituju berkedip 3 kali */
+#ay .mushaf{color:var(--tc,var(--bc,var(--ink)))}
+.ay.aytuju{background:color-mix(in srgb,var(--g) 9%,var(--card));border-color:color-mix(in srgb,var(--g) 55%,transparent);box-shadow:0 0 0 2px color-mix(in srgb,var(--g) 22%,transparent)}
+.ayt.aytuju{background:color-mix(in srgb,var(--g) 16%,transparent);border-radius:8px;box-shadow:0 0 0 3px color-mix(in srgb,var(--g) 16%,transparent)}
+.aytuju.aykedip{animation:aykedip .3s ease-in-out 3}
+@keyframes aykedip{50%{background:color-mix(in srgb,var(--g) 34%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 40%,transparent)}}
+.ayt{transition:background .2s}
+.am-lt{margin:4px 0 0;font-size:14px}.am-tr{margin:6px 0 8px;font-size:14px;line-height:1.55}
+.ksh-mn{display:none;font-size:12.5px;margin:0 2px 8px}
+.msf .ksh-mn{display:block}
+.msf .ksh-mt{opacity:.45;pointer-events:none}
+
+/* Peta arah kiblat */
+.kmap{padding:14px}
+.kmh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.kmh>span{min-width:0}.kmh small{font-size:12.5px}
+.kmh .seg{flex:none;width:auto;min-width:170px;margin:0}
+.kmp{position:relative;height:min(62vh,380px);border-radius:14px;overflow:hidden;background:var(--fill);z-index:0}
+.kmm{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:16px;text-align:center}
+.kmf{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
+.kmf .sb{display:inline-flex;align-items:center;gap:6px}
+.kmk{display:block;font-size:12.5px;line-height:1.5}
+.kmi{display:grid!important;place-items:center;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2px solid #fff}
+.kmi-kb{background:#1d1f1e;color:#e7c873}
+.kmi-sy{background:var(--g);color:var(--on)}
+.kmp .leaflet-control-attribution{font-size:9px}
+[data-theme=dark] .kmp:not(.sat) .leaflet-tile-pane{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.9)}
+
+/* Tombol notifikasi per waktu di Jadwal salat */
+#jt .row .t{flex:1}
+.jnb{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;border:0;border-radius:99px;background:var(--fill);color:var(--ink);font:600 12.5px/1 inherit;cursor:pointer}
+.jnb.jn-mati{color:var(--mut)}
+.jnb.jn-mati .ic{opacity:.5}
+.jnb.jn-adzan{background:var(--g);color:var(--on)}
+.jnl button{align-items:center}
+.jnl button>span{display:flex;flex-direction:column;flex:1;text-align:left}
+.jnl button.on{color:var(--g)}
+.jnl small{font-size:12.5px;font-weight:400}
+.jnk{display:block;margin:10px 4px 0;font-size:13px;text-decoration:none}
+
+.jnb{min-width:86px;justify-content:center}
+.jnb.jnx{visibility:hidden}
+.jnb.jn-senyap,.jnb.jn-bunyi{background:var(--gs,var(--fill))}
+.jnh{display:block;margin:12px 4px 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.jns-s{max-height:88vh;overflow:auto}
+.jnl .jnc{flex:none;display:inline-flex;align-items:center;gap:4px;font-style:normal}
+.jnl .jnc.on{background:var(--g);color:var(--on)}
+.jns button{min-height:48px}

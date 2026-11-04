@@ -1,2 +1,2 @@
 /* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
-registerKitab({"id": "nashaihul-ibad", "judul": "Nashaihul Ibad", "arab": "نصائح العباد", "pengarang": "Syekh Nawawi Al-Bantani", "ket": "Kumpulan nasihat", "juzTotal": 1, "juz": [{"no": 1, "halaman": 170, "pola": "kitab/nashaihul-ibad/hal/j1-{n}.webp", "pdf": "kitab/nashaihul-ibad/pdf/juz-1.pdf"}], "rasio": 0.7031});
+registerKitab({"id": "nashaihul-ibad", "judul": "Nashaihul Ibad", "arab": "نصائح العباد", "pengarang": "Syekh Nawawi Al-Bantani", "ket": "Kumpulan nasihat", "juzTotal": 1, "juz": [{"no": 1, "halaman": 62, "pola": "kitab/nashaihul-ibad/hal/j1-{n}.webp", "pdf": "kitab/nashaihul-ibad/pdf/juz-1.pdf"}], "rasio": 0.7082});

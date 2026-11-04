@@ -11,7 +11,10 @@ function waktu(d,{lat,lng,tz:TZ}){
 }
 const hm=h=>{const m=Math.round(((h%24)+24)%24*60)%1440;return String(m/60|0).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 const hijri=(d=new Date())=>new Intl.DateTimeFormat('id-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d);
-const gps=cb=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{S.loc={lat:p.coords.latitude,lng:p.coords.longitude,n:'Lokasi saya',tz:-new Date().getTimezoneOffset()/60};save();toast('Lokasi diperbarui');cb()},()=>toast('Izin lokasi ditolak. Aktifkan GPS dan izinkan akses.'),{timeout:10000}):toast('Perangkat tidak mendukung lokasi');
+/* Nama kota dari koordinat (GPS / titik di peta), agar lokasi tampil "Bandung" dsb., bukan "Lokasi saya" */
+const kotaDari=(lat,lng)=>fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`).then(r=>r.ok?r.json():{}).then(j=>(j.city||j.locality||j.principalSubdivision||'').replace(/^(Kota|Kabupaten) /,'').trim()).catch(()=>'');
+const lokasiNama=(lat,lng)=>kotaDari(lat,lng).then(n=>{if(!n||!S.loc||S.loc.lat!=lat||S.loc.lng!=lng)return;S.loc.n=n;save();$$('.lc .t b').forEach(b=>b.textContent=n);const k=$('#kbn');if(k)k.textContent='dari utara sejati · '+n});
+const gps=cb=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{S.loc={lat:p.coords.latitude,lng:p.coords.longitude,n:'Lokasi saya',tz:-new Date().getTimezoneOffset()/60};save();toast('Lokasi diperbarui');cb();lokasiNama(S.loc.lat,S.loc.lng)},()=>toast('Izin lokasi ditolak. Aktifkan GPS dan izinkan akses.'),{timeout:10000}):toast('Perangkat tidak mendukung lokasi');
 const hf=(d,o)=>new Intl.DateTimeFormat('id-u-ca-islamic-umalqura',o).format(d);
 const tzl=()=>({7:'WIB',8:'WITA',9:'WIT'}[S.loc.tz??-new Date().getTimezoneOffset()/60]||'');
 const locNow=()=>{const n=new Date(),tz=S.loc.tz??-n.getTimezoneOffset()/60,u=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600+tz+(S.kor||0)/60;return((u%24)+24)%24};
@@ -21,3 +24,5 @@ function lsheet(){const e=document.createElement('div');e.className='back-d';let
  draw();$('#lq',e).oninput=draw;segBind('lz',v=>tz=+v);$('#lg',e).onclick=()=>gps(()=>{e.remove();route()});
  $('#ls',e).onclick=()=>{const la=parseFloat($('#la',e).value.replace(',','.')),lo=parseFloat($('#lo',e).value.replace(',','.'));if(!(la>=-90&&la<=90&&lo>=-180&&lo<=180))return toast('Lintang dan bujur belum valid');set({n:$('#ln',e).value.trim()||'Lokasi manual',lat:la,lng:lo,tz})};
  e.onclick=x=>{const r=x.target.closest('[data-c]');if(r){const c=CITIES[+r.dataset.c];return set({n:c[0],lat:c[1],lng:c[2],tz:c[3]})}if(x.target==e)e.remove()}}
+/* Lokasi lama tanpa nama kota: cari namanya sekali saat online */
+setTimeout(()=>{if(S.loc&&/^(Lokasi saya|Titik di peta)$/i.test(S.loc.n)&&navigator.onLine)lokasiNama(S.loc.lat,S.loc.lng)},4000);

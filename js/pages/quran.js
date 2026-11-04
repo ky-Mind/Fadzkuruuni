@@ -3,7 +3,7 @@
 const MADANI=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
 const jn=n=>`<span class="jn">${MADANI.has(n)?'Madaniyah':'Makkiyah'}</span>`;
 /* Kartu progres di tab Riwayat: surah terakhir dibaca dan jumlah surah yang sudah pernah dibuka */
-const KH=()=>{const h=S.hist||[];if(!h.length)return '';const k=new Set(S.dibuka||[]).size,p=Math.round(k/114*100);return `<div class="card kh"><small class="mut">Terakhir dibaca</small><div class="kh-r"><b>${NAMA[h[0]-1]}</b><a class="btn s" href="#/quran/${h[0]}">Lanjutkan</a></div><div class="pb"><i style="width:${p}%"></i></div><small class="mut">${k} dari 114 surah sudah dibuka (${p}%)</small></div>`};
+const KH=()=>{const h=S.hist||[],tb=S.tbaca;if(!h.length&&!tb)return '';const k=new Set(S.dibuka||[]).size,p=Math.round(k/114*100);return `<div class="card kh"><small class="mut">${tb?'Ditandai terakhir dibaca':'Terakhir dibaca'}</small><div class="kh-r"><b>${tb?`${NAMA[tb.n-1]} · ayat ${tb.a}`:NAMA[h[0]-1]}</b><a class="btn s" href="#/quran/${tb?tb.n+'/'+tb.a:h[0]}">Lanjutkan</a></div><div class="pb"><i style="width:${p}%"></i></div><small class="mut">${k} dari 114 surah sudah dibuka (${p}%)</small></div>`};
 P.quran=()=>({html:`<div class="bar"><a class="bk" href="#/">${ic('back',22)}</a><h1>Al-Quran</h1><button class="btn s" onclick="$('#q').focus()">${ic('search',16)} Cari</button></div><input class="in" id="q" type="search" placeholder="Cari surah…">${tabs([`${ic('book',16)} Surah`,`${ic('news',16)} Juz`,`${ic('clock',16)} Riwayat`])}<div id="ql"></div>`,
  init(){let tab=0;const draw=()=>{/* Cari surah tanpa peduli spasi, tanda hubung, atau petik: "yasin" = "Ya Sin", "aliimran" = "Ali 'Imran" */const nrm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,''),q=nrm($('#q').value);let a=NAMA.map((n,i)=>i+1);if(tab==2)a=S.hist;else if(q)a=a.filter(i=>nrm(NAMA[i-1]+i).includes(q));
   $('#ql').innerHTML=(tab==2?KH():'')+(tab==1?list(JUZ,(j,i)=>`<a class="row" href="#/quran/${j[0]}/${j[1]}"><span class="num">${i+1}</span><span class="t">Juz ${i+1}<br><small>${NAMA[j[0]-1]} : ${j[1]}</small></span></a>`):a.length?list(a,i=>`<a class="row" href="#/quran/${i}"><span class="num">${i}</span><span class="t">${NAMA[i-1]}${jn(i)}<br><small>${ARTI[i-1]} (${AYAT[i-1]} Ayat)</small></span></a>`):'<div class="card mut">Belum ada riwayat.</div>');};
@@ -24,11 +24,13 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  const segOn=()=>$$('.mseg button').forEach(b=>b.classList.toggle('on',(b.dataset.md=='1')==!!S.full));
  /* Pemutar: memutar ayat satu per satu dan menyorot ayat yang sedang dibaca */
  const au=$('#au'),pl={n:0,i:0,L:[]};
- const tandai=()=>{$$('#ay .qplay').forEach(x=>x.classList.remove('qplay'));if(!pl.L.length||pl.n!=R.n)return;const k=pl.i-(pl.L.length-AYAT[pl.n-1]);const t=k>=0&&$('#a'+(k+1));t&&t.classList.add('qplay')};
+ const tandai=()=>{$$('#ay .qplay').forEach(x=>x.classList.remove('qplay'));if(!pl.L.length||pl.n!=R.n)return;const k=pl.satu?pl.satu-1:pl.i-(pl.L.length-AYAT[pl.n-1]);const t=k>=0&&$('#a'+(k+1));t&&t.classList.add('qplay')};
  const putar=i=>{pl.i=i;au.src=pl.L[i];au.play().catch(()=>{});tandai()};
- const henti=()=>{au.pause();au.removeAttribute('src');pl.L=[];pl.i=0;$('#pg').style.width='0';tandai()};
- R.dari=k=>{pl.n=R.n;pl.L=qAudList(R.n);putar(k-1+(pl.L.length-AYAT[R.n-1]))};
- $('#pp').onclick=()=>{if(pl.n!=R.n||!pl.L.length){pl.n=R.n;pl.L=qAudList(R.n);putar(0)}else au.paused?au.play().catch(()=>{}):au.pause()};
+ const henti=()=>{au.pause();au.removeAttribute('src');pl.L=[];pl.i=0;pl.satu=0;$('#pg').style.width='0';tandai()};
+ R.dari=k=>{pl.n=R.n;pl.satu=0;pl.L=qAudList(R.n);putar(k-1+(pl.L.length-AYAT[R.n-1]))};
+ /* Putar hanya satu ayat (berhenti setelah ayat itu selesai) */
+ R.satu=k=>{const L=qAudList(R.n);pl.n=R.n;pl.satu=k;pl.L=[L[k-1+(L.length-AYAT[R.n-1])]];putar(0)};
+ $('#pp').onclick=()=>{if(pl.n!=R.n||!pl.L.length||(pl.satu&&au.ended)){pl.satu=0;pl.n=R.n;pl.L=qAudList(R.n);putar(0)}else au.paused?au.play().catch(()=>{}):au.pause()};
  au.onplay=()=>$('#pp').innerHTML=ic('pause',20);au.onpause=()=>$('#pp').innerHTML=ic('play',20);
  au.onended=()=>{pl.i+1<pl.L.length?putar(pl.i+1):henti()};
  au.onerror=()=>{if(!pl.L.length||!au.getAttribute('src'))return;if(navigator.onLine===false&&pl.i+1<pl.L.length)return putar(pl.i+1);toast('Audio ayat ini belum tersimpan dan internet tidak tersedia');henti()};
@@ -36,7 +38,10 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  const hdr=()=>{$('#qt').textContent=R.n+'. '+NAMA[R.n-1];$('#qa').textContent=ARTI[R.n-1]+' · '+AYAT[R.n-1]+' ayat';segOn();henti();$('#qdl').innerHTML=dlW('audio:'+R.n)};
  const nav=()=>{const np=pages(),first=R.p<=0,last=R.p>=np-1,lbl=S.full||np<2?'':`Ayat ${R.p*QPER+1}–${Math.min(R.A.length,(R.p+1)*QPER)} dari ${R.A.length}`;
   $('#snav').innerHTML=`<button class="btn s" data-qn="-1" ${first&&R.n<=1?'disabled':''}>‹ ${first?'Surah sebelumnya':'Sebelumnya'}</button>${lbl?`<small class="mut">${lbl}</small>`:''}<button class="btn" data-qn="1" ${last&&R.n>=114?'disabled':''}>${last?'Surah berikutnya':'Berikutnya'} ›</button>`};
- const draw=()=>{drawAy(el,R.A,R.n,S.full?null:R.p);nav();tandai()};
+ const draw=()=>{drawAy(el,R.A,R.n,S.full?null:R.p);nav();tandai();const t=R.tuju&&$('#a'+R.tuju);t&&t.classList.add('aytuju')};
+ /* Ayat yang dituju (dari penanda, terakhir dibaca, pencarian) diberi blok warna dan berkedip 3 kali; blok tetap sampai ayat lain dipilih */
+ window.ayTuju=k=>{R.tuju=k;$$('#ay .aytuju,#ay .aykedip').forEach(x=>x.classList.remove('aytuju','aykedip'));const t=$('#a'+k);if(!t)return;t.classList.add('aytuju');void t.offsetWidth;t.classList.add('aykedip')};
+ window.ayPilih=k=>{R.tuju=k;$$('#ay .aytuju').forEach(x=>x.classList.remove('aytuju','aykedip'));const t=$('#a'+k);t&&t.classList.add('aytuju')};
  const catat=()=>{S.hist=[R.n,...S.hist.filter(x=>x!=R.n)].slice(0,20);S.dibuka=[...new Set([...(S.dibuka||[]),R.n])];save()};
  /* Ayat yang sedang terlihat paling atas (di bawah header), untuk mempertahankan posisi saat ganti mode */
  const atas=()=>{const y=$('.rh').getBoundingClientRect().bottom;const t=$$('#ay [id^="a"]').find(x=>x.getBoundingClientRect().bottom>y+8);return t?+t.id.slice(1):1};
@@ -46,18 +51,18 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  R.go=async d=>{if(R.busy||!R.A)return;const np=pages();
   if(!S.full&&R.p+d>=0&&R.p+d<np){R.busy=1;await slide(d,()=>{R.p+=d;draw()});R.busy=0;return}
   const m=R.n+d;if(m<1||m>114)return;R.busy=1;let A;try{A=await qGet(m)}catch(e){R.busy=0;return toast('Surah ini belum tersimpan dan internet tidak tersedia')}
-  await slide(d,()=>{R.n=m;R.A=window.QA=A;R.p=d<0&&!S.full?Math.ceil(A.length/QPER)-1:0;hdr();draw();history.replaceState(null,'','#/quran/'+m);route.cur=location.hash;RIW[RIW.length-1]=location.hash;catat()});R.busy=0};
+  await slide(d,()=>{R.n=m;R.tuju=0;R.A=window.QA=A;R.p=d<0&&!S.full?Math.ceil(A.length/QPER)-1:0;hdr();draw();history.replaceState(null,'','#/quran/'+m);route.cur=location.hash;RIW[RIW.length-1]=location.hash;catat()});R.busy=0};
  R.mode=full=>{full=!!full;if(!!S.full==full||!R.A)return;const k=atas();S.full=full;save();document.body.classList.toggle('full',full);R.p=Math.floor((k-1)/QPER);segOn();draw();ke(k)};
  $$('.mseg button').forEach(b=>b.onclick=()=>R.mode(b.dataset.md=='1'));
  /* Ketuk kartu ayat (atau ayat di mode mushaf) untuk membuka menu ayat; tombol bintang tetap langsung menandai */
- el.onclick=e=>{if(e.target.closest('button,a')||String(getSelection()).trim())return;const t=e.target.closest('.ay,.ayt');if(t)ayMenu(R.n,+t.id.slice(1))};
+ el.onclick=e=>{if(e.target.closest('button,a')||String(getSelection()).trim())return;const t=e.target.closest('.ay,.ayt');if(t){ayPilih(+t.id.slice(1));ayMenu(R.n,+t.id.slice(1))}};
  $('#snav').onclick=e=>{const b=e.target.closest('[data-qn]');if(b&&!b.disabled)R.go(+b.dataset.qn)};
  /* Geser ke samping: isi ikut bergeser mengikuti jari, lalu pindah halaman/surah saat dilepas */
  let sx=0,sy=0,hz=0;el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;hz=0;el.style.transition='none'},{passive:true});
  el.addEventListener('touchmove',e=>{const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;if(!hz&&Math.abs(dx)>12)hz=Math.abs(dx)>Math.abs(dy)*1.3?1:-1;if(hz==1)el.style.transform=`translateX(${dx*.35}px)`},{passive:true});
  el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;el.style.transition='transform .2s ease';el.style.transform='';if(hz==1&&Math.abs(dx)>60)R.go(dx<0?1:-1)},{passive:true});
  hdr();catat();
- qGet(n).then(A=>{R.A=window.QA=A;if(sc)R.p=Math.floor((sc-1)/QPER);draw();if(sc)requestAnimationFrame(()=>ke(sc))}).catch(()=>{el.innerHTML='<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia. Sambungkan internet sekali, atau unduh semua dari menu Al-Qur\'an.</div>';$('#snav').innerHTML=''})}
+ qGet(n).then(A=>{R.A=window.QA=A;if(sc)R.p=Math.floor((sc-1)/QPER);draw();if(sc)requestAnimationFrame(()=>{ke(sc);ayTuju(sc)})}).catch(()=>{el.innerHTML='<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia. Sambungkan internet sekali, atau unduh semua dari menu Al-Qur\'an.</div>';$('#snav').innerHTML=''})}
 /* Panah kiri/kanan di keyboard untuk halaman/surah sebelumnya/berikutnya */
 addEventListener('keydown',e=>{if(!window.QR||!$('#ay')||e.target.closest('input,textarea')||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key=='ArrowRight')QR.go(1);else if(e.key=='ArrowLeft')QR.go(-1)});
 /* Mode baca Kartu | Mushaf untuk Tahlil, Maulid, Wirid & Doa (seperti Al-Qur'an). Mushaf: teks Arab tiap bagian (.ay2) disambung
@@ -87,9 +92,10 @@ function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#
 <div class="ksh-l">Tema aplikasi</div>${seg('sth',[['auto','Perangkat'],['light','Terang'],['dark','Gelap'],['blue','Biru']],S.theme||'auto')}
 ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kartu'],['1','Mushaf']],(qr?S.full:S.mbaca=='mushaf')?'1':'0')}`:''}
 <div class="ksh-l">Tampilkan</div>
-<div class="list sg ksh-c">${row('search','Teks Latin','Transliterasi di bawah teks Arab',tg('s5',S.lt))}${row('news','Terjemah','Arti dalam bahasa Indonesia',tg('s1',S.tr))}</div>
+<p class="mut ksh-mn">Mode Mushaf hanya menampilkan teks Arab bersambung. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.</p>
+<div class="list sg ksh-c ksh-mt">${row('search','Teks Latin','Transliterasi di bawah teks Arab',tg('s5',S.lt))}${row('news','Terjemah','Arti dalam bahasa Indonesia',tg('s1',S.tr))}</div>
 <div class="ksh-l">Ukuran huruf</div>
-<div class="list sg ksh-c">${sl('s2','Arab',22,52,S.fs)}${sl('s6','Latin',12,26,S.fl||15)}${sl('s7','Terjemah',12,26,S.fi||14)}</div>
+<div class="list sg ksh-c">${sl('s2','Arab',22,52,S.fs)}<div class="ksh-mt">${sl('s6','Latin',12,26,S.fl||15)}${sl('s7','Terjemah',12,26,S.fi||14)}</div></div>
 <div class="ksh-l">Warna teks</div><div class="ksh-c kpad">${wteksUI()}</div>
 <div class="ksh-l">Jenis huruf Arab</div>${fontUI('af',FAR,'بِسْمِ اللّٰهِ')}
 <div class="ksh-l">Warna aksen</div><div class="ksh-c kpad"><div class="wtk acw" id="acw">${Object.entries(ACC).map(([v,a])=>`<button type="button" data-v="${v}" class="${v==(S.ac||'hitam')?'on':''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check',16)}</i><small>${a[0]}</small></button>`).join('')}</div></div>
@@ -98,7 +104,8 @@ ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kart
  $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();setSz()};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();setSz()};
  $('#s6',e).oninput=x=>{S.fl=+x.target.value;save();setSz()};$('#s7',e).oninput=x=>{S.fi=+x.target.value;save();setSz()};
  $('#s2',e).oninput=x=>{S.fs=+x.target.value;save();$$('#view .ay .ar,#view .ay2 .ar,#view .ar2,#view .mushaf').forEach(a=>a.style.fontSize=S.fs+'px');$$('#view .bsm').forEach(a=>a.style.fontSize=Math.round(S.fs*.85)+'px')};
- if($('#smd',e))segBind('smd',v=>window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1'));
+ const msf=()=>{const on=qr?!!S.full:S.mbaca=='mushaf';e.querySelector('.sheet').classList.toggle('msf',on);$$('.ksh-mt input',e).forEach(i=>i.disabled=on)};msf();
+ if($('#smd',e))segBind('smd',v=>{window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1');msf()});
  segBind('sth',v=>{S.theme=v;save();theme()});wteksBind();fontBind('af',FAR);segBind('acw',v=>{S.ac=v;save();accent()});
  /* Pratinjau dan angka di samping penggeser ikut berubah */
  const prv=()=>{$('#qpa',e).style.fontSize=S.fs+'px';$('#qpl',e).style.fontSize=(S.fl||15)+'px';$('#qpt',e).style.fontSize=(S.fi||14)+'px';$$('[data-for]',e).forEach(b=>b.textContent=$('#'+b.dataset.for,e).value)};prv();e.addEventListener('input',prv);e.addEventListener('click',()=>setTimeout(prv))}
@@ -111,11 +118,13 @@ P.bookmark=()=>({html:head('Penanda ayat')+`<p class="mut">Penanda menyimpan aya
 const bsmSplit=(A,n)=>{const w=A.map(x=>x.a);let b='';if(n!=1&&w[0].startsWith('بِسْمِ')){w[0]=w[0].split(' ').slice(4).join(' ');b=`<div class="bsm" style="font-size:${Math.round(S.fs*.85)}px">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>`}return {b,w}};
 /* Menu ayat: tandai, putar dari ayat ini, salin (Arab + terjemah + rujukan), bagikan */
 function ayMenu(n,k){const x=window.QR&&QR.A&&QR.A[k-1];if(!x)return;const key=n+':'+k,ditandai=()=>(S.bm||[]).includes(key),teks=`${x.a}\n\n${x.t}\n\n(QS. ${NAMA[n-1]} [${n}]: ${k})`;
- const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n-1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div><div class="am-l"><button data-am="bm">${ic('star',20)}<span>${ditandai()?'Hapus tanda ayat':'Tandai ayat'}</span></button><button data-am="play">${ic('play',20)}<span>Putar dari ayat ini</span></button><button data-am="share">${ic('share',20)}<span>Bagikan</span></button></div></div>`;document.body.append(e);
+ const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n-1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div>${S.full?`${S.lt&&x.l?`<p class="lt am-lt">${x.l}</p>`:''}${S.tr!==false?`<p class="mut tr am-tr">${x.t}</p>`:''}`:''}<div class="am-l"><button data-am="bm">${ic('star',20)}<span>${ditandai()?'Hapus tanda ayat':'Tandai ayat'}</span></button><button data-am="tb">${ic('book',20)}<span>${S.tbaca&&S.tbaca.n==n&&S.tbaca.a==k?'Sudah ditandai terakhir dibaca':'Tandai sebagai terakhir dibaca'}</span></button><button data-am="play">${ic('play',20)}<span>Putar ayat ini saja</span></button><button data-am="dari">${ic('play',20)}<span>Putar dari ayat ini sampai akhir surah</span></button><button data-am="share">${ic('share',20)}<span>Bagikan</span></button></div></div>`;document.body.append(e);
  const salin=()=>(navigator.clipboard?navigator.clipboard.writeText(teks):Promise.reject()).then(()=>toast('Ayat disalin'),()=>toast('Tidak bisa menyalin di perangkat ini'));
  e.onclick=ev=>{if(ev.target==e||ev.target.closest('[data-x]'))return e.remove();const b=ev.target.closest('[data-am]');if(!b)return;const a=b.dataset.am;e.remove();
   if(a=='bm'){S.bm=S.bm||[];const i=S.bm.indexOf(key);i<0?S.bm.unshift(key):S.bm.splice(i,1);save();$$(`[data-bm="${key}"]`).forEach(s=>s.classList.toggle('on',i<0));toast(i<0?'Ayat ditandai':'Penanda dihapus')}
-  else if(a=='play')window.QR&&QR.dari(k);
+  else if(a=='play')window.QR&&QR.satu(k);
+  else if(a=='dari')window.QR&&QR.dari(k);
+  else if(a=='tb'){S.tbaca={n,a:k,t:Date.now()};save();toast(`${NAMA[n-1]} ayat ${k} ditandai sebagai terakhir dibaca`)}
   else if(a=='copy')salin();
   else if(a=='share'){window.ANDROID?andPanggil('bagikan',teks):navigator.share?navigator.share({text:teks}).catch(()=>{}):salin()}}}
 /* Gambar ayat. Mode mushaf: semua ayat bersambung (bismillah di luar blok bergaris). Mode kartu: halaman p (QPER ayat); p null = semua. */
