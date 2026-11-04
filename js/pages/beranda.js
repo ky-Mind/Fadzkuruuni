@@ -10,7 +10,7 @@ const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j,kw,kh)=>L.push(
  KITAB_DAFTAR.forEach(k=>tb(k.judul,k.berkas?'#/kitab/'+k.id:null,'Kitab'));
  ASMA.forEach(a=>tb(a[1]+' · '+a[2],'#/asma/'+a[0],'Asmaul Husna'));
  /* Isi kitab: bab/fasal dari daftar isi (data/kitab-indeks.js), mis. "puasa" → Fathul Qarib, Kitab Puasa, hal. 120 */
- if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=KITAB_DAFTAR.find(x=>x.id==id);if(!k)return;E.forEach(e=>tb(e[1]+' — '+k.judul,`#/kitab/${id}/${e[3]}`,'Kitab · '+e[0]+' · hal. '+e[4],e[2]+' '+e[0],`${id}|${e[3]}|${e[4]}`))});
+ if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=KITAB_DAFTAR.find(x=>x.id==id);if(!k)return;E.forEach(e=>tb(e[1]+' — '+k.judul,`#/kitab/${id}/${e[3]}`,'Kitab'+(e[0]?' · '+e[0]:'')+' · hal. '+e[4],e[2]+' '+e[0],`${id}|${e[3]}|${e[4]}`))});
  Object.entries(TPOOL).forEach(([r,v])=>tb(tNama(r,v[1]),'#/'+r,'Fitur'));
  return CARIX=L};
 const cariHasil=q=>{const w=cariNorm(q).split(' ').filter(Boolean);if(!w.length)return [];return cariIndeks().filter(x=>w.every(k=>x[3].includes(k))).sort((a,b)=>(b[3].startsWith(w[0])-a[3].startsWith(w[0]))||(!!b[1]-!!a[1])).slice(0,12)};
