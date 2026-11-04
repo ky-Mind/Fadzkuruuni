@@ -11,13 +11,18 @@ const tg=(id,on)=>`<label class="tg"><input type="checkbox" id="${id}" ${on?'che
 const lk=(h,i,t)=>`<a class="srw" href="${h}"><span class="si">${ic(i,20)}</span><span class="t">${t}</span>${ic('next',18)}</a>`;
 const seg=(id,o,v)=>`<div class="seg" id="${id}">${o.map(x=>`<button type="button" data-v="${x[0]}" class="${x[0]==v?'on':''}">${x[1]}</button>`).join('')}</div>`;
 const segBind=(id,fn)=>$$('#'+id+' button').forEach(b=>b.onclick=()=>{$$('#'+id+' button').forEach(x=>x.classList.toggle('on',x==b));fn(b.dataset.v,b)});
-/* Ganti tema dengan tampilan baru yang melebar melingkar dari tombol yang dipencet ke seluruh layar.
-   Memakai View Transitions bila didukung; bila tidak (atau gerak dikurangi), langsung berganti. */
+/* Ganti tema: tampilan baru melebar melingkar dari BELAKANG tombol yang dipencet ke seluruh layar, dengan tepi lembut.
+   Kotak tombol tema dipotret terpisah (view-transition-name: temaseg) dan tetap di lapisan depan, hanya berganti warna halus.
+   Tepi lembut memakai mask bergradasi dengan --tr (didaftarkan agar bisa dianimasikan); tanpa dukungan itu, lingkaran biasa.
+   Tanpa View Transitions atau bila gerak dikurangi: langsung berganti. */
+let TGMASK=false;try{CSS.registerProperty({name:'--tr',syntax:'<length>',inherits:true,initialValue:'0px'});TGMASK=true}catch(e){TGMASK=!!(window.CSS&&CSS.registerProperty)}
 function temaGanti(el,ubah){const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null,x=r?r.left+r.width/2:innerWidth/2,y=r?r.top+r.height/2:innerHeight/2;
  if(!document.startViewTransition||gerakOff())return ubah();
- const h=document.documentElement;h.classList.add('tgt');const t=document.startViewTransition(ubah);t.finished.finally(()=>h.classList.remove('tgt'));
- t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
-  document.documentElement.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:620,easing:'cubic-bezier(.4,0,.2,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{})}
+ const h=document.documentElement,sg=el&&el.closest&&el.closest('.seg');
+ h.style.setProperty('--tx',x+'px');h.style.setProperty('--ty',y+'px');h.classList.add('tgt');TGMASK&&h.classList.add('tgm');sg&&sg.classList.add('vtseg');
+ const t=document.startViewTransition(ubah);t.finished.finally(()=>{h.classList.remove('tgt','tgm');sg&&sg.classList.remove('vtseg')});
+ t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y))+90,o={duration:850,easing:'cubic-bezier(.33,0,.15,1)',pseudoElement:'::view-transition-new(root)'};
+  if(TGMASK)h.animate({'--tr':['0px',R+'px']},o);else h.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},o)}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
