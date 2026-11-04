@@ -1276,13 +1276,12 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
 ::view-transition-new(root){z-index:2}
 /* Selama ganti tema hanya satu gambar (seluruh layar) yang dilingkarkan; transisi halaman (page) dimatikan sementara */
-html.tgt *:not(.vtseg){view-transition-name:none!important}
-/* Kotak tombol tema tetap di depan lingkaran, berganti warna halus */
-html.tgt .vtseg{view-transition-name:temaseg}
-::view-transition-group(temaseg){z-index:5;animation-duration:.55s}
-::view-transition-old(temaseg),::view-transition-new(temaseg){animation-duration:.55s;animation-timing-function:ease}
-/* Tepi lingkaran lembut: gradasi 80px di tepi */
-html.tgm::view-transition-new(root){-webkit-mask-image:radial-gradient(circle at var(--tx) var(--ty),#000 calc(var(--tr) - 80px),transparent var(--tr));mask-image:radial-gradient(circle at var(--tx) var(--ty),#000 calc(var(--tr) - 80px),transparent var(--tr))}
+html.tgt *:not(.vtbtn){view-transition-name:none!important}
+/* Tombol tema yang dipencet tetap di depan lingkaran (lingkaran muncul dari baliknya), berganti warna halus */
+html.tgt .vtbtn{view-transition-name:temabtn}
+::view-transition-group(temabtn){z-index:5;animation-duration:.45s;animation-timing-function:cubic-bezier(.32,.72,0,1)}
+::view-transition-old(temabtn),::view-transition-new(temabtn){animation-duration:.45s;animation-timing-function:ease}
+::view-transition-group(root){animation:none}
 /* Dialog konfirmasi Buka rekening (Dukung kami) */
 .dkno{margin:12px 0;padding:12px;border:1px dashed var(--line);border-radius:12px;background:var(--fill)}
 .dkno small{display:block;font-size:12px}.dkno>b{display:block;font-size:22px;letter-spacing:.04em;margin:4px 0;color:var(--ink)}
