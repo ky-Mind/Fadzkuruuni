@@ -29,12 +29,18 @@ window.fadzMasukGoogle=async(id,at)=>{try{if(typeof fbInit=='function')await fbI
 /* Pengingat adzan: jadwal 30 hari ke depan dikirim ke Android (alarm terdekat dipasang berantai), agar adzan tetap
    berbunyi walau aplikasi lama tidak dibuka. Dikirim ulang bila pengaturan/lokasi berubah. */
 let andAdzanSig='';
-function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,az.sound,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
+/* Jenis alarm per waktu salat; APK lama (tanpa versiAdzan) belum mengenal 'senyap' & suara per waktu */
+const andJenis=k=>{const md=azMode(k),v2=window.FadzAndroid&&FadzAndroid.versiAdzan,az=S.az;
+ if(az.sound===false||md=='bunyi'||!v2&&(md=='senyap'||md=='beduk'||md=='alarm'))return {jenis:'pengingat'};
+ if(md=='senyap')return {jenis:'senyap'};if(md=='beduk'||md=='alarm')return {jenis:'adzan',suara:md};
+ return {jenis:k==0?'subuh':'adzan',suara:v2?azSuara(k):''}};
+function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,az.m,az.v,az.sound,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
  const L=[];if(az.on){const tz=S.loc.tz??-new Date().getTimezoneOffset()/60,pre=+az.pre||0,kor=(S.kor||0)/60;
   for(let d=0;d<30;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());
+   if(azMode(5)!='mati')L.push({t:dasar+(T[1][1]-tz-kor)*36e5,judul:'Matahari terbit',isi:'Waktu Subuh telah berakhir. Wilayah '+S.loc.n,...andJenis(5)});
    WI.forEach((wi,k)=>{if(!az.w[k])return;const jam=T[wi][1],t=dasar+(jam-tz-kor)*36e5;
     if(pre)L.push({t:t-pre*6e4,judul:'Menjelang '+WS[k],isi:pre+' menit lagi masuk waktu '+WS[k]+' ('+S.loc.n+')',jenis:'pengingat'});
-    L.push({t,judul:'Waktu '+WS[k]+' telah tiba',isi:'Untuk wilayah '+S.loc.n+' dan sekitarnya',jenis:az.sound===false?'pengingat':k==0?'subuh':'adzan'})})}}
+    L.push({t,judul:'Waktu '+WS[k]+' telah tiba',isi:'Untuk wilayah '+S.loc.n+' dan sekitarnya',...andJenis(k)})})}}
  L.sort((a,b)=>a.t-b.t);andPanggil('jadwalAdzan',JSON.stringify(L.filter(x=>x.t>Date.now())))}
 /* Data widget layar utama: jadwal 6 waktu hari ini s.d. lusa (jam & waktu epoch), lokasi, tanggal, dan kata-kata Beranda */
 let andWidSig='';

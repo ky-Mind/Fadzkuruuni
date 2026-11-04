@@ -12,8 +12,8 @@ const AI_FITUR=[['Jadwal salat & pengingat adzan','waktu salat subuh zuhur asar 
 
 const aiRiw=()=>{try{return JSON.parse(localStorage.fzai||'[]')}catch(e){return []}};
 const aiSimpan=L=>{try{localStorage.fzai=JSON.stringify(L.slice(-40))}catch(e){}};
-/* Selesai satu sesi obrolan: tanya-jawab tentang pengembang (yang menyebut nama) dihapus dan hitungan diulang dari nol,
-   agar Fadz AI tidak menyebut nama itu lagi sampai ditanya 3 kali lagi */
+/* Selesai satu sesi obrolan (keluar dari Fadz AI atau riwayat dihapus): semua tanya-jawab tentang pengembang dihapus dan
+   hitungan diulang dari nol, seolah Fadz AI belum pernah ditanya tentang pengembangnya */
 const aiBersihDev=()=>{const L=aiRiw(),B=L.filter(m=>!m.dev&&!m.esk);if(B.length!=L.length)aiSimpan(B);if(S.aidev){S.aidev=0;save()}};
 const aiTerpasang=()=>{try{return localStorage.fzaim||''}catch(e){return ''}};
 let AIE=null,AIL=null,AIX=null,AISIBUK=0,AIUNDUH=null;
@@ -61,7 +61,7 @@ function aiProfil(){const d=new Date(),T=waktu(d,S.loc),L=[];
  if(S.hist&&S.hist[0])L.push('Terakhir membaca surah: '+NAMA[S.hist[0]-1]);
  return L.join('\n')}
 /* Mode online lewat server; aliran jawaban dibaca per potong agar teks muncul bertahap */
-async function aiOnline(L,konteks,tulis){const r=await fetch('api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pesan:L.slice(-10).map(m=>({role:m.role,content:m.content})),konteks,profil:aiProfil(),dev:S.aidev||0})});
+async function aiOnline(L,konteks,tulis){const r=await fetch('api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pesan:L.slice(-10).map(m=>({role:m.role,content:m.content})),konteks,profil:aiProfil(),dev:0})});
  if(!r.ok){let g='';try{g=(await r.json()).galat}catch(e){}throw {kode:r.status,galat:g}}
  const rd=r.body.getReader(),dec=new TextDecoder();let buf='',teks='';
  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});const B=buf.split('\n');buf=B.pop();
@@ -122,7 +122,7 @@ function aiTanyaSimpan(n){if($('.back-d'))return;const e=document.createElement(
   else if(x.target==e)wajibGoyang(e)}}
 
 P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</span><h1>Fadz AI<small>Asisten tanya-jawab Fadzkuruuni</small></h1><button class="ib" data-aifull aria-label="Layar penuh">${ic('full',19)}</button><button class="ib" data-aihapus aria-label="Hapus riwayat chat">${ic('trash',19)}</button></div><div class="aist" id="aist"></div><div class="aic" id="aic"></div>
-<div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
+<div class="aivt" id="aivt" hidden></div><div class="aisv" id="aisv" hidden>${ic('mic',14)}<span>Hasil suara. Periksa atau ubah dulu, lalu ketuk Kirim.</span><button type="button" data-svm aria-label="Lanjut merekam suara">${ic('mic',15)}</button><button type="button" data-svx aria-label="Hapus hasil suara">×</button></div><form class="aif" id="aif"><button type="button" class="aitn" id="aitn" hidden aria-label="Ke pesan terbaru">${ic('next',20)}</button><div class="aiin"><textarea id="aiq" rows="1" maxlength="1500" placeholder="Tanya Fadz AI…"></textarea></div><div class="airec" id="airec" hidden><button type="button" class="airx" data-recx aria-label="Batalkan rekaman">${ic('trash',17)}<span>Batal</span></button><span class="airt"><i></i><b id="airt">0:00</b><span class="airl" id="airl">${'<u></u>'.repeat(18)}</span><span id="airtx"></span><small class="airg">‹ geser untuk batal</small></span><button type="button" class="airj" data-recj aria-label="Jeda rekaman">${ic('pause',18)}</button><button type="button" class="aik" data-reck aria-label="Kirim rekaman">${ic('send',20)}</button></div><span class="ailk" id="ailk" hidden aria-hidden="true">${ic('shield',15)}<i>‹</i></span><button class="aik" id="aikb" aria-label="Kirim">${ic(AIMIC?'mic':'send',20)}</button></form>`,
  init(){aiBersihDev();const L=aiRiw(),c=$('#aic'),q=$('#aiq');let suara=0;aiStatus();aiPenuh(S.aip);
   const kosong=()=>`<div class="aie"><div class="aiei">${ic('spark',30)}</div><b>Assalamu'alaikum${S.nm?', '+esc(S.nm):''}</b><p class="mut">Aku Fadz AI, asisten tanya-jawab Fadzkuruuni. Tanyakan seputar ibadah, doa, Al-Qur'an, zakat, atau isi aplikasi ini. Bisa juga lewat suara dengan tombol mikrofon. Jawaban AI bisa keliru; untuk masalah hukum, tanyakan juga kepada ustadz.</p><div class="ais">${AI_SARAN.map(s=>`<button type="button" class="chip2" data-ais>${s}</button>`).join('')}</div></div>`;
   /* Gulir seperti WhatsApp: ikut turun hanya bila pengguna sedang di bawah; bila sedang membaca pesan lama, tidak ditarik paksa.
@@ -146,8 +146,10 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
   const ikonKb=()=>{const ada=q.value.trim()||!AIMIC;kb.innerHTML=ic(ada?'send':'mic',20);kb.setAttribute('aria-label',ada?'Kirim':'Ketuk untuk merekam suara, tahan untuk bicara');kb.classList.toggle('mic',!ada)};
   q.addEventListener('input',ikonKb);ikonKb();
   /* Hasil pesan suara tidak langsung dikirim: tampil dulu di kolom (jeda) supaya bisa diperiksa atau diubah, lalu ketuk Kirim */
-  const sv=$('#aisv');const hasilSuara=t=>{q.value=t;tinggi();ikonKb();suara=1;sv.hidden=false;buzz(15)};
+  const sv=$('#aisv'),vt=$('#aivt');const hasilSuara=(t,tambah)=>{q.value=tambah&&q.value.trim()?q.value.trim()+' '+t:t;tinggi();ikonKb();suara=1;sv.hidden=false;buzz(15)};
   q.addEventListener('input',()=>{if(!q.value.trim()){sv.hidden=true;suara=0}});
+  /* Lanjut merekam: hasil suara berikutnya ditambahkan di belakang teks yang sudah ada */
+  sv.querySelector('[data-svm]').onclick=()=>{if(!R)rekMulai('kunci',1)};
   sv.querySelector('[data-svx]').onclick=()=>{q.value='';tinggi();ikonKb();sv.hidden=true;suara=0};
   const jamTampil=()=>{if(!R||!R.t0)return;const d=(Date.now()-R.t0)/1000|0;$('#airt').textContent=(d/60|0)+':'+String(d%60).padStart(2,'0')};
   const tampilan=mode=>{rc.hidden=!mode;if(!mode)rc.classList.remove('srm');if(mode!='kunci'){rc.classList.remove('dijeda');const j=rc.querySelector('[data-recj]');if(j){j.innerHTML=ic('pause',18);j.setAttribute('aria-label','Jeda rekaman')}}aiin.hidden=!!mode;rc.classList.toggle('tahan',mode=='tahan');rc.classList.toggle('kunci',mode=='kunci');rc.classList.toggle('proses',mode=='proses');
@@ -158,8 +160,8 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
   /* Batang level suara: bukti mikrofon menangkap suara */
   const level=()=>{if(!R||!R.an)return;if(R.ctx.state=='suspended')R.ctx.resume();const a=R.an,b=new Uint8Array(a.fftSize);a.getByteTimeDomainData(b);let m=0;for(const v of b)m=Math.max(m,Math.abs(v-128));const lv=Math.min(1,m/70);R.puncak=Math.max(R.puncak,lv);
    R.L.push(lv);R.L.shift();$$('#airl u').forEach((u,k)=>u.style.transform=`scaleY(${.15+R.L[k]*.85})`)};
-  async function rekMulai(mode){if(R)return;if(!navigator.onLine)return toast('Pesan suara butuh internet');
-   R={mode,t0:Date.now(),puncak:0,L:Array(18).fill(0),siap:0,akhir:null};tampilan(mode);rc.classList.add('siapan');$('#airtx').textContent='Menyiapkan mikrofon…';$('#airt').textContent='0:00';
+  async function rekMulai(mode,tambah){if(R)return;if(!navigator.onLine)return toast('Pesan suara butuh internet');
+   R={mode,tambah,t0:Date.now(),puncak:0,L:Array(18).fill(0),siap:0,akhir:null,teks:''};vtTampil('');tampilan(mode);rc.classList.add('siapan');$('#airtx').textContent='Menyiapkan mikrofon…';$('#airt').textContent='0:00';
    const r=R;try{r.stream=await navigator.mediaDevices.getUserMedia({audio:window.ANDROID?{echoCancellation:false,noiseSuppression:false,autoGainControl:true,channelCount:1}:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}
    catch(x){if(R===r){bersih();R=null;tampilan(0)}return toast(x&&x.name=='NotAllowedError'?'Izinkan mikrofon untuk berbicara dengan Fadz AI':'Mikrofon tidak bisa dipakai')}
    if(R!==r){r.stream.getTracks().forEach(t=>t.stop());return}
@@ -168,15 +170,20 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    r.rec.onstop=()=>{const f=r.akhir;bersih(r);if(f)f(new Blob(r.potong,{type:(r.rec.mimeType||jt||'audio/webm').split(';')[0]}))};
    /* Mulai menghitung & memberi tanda (getar + 'Bicara sekarang') hanya setelah perekam benar-benar berjalan, agar awal ucapan tidak terpotong */
    r.rec.onstart=()=>{if(R!==r)return;r.t0=Date.now();r.siap=1;rc.classList.remove('siapan');$('#airtx').textContent='Bicara sekarang';r.jam=setInterval(jamTampil,500);buzz(25);if(r.antre)r.antre()};r.rec.start(250)}
-  const rekBatal=pesan=>{if(!R)return;const r=R;R=null;r.akhir=null;try{r.rec&&r.rec.state!='inactive'?r.rec.stop():bersih(r)}catch(x){bersih(r)}tampilan(0);if(pesan)toast(pesan)};
+  /* Suara → teks lewat api/stt.js (Whisper) */
+  const stt=async b=>{const h=await fetch('api/stt',{method:'POST',headers:{'content-type':b.type||'audio/webm'},body:b});let j={};try{j=await h.json()}catch(x){}
+   if(!h.ok)throw new Error(j.galat=='belum-dipasang'?'Pesan suara belum aktif di server':j.galat=='sibuk'?'Layanan suara sedang sibuk, coba sebentar lagi':j.galat=='kosong'?'Suara tidak terdengar':'Gagal mengenali suara');
+   return (j.teks||'').trim()};
+  /* Teks sementara di atas bilah rekaman: muncul saat rekaman dijeda, dan tetap tampil saat rekaman dilanjutkan */
+  function vtTampil(t,proses){vt.hidden=!t&&!proses;vt.classList.toggle('proses',!!proses);vt.innerHTML=proses?`<i></i><span>${t?esc(t)+' ':''}<em>Mengubah suara jadi teks…</em></span>`:`${ic('mic',14)}<span>${esc(t)}</span>`}
+  const blobRek=r=>new Blob(r.potong,{type:(r.rec.mimeType||'audio/webm').split(';')[0]});
+  const rekBatal=pesan=>{if(!R)return;const r=R;R=null;vtTampil('');r.akhir=null;try{r.rec&&r.rec.state!='inactive'?r.rec.stop():bersih(r)}catch(x){bersih(r)}tampilan(0);if(pesan)toast(pesan)};
   const rekKunci=()=>{if(!R||R.mode=='kunci')return;R.mode='kunci';tampilan('kunci');buzz(15)};
   const rekKirim=()=>{if(!R)return;const r=R;if(!r.siap){r.antre=rekKirim;return}const lama=Date.now()-r.t0;
    if(lama<600)return rekBatal('Rekaman terlalu singkat');if(r.an&&r.puncak<.08)return rekBatal('Suara tidak terdengar. Dekatkan HP ke mulut lalu coba lagi');
-   R=null;tampilan('proses');$('#airtx').textContent='Mengubah suara jadi teks…';
-   r.akhir=async b=>{try{const h=await fetch('api/stt',{method:'POST',headers:{'content-type':b.type||'audio/webm'},body:b});let j={};try{j=await h.json()}catch(x){}
-     if(!h.ok)throw new Error(j.galat=='belum-dipasang'?'Pesan suara belum aktif di server':j.galat=='sibuk'?'Layanan suara sedang sibuk, coba sebentar lagi':j.galat=='kosong'?'Suara tidak terdengar':'Gagal mengenali suara');
-     const t=(j.teks||'').trim();tampilan(0);if(!t)return toast('Suara kurang jelas. Coba lagi lebih dekat ke HP');hasilSuara(t)}
-    catch(x){tampilan(0);toast(x.message&&!/fetch|network/i.test(x.message)?x.message:'Gagal mengirim suara. Periksa internet')}};
+   R=null;r.vt=-1;tampilan('proses');$('#airtx').textContent='Mengubah suara jadi teks…';
+   r.akhir=async b=>{try{const t=await stt(b);tampilan(0);vtTampil('');if(!t){if(r.teks)return hasilSuara(r.teks,r.tambah);return toast('Suara kurang jelas. Coba lagi lebih dekat ke HP')}hasilSuara(t,r.tambah)}
+    catch(x){tampilan(0);vtTampil('');if(r.teks){hasilSuara(r.teks,r.tambah);return toast('Sebagian suara terakhir gagal diubah jadi teks')}toast(x.message&&!/fetch|network/i.test(x.message)?x.message:'Gagal mengirim suara. Periksa internet')}};
    try{r.rec.requestData&&r.rec.requestData()}catch(x){}r.rec.stop()};
   /* Cadangan: pengenalan suara bawaan browser (bila perekam tidak didukung), mode terkunci dengan Kirim/Batal */
   let sr=null,srTeks='',srKirim=0;
@@ -203,8 +210,11 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
   /* Jeda / lanjutkan rekaman yang terkunci (seperti WhatsApp: Hapus · Jeda · Kirim) */
   const jb=rc.querySelector('[data-recj]');
   const jedaUI=on=>{rc.classList.toggle('dijeda',on);jb.innerHTML=ic(on?'mic':'pause',18);jb.setAttribute('aria-label',on?'Lanjutkan rekaman':'Jeda rekaman');$('#airtx').textContent=on?'Dijeda':''};
+  /* Saat dijeda, suara yang sudah direkam langsung diubah jadi teks dan ditampilkan; saat dilanjutkan teksnya tetap ada,
+     dan saat Kirim seluruh rekaman (sebelum + sesudah jeda) diubah jadi satu teks utuh */
+  const jedaTeks=r=>{const k=r.vt=(r.vt||0)+1;vtTampil(r.teks,1);setTimeout(async()=>{if(R!==r||r.vt!==k)return;try{const t=await stt(blobRek(r));if(r.vt!==k)return;if(t)r.teks=t}catch(x){}if(r.vt===k&&R===r)vtTampil(r.teks||'')},150)};
   jb.onclick=()=>{const r=R;if(!r||!r.rec||sr)return;try{
-   if(r.rec.state=='recording'){r.rec.pause();r.jd=Date.now();clearInterval(r.jam);clearInterval(r.lv);jedaUI(true)}
+   if(r.rec.state=='recording'){r.rec.pause();try{r.rec.requestData()}catch(x){}r.jd=Date.now();clearInterval(r.jam);clearInterval(r.lv);jedaUI(true);jedaTeks(r)}
    else if(r.rec.state=='paused'){r.rec.resume();r.t0+=Date.now()-r.jd;r.jam=setInterval(jamTampil,500);if(r.an)r.lv=setInterval(level,80);jedaUI(false)}}catch(x){}};
   /* Geser bilah rekaman (terkunci) ke kiri untuk membatalkan, seperti WhatsApp */
   let gx0=null;rc.addEventListener('pointerdown',e=>{if(rc.classList.contains('kunci')&&!e.target.closest('button'))gx0=e.clientX});rc.addEventListener('pointermove',e=>{if(gx0==null)return;const d=Math.min(0,e.clientX-gx0);rc.style.transform=`translateX(${d}px)`;rc.style.opacity=1+d/300;if(d<-110){gx0=null;rc.style.transform=rc.style.opacity='';rc.querySelector('[data-recx]').click()}});
@@ -229,10 +239,15 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    /* Pertanyaan siapa pembuat/pengembang dihitung (lihat api/ai.js: nama pengembang baru disebut setelah ditanya berkali-kali) */
    /* "Who is KyMind ?" persis (bahasa Inggris, huruf besar-kecil sama) langsung dijawab namanya; tulisan lain tidak */
    const kym=/^Who is KyMind ?\?$/.test(t);
-   const tanyaDev=!kym&&/(siapa|who).{0,40}(pembuat|pengembang|developer|dev\b|programmer|kreator|creator|pencipta|membuat|bikin|buat|ngembangin|mengembangkan|founder)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t);if(tanyaDev){S.aidev=(S.aidev||0)+1;save()}
-   /* Setelah nama pengembang terbuka (ditanya >= 3 kali): dalam satu chat nama disebut paling banyak 3 kali, lalu jawaban makin tegas */
-   const nDev=L.filter(m=>m.dev&&m.role=='assistant').length,ESK=['Kenapa kau nanya ini?','Dia tuanku.','Jangan pernah tanya tentangnya.','Stop bertanya tentangnya, atau saya blok atau saya laporkan kepada tuanku, "Zia".'];
-   const eskTeks=kym?'KyMind is Muhammad Hilmi Azkia Rahman.':tanyaDev&&S.aidev>=3&&nDev>=3?ESK[Math.min(nDev-3,ESK.length-1)]:'';
+   const tanyaDev=!kym&&(/(siapa|who).{0,40}(pengembang|developer|dev\b|programmer|kreator|creator|founder|ngembangin|mengembangkan)/i.test(t)||/(siapa|who).{0,40}(pembuat|pencipta|membuat|bikin|buat|made|create)|(dibuat|dikembangkan|diciptakan|dibikin) (oleh|sama) siapa/i.test(t)&&/aplikasi|\bapp|apk|kamu|kau|\blu\b|\bmu\b|fadz|ai\b|ini/i.test(t));if(tanyaDev){S.aidev=(S.aidev||0)+1;save()}
+   /* Tahapan jawaban tentang pengembang: ke-1 tertutup, ke-2 mulai ketus, ke-3 makin keras, ke-4 nama disebut.
+      Setelah nama disebut, hitungan diulang dari nol (seolah belum pernah ditanya) */
+   const ESK=['Maaf, soal itu tidak bisa kubahas. Aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni, cukup itu yang perlu kamu tahu.',
+    'Kenapa kamu ingin tahu? Sudah kubilang, itu rahasia tim. Tolong jangan tanya soal pengembangku lagi.',
+    'Kamu terus mendesak, dan aku tidak suka. Ini peringatan terakhir: berhenti bertanya tentang tuanku.'];
+   const keDev=kym?4:tanyaDev?S.aidev:0,NAMA_DEV='Baiklah, karena kamu terus memaksa: pengembangku adalah Muhammad Hilmi Azkia Rahman. Sudah, jangan tanya lagi.';
+   const eskTeks=kym?'KyMind is Muhammad Hilmi Azkia Rahman.':keDev>=4?NAMA_DEV:keDev?ESK[keDev-1]:'';
+   if(keDev>=4&&S.aidev){S.aidev=0;save()}
    const hits=sapa?[]:aiCari(t),konteks=hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,300)}`).join('\n');
    c.insertAdjacentHTML('beforeend','<div class="aim a"><div class="aiw"><i></i><i></i><i></i></div></div>');const b=c.lastElementChild.firstElementChild;ikut=1;turun(1);
    /* Teks digambar paling sering sekali per bingkai layar agar tetap mulus saat jawaban mengalir cepat */
@@ -240,10 +255,10 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    try{if(eskTeks){teks=eskTeks;tulis(teks)}else{if(!navigator.onLine)throw {kode:-1};teks=await aiOnline(L.filter(m=>!m.esk&&!m.dev),konteks,tulis)}}
    catch(er){if(er&&er.galat=='belum-dipasang')toast('AI online belum diaktifkan pengelola aplikasi');else if(er&&er.kode==429)toast('AI online sedang ramai, memakai mode offline');
     try{if(!aiTerpasang())throw 0;mode='lokal';teks=await aiLokal(L,konteks,tulis)}catch(e2){mode='cari';teks=aiJawabCari(hits)}}
-   const dev=kym||tanyaDev&&S.aidev>=3;if(dev||eskTeks)L[L.length-1][eskTeks&&!kym?'esk':'dev']=1;
-   L.push({role:'assistant',content:teks,mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(dev?{dev:1}:{}),...(eskTeks&&!kym?{esk:1}:{})});aiSimpan(L);
+   const dev=keDev>=4;if(eskTeks)L[L.length-1][dev?'dev':'esk']=1;
+   L.push({role:'assistant',content:teks,mode:eskTeks?'online':mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(eskTeks?{[dev?'dev':'esk']:1}:{})});aiSimpan(L);
    if($('#aic')){b.parentElement.outerHTML=aiGelembung(L[L.length-1],L.length-1);if(ikut)turun(1);if(lewatSuara)aiBicara(teks,L.length-1)}AISIBUK=0};
-  $('[data-aihapus]').onclick=()=>konfirmasi('Hapus riwayat chat?','Semua percakapan di perangkat ini akan dihapus.','Hapus',()=>{L.length=0;aiSimpan(L);gambar()})}});
+  $('[data-aihapus]').onclick=()=>konfirmasi('Hapus riwayat chat?','Semua percakapan di perangkat ini akan dihapus.','Hapus',()=>{L.length=0;aiSimpan(L);if(S.aidev){S.aidev=0;save()}gambar()})}});
 
 /* Lembar AI offline: pilih model, unduh (sekali), atau hapus */
 async function aiOfflineSheet(){const m=aiTerpasang();let gpu=false;try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
