@@ -36,7 +36,7 @@ function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify(
 let andWidSig='';
 function androidWidget(){if(!ANDROID||!window.FadzAndroid.jadwalWidget)return;const tz=S.loc.tz??-new Date().getTimezoneOffset()/60,kor=(S.kor||0)/60,H=[];
  for(let d=0;d<3;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());H.push(T.map(x=>[x[0],hm(x[1]),Math.round(dasar+(x[1]-tz-kor)*36e5)]))}
- const n=new Date(),o={lok:S.loc.n,tgl:n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'})+' · '+hijri(n),h:H,kata:(typeof QA=='function'?QA():[]).map(q=>q.t).slice(0,40)},sig=JSON.stringify([S.loc,S.kor,n.toDateString(),o.kata.length]);
+ const n=new Date(),o={lok:S.loc.n,zona:tzl(),tgl:n.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})+' / '+(typeof hf=='function'?hf(n,{day:'numeric',month:'long',year:'numeric'}):hijri(n)),h:H,kata:(typeof QA=='function'?QA():[]).map(q=>[q.t,q.p||'any']).slice(0,60)},sig=JSON.stringify([S.loc,S.kor,n.toDateString(),o.kata.length]);
  if(sig==andWidSig)return;andWidSig=sig;andPanggil('jadwalWidget',JSON.stringify(o))}
 if(ANDROID){document.documentElement.classList.add('android');androidWarna();androidAdzan();
  /* Pilihan suara adzan disamakan ke Android (dipakai pemutar adzan) */
