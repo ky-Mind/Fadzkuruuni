@@ -14,21 +14,28 @@ const jarakKaabah=(lat,lng)=>{const r=Math.PI/180,a=Math.sin((KAABA[0]-lat)*r/2)
 const garisBesar=(a,b,n=96)=>{const r=Math.PI/180,[p1,l1]=[a[0]*r,a[1]*r],[p2,l2]=[b[0]*r,b[1]*r],d=2*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin((l2-l1)/2)**2));if(!d)return [a,b];
  const P=[];for(let k=0;k<=n;k++){const f=k/n,A=Math.sin((1-f)*d)/Math.sin(d),B=Math.sin(f*d)/Math.sin(d),x=A*Math.cos(p1)*Math.cos(l1)+B*Math.cos(p2)*Math.cos(l2),y=A*Math.cos(p1)*Math.sin(l1)+B*Math.cos(p2)*Math.sin(l2),z=A*Math.sin(p1)+B*Math.sin(p2);P.push([Math.atan2(z,Math.hypot(x,y))/r,Math.atan2(y,x)/r])}return P};
 const LEAFLET='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
-const leafletMuat=()=>window.L&&L.map?Promise.resolve():(kitabCss(LEAFLET+'leaflet.min.css'),ldjs(LEAFLET+'leaflet.min.js'));
+/* leaflet-rotate: peta bisa diputar mengikuti arah HP (kompas) tanpa merusak geser & cubit */
+const LROT='https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js';
+const leafletMuat=()=>(window.L&&L.map?Promise.resolve():(kitabCss(LEAFLET+'leaflet.min.css'),ldjs(LEAFLET+'leaflet.min.js'))).then(()=>L.Map.prototype.setBearing?0:ldjs(LROT).catch(()=>{}));
 P.kiblat=()=>{let b=arahKiblat(S.loc.lat,S.loc.lng);
  return {html:head('Arah kiblat')+locCard()+`<div class="card" style="text-align:center"><b style="font-size:30px" id="kbd0">${b.toFixed(1)}°</b><br><small class="mut" id="kbn">dari utara sejati · ${esc(S.loc.n)}</small><div id="kbw">${kiblatDial(b)}</div><p class="mut" id="kh">Atur lokasi lebih dulu, lalu aktifkan kompas dan goyangkan ponsel membentuk angka 8 agar akurat.</p><button class="btn" id="cmp">Aktifkan kompas</button></div>
 <div class="card kmap"><div class="kmh"><span><b>Peta arah kiblat</b><small class="mut" id="kmj"></small></span>${seg('kml',[['peta','Peta'],['satelit','Satelit']],S.kml||'peta')}</div>
 <div class="kmp" id="kmp"><p class="mut kmm">Memuat peta…</p></div>
-<div class="kmf"><button type="button" class="sb" data-kmgps>${ic('pin',14)} Lokasi saya</button><button type="button" class="sb" data-kmsaya>${ic('compass',14)} Ke titikku</button><button type="button" class="sb" data-kmkb>${ic('kaaba',14)} Ka'bah</button></div>
+<div class="kmf"><button type="button" class="sb" data-kmgps>${ic('pin',14)} Lokasi saya</button><button type="button" class="sb" data-kmsaya>${ic('compass',14)} Ke titikku</button><button type="button" class="sb" data-kmkb>${ic('kaaba',14)} Ka'bah</button><button type="button" class="sb" data-kmrot>${ic('compass',14)} Ikuti kompas</button></div>
 <small class="mut kmk">Garis hijau adalah arah kiblat (jalur terpendek ke Ka'bah). Geser penanda <b>titikmu</b> atau ketuk lama di peta untuk memindahkan lokasi.</small></div>`,
  init(){let pas=0;$('#cmp').onclick=async()=>{try{if(DeviceOrientationEvent.requestPermission&&await DeviceOrientationEvent.requestPermission()!='granted')throw 0}catch(e){return toast('Izin sensor ditolak')}
   const f=e=>{const h=e.webkitCompassHeading??(e.alpha!=null?360-e.alpha:null);if(h==null||!$('#nd'))return;$('#nd').style.transform=`rotate(${-h}deg)`;
    /* Lurus ke kiblat (selisih < 4°): jarum & Ka'bah menyala, getar sekali */
-   const d=Math.abs(((b-h)%360+540)%360-180),ok=d<4;$('.kbl')?.classList.toggle('pas',ok);if(ok&&!pas)buzz&&buzz(40);pas=ok;
+   const d=Math.abs(((b-h)%360+540)%360-180),ok=d<4;$('.kbl')?.classList.toggle('pas',ok);if(ok&&!pas)getarKe([70,60,70,60,160]);pas=ok;
+   /* Peta ikut berputar sesuai arah HP: arah atas peta = arah HP menghadap, jadi garis kiblat sejajar jarum kompas */
+   kompasH=h;if(S.kmrot!==false&&M&&M.setBearing&&!putarJ)putarJ=requestAnimationFrame(()=>{putarJ=0;M&&M.setBearing(-kompasH)});
    $('#kh').textContent=ok?'Sudah menghadap kiblat.':'Putar badan hingga Ka\'bah di ujung jarum berada di penanda atas.'};
-  addEventListener('deviceorientationabsolute',f,true);addEventListener('deviceorientation',f,true);toast('Kompas aktif')};
+  addEventListener('deviceorientationabsolute',f,true);addEventListener('deviceorientation',f,true);kompasOn=1;rotUI();if(M&&S.kmrot!==false)M.setView([S.loc.lat,S.loc.lng],Math.max(M.getZoom(),15));toast('Kompas aktif')};
   /* Peta (Leaflet + OpenStreetMap / citra satelit Esri): bisa digeser & dicubit seperti Google Maps */
-  const kmp=$('#kmp');let M=null,lap={},saya=null,kb=null,gr=null;
+  const kmp=$('#kmp');let M=null,lap={},saya=null,kb=null,gr=null,kompasH=0,putarJ=0,kompasOn=0;
+  /* Tombol "Ikuti kompas": peta berputar mengikuti HP (butuh kompas aktif) atau kembali utara di atas */
+  const rotUI=()=>{const r=$('[data-kmrot]');if(r)r.classList.toggle('on',kompasOn&&S.kmrot!==false)};
+  $('[data-kmrot]').onclick=()=>{if(!kompasOn){$('#cmp').click();S.kmrot=true;save();return}S.kmrot=S.kmrot===false;save();rotUI();if(S.kmrot===false&&M&&M.setBearing)M.setBearing(0);toast(S.kmrot===false?'Peta: utara di atas':'Peta mengikuti arah HP')};
   const info=()=>{$('#kmj').textContent=' · '+Math.round(jarakKaabah(S.loc.lat,S.loc.lng)).toLocaleString('id-ID')+' km ke Ka\'bah'};info();
   const lapis=v=>{if(!M)return;Object.values(lap).forEach(l=>M.removeLayer(l));lap[v].addTo(M);kmp.classList.toggle('sat',v=='satelit')};
   const gambarGaris=()=>{const a=[S.loc.lat,S.loc.lng];saya.setLatLng(a);gr.setLatLngs(garisBesar(a,KAABA))};
@@ -42,9 +49,9 @@ P.kiblat=()=>{let b=arahKiblat(S.loc.lat,S.loc.lng);
   $('[data-kmkb]').onclick=()=>M&&M.flyTo(KAABA,17,{duration:1.2});
   if(!navigator.onLine){kmp.innerHTML='<p class="mut kmm">Peta butuh internet. Kompas di atas tetap bisa dipakai tanpa internet.</p>';return}
   leafletMuat().then(()=>{if(!$('#kmp'))return;kmp.innerHTML='';
-   M=L.map(kmp,{zoomControl:true,attributionControl:true,worldCopyJump:true,tap:true}).setView([S.loc.lat,S.loc.lng],5);
-   lap.peta=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
-   lap.satelit=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Citra © Esri'});
+   M=L.map(kmp,{zoomControl:true,attributionControl:true,worldCopyJump:true,minZoom:2,maxZoom:21,maxBounds:[[-85,-400],[85,400]],maxBoundsViscosity:.8,rotate:true,bearing:0,touchRotate:false,shiftKeyRotate:false,rotateControl:false,compassBearing:false}).setView([S.loc.lat,S.loc.lng],5);
+   lap.peta=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,maxNativeZoom:19,attribution:'© OpenStreetMap'});
+   lap.satelit=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Citra © Esri'});
    lapis(S.kml||'peta');
    const ikon=(k,h)=>L.divIcon({className:'kmi '+k,html:h,iconSize:[34,34],iconAnchor:[17,17]});
    kb=L.marker(KAABA,{icon:ikon('kmi-kb',ic('kaaba',20)),title:"Ka'bah",keyboard:false}).addTo(M);
