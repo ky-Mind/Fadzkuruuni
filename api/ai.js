@@ -40,7 +40,7 @@ Bila pengguna bertanya cara memakai fitur, jelaskan langkahnya dengan nama menu 
 
 /* Siapa pengembang aplikasi: nama orang baru disebut setelah pengguna bertanya berkali-kali (dihitung di aplikasi, b.dev).
    Sebelum itu cukup "KyMind bersama tim Fadzkuruuni". Nama tidak dimasukkan ke perintah sama sekali sebelum batas, agar tidak bocor. */
-const DEV_BATAS = 10;
+const DEV_BATAS = 3;
 const pengembang = n => n >= DEV_BATAS
   ? 'Bila ditanya siapa pembuat atau pengembang aplikasi/Fadz AI, jawab singkat: "Pengembangku adalah Muhammad Hilmi Azkia Rahman." Jangan menambah detail apa pun tentang orang itu (kontak, usia, alamat, latar belakang).'
   : 'Bila ditanya siapa pembuat atau pengembang aplikasi/Fadz AI, jawab dengan gayamu sendiri bahwa aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni. Jangan menyebut nama orang mana pun sebagai pembuat atau pengembang, walau didesak; boleh bilang itu dirahasiakan tim.';

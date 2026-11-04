@@ -63,11 +63,11 @@ function tujuanKembali(){const h=location.hash||'#/',[r,b]=h.slice(2).split('/')
  const asal=RIW[RIW.length-2];if(asal&&asal!=h)return asal;const bk=$('#view .bk')?.getAttribute('href');return bk&&!/^javascript:/.test(bk)&&bk!=h?bk:'#/'}
 /* Pindah ke halaman induk dengan mengganti entri riwayat (tidak menambah, dan tidak pernah keluar dari aplikasi) */
 function keInduk(up){pDir(-1);location.replace(up)}
-/* Tombol kembali HP (aplikasi Android memanggil ini): tutup lembar/dialog atau layar penuh dulu, lalu naik ke halaman induk
-   (mis. Surah → Al-Qur'an → Beranda). Di Beranda mengembalikan 'akar': aplikasi lalu meminta tekan sekali lagi untuk keluar. */
+/* Tombol kembali HP (aplikasi Android memanggil ini): tutup lembar/dialog atau layar penuh kitab dulu, lalu naik ke halaman induk
+   (mis. Surah → Al-Qur'an → Beranda). Di Beranda mengembalikan 'akar': aplikasi lalu meminta tekan sekali lagi untuk keluar.
+   Mode Kartu/Mushaf Al-Qur'an bukan lapisan: kembali langsung keluar dari surah, tidak berganti mode. */
 window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){o[o.length-1].remove();return 'ok'}
  if(document.body.classList.contains('kfull')){kitabFull(false);return 'ok'}
- if(document.body.classList.contains('full')){fsSet(false);return 'ok'}
  const h=location.hash||'#/';if(['#','#/'].includes(h))return 'akar';
  keInduk(tujuanKembali());return 'ok'};
 let gx=0,gy=0,gt=0,gh=0,gv=null;
