@@ -1,6 +1,6 @@
 /* js/pages/pengaturan/salat-notifikasi.js - Pengaturan: Waktu Salat dan Notifikasi (lokasi, izin, adzan) */
 /* Kotak pilihan suara adzan + rekam/unggah suara sendiri */
-const suaraOpsi=j=>SUARA.filter(x=>j=='subuh'||x[0]!='subuh-malmo').map(([v,n])=>`<option value="${v}" ${suaraPilih(j)==v?'selected':''}>${n}</option>`).join('');
+const suaraOpsi=j=>SUARA.filter(x=>j=='subuh'||!x[0].startsWith('subuh-')).map(([v,n])=>`<option value="${v}" ${suaraPilih(j)==v?'selected':''}>${n}</option>`).join('');
 const suaraBaris=(j,lb)=>`<label>${lb}</label><div class="suar"><select class="in" data-suara="${j}">${suaraOpsi(j)}</select><button type="button" class="sb" data-coba="${j}">${ic('play',14)} Coba</button></div><div class="sus" data-sus="${j}" hidden><span class="mut" data-sust="${j}">Memeriksa…</span><button type="button" class="sb" data-rekam="${j}">${ic('mic',14)} Rekam</button><label class="sb sbf">${ic('down',14)} Unggah<input type="file" accept="audio/*" data-unggah="${j}" hidden></label></div>`;
 const korTxt=()=>S.kor?(S.kor>0?'+':'')+S.kor+' menit dari jam perangkat':'Sesuai jam perangkat';
 SETPAGES.salat=()=>({html:head('Waktu Salat & Notifikasi','#/pengaturan')+`<h2>Lokasi</h2>${locCard()}<div class="list sg" style="margin-top:8px">${row('pin','Izin lokasi',bdg('geolocation'),'<button class="btn s" data-gps>Gunakan lokasi saya</button>')}</div>
