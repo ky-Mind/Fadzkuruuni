@@ -17,7 +17,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('#view .tabs [dat
  const T=tabSemua(),i=T.findIndex(x=>x.classList.contains('on')),k=T.indexOf(b);if(i<0||k<0)return;e.stopImmediatePropagation();e.preventDefault();if(!tabSibuk)tabKe(b,k>i?1:-1)},true);
 /* Pil hijau di bilah tab meluncur ke tab yang aktif */
 function tabPil(){const tb=$('#view .tabs');if(!tb)return;const T=$$('[data-tab]',tb),i=T.findIndex(b=>b.classList.contains('on'));tb.style.setProperty('--n',T.length);tb.style.setProperty('--ti',Math.max(i,0));tb.classList.add('pil')}
-addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tAx=0;tEl=tabSemua().length>1&&!e.target.closest('input,textarea,.cal,.car,.kp,.back-d,.tabs')?tabIsi():null},{passive:true});
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tAx=0;tEl=tabSemua().length>1&&!e.target.closest('input,textarea,.cal,.car,.kp,.kmp,.back-d,.tabs')?tabIsi():null},{passive:true});
 addEventListener('touchmove',e=>{if(!tEl)return;const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
  if(!tAx&&(Math.abs(dx)>10||Math.abs(dy)>10)){tAx=Math.abs(dx)>Math.abs(dy)*1.2?1:-1;if(tAx==1)tEl.style.willChange='transform'}if(tAx!=1)return;
  const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on')),ada=!!T[i+(dx<0?1:-1)];tEl.style.transition='none';tEl.style.transform=`translateX(${dx*(ada?.45:.12)}px)`;tEl.style.opacity=ada?1-Math.min(Math.abs(dx)/600,.35):1},{passive:true});
@@ -73,7 +73,7 @@ window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){const d=o[o.length-1]
 let gx=0,gy=0,gt=0,gh=0,gv=null;
 const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
 const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
-addEventListener('touchstart',e=>{gv=null;if(e.touches.length>1||!$('#view .pnav')||e.target.closest('input,textarea,.sheet,#ftb,.tdlap,.tdbar')||gGeserX(e.target))return;gv=$('#view');gx=e.touches[0].clientX;gy=e.touches[0].clientY;gt=Date.now();gh=0},{passive:true});
+addEventListener('touchstart',e=>{gv=null;if(e.touches.length>1||!$('#view .pnav')||e.target.closest('input,textarea,.sheet,#ftb,.tdlap,.tdbar,.kmp')||gGeserX(e.target))return;gv=$('#view');gx=e.touches[0].clientX;gy=e.touches[0].clientY;gt=Date.now();gh=0},{passive:true});
 addEventListener('touchmove',e=>{if(!gv)return;if(e.touches.length>1){gh=-1;gv.style.transform='';return}const dx=e.touches[0].clientX-gx,dy=e.touches[0].clientY-gy;if(!gh&&Math.abs(dx)>10)gh=Math.abs(dx)>Math.abs(dy)*1.3?1:-1;if(gh!=1)return;
  const r=gLink(dx)?dx*.55:dx*.12;gv.style.transition='none';gv.style.transform=`translateX(${r}px)`;gv.style.opacity=1-Math.min(Math.abs(r)/700,.35)},{passive:true});
 addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx=e.changedTouches[0].clientX-gx,cepat=Math.abs(dx)>40&&Date.now()-gt<250,L=gLink(dx);

@@ -1369,3 +1369,5 @@ html.tgt .vtbtn{view-transition-name:temabtn}
 .jnl .jnc{flex:none;display:inline-flex;align-items:center;gap:4px;font-style:normal}
 .jnl .jnc.on{background:var(--g);color:var(--on)}
 .jns button{min-height:48px}
+.kmf .sb.on{background:var(--g);color:var(--on)}
+.kmp .leaflet-control-zoom a{width:36px;height:36px;line-height:36px;font-size:20px}
