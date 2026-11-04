@@ -10,7 +10,14 @@ const row=(i,t,sb,r)=>`<div class="srw"><span class="si">${ic(i,20)}</span><span
 const tg=(id,on)=>`<label class="tg"><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></label>`;
 const lk=(h,i,t)=>`<a class="srw" href="${h}"><span class="si">${ic(i,20)}</span><span class="t">${t}</span>${ic('next',18)}</a>`;
 const seg=(id,o,v)=>`<div class="seg" id="${id}">${o.map(x=>`<button type="button" data-v="${x[0]}" class="${x[0]==v?'on':''}">${x[1]}</button>`).join('')}</div>`;
-const segBind=(id,fn)=>$$('#'+id+' button').forEach(b=>b.onclick=()=>{$$('#'+id+' button').forEach(x=>x.classList.toggle('on',x==b));fn(b.dataset.v)});
+const segBind=(id,fn)=>$$('#'+id+' button').forEach(b=>b.onclick=()=>{$$('#'+id+' button').forEach(x=>x.classList.toggle('on',x==b));fn(b.dataset.v,b)});
+/* Ganti tema dengan tampilan baru yang melebar melingkar dari tombol yang dipencet ke seluruh layar.
+   Memakai View Transitions bila didukung; bila tidak (atau gerak dikurangi), langsung berganti. */
+function temaGanti(el,ubah){const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null,x=r?r.left+r.width/2:innerWidth/2,y=r?r.top+r.height/2:innerHeight/2;
+ if(!document.startViewTransition||gerakOff())return ubah();
+ const h=document.documentElement;h.classList.add('tgt');const t=document.startViewTransition(ubah);t.finished.finally(()=>h.classList.remove('tgt'));
+ t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+  document.documentElement.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:620,easing:'cubic-bezier(.4,0,.2,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
