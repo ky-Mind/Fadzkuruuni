@@ -44,6 +44,7 @@ header small{color:var(--mut);font-size:12px}
 .gate img{width:56px;height:56px;border-radius:12px}
 .gate h1{margin:12px 0 4px;font-size:20px}
 .gate p{margin:0 0 18px;color:var(--mut)}
+.tot{margin:-4px 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .stats button{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-align:left;cursor:pointer}
 .stats button b{display:block;font-size:22px}
@@ -143,14 +144,14 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearT
 const tgl=t=>t?new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
 const APP=location.href.replace(/admin\.html.*$/,'');
 firebase.initializeApp(FBCFG);const auth=firebase.auth(),db=firebase.firestore();
-let L=[],F={st:'baru',j:'',q:''},stop=null,tunda=0;
+let L=[],F={st:'baru',j:'',q:''},stop=null,tunda=0,DON=0;
 
 const gate=(judul,isi,tombol)=>$('#root').innerHTML=`<div class="gate"><img src="img/icon-192.png" alt=""><h1>${judul}</h1><p>${isi}</p>${tombol||''}</div>`;
 const masuk=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{const c=e.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());if(c!='auth/popup-closed-by-user')toast('Gagal masuk: '+(c=='auth/unauthorized-domain'?'domain ini belum diizinkan di Firebase':c))});
 
 /* Admin = pemilik (ADMIN, tetap) + daftar tambahan di Firestore config/admin (diatur di tab Admin) */
 let ADMX=[],PEMILIK=false;
-const TABS=[['laporan','Laporan'],['tampilan','Tampilan'],['peta','Peta aplikasi'],['statistik','Statistik'],['admin','Admin']];
+const TABS=[['laporan','Laporan'],['donasi','Donasi'],['tampilan','Tampilan'],['peta','Peta aplikasi'],['statistik','Statistik'],['admin','Admin']];
 auth.onAuthStateChanged(async u=>{stop&&stop();stop=null;
  if(!u)return gate('Dashboard Admin','Masuk dengan akun Google admin untuk mengelola Fadzkuruuni.','<button class="btn" id="in">Masuk dengan Google</button>'),$('#in').onclick=masuk;
  const em=(u.email||'').toLowerCase();try{const d=await db.collection('config').doc('admin').get();ADMX=(d.exists&&d.data().emails)||[]}catch(e){ADMX=[]}
@@ -161,22 +162,25 @@ auth.onAuthStateChanged(async u=>{stop&&stop();stop=null;
 addEventListener('hashchange',()=>{if($('#atab'))bukaTab()});
 function bukaTab(){const k=TABS.some(t=>t[0]==location.hash.slice(1))?location.hash.slice(1):'laporan';stop&&stop();stop=null;
  document.querySelectorAll('#atab a').forEach(a=>a.classList.toggle('on',a.dataset.tab==k));$('#isi').className='wrap'+(k=='tampilan'?' lebar':'');
- ({laporan:tabLaporan,tampilan:tabTampilan,peta:tabPeta,statistik:tabStatistik,admin:tabAdmin})[k]()}
-function tabLaporan(){
- $('#isi').innerHTML=`<div class="stats" id="stats"></div><div class="bar"><input id="q" type="search" placeholder="Cari isi laporan, nama, halaman…"><select id="j"><option value="">Semua jenis</option><option>Bug</option><option>Salah tulis</option><option>Konten kurang</option><option>Saran</option></select></div><div id="list"><div class="empty">Memuat laporan…</div></div>`;
+ ({laporan:()=>tabLaporan(0),donasi:()=>tabLaporan(1),tampilan:tabTampilan,peta:tabPeta,statistik:tabStatistik,admin:tabAdmin})[k]()}
+/* Tab Laporan dan tab Donasi memakai koleksi yang sama ('laporan'); konfirmasi donasi dari halaman Dukung kami berjenis 'Donasi' */
+function tabLaporan(don){DON=don;F.j='';
+ $('#isi').innerHTML=`<div class="stats" id="stats"></div>${DON?'<div class="tot" id="tot"></div>':''}<div class="bar"><input id="q" type="search" placeholder="${DON?'Cari nama, metode, pesan…':'Cari isi laporan, nama, halaman…'}">${DON?'':'<select id="j"><option value="">Semua jenis</option><option>Bug</option><option>Salah tulis</option><option>Konten kurang</option><option>Saran</option></select>'}</div><div id="list"><div class="empty">Memuat…</div></div>`;
  $('#q').oninput=e=>{F.q=e.target.value.trim().toLowerCase();tampil()};
- $('#j').onchange=e=>{F.j=e.target.value;tampil()};
+ $('#j')&&($('#j').onchange=e=>{F.j=e.target.value;tampil()});
  /* Laporan baru muncul langsung tanpa memuat ulang */
- stop=db.collection('laporan').orderBy('t','desc').limit(500).onSnapshot(s=>{L=s.docs.map(d=>({id:d.id,...d.data()}));/* Jangan gambar ulang saat admin sedang mengetik catatan */if(document.activeElement?.matches('[data-cat]'))tunda=1;else tampil()},e=>{$('#list').innerHTML=`<div class="empty">Tidak bisa membaca laporan (${esc(e.code||e.message)}).<br>Pastikan Firestore Rules untuk admin sudah dipasang (lihat PANDUAN-FIREBASE.md).</div>`})}
+ stop=db.collection('laporan').orderBy('t','desc').limit(500).onSnapshot(s=>{L=s.docs.map(d=>({id:d.id,...d.data()})).filter(r=>(r.jenis=='Donasi')==!!DON);/* Jangan gambar ulang saat admin sedang mengetik catatan */if(document.activeElement?.matches('[data-cat]'))tunda=1;else tampil()},e=>{$('#list').innerHTML=`<div class="empty">Tidak bisa membaca laporan (${esc(e.code||e.message)}).<br>Pastikan Firestore Rules untuk admin sudah dipasang (lihat PANDUAN-FIREBASE.md).</div>`})}
 
 const stOf=r=>r.status||'baru';
 function tampil(){
  const n=k=>L.filter(r=>!k||stOf(r)==k).length;
  $('#stats').innerHTML=[['','Semua'],...STATUS].map(([k,t])=>`<button data-st="${k}" class="${F.st==k?'on':''}"><b>${n(k)}</b><span>${t}</span></button>`).join('');
  const X=L.filter(r=>(!F.st||stOf(r)==F.st)&&(!F.j||r.jenis==F.j)&&(!F.q||[r.pesan,r.nama,r.kontak,r.email,r.halJudul,r.hal,r.lokasi,r.catatan].join(' ').toLowerCase().includes(F.q)));
- $('#list').innerHTML=X.length?X.map(kartu).join(''):'<div class="empty">Tidak ada laporan di sini.</div>'}
+ /* Donasi: jumlah nominal yang dilaporkan (nominal ditulis di 'lokasi', mis. "Dana · Rp50.000") */
+ if(DON){const rpOf=r=>+((/Rp\s?([\d.]+)/.exec(r.lokasi||'')||[])[1]||'0').replace(/\./g,''),tot=X.reduce((n,r)=>n+rpOf(r),0);$('#tot').innerHTML=`Total nominal yang dilaporkan: <b>Rp${tot.toLocaleString('id-ID')}</b> dari ${X.length} konfirmasi`}
+ $('#list').innerHTML=X.length?X.map(kartu).join(''):`<div class="empty">${DON?'Belum ada konfirmasi donasi di sini.':'Tidak ada laporan di sini.'}</div>`}
 function kartu(r){const st=stOf(r),foto=Array.isArray(r.foto)?r.foto:r.foto?[r.foto]:[],p=r.perangkat||{};
- const meta=[['Halaman',r.hal?`${esc(r.halJudul||r.hal)} · <a href="${esc(APP+r.hal)}" target="_blank" rel="noopener">Buka di aplikasi</a>`:''],['Bagian',esc(r.lokasi)],['Atas nama',esc(r.nama)],['Kontak',esc(r.kontak)],['Akun',esc(r.email)],['Perangkat',[p.layar,p.pwa?'aplikasi terpasang':'',esc(p.ua)].filter(Boolean).join(' · ')],['Versi',esc(r.versi)]].filter(x=>x[1]);
+ const meta=[['Halaman',r.hal?`${esc(r.halJudul||r.hal)} · <a href="${esc(APP+r.hal)}" target="_blank" rel="noopener">Buka di aplikasi</a>`:''],[r.jenis=='Donasi'?'Donasi lewat':'Bagian',esc(r.lokasi)],['Atas nama',esc(r.nama)],['Kontak',esc(r.kontak)],['Akun',esc(r.email)],['Perangkat',[p.layar,p.pwa?'aplikasi terpasang':'',esc(p.ua)].filter(Boolean).join(' · ')],['Versi',esc(r.versi)]].filter(x=>x[1]);
  return `<article class="card ${st}" data-id="${r.id}"><div class="top"><span class="chip st-${st}">${STATUS.find(s=>s[0]==st)[1]}</span><span class="chip">${esc(r.jenis||'-')}</span><time>${tgl(r.t)}</time></div>
  <p class="msg">${esc(r.pesan)}</p><dl class="meta">${meta.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
  ${foto.length?`<div class="fotos">${foto.map((f,i)=>`<img src="${esc(f)}" alt="Foto ${i+1}" data-lb>`).join('')}</div>`:''}
