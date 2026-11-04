@@ -26,11 +26,12 @@ window.fadzMasuk=async(p,id,at)=>{try{if(typeof fbInit=='function')await fbInit(
  const c=p=='fb'?firebase.auth.FacebookAuthProvider.credential(at):firebase.auth.GoogleAuthProvider.credential(id||null,at||null);await firebase.auth().signInWithCredential(c);toast('Berhasil masuk dengan '+(p=='fb'?'Facebook':'Google'))}catch(e){toast(e.code=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Masuk dengan Google dulu.':p=='fb'?FBGAGAL:'Gagal masuk: '+(e.code||e.message))}};
 window.fadzMasukGoogle=async(id,at)=>{try{if(typeof fbInit=='function')await fbInit();for(let k=0;k<40&&!(window.firebase&&firebase.auth);k++)await new Promise(r=>setTimeout(r,250));
  await firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(id||null,at||null));toast('Berhasil masuk dengan Google')}catch(e){toast('Gagal masuk: '+(e.code||e.message))}};
-/* Pengingat adzan: jadwal 7 hari ke depan dikirim ke Android (dipasang sebagai alarm). Dikirim ulang bila pengaturan/lokasi berubah. */
+/* Pengingat adzan: jadwal 30 hari ke depan dikirim ke Android (alarm terdekat dipasang berantai), agar adzan tetap
+   berbunyi walau aplikasi lama tidak dibuka. Dikirim ulang bila pengaturan/lokasi berubah. */
 let andAdzanSig='';
-function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
+function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,az.sound,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
  const L=[];if(az.on){const tz=S.loc.tz??-new Date().getTimezoneOffset()/60,pre=+az.pre||0,kor=(S.kor||0)/60;
-  for(let d=0;d<7;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());
+  for(let d=0;d<30;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());
    WI.forEach((wi,k)=>{if(!az.w[k])return;const jam=T[wi][1],t=dasar+(jam-tz-kor)*36e5;
     if(pre)L.push({t:t-pre*6e4,judul:'Menjelang '+WS[k],isi:pre+' menit lagi masuk waktu '+WS[k]+' ('+S.loc.n+')',jenis:'pengingat'});
     L.push({t,judul:'Waktu '+WS[k]+' telah tiba',isi:'Untuk wilayah '+S.loc.n+' dan sekitarnya',jenis:az.sound===false?'pengingat':k==0?'subuh':'adzan'})})}}
@@ -44,4 +45,8 @@ function androidWidget(){if(!ANDROID||!window.FadzAndroid.jadwalWidget)return;co
 if(ANDROID){document.documentElement.classList.add('android');androidWarna();androidAdzan();
  /* Pilihan suara adzan disamakan ke Android (dipakai pemutar adzan) */
  andPanggil('aturSuara','adzan',S.az.sa||'bawaan');andPanggil('aturSuara','subuh',S.az.ss||'bawaan');setInterval(androidAdzan,15000);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden){andAdzanSig='';androidAdzan();andWidSig='';androidWidget()}})}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){andAdzanSig='';androidAdzan();andWidSig='';androidWidget()}});
+ /* Sekali: minta izin "jalan di latar belakang" (pengecualian hemat baterai). Tanpa ini banyak HP (OPPO, Realme, Xiaomi, Vivo)
+    menahan atau membatalkan alarm adzan saat aplikasi ditutup dan layar mati. */
+ setTimeout(()=>{if(!S.az.on||S.batTanya||!window.FadzAndroid.ujiAdzan||andIzinStatus().baterai!='prompt'||$('.back-d'))return;S.batTanya=1;save();
+  konfirmasi('Agar adzan tetap berbunyi','Izinkan Fadzkuruuni berjalan di latar belakang, supaya HP tidak menahan pengingat adzan saat aplikasi ditutup dan layar mati.','Izinkan',()=>andMintaIzin('baterai'))},6000)}

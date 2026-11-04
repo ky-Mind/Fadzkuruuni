@@ -9,15 +9,21 @@ const BANK=[['BSI','7283603126','com.bsm.activity2'],['Dana','089652243480','id.
 const UNDUH_APK='https://github.com/ky-Mind/Fadzkuruuni/releases/latest/download/fadzkuruuni.apk';
 const salinTeks=t=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()});
 /* Buka aplikasi bank/dompet: di aplikasi Android lewat jembatan; di Chrome Android lewat intent (cadangan ke Play Store) */
-function bukaBank(b){salinTeks(b[1]);toast(`Nomor ${b[0]} ${b[1]} disalin. Tempel di kolom tujuan transfer.`);
+const DKHP=/android/i.test(navigator.userAgent);
+function bukaBank(b){salinTeks(b[1]);
+ /* Laptop/desktop/iPhone: tidak ada aplikasi Android yang bisa dibuka, cukup salin */
+ if(!DKHP)return toast(`Nomor ${b[0]} ${b[1]} disalin. Buka aplikasi ${b[0]} di HP-mu lalu tempel di kolom tujuan.`);
+ toast(`Nomor ${b[0]} ${b[1]} disalin. Tempel di kolom tujuan transfer.`);
  if(window.ANDROID&&window.FadzAndroid.bukaAplikasi){andPanggil('bukaAplikasi',b[2]);return}
+ /* APK lama belum punya jembatan buka aplikasi */
+ if(window.ANDROID)toast('Perbarui aplikasi Fadzkuruuni ke versi terbaru agar tombol Buka bisa membuka aplikasi '+b[0]);
  const play='https://play.google.com/store/apps/details?id='+b[2];
  if(/android/i.test(navigator.userAgent))setTimeout(()=>{location.href=`intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${b[2]};S.browser_fallback_url=${encodeURIComponent(play)};end`},600)}
 P.dukung=()=>({html:head('Dukung kami','back')+`<div class="card dkh"><span class="dki">${ic('heart',26)}</span><b>Bantu Fadzkuruuni terus berkembang</b>
 <p class="mut">Fadzkuruuni gratis dan tanpa iklan, dikembangkan oleh <b>KyMind</b> bersama tim Pondok Pesantren Fadzkuruuni. Dukunganmu dipakai untuk biaya server dan Fadz AI, membuat fitur-fitur baru, dan menyemangati pengembang agar terus memperbaiki aplikasi ini.</p></div>
 <h3 class="sec">Donasi untuk pengembangan</h3>
-<div class="list">${BANK.map((b,i)=>`<div class="row dkr"><span class="t">${b[0]}<br><b>${b[1]}</b></span><button type="button" class="sb pri" data-dkb="${i}">${ic('next',14)} Buka</button></div>`).join('')}</div>
-<p class="mut" style="font-size:13px;margin:8px 0 0">Ketuk <b>Buka</b>: nomor tujuan langsung tersalin dan aplikasinya terbuka (bila belum ada, diarahkan ke Play Store). Berapa pun nominalnya sangat berarti. Nama penerima yang muncul saat transfer adalah nama pengembang Fadzkuruuni.</p>
+<div class="list">${BANK.map((b,i)=>`<div class="row dkr"><span class="t">${b[0]}<br><b>${b[1]}</b></span><button type="button" class="sb pri" data-dkb="${i}">${DKHP?ic('next',14)+' Buka':ic('copy',14)+' Salin'}</button></div>`).join('')}</div>
+<p class="mut" style="font-size:13px;margin:8px 0 0">${DKHP?'Ketuk <b>Buka</b>: nomor tujuan langsung tersalin dan aplikasinya terbuka (bila belum ada, diarahkan ke Play Store).':'Ketuk <b>Salin</b>, lalu buka aplikasi bank atau dompet digital di HP-mu dan tempel nomornya.'} Berapa pun nominalnya sangat berarti. Nama penerima yang muncul saat transfer adalah nama pengembang Fadzkuruuni.</p>
 <button type="button" class="btn" id="dkkf" style="width:100%;margin-top:12px">Sudah berdonasi? Kabari kami</button>
 <h3 class="sec">Dukungan tanpa biaya</h3>
 <div class="list"><a class="srw" href="#" id="dkbg"><span class="si">${ic('share',20)}</span><span class="t">Bagikan aplikasi ke teman dan keluarga</span>${ic('next',18)}</a>${lk('#/lapor','flag','Laporkan bug atau beri saran')}</div>
