@@ -30,5 +30,7 @@ function barLekat(){BLY=0;const h=$('#view > .rh')||$('#view > .bar [data-rs]')?
 addEventListener('hashchange',route);
 tataNav();route();
 if('serviceWorker'in navigator&&!TPRATINJAU)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+/* Saat aplikasi dibuka lagi dari latar belakang, cek versi baru; bila ada, halaman dimuat ulang otomatis (lihat controllerchange) */
+if('serviceWorker'in navigator&&!TPRATINJAU)document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')navigator.serviceWorker.getRegistration().then(g=>g&&g.update()).catch(()=>{})});
 /* Versi baru terpasang (service worker berganti): muat ulang sekali agar tampilan langsung memakai kode terbaru, tanpa perlu buka-tutup aplikasi */
 if('serviceWorker'in navigator&&navigator.serviceWorker.controller){let sdh=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sdh||$('.back-d'))return;sdh=1;location.reload()})}
