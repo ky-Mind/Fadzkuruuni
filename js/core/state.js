@@ -33,18 +33,18 @@ const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
-const VER='1.9.4';
+const VER='2.0.0';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';
 /* Warna teks bacaan (Arab, latin, terjemah): 'auto' = hitam (putih di tema gelap); selain itu kode warna pilihan pengguna */
-const WTEKS=[['auto','Hitam'],['#1f5a43','Hijau'],['#1f4f8f','Biru'],['#6b3f1d','Coklat'],['#7a1f2b','Merah tua']];
+const WTEKS=[['auto','Otomatis'],['#1f5a43','Hijau'],['#1f4f8f','Biru'],['#6b3f1d','Coklat'],['#7a1f2b','Merah tua']];
 /* Ukuran teks bacaan + tampil/sembunyi Latin & terjemah untuk SEMUA halaman (lewat kelas di <html>, langsung berlaku tanpa memuat ulang) */
 /* Ukuran tampilan di HP (layar sempit): seluruh aplikasi diperkecil lewat zoom. Bawaan 'kecil'. */
 const ZM={kecil:.86,sedang:.93,besar:1};
 const zmKini=()=>parseFloat(getComputedStyle(document.documentElement).zoom)||1;
 const setSz=()=>{const r=document.documentElement.style,h=document.documentElement.classList;r.setProperty('--zm',ZM[S.uz]||ZM.kecil);h.toggle('no-lt',!S.lt);h.toggle('no-tr',S.tr===false);r.setProperty('--lt',(S.fl||15)+'px');r.setProperty('--tr',(S.fi||14)+'px');S.tc&&S.tc!='auto'?r.setProperty('--tc',S.tc):r.removeProperty('--tc')};
 /* Pilihan warna teks: bulatan warna + pemilih warna bebas; dipakai di Tampilan & Bacaan dan pengaturan baca */
-const wteksUI=()=>{const tc=S.tc||'auto',lain=tc[0]=='#'&&!WTEKS.some(w=>w[0]==tc)?tc:'';return `<div class="wtk" id="wtk">${WTEKS.map(([v,n])=>`<button type="button" data-tc="${v}" class="${tc==v?'on':''}" style="--c:${v=='auto'?'var(--ink)':v}" aria-label="${n}"><i>${ic('check',16)}</i><small>${n}</small></button>`).join('')}<label class="wtkb${lain?' on':''}" style="${lain?'--c:'+lain:''}" aria-label="Pilih warna lain"><i>${ic('check',16)}</i><input type="color" id="tcx" value="${lain||'#333333'}"><small>Lainnya</small></label></div><div class="wtkp"><span>بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</span><small>Bismillāhir-raḥmānir-raḥīm · Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</small></div>`};
+const wteksUI=()=>{const tc=S.tc||'auto',lain=tc[0]=='#'&&!WTEKS.some(w=>w[0]==tc)?tc:'';return `<div class="wtk" id="wtk">${WTEKS.map(([v,n])=>`<button type="button" data-tc="${v}" class="${tc==v?'on':''}" style="--c:${v=='auto'?'var(--bc,var(--ink))':v}" aria-label="${n}"><i>${ic('check',16)}</i><small>${n}</small></button>`).join('')}<label class="wtkb${lain?' on':''}" style="${lain?'--c:'+lain:''}" aria-label="Pilih warna lain"><i>${ic('check',16)}</i><input type="color" id="tcx" value="${lain||'#333333'}"><small>Lainnya</small></label></div><div class="wtkp"><span>بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</span><small>Bismillāhir-raḥmānir-raḥīm · Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</small></div>`};
 const wteksBind=()=>{const pasang=v=>{S.tc=v;save();setSz();const lain=v[0]=='#'&&!WTEKS.some(w=>w[0]==v);$$('#wtk [data-tc]').forEach(b=>b.classList.toggle('on',b.dataset.tc==v));const l=$('#wtk .wtkb');if(l){l.classList.toggle('on',lain);l.style.setProperty('--c',lain?v:'')}};$$('#wtk [data-tc]').forEach(b=>b.onclick=()=>pasang(b.dataset.tc));const x=$('#tcx');if(x)x.oninput=e=>pasang(e.target.value)};
 setSz();

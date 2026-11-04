@@ -24,7 +24,10 @@ function kitabFull(on,pulih){S.kfull=on;save();document.body.classList.toggle('k
 addEventListener('keydown',e=>{if(!document.body.classList.contains('kfull')||!window.KR||!$('#kp')||e.target.closest?.('input'))return;
  if(e.key=='ArrowLeft'||e.key=='ArrowRight'){e.preventDefault();KR.ke(KR.cur()+(e.key=='ArrowLeft'?1:-1))}else if(e.key=='Escape')kitabFull(false)});
 addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('kfull'))kitabFull(false,1)});
-function kitabHalaman(el,k,j){let cur=0;const key=k.id+'-'+j.no,last=S.klj===false?1:(S.kh||{})[key]||1,jn=x=>k.juz.find(y=>y.no==x),z=()=>S.kz||100;
+/* Hasil pencarian bab kitab (data-kh="id|juz|halaman") membuka kitab langsung di halaman babnya */
+let KITAB_KE=null;
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-kh]');if(!a)return;const [id,j,n]=a.dataset.kh.split('|');KITAB_KE={key:id+'-'+j,n:+n}},true);
+function kitabHalaman(el,k,j){let cur=0;const key=k.id+'-'+j.no,kkh=KITAB_KE&&KITAB_KE.key==key?KITAB_KE.n:0,last=kkh?Math.min(kkh,j.halaman):S.klj===false?1:(S.kh||{})[key]||1,jn=x=>k.juz.find(y=>y.no==x),z=()=>S.kz||100;KITAB_KE=null;
  el.innerHTML=`<div class="ktb"><div class="ktr"><div class="kzg"><button class="sb" data-kz="-15" aria-label="Perkecil">−</button><b id="kzv">${z()}%</b><button class="sb" data-kz="15" aria-label="Perbesar">+</button></div>
 <form class="kgo" id="kgf" title="Ketik nomor halaman lalu Enter"><input class="in" id="kgo" type="number" inputmode="numeric" enterkeyhint="go" min="1" max="${j.halaman}" value="${last}" aria-label="Nomor halaman"><span class="mut">/ ${j.halaman}</span></form></div>
 <div class="kpr"><i id="kpb" style="width:${last/j.halaman*100}%"></i></div></div>
@@ -61,7 +64,7 @@ ${tanpaJuz(k)?`<div class="ksh-l">Unduh</div><div class="ksh-c kdl"><div class="
   $('#klj',e).onchange=x=>{S.klj=x.target.checked;save()};$('#kfs',e).onchange=x=>kitabFull(x.target.checked)};
  /* Layar penuh: satu halaman memenuhi layar, geser kanan/kiri untuk pindah halaman (urutan kanan-ke-kiri seperti kitab Arab).
     Ketuk halaman untuk memunculkan nomor halaman & tombol keluar sebentar. */
- cur=last;window.KR={ke,cur:()=>cur};const kfo=$('#kfo');let kt=0;const kfoTampil=()=>{kfo.classList.add('on');clearTimeout(kt);kt=setTimeout(()=>kfo.classList.remove('on'),2500)};
+ cur=last;window.KR={ke,cur:()=>cur};kitabCubit($('#kp'));const kfo=$('#kfo');let kt=0;const kfoTampil=()=>{kfo.classList.add('on');clearTimeout(kt);kt=setTimeout(()=>kfo.classList.remove('on'),2500)};
  $('#kp').onclick=()=>{if(document.body.classList.contains('kfull'))kfo.classList.contains('on')?kfo.classList.remove('on'):kfoTampil()};
  $('[data-kfx]').onclick=()=>kitabFull(false);window.KR.tampil=kfoTampil;
  /* Di layar penuh, halaman aktif dihitung langsung dari posisi geser (lebih cepat & pasti daripada pengamat visibilitas) */
@@ -80,3 +83,19 @@ P.kitab=(id,juz,bab)=>({html:head('Kitab Kuning',bab!=null?`#/kitab/${id}/${juz}
   t.textContent=tanpaJuz(k)?k.judul:'Juz '+j.no;if(j.pola)return kitabHalaman(el,k,j);
   const B=j.bab||[];if(bab==null){el.innerHTML=`<div class="list">${B.map((b,i)=>`<a class="row" href="#/kitab/${k.id}/${j.no}/${i}"><span class="num">${i+1}</span><span class="t"><b>${esc(b.judul)}</b><br><small>${b.isi.length} bagian</small></span>${ic('next',18)}</a>`).join('')}</div>`;return}
   kitabTeks(el,k,j,B[+bab],+bab,B.length)}});
+/* Layar penuh kitab: cubit dua jari untuk memperbesar/memperkecil halaman (1–4x), geser satu jari saat diperbesar,
+   ketuk dua kali untuk kembali ukuran normal. Saat diperbesar, geser antarhalaman dinonaktifkan sementara. */
+function kitabCubit(kp){if(!kp)return;let sk=1,tx=0,ty=0,img=null,awal=null,ketuk=0;
+ const terap=()=>{if(!img)return;img.style.transform=sk>1?`translate(${tx}px,${ty}px) scale(${sk})`:'';kp.classList.toggle('kzum',sk>1)};
+ const reset=()=>{sk=1;tx=ty=0;terap();img=null};
+ const batas=()=>{if(!img)return;const w=img.clientWidth*(sk-1)/2,h=img.clientHeight*(sk-1)/2;tx=Math.max(-w,Math.min(w,tx));ty=Math.max(-h,Math.min(h,ty))};
+ const jarak=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+ kp.addEventListener('touchstart',e=>{if(!document.body.classList.contains('kfull'))return;
+  if(e.touches.length==2){const n=window.KR?KR.cur():1;const baru=kp.querySelector(`img[data-p="${n}"]`);if(img!=baru){reset();img=baru}awal={d:jarak(e.touches),s:sk,tx,ty}}
+  else if(e.touches.length==1){const now=Date.now();if(now-ketuk<300&&sk>1){reset();ketuk=0;return}ketuk=now;if(sk>1)awal={x:e.touches[0].clientX,y:e.touches[0].clientY,tx,ty}}},{passive:true});
+ kp.addEventListener('touchmove',e=>{if(!awal||!img)return;
+  if(e.touches.length==2&&awal.d){e.preventDefault();sk=Math.max(1,Math.min(4,awal.s*jarak(e.touches)/awal.d));batas();terap()}
+  else if(e.touches.length==1&&sk>1&&awal.x!=null){e.preventDefault();tx=awal.tx+e.touches[0].clientX-awal.x;ty=awal.ty+e.touches[0].clientY-awal.y;batas();terap()}},{passive:false});
+ kp.addEventListener('touchend',e=>{if(e.touches.length==0){awal=null;if(sk<=1.02)reset()}else if(e.touches.length==1&&sk>1)awal={x:e.touches[0].clientX,y:e.touches[0].clientY,tx,ty}},{passive:true});
+ kp.addEventListener('scroll',()=>{if(sk>1&&img&&window.KR&&img.dataset.p!=KR.cur())reset()},{passive:true})}
+

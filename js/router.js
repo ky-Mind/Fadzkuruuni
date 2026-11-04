@@ -3,9 +3,9 @@ const applyNav=()=>document.body.classList.toggle('nav-off',S.sb===false);
 /* Pindah halaman: isi lama keluar bertahap satu per satu, lalu isi baru masuk bertahap. Muat ulang halaman yang sama tidak dianimasikan. */
 const gerakOff=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
 let RT=0;
-/* Riwayat halaman di dalam aplikasi: tombol kembali kembali ke halaman sebelumnya satu per satu (mis. Maulid → Semua Menu → Beranda) */
+/* Riwayat halaman di dalam aplikasi: tombol kembali (di aplikasi maupun tombol kembali HP) menuju halaman asal, mis. Kalkulator zakat → Semua Menu bila dibuka dari Semua Menu, → Beranda bila dibuka dari Beranda */
 const RIW=[];
-function route(){if(!location.hash.startsWith('#/lapor'))LAST=location.hash||'#/';else if(!$('#rk'))LASTT=judulKini();$('#au')?.pause();const [a='',b,c,d]=location.hash.slice(2).split('/');const pg=a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d);const v=$('#view'),tok=++RT,baru=route.cur!=location.hash,ganti=baru&&v.children.length&&!gerakOff();route.cur=location.hash;{const h=location.hash||'#/';if(RIW[RIW.length-2]==h)RIW.pop();else if(RIW[RIW.length-1]!=h)RIW.push(h)}
+function route(){if(!location.hash.startsWith('#/lapor'))LAST=location.hash||'#/';else if(!$('#rk'))LASTT=judulKini();$('#au')?.pause();const [a='',b,c,d]=location.hash.slice(2).split('/');const pg=a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d);const v=$('#view'),tok=++RT,baru=route.cur!=location.hash,ganti=baru&&v.children.length&&!gerakOff();route.cur=location.hash;{const h=location.hash||'#/',t=RIW[RIW.length-1],par=x=>x.replace(/\/[^/]*$/,'');if(RIW[RIW.length-2]==h)RIW.pop();else if(t!=h){/* Halaman saudara (surah/bacaan/subhalaman berikutnya) mengganti entri terakhir, bukan menambah langkah kembali */if(t&&par(t)==par(h)&&par(h).split('/').length>=2)RIW[RIW.length-1]=h;else RIW.push(h);if(RIW.length>60)RIW.shift()}}
  /* Arah (data-vt: fwd/back) dari navigasi bagian, geser, atau tombol kembali */
  const de=document.documentElement,arah=de.dataset.vt;delete de.dataset.vt;
  /* Isi halaman dipasang lalu inisialisasinya dijalankan */
@@ -23,7 +23,7 @@ let BLY=0,BLU=0;
    Keluar dari kitab otomatis keluar dari layar penuh peramban. */
 function layarBaca(kitab){const baca=kitab,on=!!S.kfull&&baca;document.body.classList.toggle('kfull',on);if(window.ANDROID&&!on)andPanggil('layarPenuh',false);
  if(!baca&&(document.fullscreenElement||document.webkitFullscreenElement))(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}
-function barLekat(){BLY=0;const h=$('#view > .rh')||$('#view > .bar [data-rs]')?.closest('.bar');if(!h)return;h.classList.add('lekat');
+function barLekat(){BLY=0;const h=$('#view > .rh')||$('#view > .bar [data-rs]')?.closest('.bar')||$('#view > .aibar');if(!h)return;h.classList.add('lekat');
  mbacaCek()}
 {const v=$('#view');['touchmove','wheel','keydown'].forEach(n=>v.addEventListener(n,()=>BLU=Date.now(),{passive:true}));
  v.addEventListener('scroll',()=>{const h=$('#view > .lekat');if(!h)return;const y=v.scrollTop,d=y-BLY;h.classList.toggle('lyg',y>4);if(Math.abs(d)>6){if(Date.now()-BLU<400)h.classList.toggle('smb',d>0&&y>140&&!h.contains(document.activeElement));else if(d<0)h.classList.remove('smb');BLY=y}},{passive:true})}

@@ -1,7 +1,7 @@
 /* js/pages/wirid-doa.js - Wirid dan Doa */
 const card=x=>`<div class="card" style="margin-bottom:10px"><b>${x[0]}</b>${x[1]?`<div class="ar2">${x[1]}</div>`:''}${x[2]?`<p style="margin:6px 0 0">${x[2]}</p>`:''}${x[3]?`<a class="btn s" style="display:inline-block;margin-top:8px" href="${x[3]}">${/^http/.test(x[3])?'Buka di ':'Buka'}</a>`:''}</div>`;
 const WN=MENU.wirid;
-P.wirid=()=>twoTabs('Wirid & Doa','Wirid','Doa',catList('w',WN,WD),catList('d',MENU.doa,DD),'#/',0);
+P.wirid=()=>twoTabs('Wirid & Doa','Wirid','Doa',catList('w',WN,WD),catList('d',MENU.doa,DD));
 P.doa=()=>twoTabs('Wirid & Doa','Wirid','Doa',catList('w',WN,WD),catList('d',MENU.doa,DD),'#/',1);
 const doaCards=()=>DOA.map(d=>`<div class="card" style="margin-bottom:10px"><b>${d.j}</b><div class="ar2">${d.a}</div><p class="mut" style="margin:0"><i>${d.l}</i></p><p style="margin:6px 0 0">${d.t}</p>${d.s?`<small class="mut">${d.s}</small>`:''}</div>`).join('');
 const items=(t,i)=>{const D=(t=='w'?WD:DD)[i]||[],U=t=='w'?SUB[i]:null;return U?U.map(n=>({n,j:D.findIndex(x=>x[0].toLowerCase().includes(n.toLowerCase()))})):D.map((x,j)=>({n:x[0],j}))};

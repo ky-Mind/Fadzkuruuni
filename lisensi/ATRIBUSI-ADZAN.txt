@@ -1,0 +1,15 @@
+Rekaman adzan tambahan di audio/adzan/ (juga di aplikasi Android res/raw/adzan_*.mp3)
+Semua dari Wikimedia Commons, diubah ke MP3 mono 64 kbps dengan penyamaan kenyaringan (loudnorm).
+
+makkah.mp3      "Maghrib Adhan at the Masjid al Haram, Mecca - 25 Feb, 2012" (CC BY 3.0)
+                https://commons.wikimedia.org/wiki/File:Maghrib_Adhan_at_the_Masjid_al_Haram,_Mecca_-_25_Feb,_2012.webm
+merdu.mp3       "Beautiful adhan" oleh Adam-synagda (CC0)
+                https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg
+syam.mp3        "Call to prayer by Sabah Fakhry" (domain publik)
+                https://commons.wikimedia.org/wiki/File:Call_to_prayer_by_Sabah_Fakhry.mp3
+aaqib.mp3       "The Adhan - Muslim Call to Prayer - Aaqib Azeez" (CC BY-SA 4.0)
+                https://commons.wikimedia.org/wiki/File:The_Adhan_-_Muslim_Call_to_Prayer_-_Aaqib_Azeez.mp3
+istanbul.mp3    "Adhan in Istanbul" oleh Viceskeeni2 (CC0)
+                https://commons.wikimedia.org/wiki/File:Adhan_in_Istanbul.webm
+subuh-malmo.mp3 "Eid al-Fitr Fajr azan at Malmö Mosque - 19 August 2012" (CC BY 3.0)
+                https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm

@@ -42,10 +42,10 @@ document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-gout]'))return konfirmasi('Keluar dari akun?','Data di perangkat tetap tersimpan. Kamu bisa masuk lagi kapan saja.','Keluar',()=>firebase.auth().signOut().then(()=>{FBU=null;route()}));
  if(t.closest('[data-nsave]')){S.nm=($('#nm').value||'').trim().slice(0,24);save();return toast(S.nm?'Nama disimpan':'Nama dikosongkan')}
  if(t.closest('[data-ndel]')){S.nm='';save();$('#nm').value='';return toast('Nama dihapus')}
- if(t.closest('[data-addq]')){const v=($('#qn').value||'').trim();if(!v)return toast('Tulis kata-katanya dulu');QA().push({t:v,p:'any'});save();return route()}
+ if(t.closest('[data-addq]')){const v=($('#qn').value||'').trim();if(!v)return toast('Tulis kata-katanya dulu');QA().push({t:v,p:$('#qnw')?.value||'any'});save();toast('Kata-kata ditambahkan');return route()}
  const qe=t.closest('[data-qe]');if(qe){QEDIT=+qe.dataset.qe;return route()}
  if(t.closest('[data-qc]')){QEDIT=-1;return route()}
- const qs=t.closest('[data-qs]');if(qs){const v=($('#qv').value||'').trim();if(!v)return toast('Teks tidak boleh kosong');QA()[+qs.dataset.qs].t=v;QEDIT=-1;save();return route()}
+ const qs=t.closest('[data-qs]');if(qs){const v=($('#qv').value||'').trim();if(!v)return toast('Teks tidak boleh kosong');const q=QA()[+qs.dataset.qs];q.t=v;q.p=$('#qvw')?.value||q.p||'any';QEDIT=-1;save();return route()}
  const qd=t.closest('[data-qd]');if(qd){QA().splice(+qd.dataset.qd,1);save();return route()}
  if(t.closest('[data-qr]')){S.qa=null;QA();save();return route()}});
 /* Sembunyikan / tampilkan sidebar (desktop): tombol di sidebar atau Ctrl+B */
@@ -56,7 +56,11 @@ addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLow
 const pDir=d=>document.documentElement.dataset.vt=d>0?'fwd':'back';
 document.addEventListener('click',e=>{const a=e.target.closest('.pnav a,.bk');if(!a)return;pDir(a.matches('[data-nx]')?1:-1);
  /* Tombol kembali: naik ke halaman induknya, seperti aplikasi pada umumnya (bukan menelusuri riwayat satu per satu) */
- if(a.matches('.bk')&&!/^javascript:/.test(a.getAttribute('href')||'')){e.preventDefault();keInduk(a.getAttribute('href'))}});
+ if(a.matches('.bk')&&!/^javascript:/.test(a.getAttribute('href')||'')){e.preventDefault();keInduk(tujuanKembali())}});
+/* Tujuan kembali: halaman asal (riwayat di aplikasi), bila tidak ada (mis. baru dibuka lewat tautan) ke induk tetap di tombol kembali.
+   Menu bawah (Al-Qur'an, Fadz AI, dll.) selalu kembali ke Beranda. */
+function tujuanKembali(){const h=location.hash||'#/',[r,b]=h.slice(2).split('/');if(tataNavR().includes(r)&&!b)return '#/';
+ const asal=RIW[RIW.length-2];if(asal&&asal!=h)return asal;const bk=$('#view .bk')?.getAttribute('href');return bk&&!/^javascript:/.test(bk)&&bk!=h?bk:'#/'}
 /* Pindah ke halaman induk dengan mengganti entri riwayat (tidak menambah, dan tidak pernah keluar dari aplikasi) */
 function keInduk(up){pDir(-1);location.replace(up)}
 /* Tombol kembali HP (aplikasi Android memanggil ini): tutup lembar/dialog atau layar penuh dulu, lalu naik ke halaman induk
@@ -65,9 +69,7 @@ window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){o[o.length-1].remove(
  if(document.body.classList.contains('kfull')){kitabFull(false);return 'ok'}
  if(document.body.classList.contains('full')){fsSet(false);return 'ok'}
  const h=location.hash||'#/';if(['#','#/'].includes(h))return 'akar';
- const [r,b]=h.slice(2).split('/'),bk=$('#view .bk')?.getAttribute('href');
- let up=tataNavR().includes(r)&&!b?'#/':bk&&!/^javascript:/.test(bk)?bk:'#/';if(up==h)up='#/';
- keInduk(up);return 'ok'};
+ keInduk(tujuanKembali());return 'ok'};
 let gx=0,gy=0,gt=0,gh=0,gv=null;
 const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
 const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');

@@ -16,7 +16,10 @@ $('#fc').onclick=tap;
 
 /* Posisi disimpan dalam piksel dan dijepit agar tetap di dalam layar */
 /* x,y dalam koordinat layar; dibagi skala tampilan (zoom di HP) saat dipasang sebagai left/top */
-const place=(x,y)=>{const z=zmKini();x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth*z);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight*z);Object.assign(ftb.style,{left:x/z+'px',top:y/z+'px',right:'auto',bottom:'auto'});return {x,y}};
+/* Ukuran tasbih melayang (Kecil/Sedang/Besar): skala dari pojok kanan bawah */
+const FTZ=[['kecil','Kecil'],['sedang','Sedang'],['besar','Besar']],FTZS={kecil:.78,sedang:1,besar:1.22};
+const ftUkuran=()=>document.documentElement.style.setProperty('--fts',FTZS[S.ftz]||1);ftUkuran();
+const place=(x,y)=>{const z=zmKini(),k=FTZS[S.ftz]||1;x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth*z*k);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight*z*k);Object.assign(ftb.style,{left:x/z+'px',top:y/z+'px',right:'auto',bottom:'auto'});return {x,y}};
 
 /* Geser dilacak di dokumen (bukan di tombol), jadi tetap jalan walau kursor atau jari keluar dari tombol.
    Ketukan biasa tidak diubah: klik tetap sampai ke tombol. */
@@ -34,10 +37,10 @@ const ftpLetak=()=>{const p=$('#ftp');if(!p)return;const z=zmKini(),r=ftb.getBou
  let x=Math.min(Math.max(8,r.right-w),innerWidth-w-8),y=r.top-h-10;if(y<8)y=Math.min(r.bottom+10,innerHeight-h-8);
  p.style.left=x/z+'px';p.style.top=y/z+'px';p.style.transformOrigin=`${(r.left+r.width/2-x)/z}px ${y<r.top?h/z:0}px`};
 ftb.querySelector('#fg').onclick=e=>{e.stopPropagation();if($('#ftp'))return ftpTutup();
- const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('ftt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
+ const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('ftt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<small class="mut">Ukuran</small>${seg('ftz',FTZ,S.ftz||'sedang')}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
  p.id='ftp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Pengaturan tasbih melayang');ftpLetak();
  $('#fvb').onchange=e=>{S.vib=e.target.checked;save();S.vib&&buzz(18)};segBind('fvp',v=>{S.vpola=v;save();buzz(VPOLA[v])});
- segBind('ftt',v=>{S.tt=+v;S.tas=0;save();tUpd()});
+ segBind('ftt',v=>{S.tt=+v;S.tas=0;save();tUpd()});segBind('ftz',v=>{S.ftz=v;save();ftUkuran();setTimeout(ftpLetak,220)});
  $('#frz').onclick=()=>{S.tas=0;save();tUpd();toast('Hitungan direset')};
  $('#fhd').onclick=()=>{S.ft=false;save();ftUpd();ftpTutup();toast('Tasbih melayang disembunyikan')};
  $('[data-fx]',p).onclick=ftpTutup;

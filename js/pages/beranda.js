@@ -3,12 +3,14 @@
    Asmaul Husna, dan fitur), jadi setiap hasil langsung membuka halamannya. Yang memang belum ada isinya ditandai "Segera hadir". */
 let CARIX=null;
 const cariNorm=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j)=>L.push([n,h,j,cariNorm(n)]);
+const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j,kw,kh)=>L.push([n,h,j,cariNorm(n+' '+(kw||'')),kh]);
  NAMA.forEach((n,i)=>tb(n+' · '+ARTI[i],'#/quran/'+(i+1),'Surah'));
  [['w',WN,WD,'Wirid'],['d',MENU.doa,DD,'Doa']].forEach(([t,N,D,j])=>N.forEach((n,i)=>{const isi=D[i]||[];const as=t=='w'&&i==2;tb(n,as?'#/asma':isi.length?`#/baca/${t}/${i}`:null,j);isi.forEach((x,k)=>x&&x[0]&&tb(x[0],`#/bacaan/${t}/${i}/${k}`,j+' · '+n))}));
  MAULID_DAFTAR.forEach(m=>tb(m.judul,m.berkas?'#/maulid/'+m.id:null,'Maulid'));
  KITAB_DAFTAR.forEach(k=>tb(k.judul,k.berkas?'#/kitab/'+k.id:null,'Kitab'));
  ASMA.forEach(a=>tb(a[1]+' · '+a[2],'#/asma/'+a[0],'Asmaul Husna'));
+ /* Isi kitab: bab/fasal dari daftar isi (data/kitab-indeks.js), mis. "puasa" → Fathul Qarib, Kitab Puasa, hal. 120 */
+ if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=KITAB_DAFTAR.find(x=>x.id==id);if(!k)return;E.forEach(e=>tb(e[1]+' — '+k.judul,`#/kitab/${id}/${e[3]}`,'Kitab · '+e[0]+' · hal. '+e[4],e[2]+' '+e[0],`${id}|${e[3]}|${e[4]}`))});
  Object.entries(TPOOL).forEach(([r,v])=>tb(tNama(r,v[1]),'#/'+r,'Fitur'));
  return CARIX=L};
 const cariHasil=q=>{const w=cariNorm(q).split(' ').filter(Boolean);if(!w.length)return [];return cariIndeks().filter(x=>w.every(k=>x[3].includes(k))).sort((a,b)=>(b[3].startsWith(w[0])-a[3].startsWith(w[0]))||(!!b[1]-!!a[1])).slice(0,12)};
@@ -29,7 +31,7 @@ const BAG={
 /* Tiap bagian dibungkus <section data-ta> (display:contents) agar mode admin bisa memasang tombol geser; yang disembunyikan hanya terlihat (redup) di mode admin */
 const berandaHtml=()=>TATA.beranda.map(x=>{if(!x.on&&!TADMON)return '';let h=BAG[x.id]?BAG[x.id]():'';if(!h&&TADMON)h=`<div class="tak-kosong">${esc(TBAG[x.id])} (kosong saat ini)</div>`;return h?`<section class="tb${x.on?'':' tah'}" data-ta="beranda:${x.id}">${h}</section>`:''}).join('');
 P['']=()=>({html:berandaHtml(),
- init(){qrot();if($('#sr'))$('#sr').oninput=e=>{const q=e.target.value.trim(),H=cariHasil(q);$('#sl').innerHTML=q?(H.length?list(H,x=>x[1]?`<a class="row" href="${x[1]}"><span class="t">${esc(x[0])}<br><small>${esc(x[2])}</small></span>${ic('next',18)}</a>`:`<div class="row" data-soon><span class="t">${esc(x[0])}<br><small>${esc(x[2])} · Segera hadir</small></span></div>`):`<p class="mut" style="margin:8px 4px">Tidak ada hasil untuk "${esc(q)}".</p>`):'';$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
+ init(){qrot();if($('#sr'))$('#sr').oninput=e=>{const q=e.target.value.trim(),H=cariHasil(q);$('#sl').innerHTML=q?(H.length?list(H,x=>x[1]?`<a class="row" href="${x[1]}"${x[4]?` data-kh="${x[4]}"`:''}><span class="t">${esc(x[0])}<br><small>${esc(x[2])}</small></span>${ic('next',18)}</a>`:`<div class="row" data-soon><span class="t">${esc(x[0])}<br><small>${esc(x[2])} · Segera hadir</small></span></div>`):`<p class="mut" style="margin:8px 4px">Tidak ada hasil untuk "${esc(q)}".</p>`):'';$$('[data-soon]').forEach(e=>e.onclick=()=>toast('Konten ini segera hadir'))};
  const tick=()=>{if(!$('#pt'))return clearInterval(P.tk);const now=new Date(),T=waktu(now,S.loc),c=locNow(),z=v=>String(v).padStart(2,'0');
  let cur=5;T.forEach((x,i)=>{if(x[1]<=c)cur=i});
  /* Tanda warna: tetap di waktu yang baru masuk selama 10 menit, lalu pindah ke waktu berikutnya (setelah Isya: Subuh) */
@@ -38,7 +40,10 @@ P['']=()=>({html:berandaHtml(),
  $('#nl').textContent='Sekarang · '+T[cur][0];$('#np').innerHTML=hm(c)+' <small>'+tzl()+'</small>';$('#cd').textContent='Menuju '+T[ni][0]+' · -'+z(D/3600|0)+':'+z(D%3600/60|0)+':'+z(D%60);$('#pt').innerHTML=T.map((x,i)=>`<div class="${i==tn?'n':''}">${x[0]}<b>${hm(x[1])}</b></div>`).join('')};tick();clearInterval(P.tk);P.tk=setInterval(tick,1000)}});
 const periode=()=>{const h=locNow();return h<4?'malam':h<10?'pagi':h<15?'siang':h<18?'sore':'malam'};
 const GREET=()=>`<div class="gr"><small class="mut">${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${hijri()}</small><div class="gh">Selamat ${periode()}${S.nm?', '+esc(S.nm):''}</div></div>`;
-/* Doa hari ini: satu doa (berteks Arab dan terjemah) dari Wirid & Doa, berganti tiap hari */
+/* Doa hari ini: satu doa (berteks Arab dan terjemah) dari Wirid & Doa */
+let DOAPILIH=null;
 const doaHariIni=()=>{const L=[];DD.forEach((g,i)=>g.forEach((x,j)=>{if(x[1]&&x[2])L.push([x,i,j])}));if(!L.length)return '';
- const h=Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5),[x,i,j]=L[h%L.length];
+ /* Berganti setiap kali aplikasi dibuka (dipilih acak sekali per pembukaan, tidak sama dengan doa terakhir) */
+ if(DOAPILIH==null){DOAPILIH=Math.floor(Math.random()*L.length);if(L.length>1&&DOAPILIH==S.doaTerakhir)DOAPILIH=(DOAPILIH+1)%L.length;S.doaTerakhir=DOAPILIH;try{save()}catch(e){}}
+ const [x,i,j]=L[DOAPILIH%L.length];
  return `<h2>Doa hari ini</h2><a class="card dhi" href="#/bacaan/d/${i}/${j}"><b>${x[0]}</b><div class="dar">${x[1]}</div><p class="mut">${x[2]}</p><span class="dlj">Baca selengkapnya ${ic('next',16)}</span></a>`};

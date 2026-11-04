@@ -1,10 +1,22 @@
 /* js/core/adzan.js - Adzan, notifikasi, izin */
 const WS=['Subuh','Zuhur','Asar','Magrib','Isya'],WI=[0,2,3,4,5];
-S.az=Object.assign({on:false,sound:true,pre:0,w:[1,1,1,1,1]},S.az||{});
+/* Pengingat adzan menyala bawaan (sekali dinyalakan juga untuk pengguna lama yang belum pernah mengubahnya: S.azv) */
+S.az=Object.assign({on:true,sound:true,pre:0,w:[1,1,1,1,1]},S.az||{});
+if(!S.azv){S.az.on=true;S.azv=1;try{save()}catch(e){}}
 const beep=()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime;[0,.35,.7].forEach(d=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=660;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,t+d);g.gain.exponentialRampToValueAtTime(.001,t+d+.3);o.start(t+d);o.stop(t+d+.3)})}catch(e){}};
 let ADZ=null;
 const stopAdzan=()=>{if(ADZ){ADZ.pause();ADZ=null}};
-const play=(k=1,uji)=>{if(!S.az.sound||(window.ANDROID&&!uji))return;stopAdzan();ADZ=new Audio(k==0?'audio/adzan-subuh.mp3':'audio/adzan.mp3');ADZ.onerror=beep;ADZ.play?.().catch(beep)};
+/* Pilihan suara adzan: bawaan, beberapa muadzin (rekaman berlisensi bebas dari Wikimedia Commons, lihat lisensi/ATRIBUSI-ADZAN.txt),
+   atau rekaman/berkas sendiri (disimpan di IndexedDB; di Android juga disalin ke aplikasi agar dipakai alarm adzan) */
+const SUARA=[['bawaan','Bawaan aplikasi'],['makkah','Masjidil Haram, Makkah'],['merdu','Adzan merdu'],['syam','Sabah Fakhri (Syam)'],['aaqib','Aaqib Azeez'],['istanbul','Istanbul'],['subuh-malmo','Adzan Subuh (Masjid Malmö)'],['sendiri','Rekaman / berkas sendiri']];
+const idbBuka=()=>new Promise((ok,no)=>{const r=indexedDB.open('fz-suara',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const idbSimpan=async(k,v)=>{const d=await idbBuka();return new Promise((ok,no)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})};
+const idbAmbil=async k=>{try{const d=await idbBuka();return await new Promise(ok=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}};
+const suaraPilih=j=>(j=='subuh'?S.az.ss:S.az.sa)||'bawaan';
+const suaraSrc=async j=>{const p=suaraPilih(j);if(p=='sendiri'){const b=await idbAmbil('suara_'+j);if(b)return URL.createObjectURL(b)}
+ return p=='bawaan'||p=='sendiri'?(j=='subuh'?'audio/adzan-subuh.mp3':'audio/adzan.mp3'):'audio/adzan/'+p+'.mp3'};
+const putarSuara=src=>{stopAdzan();ADZ=new Audio(src);ADZ.onerror=beep;ADZ.play?.().catch(beep)};
+const play=(k=1,uji)=>{if(!S.az.sound||(window.ANDROID&&!uji))return;suaraSrc(k==0?'subuh':'adzan').then(putarSuara)};
 const notify=async(t,b)=>{if(window.ANDROID)return;if(!('Notification'in window)||Notification.permission!='granted')return;try{const r=await navigator.serviceWorker.ready;r.showNotification(t,{body:b,icon:'img/apple-touch-icon.png',badge:'img/badge-96.png',tag:'adzan',vibrate:[200,100,200]})}catch(e){new Notification(t,{body:b})}};
 const askNotif=async()=>{if(typeof ANDROID!='undefined'&&ANDROID){if(andIzinStatus().notifications=='granted')return true;const st=await andMintaIzin('notifications');toast(st=='granted'?'Notifikasi diizinkan':'Notifikasi belum diizinkan. Buka Pengaturan aplikasi > Izin.');androidAdzan();return st=='granted'}if(!('Notification'in window)){toast('Browser tidak mendukung notifikasi');return false}const r=await Notification.requestPermission();toast(r=='granted'?'Notifikasi diizinkan':'Izin ditolak. Aktifkan lewat pengaturan situs di browser.');return r=='granted'};
 /* Uji notifikasi: di aplikasi Android memakai notifikasi Android asli (melayang dari atas, dengan suara adzan); di browser memakai notifikasi web + suara */
