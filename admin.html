@@ -215,7 +215,7 @@ const nm=r=>(DRAF.label[r]||(TI.TPOOL[r]||[])[1]||r);
 const pindah=(A,i,d)=>{const t=i+d;if(t<0||t>=A.length)return;[A[i],A[t]]=[A[t],A[i]]};
 const sakelar=(on,attr)=>`<label class="sw"><input type="checkbox" ${on?'checked':''} ${attr}><i></i></label>`;
 const tombolUrut=(i,n,ex='')=>`<button class="ib" data-u="-1" data-i="${i}" ${i==0?'disabled':''} aria-label="Naikkan">▲</button><button class="ib" data-u="1" data-i="${i}" ${i==n-1?'disabled':''} aria-label="Turunkan">▼</button>${ex}`;
-const pilihRute=(id,kecuali,atas)=>`<select id="${id}"><option value="">+ Tambah…</option>${Object.entries(TI.TPOOL).filter(([r])=>!kecuali.includes(r)&&(!atas||!r.includes('/'))).map(([r,v])=>`<option value="${esc(r)}">${esc(DRAF.label[r]||v[1])}${r?` (#/${esc(r)})`:''}</option>`).join('')}</select>`;
+const pilihRute=(id,kecuali,atas)=>`<select id="${id}"><option value="">+ Tambah…</option>${Object.entries(TI.TPOOL).filter(([r])=>!kecuali.includes(r)&&(!atas||!r.includes('/'))).map(([r,v])=>`<option value="${r===''?'@':esc(r)}">${esc(DRAF.label[r]||v[1])}${r?` (#/${esc(r)})`:''}</option>`).join('')}</select>`;
 function tabTampilan(){
  $('#isi').innerHTML=`<div class="ted"><div id="ed"><div class="empty">Memuat aplikasi untuk pratinjau…</div></div><div class="hp"><div class="hpk" id="hpk">${[['#/','Beranda'],['#/menu','Semua Menu'],['#/pengaturan','Pengaturan']].map(([h,t])=>`<button data-ke="${h}" class="${h==KE?'on':''}">${t}</button>`).join('')}</div><div class="hpf"><iframe id="fr" title="Pratinjau aplikasi" src="index.html?pratinjau=1${KE}"></iframe></div></div></div>`;
  $('#fr').onload=async()=>{const w=$('#fr').contentWindow;for(let k=0;k<40&&!w.TATAINFO;k++)await new Promise(r=>setTimeout(r,100));TI=w.TATAINFO;setTimeout(()=>$('.hp')?.classList.add('siap'),350);if(!TI)return $('#ed').innerHTML='<div class="empty">Pratinjau gagal dimuat.</div>';
@@ -274,11 +274,13 @@ function ikatEd(){const D=DRAF,ed=$('#ed');if(!ed.dataset.seret){ed.dataset.sere
   const A=bl=='beranda'?D.beranda:bl=='pintasan'?D.pintasan:bl=='nav'?D.nav:bl=='setelan'?D.setelan:bl=='menu'&&g?D.menu[+g.dataset.g].isi:null;if(!A||i<0)return;
   if(b.dataset.u)pindah(A,i,+b.dataset.u);else if(b.dataset.x!=null)A.splice(i,1);tUbah()};
  ed.onchange=e=>{const t=e.target;
+  /* Pilihan rute: Beranda bernilai '@' (kosong = "+ Tambah…") */
+  const rv=v=>v=='@'?'':v;
   if(t.dataset.on!=null){D.beranda[+t.dataset.on].on=t.checked;return tUbah()}
   if(t.dataset.son!=null){const k=t.dataset.son,j=D.sembunyiSet.indexOf(k);t.checked?j>=0&&D.sembunyiSet.splice(j,1):j<0&&D.sembunyiSet.push(k);return tUbah()}
-  if(t.id=='tpin'&&t.value!==''){D.pintasan.push(t.value);return tUbah()}
-  if(t.id=='tnav'&&t.value!==''){D.nav.push(t.value);return tUbah()}
-  if(t.id&&t.id.startsWith('tmenu')&&t.value!==''){D.menu[+t.id.slice(5)].isi.push(t.value);return tUbah()}
+  if(t.id=='tpin'&&t.value!==''){D.pintasan.push(rv(t.value));toast('Ditambahkan ke draf. Tekan Terbitkan untuk memakainya.');return tUbah()}
+  if(t.id=='tnav'&&t.value!==''){if(D.nav.length>=5){t.value='';return toast('Menu bawah paling banyak 5. Hapus satu dulu.')}D.nav.push(rv(t.value));toast('Ditambahkan ke draf. Tekan Terbitkan untuk memakainya.');return tUbah()}
+  if(t.id&&t.id.startsWith('tmenu')&&t.value!==''){D.menu[+t.id.slice(5)].isi.push(rv(t.value));toast('Ditambahkan ke draf. Tekan Terbitkan untuk memakainya.');return tUbah()}
   if(t.dataset.bw){const k=t.dataset.bw;t.value===''?delete D.bawaan[k]:D.bawaan[k]=JSON.parse(t.value);return tUbah()}
   if(t.id=='uon'){D.umum.on=t.checked;return tUbah()}};
  /* Ketik: simpan ke draf & perbarui pratinjau tanpa menggambar ulang editor (fokus tetap) */

@@ -20,8 +20,9 @@ function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getB
  const h=document.documentElement;h.classList.add('tgt');el&&el.classList.add('vtbtn');
  const t=document.startViewTransition(ubah);
  t.finished.finally(()=>{h.classList.remove('tgt');el&&el.classList.remove('vtbtn');sesudah&&setTimeout(sesudah,50)});
- t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
-  h.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:Math.min(900,520+R*.25),easing:'cubic-bezier(.32,.72,0,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{})}
+ t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y)),z=zmKini(),X=x/z,Y=y/z,RR=R/z;
+  /* Di HP seluruh halaman memakai CSS zoom, dan pseudo-elemen transisi ikut ter-zoom: titik pusat dibagi zoom agar tepat di tombol */
+  h.animate({clipPath:[`circle(0px at ${X}px ${Y}px)`,`circle(${RR}px at ${X}px ${Y}px)`]},{duration:Math.min(900,520+R*.25),easing:'cubic-bezier(.32,.72,0,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
