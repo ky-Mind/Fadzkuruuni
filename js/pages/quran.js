@@ -52,8 +52,8 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  /* d = 1 (berikutnya) atau -1: pindah halaman kartu dulu, lalu pindah surah di tempat */
  R.go=async d=>{if(R.busy||!R.A)return;const np=pages();
   if(!S.full&&R.p+d>=0&&R.p+d<np){R.busy=1;await slide(d,()=>{R.p+=d;draw()});R.busy=0;return}
-  const m=R.n+d;if(m<1||m>114)return;R.busy=1;let A;try{A=await qGet(m)}catch(e){R.busy=0;return toast('Surah ini belum tersimpan dan internet tidak tersedia')}
-  await slide(d,()=>{R.n=m;R.tuju=0;R.A=window.QA=A;R.p=d<0&&!S.full?Math.ceil(A.length/QPER)-1:0;hdr();draw();history.replaceState(null,'','#/quran/'+m);route.cur=location.hash;RIW[RIW.length-1]=location.hash;catat()});R.busy=0};
+  const m=R.n+d;if(m<1||m>114)return;R.busy=1;let A;try{A=SBL[m]||await qGet(m)}catch(e){R.busy=0;return toast('Surah ini belum tersimpan dan internet tidak tersedia')}
+  await slide(d,()=>{R.n=m;R.tuju=0;R.A=window.QA=A;R.p=d<0&&!S.full?Math.ceil(A.length/QPER)-1:0;hdr();draw();history.replaceState(null,'','#/quran/'+m);R.siapkan&&R.siapkan();route.cur=location.hash;RIW[RIW.length-1]=location.hash;catat()});R.busy=0};
  R.mode=full=>{full=!!full;if(!!S.full==full||!R.A)return;const k=atas();S.full=full;save();document.body.classList.toggle('full',full);R.p=Math.floor((k-1)/QPER);segOn();draw();ke(k)};
  $$('.mseg button').forEach(b=>b.onclick=()=>R.mode(b.dataset.md=='1'));
  /* Ketuk kartu ayat (atau ayat di mode mushaf) untuk membuka menu ayat; tombol bintang tetap langsung menandai */
@@ -61,11 +61,16 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  $('#snav').onclick=e=>{const b=e.target.closest('[data-qn]');if(b&&!b.disabled)R.go(+b.dataset.qn)};
  /* Geser ke samping seperti WhatsApp: halaman kartu (atau surah) sebelah ikut masuk bersama jari; dilepas cukup jauh
     atau dikibas: meluncur penuh lalu dipasang tanpa animasi; kurang dari itu kembali. Tepi kiri dibiarkan untuk geser kembali. */
+ /* Surah sebelum & sesudah disiapkan lebih dulu, supaya saat digeser isinya langsung tampil */
+ const SBL={};const siapkan=()=>[R.n-1,R.n+1].forEach(m=>{if(m>=1&&m<=114&&!SBL[m])qGet(m).then(B=>{SBL[m]=B}).catch(()=>{})});R.siapkan=siapkan;
  {let sx=null,sy=0,t0=0,dx=0,lk=null,d=0,ada=0,pk=null,k=1;const V=$('#view'),Wd=()=>V.clientWidth,ES='cubic-bezier(.22,.8,.3,1)';
   const buang=()=>{if(pk){pk.remove();pk=null}};
   const isiSebelah=dd=>{buang();d=dd;ada=0;if(!R.A||R.busy)return;let h='';
    if(!S.full&&R.p+d>=0&&R.p+d<pages()){const simpan=[...el.childNodes];R.p+=d;drawAy(el,R.A,R.n,R.p);h=el.innerHTML;R.p-=d;el.replaceChildren(...simpan);ada=1}
-   else{const m=R.n+d;if(m>=1&&m<=114){ada=1;h=`<div class="card" style="text-align:center;padding:28px 16px"><small class="mut">${d>0?'Surah berikutnya':'Surah sebelumnya'}</small><div style="font-size:20px;font-weight:700;margin-top:4px">${m}. ${esc(NAMA[m-1])}</div></div>`}}
+   else{const m=R.n+d;if(m>=1&&m<=114){ada=1;const B=SBL[m];
+    /* Isi surah sebelah (sudah disiapkan sejak surah ini dibuka): kartu pertama, atau kartu terakhir bila mundur; mushaf: awal surah */
+    if(B){const t=document.createElement('div');drawAy(t,S.full?B.slice(0,40):B,m,S.full?null:d<0?Math.ceil(B.length/QPER)-1:0);h=`<div class="card" style="text-align:center;padding:10px 16px;margin-bottom:10px"><b>${m}. ${esc(NAMA[m-1])}</b></div>`+t.innerHTML}
+    else h=`<div class="card" style="text-align:center;padding:28px 16px"><small class="mut">${d>0?'Surah berikutnya':'Surah sebelumnya'}</small><div style="font-size:20px;font-weight:700;margin-top:4px">${m}. ${esc(NAMA[m-1])}</div></div>`}}
    if(!ada)return;pk=document.createElement('div');pk.className='tpeek';pk.setAttribute('aria-hidden','true');pk.innerHTML=h;Object.assign(pk.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(pk)};
   const pasang=(px,tr)=>{const t=tr?`transform ${tr}`:'none';el.style.transition=t;el.style.transform=px?`translate3d(${px}px,0,0)`:'';if(pk){pk.style.transition=t;pk.style.transform=`translate3d(${px+d*Wd()}px,0,0)`}};
   const pulih=()=>{el.style.transition=el.style.transform='';V.style.position='';buang()};
@@ -82,7 +87,7 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  hdr();catat();
  /* Catat ayat paling atas yang sedang dibaca (untuk Riwayat & Lanjutkan) */
  let qt=0;const vw=$('#view');vw.addEventListener('scroll',function f(){if(window.QR!==R||!$('#ay'))return vw.removeEventListener('scroll',f);clearTimeout(qt);qt=setTimeout(()=>{if(!R.A||window.QR!==R)return;(S.qpos=S.qpos||{})[R.n]=atas();save()},400)},{passive:true});
- qGet(n).then(A=>{R.A=window.QA=A;if(sc)R.p=Math.floor((sc-1)/QPER);draw();if(sc)requestAnimationFrame(()=>{ke(sc);ayTuju(sc)})}).catch(()=>{el.innerHTML='<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia. Sambungkan internet sekali, atau unduh semua dari menu Al-Qur\'an.</div>';$('#snav').innerHTML=''})}
+ qGet(n).then(A=>{R.A=window.QA=A;R.siapkan&&R.siapkan();if(sc)R.p=Math.floor((sc-1)/QPER);draw();if(sc)requestAnimationFrame(()=>{ke(sc);ayTuju(sc)})}).catch(()=>{el.innerHTML='<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia. Sambungkan internet sekali, atau unduh semua dari menu Al-Qur\'an.</div>';$('#snav').innerHTML=''})}
 /* Panah kiri/kanan di keyboard untuk halaman/surah sebelumnya/berikutnya */
 addEventListener('keydown',e=>{if(!window.QR||!$('#ay')||e.target.closest('input,textarea')||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key=='ArrowRight')QR.go(1);else if(e.key=='ArrowLeft')QR.go(-1)});
 /* Mode baca Kartu | Mushaf untuk Tahlil, Maulid, Wirid & Doa (seperti Al-Qur'an). Mushaf: teks Arab tiap bagian (.ay2) disambung
