@@ -75,7 +75,7 @@ const gsHP=()=>matchMedia('(max-width:899px)').matches;
 const VSNAP=new Map();
 function vSnap(h,html){if(!h||!html||html.length>600000)return;VSNAP.delete(h);VSNAP.set(h,html);if(VSNAP.size>24)VSNAP.delete(VSNAP.keys().next().value)}
 /* Isi halaman lain sebagai HTML: potret terakhir, atau dirender dari fungsi halamannya (tanpa init) */
-function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
+function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');const pr=PRATINJAU[a]&&PRATINJAU[a](b,c,d);if(pr)return pr;return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
 /* Jangan bajak geseran di isian, penggeser, lembar, kitab, kalender, carousel, atau daftar yang bisa digeser samping */
 function gsHalang(t){if(t.closest('input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'))return true;
  for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false}

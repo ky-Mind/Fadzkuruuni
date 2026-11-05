@@ -69,8 +69,8 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
    if(!S.full&&R.p+d>=0&&R.p+d<pages()){const simpan=[...el.childNodes];R.p+=d;drawAy(el,R.A,R.n,R.p);h=el.innerHTML;R.p-=d;el.replaceChildren(...simpan);ada=1}
    else{const m=R.n+d;if(m>=1&&m<=114){ada=1;const B=SBL[m];
     /* Isi surah sebelah (sudah disiapkan sejak surah ini dibuka): kartu pertama, atau kartu terakhir bila mundur; mushaf: awal surah */
-    if(B){const t=document.createElement('div');drawAy(t,S.full?B.slice(0,40):B,m,S.full?null:d<0?Math.ceil(B.length/QPER)-1:0);h=`<div class="card" style="text-align:center;padding:10px 16px;margin-bottom:10px"><b>${m}. ${esc(NAMA[m-1])}</b></div>`+t.innerHTML}
-    else h=`<div class="card" style="text-align:center;padding:28px 16px"><small class="mut">${d>0?'Surah berikutnya':'Surah sebelumnya'}</small><div style="font-size:20px;font-weight:700;margin-top:4px">${m}. ${esc(NAMA[m-1])}</div></div>`}}
+    if(B){const t=document.createElement('div');drawAy(t,S.full?B.slice(0,40):B,m,S.full?null:d<0?Math.ceil(B.length/QPER)-1:0);h=t.innerHTML}
+    else h='<p class="mut" style="text-align:center;padding:28px 0">Memuat…</p>'}}
    if(!ada)return;pk=document.createElement('div');pk.className='tpeek';pk.setAttribute('aria-hidden','true');pk.innerHTML=h;Object.assign(pk.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(pk)};
   const pasang=(px,tr)=>{const t=tr?`transform ${tr}`:'none';el.style.transition=t;el.style.transform=px?`translate3d(${px}px,0,0)`:'';if(pk){pk.style.transition=t;pk.style.transform=`translate3d(${px+d*Wd()}px,0,0)`}};
   const pulih=()=>{el.style.transition=el.style.transform='';V.style.position='';buang()};
