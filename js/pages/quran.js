@@ -48,7 +48,7 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  /* Ayat yang sedang terlihat paling atas (di bawah header), untuk mempertahankan posisi saat ganti mode */
  const atas=()=>{const y=$('.rh').getBoundingClientRect().bottom;const t=$$('#ay [id^="a"]').find(x=>x.getBoundingClientRect().bottom>y+8);return t?+t.id.slice(1):1};
  const ke=(k,smooth)=>{const t=$('#a'+k);if(t&&k>1)t.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'});else $('#view').scrollTo({top:0})};
- const slide=(d,fn)=>new Promise(res=>{el.classList.remove('sl-in-l','sl-in-r');el.classList.add(d>0?'sl-out-l':'sl-out-r');setTimeout(()=>{fn();$('#view').scrollTo({top:0});el.classList.remove('sl-out-l','sl-out-r');void el.offsetWidth;el.classList.add(d>0?'sl-in-r':'sl-in-l');res()},170)});
+ const slide=(d,fn)=>new Promise(res=>{if(R.instan){fn();$('#view').scrollTo({top:0});return res()}el.classList.remove('sl-in-l','sl-in-r');el.classList.add(d>0?'sl-out-l':'sl-out-r');setTimeout(()=>{fn();$('#view').scrollTo({top:0});el.classList.remove('sl-out-l','sl-out-r');void el.offsetWidth;el.classList.add(d>0?'sl-in-r':'sl-in-l');res()},170)});
  /* d = 1 (berikutnya) atau -1: pindah halaman kartu dulu, lalu pindah surah di tempat */
  R.go=async d=>{if(R.busy||!R.A)return;const np=pages();
   if(!S.full&&R.p+d>=0&&R.p+d<np){R.busy=1;await slide(d,()=>{R.p+=d;draw()});R.busy=0;return}
@@ -59,10 +59,26 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  /* Ketuk kartu ayat (atau ayat di mode mushaf) untuk membuka menu ayat; tombol bintang tetap langsung menandai */
  el.onclick=e=>{if(e.target.closest('button,a')||String(getSelection()).trim())return;const t=e.target.closest('.ay,.ayt');if(t){ayPilih(+t.id.slice(1));ayMenu(R.n,+t.id.slice(1))}};
  $('#snav').onclick=e=>{const b=e.target.closest('[data-qn]');if(b&&!b.disabled)R.go(+b.dataset.qn)};
- /* Geser ke samping: isi ikut bergeser mengikuti jari, lalu pindah halaman/surah saat dilepas */
- let sx=0,sy=0,hz=0;el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;hz=0;el.style.transition='none'},{passive:true});
- el.addEventListener('touchmove',e=>{const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;if(!hz&&Math.abs(dx)>12)hz=Math.abs(dx)>Math.abs(dy)*1.3?1:-1;if(hz==1)el.style.transform=`translateX(${dx*.35}px)`},{passive:true});
- el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;el.style.transition='transform .2s ease';el.style.transform='';if(hz==1&&Math.abs(dx)>60)R.go(dx<0?1:-1)},{passive:true});
+ /* Geser ke samping seperti WhatsApp: halaman kartu (atau surah) sebelah ikut masuk bersama jari; dilepas cukup jauh
+    atau dikibas: meluncur penuh lalu dipasang tanpa animasi; kurang dari itu kembali. Tepi kiri dibiarkan untuk geser kembali. */
+ {let sx=null,sy=0,t0=0,dx=0,lk=null,d=0,ada=0,pk=null,k=1;const V=$('#view'),Wd=()=>V.clientWidth,ES='cubic-bezier(.22,.8,.3,1)';
+  const buang=()=>{if(pk){pk.remove();pk=null}};
+  const isiSebelah=dd=>{buang();d=dd;ada=0;if(!R.A||R.busy)return;let h='';
+   if(!S.full&&R.p+d>=0&&R.p+d<pages()){const simpan=[...el.childNodes];R.p+=d;drawAy(el,R.A,R.n,R.p);h=el.innerHTML;R.p-=d;el.replaceChildren(...simpan);ada=1}
+   else{const m=R.n+d;if(m>=1&&m<=114){ada=1;h=`<div class="card" style="text-align:center;padding:28px 16px"><small class="mut">${d>0?'Surah berikutnya':'Surah sebelumnya'}</small><div style="font-size:20px;font-weight:700;margin-top:4px">${m}. ${esc(NAMA[m-1])}</div></div>`}}
+   if(!ada)return;pk=document.createElement('div');pk.className='tpeek';pk.setAttribute('aria-hidden','true');pk.innerHTML=h;Object.assign(pk.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(pk)};
+  const pasang=(px,tr)=>{const t=tr?`transform ${tr}`:'none';el.style.transition=t;el.style.transform=px?`translate3d(${px}px,0,0)`:'';if(pk){pk.style.transition=t;pk.style.transform=`translate3d(${px+d*Wd()}px,0,0)`}};
+  const pulih=()=>{el.style.transition=el.style.transform='';V.style.position='';buang()};
+  el.addEventListener('touchstart',e=>{sx=null;if(e.touches.length!=1||R.busy||e.touches[0].clientX<24||e.target.closest('button,a,input'))return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;t0=Date.now();dx=0;lk=null;k=V.getBoundingClientRect().width/V.offsetWidth||1},{passive:true});
+  el.addEventListener('touchmove',e=>{if(sx===null)return;if(e.touches.length!=1){sx=null;if(lk=='h'){pasang(0,`.2s ${ES}`);setTimeout(pulih,220)}return}
+   const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k;
+   if(lk===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;lk=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lk=='h'){V.style.position='relative';isiSebelah(x<0?1:-1)}}
+   if(lk!='h')return;if(e.cancelable)e.preventDefault();const nd=x<0?1:-1;if(nd!=d&&x!=0)isiSebelah(nd);dx=x;pasang(ada?dx:dx*.25)},{passive:false});
+  el.addEventListener('touchend',()=>{if(sx===null)return;sx=null;if(lk!='h')return;const w=Wd(),vel=dx/Math.max(1,Date.now()-t0),kibas=Math.abs(vel)>.5&&Math.sign(vel)==-d;
+   if(ada&&(Math.abs(dx)>w*.22||kibas)){const ms=Math.max(140,Math.min(260,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));pasang(-d*w,`${ms}ms ${ES}`);
+    setTimeout(async()=>{R.instan=1;try{await R.go(d)}finally{R.instan=0;pulih()}},ms+20)}
+   else{pasang(0,`.26s ${ES}`);setTimeout(pulih,280)}},{passive:true});
+  el.addEventListener('touchcancel',()=>{if(sx!==null){sx=null;if(lk=='h'){pasang(0,`.2s ${ES}`);setTimeout(pulih,220)}}},{passive:true})}
  hdr();catat();
  /* Catat ayat paling atas yang sedang dibaca (untuk Riwayat & Lanjutkan) */
  let qt=0;const vw=$('#view');vw.addEventListener('scroll',function f(){if(window.QR!==R||!$('#ay'))return vw.removeEventListener('scroll',f);clearTimeout(qt);qt=setTimeout(()=>{if(!R.A||window.QR!==R)return;(S.qpos=S.qpos||{})[R.n]=atas();save()},400)},{passive:true});

@@ -1,7 +1,6 @@
 /* js/core/events.js - Pendengar peristiwa bersama (klik, input, geser) */
 /* Geser kiri/kanan untuk pindah tab (mis. Tahlil | Yasin, Menu | Kalkulator): isi ikut jari, lalu tab berikutnya masuk dari samping.
    Juga bisa dengan geser dua jari di trackpad. Tidak aktif di dalam lembar, isian, kalender, carousel, atau halaman kitab. */
-let tx=0,ty=0,tAx=0,tEl=null;
 const tabSemua=()=>$$('#view .tabs [data-tab]'),tabIsi=()=>$('#tb')||$('#view .tabs')?.nextElementSibling;
 /* Pindah tab dengan gerak yang sama seperti geser halaman Al-Qur'an (kelas sl-out dan sl-in di css): keluar 0,17 s, masuk 0,28 s */
 let tabSibuk=0;
@@ -17,12 +16,6 @@ document.addEventListener('click',e=>{const b=e.target.closest('#view .tabs [dat
  const T=tabSemua(),i=T.findIndex(x=>x.classList.contains('on')),k=T.indexOf(b);if(i<0||k<0)return;e.stopImmediatePropagation();e.preventDefault();if(!tabSibuk)tabKe(b,k>i?1:-1)},true);
 /* Pil hijau di bilah tab meluncur ke tab yang aktif */
 function tabPil(){const tb=$('#view .tabs');if(!tb)return;const T=$$('[data-tab]',tb),i=T.findIndex(b=>b.classList.contains('on'));tb.style.setProperty('--n',T.length);tb.style.setProperty('--ti',Math.max(i,0));tb.classList.add('pil')}
-addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tAx=0;tEl=tabSemua().length>1&&!e.target.closest('input,textarea,.cal,.car,.kp,.kmp,.back-d,.tabs')?tabIsi():null},{passive:true});
-addEventListener('touchmove',e=>{if(!tEl)return;const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
- if(!tAx&&(Math.abs(dx)>10||Math.abs(dy)>10)){tAx=Math.abs(dx)>Math.abs(dy)*1.2?1:-1;if(tAx==1)tEl.style.willChange='transform'}if(tAx!=1)return;
- const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on')),ada=!!T[i+(dx<0?1:-1)];tEl.style.transition='none';tEl.style.transform=`translateX(${dx*(ada?.45:.12)}px)`;tEl.style.opacity=ada?1-Math.min(Math.abs(dx)/600,.35):1},{passive:true});
-addEventListener('touchend',e=>{if(!tEl)return;const el=tEl;tEl=null;const dx=e.changedTouches[0].clientX-tx;
- el.style.willChange='';if(tAx==1&&Math.abs(dx)>60&&tabGanti(dx<0?1:-1))return;el.style.transition='transform .28s cubic-bezier(.22,.8,.3,1),opacity .28s cubic-bezier(.22,.8,.3,1)';el.style.transform='';el.style.opacity=''},{passive:true});
 let tWx=0,tWt=0;addEventListener('wheel',e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)||tabSemua().length<2||e.target.closest('.back-d,.kp,.car'))return;
  if(Date.now()-tWt<600)return;tWx+=e.deltaX;if(Math.abs(tWx)>90){tabGanti(tWx>0?1:-1);tWx=0;tWt=Date.now()}},{passive:true});
 document.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c){const v=c.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast(v.length>30?'Teks disalin':'Disalin: '+v),()=>toast('Tidak bisa menyalin. Salin manual.'));return}
@@ -70,15 +63,78 @@ window.fadzKembali=()=>{const o=$$('.back-d');if(o.length){const d=o[o.length-1]
  if(document.body.classList.contains('kfull')){kitabFull(false);return 'ok'}
  const h=location.hash||'#/';if(['#','#/'].includes(h))return 'akar';
  keInduk(tujuanKembali());return 'ok'};
-let gx=0,gy=0,gt=0,gh=0,gv=null;
-const gGeserX=t=>{for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false};
-const gLink=dx=>$(dx<0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
-addEventListener('touchstart',e=>{gv=null;if(e.touches.length>1||!$('#view .pnav')||e.target.closest('input,textarea,.sheet,#ftb,.tdlap,.tdbar,.kmp')||gGeserX(e.target))return;gv=$('#view');gx=e.touches[0].clientX;gy=e.touches[0].clientY;gt=Date.now();gh=0},{passive:true});
-addEventListener('touchmove',e=>{if(!gv)return;if(e.touches.length>1){gh=-1;gv.style.transform='';return}const dx=e.touches[0].clientX-gx,dy=e.touches[0].clientY-gy;if(!gh&&Math.abs(dx)>10)gh=Math.abs(dx)>Math.abs(dy)*1.3?1:-1;if(gh!=1)return;
- const r=gLink(dx)?dx*.55:dx*.12;gv.style.transition='none';gv.style.transform=`translateX(${r}px)`;gv.style.opacity=1-Math.min(Math.abs(r)/700,.35)},{passive:true});
-addEventListener('touchend',e=>{if(!gv||gh!=1)return;const v=gv;gv=null;const dx=e.changedTouches[0].clientX-gx,cepat=Math.abs(dx)>40&&Date.now()-gt<250,L=gLink(dx);
- if(L&&(Math.abs(dx)>80||cepat)){pDir(dx<0?1:-1);location.hash=L.getAttribute('href');return}
- v.style.transition='transform .3s cubic-bezier(.22,.8,.3,1),opacity .3s';v.style.transform='';v.style.opacity=''},{passive:true});
+/* Geser samping seperti WhatsApp (sama dengan Kisah-Lillah): isi sebelah ikut bergeser masuk bersama jari.
+   - Tab (Surah | Juz | Riwayat, Tahlil | Yasin, dll.): isi tab sebelah tampil di samping isi tab ini.
+   - Bagian berurutan (.pnav: surah/bacaan berikutnya) dan halaman menu bawah (Beranda, Al-Qur'an, Fadz AI, Kalender, Pengaturan):
+     halaman sebelah (potret terakhirnya, atau dirender langsung bila belum pernah dibuka) ikut bergeser.
+   - Geser dari tepi kiri di subhalaman = kembali ke halaman induk: halaman ini mengikuti jari, halaman induk tampil di belakang.
+   Dilepas cukup jauh (22% lebar) atau dikibas: meluncur penuh lalu halaman/tab asli dipasang tanpa animasi; kurang dari itu kembali. */
+const GS_BATAS=.22,GS_KIBAS=.5,GS_DUR=260,GS_EASE='cubic-bezier(.22,.8,.3,1)';
+const gsHP=()=>matchMedia('(max-width:899px)').matches;
+/* Potret isi halaman per alamat (diisi router setiap kali halaman ditinggalkan) */
+const VSNAP=new Map();
+function vSnap(h,html){if(!h||!html||html.length>600000)return;VSNAP.delete(h);VSNAP.set(h,html);if(VSNAP.size>24)VSNAP.delete(VSNAP.keys().next().value)}
+/* Isi halaman lain sebagai HTML: potret terakhir, atau dirender dari fungsi halamannya (tanpa init) */
+function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
+/* Jangan bajak geseran di isian, penggeser, lembar, kitab, kalender, carousel, atau daftar yang bisa digeser samping */
+function gsHalang(t){if(t.closest('input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'))return true;
+ for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false}
+/* Isi tab sebelah: tab itu dipilih sebentar untuk mengambil isinya, lalu tab asli dan isinya (simpul yang sama, lengkap dengan isian) dikembalikan */
+function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on')),el=tabIsi(),v=$('#view');if(!cur||!el)return '';
+ const simpan=[...el.childNodes],sy=v.scrollTop;let h='';try{nb.click();h=(tabIsi()||el).innerHTML}catch(e){}
+ try{cur.click()}catch(e){}const el2=tabIsi()||el;el2.replaceChildren(...simpan);v.scrollTop=sy;tabPil();return h}
+{
+ const v=$('#view'),app=$('#app');
+ let sx=null,sy=0,t0=0,dx=0,lock=null,mode='',dir=0,tujuan=null,peek=null,el=null,sibuk=false,tm=0,k=1;
+ const W=()=>v.clientWidth;
+ const buang=()=>{if(peek){peek.remove();peek=null}};
+ /* Halaman sebelah: lapisan seukuran #view di dalam #app, digeser selebar layar ke sisinya */
+ const peekHal=(html,blk)=>{buang();peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
+  Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px'});blk?app.insertBefore(peek,v):app.append(peek)};
+ /* Tab sebelah: lapisan seukuran isi tab, tepat di sampingnya */
+ const peekTab=html=>{buang();if(!html)return;peek=document.createElement('div');peek.className='tpeek';peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
+  Object.assign(peek.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(peek)};
+ const pasang=(px,tr)=>{const w=W(),g=mode=='tab'?el:v;g.style.transition=tr?`transform ${tr}`:'none';g.style.transform=px?`translate3d(${px}px,0,0)`:'';
+  if(mode=='back'){v.style.boxShadow=px?'-10px 0 24px rgba(0,0,0,.22)':'';if(peek){peek.style.transition=tr?`transform ${tr},filter ${tr}`:'none';peek.style.transform=`translate3d(${(px-w)*.3}px,0,0)`;peek.style.filter=`brightness(${.8+.2*Math.min(1,px/w)})`}}
+  else if(peek){peek.style.transition=g.style.transition;peek.style.transform=`translate3d(${px+dir*w}px,0,0)`}};
+ const pulih=()=>{[v,el].forEach(g=>{if(g){g.style.transition=g.style.transform='';g.style.boxShadow=''}});v.style.position=v.style.zIndex=v.style.background='';buang();sibuk=false};
+ const meluncur=(px,lalu,ms=GS_DUR)=>{pasang(px,`${ms}ms ${GS_EASE}`);clearTimeout(tm);tm=setTimeout(()=>lalu&&lalu(),ms+20)};
+ /* Halaman baru dipasang router (data-vt=geser, tanpa animasi): potret dilepas */
+ document.addEventListener('fz-dipasang',()=>{if(mode&&sibuk){mode='';pulih()}});
+ const pilihSebelah=d=>{dir=d;tujuan=null;buang();
+  if(mode=='tab'){const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));tujuan=T[i+d]||null;if(tujuan)peekTab(gsTabHtml(tujuan));return}
+  const h=location.hash||'#/',[a,b]=h.slice(2).split('/');let L=$(d>0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
+  if(L)tujuan=L.getAttribute('href');else if(!$('#view .pnav')&&tataNavR().includes(a)&&!b){const N=tataNavR(),k=N.indexOf(a);tujuan=N[k+d]!=null?'#/'+N[k+d]:null}
+  if(tujuan)peekHal(vHtml(tujuan))};
+ v.addEventListener('touchstart',e=>{sx=null;if(sibuk||!gsHP()||e.touches.length!=1||document.body.classList.contains('kfull')||gsHalang(e.target))return;
+  const t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now();dx=0;lock=null;mode='';
+  /* Jarak jari (piksel layar) diubah ke piksel CSS: di HP seluruh tampilan memakai zoom, isi harus tepat menempel di jari */
+  k=v.getBoundingClientRect().width/v.offsetWidth||1;
+  /* Tepi kiri di subhalaman: geser kembali */
+  if(t.clientX<24&&document.body.classList.contains('subhal'))mode='back';
+  /* Isi surah punya geser sendiri (halaman kartu / surah sebelah, lihat qReader di js/pages/quran.js) */
+  else if(e.target.closest('#ay'))sx=null},{passive:true});
+ v.addEventListener('touchmove',e=>{if(sx===null)return;
+  if(e.touches.length!=1){const h=lock=='h';sx=null;if(h)meluncur(0,pulih);return}
+  const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k;
+  if(lock===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;
+   if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
+   else{lock=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lock=='h'){mode=tabSemua().length>1&&!e.target.closest('#view .pnav')?'tab':'hal';el=mode=='tab'?tabIsi():null;if(mode=='tab'&&!el){lock='v';return}v.style.position='relative';pilihSebelah(x<0?1:-1)}}}
+  if(lock!='h')return;if(e.cancelable)e.preventDefault();
+  if(mode=='back'){dx=Math.max(0,x);pasang(dx);return}
+  /* Arah berbalik melewati titik awal: ganti isi sebelah yang ditampilkan */
+  const nd=x<0?1:-1;if(nd!=dir&&x!=0)pilihSebelah(nd);dx=x;pasang(tujuan?dx:dx*.25)},{passive:false});
+ const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h)return;
+  const w=W(),vel=dx/Math.max(1,Date.now()-t0),ms=Math.max(140,Math.min(GS_DUR,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));
+  if(mode=='back'){if(dx>w*.33||vel>GS_KIBAS){sibuk=true;meluncur(w,()=>{document.documentElement.dataset.vt='geser';location.replace(tujuan);setTimeout(()=>{if(sibuk){mode='';pulih()}},1500)},ms)}else meluncur(0,()=>{mode='';pulih()});return}
+  const kibas=Math.abs(vel)>GS_KIBAS&&Math.sign(vel)==-dir;
+  if(tujuan&&(Math.abs(dx)>w*GS_BATAS||kibas)){sibuk=true;
+   meluncur(-dir*w,()=>{if(mode=='tab'){const g=el;tujuan.click();tabPil();g.style.transition='none';g.style.transform='';const n=tabIsi();if(n){n.style.transition='none';n.style.transform=''}mode='';pulih();return}
+    document.documentElement.dataset.vt='geser';location.hash=tujuan;setTimeout(()=>{if(sibuk){mode='';pulih()}},1500)},ms)}
+  else meluncur(0,()=>{mode='';pulih()})};
+ v.addEventListener('touchend',lepas,{passive:true});
+ v.addEventListener('touchcancel',()=>{if(sx!==null){sx=null;if(lock=='h')meluncur(0,()=>{mode='';pulih()})}},{passive:true});
+}
 addEventListener('keydown',e=>{if(!$('#view .pnav')||e.target.closest?.('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;const L=e.key=='ArrowRight'?$('#view .pnav [data-nx]'):e.key=='ArrowLeft'?$('#view .pnav [data-pv]'):null;if(L){pDir(e.key=='ArrowRight'?1:-1);location.hash=L.getAttribute('href')}});
 /* Tarik ke bawah untuk memuat ulang (seperti Instagram): seluruh halaman ikut turun, di celah atas muncul putaran + tulisan.
    Hanya di Beranda dan Pengaturan; halaman lain (Al-Qur'an, bacaan, dll.) tidak bisa ditarik. */
