@@ -8,7 +8,7 @@ const TPEMILIK=['hilmykia@gmail.com','ponpesfadzkuruuni@gmail.com'];
 
 /* Semua tujuan yang bisa dipakai di pintasan, Semua Menu, dan menu bawah: rute -> [ikon, nama] */
 const TPOOL=(()=>{const P={'':['home','Beranda'],menu:['grid','Lainnya']};MENUALL.forEach(g=>g[1].forEach(m=>P[m[0]]=[m[1],m[2]]));SHORT.forEach(s=>P[s[0]]=P[s[0]]||[s[1],s[2]]);
- Object.assign(P,{zakat:P.zakat||['heart','Zakat & Sedekah'],lapor:['flag','Laporkan masalah'],ai:P.ai||['spark','Fadz AI'],kalender:P.kalender||['cal','Kalender'],pengaturan:P.pengaturan||['sliders','Pengaturan']});return P})();
+ Object.assign(P,{zakat:P.zakat||['heart','Zakat & Sedekah'],lapor:['flag','Laporkan masalah'],ai:P.ai||['spark','Fadz AI'],kalender:P.kalender||['cal','Kalender'],pengaturan:P.pengaturan||['sliders','Pengaturan'],dukung:P.dukung||['heart','Dukung kami'],tutorial:P.tutorial||['play','Video tutorial'],bookmark:P.bookmark||['star','Penanda ayat']});return P})();
 /* Bagian Beranda: id -> nama (untuk dashboard & mode admin) */
 const TBAG={lokasi:'Logo & lokasi',catatan:'Catatan pembuka',pengumuman:'Pengumuman admin',sapa:'Sapaan & tanggal',jadwal:'Jam & jadwal salat',pintasan:'Pintasan',cari:'Pencarian',promo:'Kartu promo (zakat, tahlil, waris)',lanjut:'Lanjutkan membaca',doa:'Doa hari ini'};
 const TATA_BAWAAN={beranda:Object.keys(TBAG).map(id=>({id,on:true})),pintasan:SHORT.map(s=>s[0]),menu:MENUALL.map(g=>({nama:g[0],isi:g[1].map(m=>m[0])})),

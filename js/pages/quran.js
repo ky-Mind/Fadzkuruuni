@@ -102,15 +102,18 @@ ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kart
 <div class="list sg ksh-c">${sl('s2','Arab',22,52,S.fs)}<div class="ksh-mt">${sl('s6','Latin',12,26,S.fl||15)}${sl('s7','Terjemah',12,26,S.fi||14)}</div></div>
 <div class="ksh-l">Warna teks</div><div class="ksh-c kpad">${wteksUI()}</div>
 <div class="ksh-l">Jenis huruf Arab</div>${fontUI('af',FAR,'بِسْمِ اللّٰهِ')}
+<div class="ksh-l">Jenis huruf Latin & Indonesia</div>${fontUI('lf',FLT,'Abc Fadzkuruuni')}
 <div class="ksh-l">Warna aksen</div><div class="ksh-c kpad"><div class="wtk acw" id="acw">${Object.entries(ACC).map(([v,a])=>`<button type="button" data-v="${v}" class="${v==(S.ac||'hitam')?'on':''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check',16)}</i><small>${a[0]}</small></button>`).join('')}</div></div>
 </div></div>`;document.body.append(e);
  e.onclick=x=>{if(x.target==e||x.target.closest('#s4')){e.remove();typeof cb=='function'&&cb()}};
  $('#s1',e).onchange=x=>{S.tr=x.target.checked;save();setSz()};$('#s5',e).onchange=x=>{S.lt=x.target.checked;save();setSz()};
  $('#s6',e).oninput=x=>{S.fl=+x.target.value;save();setSz()};$('#s7',e).oninput=x=>{S.fi=+x.target.value;save();setSz()};
  $('#s2',e).oninput=x=>{S.fs=+x.target.value;save();$$('#view .ay .ar,#view .ay2 .ar,#view .ar2,#view .mushaf').forEach(a=>a.style.fontSize=S.fs+'px');$$('#view .bsm').forEach(a=>a.style.fontSize=Math.round(S.fs*.85)+'px')};
- const msf=()=>{const on=qr?!!S.full:S.mbaca=='mushaf';e.querySelector('.sheet').classList.toggle('msf',on);$$('.ksh-mt input',e).forEach(i=>i.disabled=on)};msf();
+ /* Latin & terjemah dinonaktifkan di mode Mushaf, dan di halaman yang memang tidak punya teks Latin/terjemah (mis. Asmaul Husna) */
+ const tanpa=!qr&&!$('#view .lt,#view .tr,#view .kt-lt,#view .kt-id');
+ const msf=()=>{const on=tanpa||(qr?!!S.full:S.mbaca=='mushaf');e.querySelector('.sheet').classList.toggle('msf',on);$$('.ksh-mt input',e).forEach(i=>i.disabled=on);const n=$('.ksh-mn',e);if(n)n.textContent=tanpa?'Halaman ini tidak memiliki teks Latin dan terjemah, jadi pengaturannya tidak dipakai di sini.':'Mode Mushaf hanya menampilkan teks Arab bersambung. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.'};msf();
  if($('#smd',e))segBind('smd',v=>{window.QR&&qr?QR.mode(v=='1'):mbacaSet(v=='1');msf()});
- segBind('sth',v=>{S.theme=v;save();theme()});wteksBind();fontBind('af',FAR);segBind('acw',v=>{S.ac=v;save();accent()});
+ segBind('sth',v=>{S.theme=v;save();theme()});wteksBind();fontBind('af',FAR);fontBind('lf',FLT);segBind('acw',v=>{S.ac=v;save();accent()});
  /* Pratinjau dan angka di samping penggeser ikut berubah */
  const prv=()=>{$('#qpa',e).style.fontSize=S.fs+'px';$('#qpl',e).style.fontSize=(S.fl||15)+'px';$('#qpt',e).style.fontSize=(S.fi||14)+'px';$$('[data-for]',e).forEach(b=>b.textContent=$('#'+b.dataset.for,e).value)};prv();e.addEventListener('input',prv);e.addEventListener('click',()=>setTimeout(prv))}
 P.bookmark=()=>({html:head('Penanda ayat')+`<p class="mut">Penanda menyimpan ayat yang ingin kamu baca lagi. Ketuk ikon bintang pada sebuah ayat saat membaca, lalu temukan semuanya di sini.</p><div id="bl"></div>`,
