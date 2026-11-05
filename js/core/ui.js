@@ -28,6 +28,9 @@ function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getB
   ciut&&h.classList.add('tciut');
   /* Animasi dibatalkan saat selesai: sisa fill:forwards akan terbawa ke transisi berikutnya dan merusaknya */
   an=h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:ciut?300:400,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
+/* Pratinjau halaman untuk geser samping: PRATINJAU[rute](b,c,d) mengembalikan HTML lengkap halaman itu (isi yang biasanya dimuat init),
+   atau null bila datanya belum ada. Dipakai js/core/events.js (vHtml). */
+const PRATINJAU={};
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
