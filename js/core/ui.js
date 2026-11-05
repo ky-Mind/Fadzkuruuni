@@ -17,12 +17,16 @@ const segBind=(id,fn)=>$$('#'+id+' button').forEach(b=>b.onclick=()=>{$$('#'+id+
    jadi tetap mulus walau halaman sedang sibuk (jam, adzan). Tanpa View Transitions atau bila gerak dikurangi: langsung berganti. */
 function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null,x=r?r.left+r.width/2:innerWidth/2,y=r?r.top+r.height/2:innerHeight/2;
  if(!document.startViewTransition||gerakOff()){ubah();return sesudah&&sesudah()}
- const h=document.documentElement;h.classList.add('tgt');el&&el.classList.add('vtbtn');
- const t=document.startViewTransition(ubah);
- t.finished.finally(()=>{h.classList.remove('tgt');el&&el.classList.remove('vtbtn');sesudah&&setTimeout(sesudah,50)});
- t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y)),z=zmKini(),X=x/z,Y=y/z,RR=R/z;
-  /* Di HP seluruh halaman memakai CSS zoom, dan pseudo-elemen transisi ikut ter-zoom: titik pusat dibagi zoom agar tepat di tombol */
-  h.animate({clipPath:[`circle(0px at ${X}px ${Y}px)`,`circle(${RR}px at ${X}px ${Y}px)`]},{duration:Math.min(900,520+R*.25),easing:'cubic-bezier(.32,.72,0,1)',pseudoElement:'::view-transition-new(root)'})}).catch(()=>{})}
+ const h=document.documentElement,gelap=()=>h.dataset.theme=='dark',dulu=gelap();let ke=dulu;
+ h.classList.add('tgt');el&&el.classList.add('vtbtn');
+ const t=document.startViewTransition(()=>{ubah();ke=gelap()});
+ t.finished.finally(()=>{h.classList.remove('tgt','tciut');el&&el.classList.remove('vtbtn');sesudah&&setTimeout(sesudah,50)});
+ t.ready.then(()=>{const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y)),z=zmKini(),X=x/z,Y=y/z,RR=R/z,
+   kecil=`circle(0px at ${X}px ${Y}px)`,besar=`circle(${RR}px at ${X}px ${Y}px)`,ciut=dulu&&!ke;
+  /* Gaya Telegram: tema gelap selalu berupa lingkaran di tombol. Ke gelap: lingkaran gelap melebar dari tombol.
+     Ke terang: tampilan gelap lama ditaruh di atas lalu menciut masuk ke tombol. Di HP titik pusat dibagi zoom. */
+  ciut&&h.classList.add('tciut');
+  h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:Math.min(700,420+R*.15),easing:ciut?'cubic-bezier(.55,0,.75,.4)':'cubic-bezier(.25,.6,.35,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
