@@ -1373,7 +1373,7 @@ html.tciut::view-transition-old(root){z-index:3}
 .ay.aytuju{border-color:var(--g);box-shadow:0 0 0 2px var(--g),0 6px 18px color-mix(in srgb,var(--g) 18%,transparent)}
 @keyframes aykedip{50%{background:color-mix(in srgb,var(--g) 30%,var(--card));box-shadow:0 0 0 5px color-mix(in srgb,var(--g) 55%,transparent)}}
 /* Geser samping (js/core/events.js): halaman / tab sebelah yang ikut bergeser bersama jari */
-.vpeek{position:absolute;z-index:1;overflow:hidden;padding:16px max(16px,env(safe-area-inset-right)) 24px max(16px,env(safe-area-inset-left));word-break:break-word;pointer-events:none;will-change:transform}
+.vpeek{position:absolute;z-index:1;background:var(--bg);overflow:hidden;padding:16px max(16px,env(safe-area-inset-right)) 24px max(16px,env(safe-area-inset-left));word-break:break-word;pointer-events:none;will-change:transform}
 .vpeek.blk{z-index:0;background:var(--bg)}
 .vpeek p{line-height:1.65}.vpeek .card>p+p{margin-top:8px}
 .no-lt .vpeek .lt,.no-tr .vpeek .tr{display:none}
