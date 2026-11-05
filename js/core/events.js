@@ -101,6 +101,7 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  const meluncur=(px,lalu,ms=GS_DUR)=>{pasang(px,`${ms}ms ${GS_EASE}`);clearTimeout(tm);tm=setTimeout(()=>lalu&&lalu(),ms+20)};
  /* Halaman baru dipasang router (data-vt=geser, tanpa animasi): potret dilepas */
  document.addEventListener('fz-dipasang',()=>{if(mode&&sibuk){mode='';pulih()}});
+ /* Router memasang halaman baru dan mengembalikan #view ke tempatnya; pratinjau (sudah tepat di layar) tetap di atas sampai fz-dipasang */
  const pilihSebelah=d=>{dir=d;tujuan=null;buang();
   if(mode=='tab'){const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));tujuan=T[i+d]||null;if(tujuan)peekTab(gsTabHtml(tujuan));return}
   const h=location.hash||'#/',[a,b]=h.slice(2).split('/');let L=$(d>0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
@@ -126,7 +127,7 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
   const nd=x<0?1:-1;if(nd!=dir&&x!=0)pilihSebelah(nd);dx=x;pasang(tujuan?dx:dx*.25)},{passive:false});
  const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h)return;
   const w=W(),vel=dx/Math.max(1,Date.now()-t0),ms=Math.max(140,Math.min(GS_DUR,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));
-  if(mode=='back'){if(dx>w*.33||vel>GS_KIBAS){sibuk=true;meluncur(w,()=>{document.documentElement.dataset.vt='geser';location.replace(tujuan);setTimeout(()=>{if(sibuk){mode='';pulih()}},1500)},ms)}else meluncur(0,()=>{mode='';pulih()});return}
+  if(mode=='back'){if(dx>w*.33||vel>GS_KIBAS){sibuk=true;meluncur(w,()=>{if(peek)peek.style.zIndex='2';document.documentElement.dataset.vt='geser';location.replace(tujuan);setTimeout(()=>{if(sibuk){mode='';pulih()}},1500)},ms)}else meluncur(0,()=>{mode='';pulih()});return}
   const kibas=Math.abs(vel)>GS_KIBAS&&Math.sign(vel)==-dir;
   if(tujuan&&(Math.abs(dx)>w*GS_BATAS||kibas)){sibuk=true;
    meluncur(-dir*w,()=>{if(mode=='tab'){const g=el;tujuan.click();tabPil();g.style.transition='none';g.style.transform='';const n=tabIsi();if(n){n.style.transition='none';n.style.transform=''}mode='';pulih();return}
