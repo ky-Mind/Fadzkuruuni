@@ -26,7 +26,7 @@ function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getB
   /* Gaya Telegram: tema gelap selalu berupa lingkaran di tombol. Ke gelap: lingkaran gelap melebar dari tombol.
      Ke terang: tampilan gelap lama ditaruh di atas lalu menciut masuk ke tombol. Di HP titik pusat dibagi zoom. */
   ciut&&h.classList.add('tciut');
-  h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:Math.min(700,420+R*.15),easing:ciut?'cubic-bezier(.55,0,.75,.4)':'cubic-bezier(.25,.6,.35,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
+  h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:ciut?320:420,easing:ciut?'cubic-bezier(.25,.35,.45,1)':'cubic-bezier(.33,1,.68,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;

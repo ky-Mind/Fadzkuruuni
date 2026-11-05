@@ -44,7 +44,7 @@ const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
-const VER='2.2.1';
+const VER='2.2.2';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';
