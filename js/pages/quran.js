@@ -84,7 +84,7 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
    if(lk===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;lk=Math.abs(x)>Math.abs(y)*1.6?'h':'v';
     if(lk=='h'){V.style.position='relative';sc0=V.scrollTop;
      /* Pratinjau mulai dari atas layar yang terlihat (di bawah kepala surah bila tampil), bukan dari awal daftar yang sudah tergulir */
-     const rh=$('.rh'),hh=rh&&!rh.classList.contains('smb')?rh.offsetHeight:0;pTop=Math.max(el.offsetTop,sc0+hh);isiSebelah(x<0?1:-1)}}
+     const rh=$('.rh'),hb=rh&&!rh.classList.contains('smb')?(rh.getBoundingClientRect().bottom-V.getBoundingClientRect().top)/k:0;pTop=Math.max(el.offsetTop,sc0+hb);isiSebelah(x<0?1:-1)}}
    if(lk!='h')return;if(e.cancelable)e.preventDefault();const nd=x<0?1:-1;if(nd!=d&&x!=0)isiSebelah(nd);dx=x;pasang(ada?dx:dx*.25)},{passive:false});
   el.addEventListener('touchend',()=>{if(sx===null)return;sx=null;if(lk!='h')return;const w=Wd(),vel=dx/Math.max(1,Date.now()-t0),kibas=Math.abs(vel)>.5&&Math.sign(vel)==-d;
    if(ada&&(Math.abs(dx)>w*.22||kibas)){const ms=Math.max(140,Math.min(260,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));pasang(-d*w,`${ms}ms ${ES}`);
