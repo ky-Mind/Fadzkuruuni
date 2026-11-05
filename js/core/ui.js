@@ -18,7 +18,7 @@ function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getB
  const h=document.documentElement,gelap=()=>h.dataset.theme=='dark',dulu=gelap();let ke=dulu;
  h.classList.add('tgt');
  const t=document.startViewTransition(()=>{ubah();ke=gelap()});
- t.finished.finally(()=>{h.classList.remove('tgt','tciut');sesudah&&setTimeout(sesudah,50)});
+ let an;t.finished.finally(()=>{an&&an.cancel();h.classList.remove('tgt','tciut');sesudah&&setTimeout(sesudah,50)});
  t.ready.then(()=>{/* Posisi dalam persen layar (#app = seluruh layar, sistem koordinat sama dengan tombol), jadi tepat di zoom berapa pun */
   const V=(document.getElementById('app')||h).getBoundingClientRect(),W=V.width||innerWidth,H=V.height||innerHeight,dx=x-V.left,dy=y-V.top,
    P=`${dx/W*100}% ${dy/H*100}%`,RP=Math.hypot(Math.max(dx,W-dx),Math.max(dy,H-dy))/(Math.hypot(W,H)/Math.SQRT2)*100+1,
@@ -26,7 +26,8 @@ function temaGanti(el,ubah,sesudah){const r=el&&el.getBoundingClientRect?el.getB
   /* Gaya Telegram: tema gelap selalu berupa lingkaran di tombol. Ke gelap: lingkaran gelap melebar dari tombol.
      Ke terang: tampilan gelap lama ditaruh di atas lalu menciut masuk ke tombol. */
   ciut&&h.classList.add('tciut');
-  h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:ciut?300:400,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
+  /* Animasi dibatalkan saat selesai: sisa fill:forwards akan terbawa ke transisi berikutnya dan merusaknya */
+  an=h.animate({clipPath:ciut?[besar,kecil]:[kecil,besar]},{duration:ciut?300:400,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards',pseudoElement:ciut?'::view-transition-old(root)':'::view-transition-new(root)'})}).catch(()=>{})}
 const stp=(k,v,max)=>`<span class="stp" data-k="${k}" data-max="${max}"><button type="button" data-s="-1" aria-label="Kurangi">−</button><b>${v}</b><button type="button" data-s="1" aria-label="Tambah">+</button></span>`;
 function msheet(t,h){const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet" role="dialog"><b>${t}</b><div style="margin:8px 0">${h}</div><button class="btn" style="width:100%" data-x>Mengerti</button></div>`;document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))e.remove()}}
 const NOTE=`<div class="note">${ic('info',18)}<span>Aplikasi masih dalam masa pengembangan. Bila ada yang keliru, mohon konfirmasi lewat <a href="#/tentang">Laporkan bug</a>.</span><button class="ib2" data-nb aria-label="Tutup">×</button></div>`;
