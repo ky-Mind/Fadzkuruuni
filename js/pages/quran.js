@@ -48,7 +48,7 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  /* Ayat yang sedang terlihat paling atas (di bawah header), untuk mempertahankan posisi saat ganti mode */
  const atas=()=>{const y=$('.rh').getBoundingClientRect().bottom;const t=$$('#ay [id^="a"]').find(x=>x.getBoundingClientRect().bottom>y+8);return t?+t.id.slice(1):1};
  const ke=(k,smooth)=>{const t=$('#a'+k);if(t&&k>1)t.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'});else $('#view').scrollTo({top:0})};
- const slide=(d,fn)=>new Promise(res=>{if(R.instan){fn();$('#view').scrollTo({top:0});return res()}el.classList.remove('sl-in-l','sl-in-r');el.classList.add(d>0?'sl-out-l':'sl-out-r');setTimeout(()=>{fn();$('#view').scrollTo({top:0});el.classList.remove('sl-out-l','sl-out-r');void el.offsetWidth;el.classList.add(d>0?'sl-in-r':'sl-in-l');res()},170)});
+ const slide=(d,fn)=>new Promise(res=>{if(R.instan){fn();return res()}el.classList.remove('sl-in-l','sl-in-r');el.classList.add(d>0?'sl-out-l':'sl-out-r');setTimeout(()=>{fn();$('#view').scrollTo({top:0});el.classList.remove('sl-out-l','sl-out-r');void el.offsetWidth;el.classList.add(d>0?'sl-in-r':'sl-in-l');res()},170)});
  /* d = 1 (berikutnya) atau -1: pindah halaman kartu dulu, lalu pindah surah di tempat */
  R.go=async d=>{if(R.busy||!R.A)return;const np=pages();
   if(!S.full&&R.p+d>=0&&R.p+d<np){R.busy=1;await slide(d,()=>{R.p+=d;draw()});R.busy=0;return}
@@ -60,28 +60,37 @@ function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('
  el.onclick=e=>{if(e.target.closest('button,a')||String(getSelection()).trim())return;const t=e.target.closest('.ay,.ayt');if(t){ayPilih(+t.id.slice(1));ayMenu(R.n,+t.id.slice(1))}};
  $('#snav').onclick=e=>{const b=e.target.closest('[data-qn]');if(b&&!b.disabled)R.go(+b.dataset.qn)};
  /* Geser ke samping seperti WhatsApp: halaman kartu (atau surah) sebelah ikut masuk bersama jari; dilepas cukup jauh
-    atau dikibas: meluncur penuh lalu dipasang tanpa animasi; kurang dari itu kembali. Tepi kiri dibiarkan untuk geser kembali. */
+    atau dikibas: meluncur penuh lalu dipasang tanpa animasi; kurang dari itu kembali. Tepi kiri dibiarkan untuk geser kembali.
+    Pratinjau digambar dengan draw() yang sama persis (kartu, penanda, sorotan, tombol Sebelumnya/Berikutnya, label ayat),
+    kartu + tombol navigasi bergeser bersama, dan posisi gulir dipertahankan: setelah pindah tidak ada yang berubah/meloncat. */
  /* Surah sebelum & sesudah disiapkan lebih dulu, supaya saat digeser isinya langsung tampil */
  const SBL={};const siapkan=()=>[R.n-1,R.n+1].forEach(m=>{if(m>=1&&m<=114&&!SBL[m])qGet(m).then(B=>{SBL[m]=B}).catch(()=>{})});R.siapkan=siapkan;
- {let sx=null,sy=0,t0=0,dx=0,lk=null,d=0,ada=0,pk=null,k=1;const V=$('#view'),Wd=()=>V.clientWidth,ES='cubic-bezier(.22,.8,.3,1)';
+ {let sx=null,sy=0,t0=0,dx=0,lk=null,d=0,ada=0,pk=null,k=1,sc0=0,pTop=0;const V=$('#view'),sn=$('#snav'),Wd=()=>V.clientWidth,ES='cubic-bezier(.22,.8,.3,1)';
   const buang=()=>{if(pk){pk.remove();pk=null}};
+  /* Gambar keadaan lain (halaman kartu / surah sebelah) dengan draw() asli, ambil HTML-nya, lalu kembalikan keadaan & simpul asli */
+  const gambarLain=st=>{const sA=[...el.childNodes],sN=[...sn.childNodes],o={n:R.n,A:R.A,p:R.p,tuju:R.tuju};let h='';
+   try{Object.assign(R,st,{tuju:0});draw();h=`<div class="qpk">${el.innerHTML}</div><div class="snav">${sn.innerHTML}</div>`}catch(e){}
+   Object.assign(R,o);el.replaceChildren(...sA);sn.replaceChildren(...sN);return h};
   const isiSebelah=dd=>{buang();d=dd;ada=0;if(!R.A||R.busy)return;let h='';
-   if(!S.full&&R.p+d>=0&&R.p+d<pages()){const simpan=[...el.childNodes];R.p+=d;drawAy(el,R.A,R.n,R.p);h=el.innerHTML;R.p-=d;el.replaceChildren(...simpan);ada=1}
-   else{const m=R.n+d;if(m>=1&&m<=114){ada=1;const B=SBL[m];
-    /* Isi surah sebelah (sudah disiapkan sejak surah ini dibuka): kartu pertama, atau kartu terakhir bila mundur; mushaf: awal surah */
-    if(B){const t=document.createElement('div');drawAy(t,S.full?B.slice(0,40):B,m,S.full?null:d<0?Math.ceil(B.length/QPER)-1:0);h=t.innerHTML}
-    else h='<p class="mut" style="text-align:center;padding:28px 0">Memuat…</p>'}}
-   if(!ada)return;pk=document.createElement('div');pk.className='tpeek';pk.setAttribute('aria-hidden','true');pk.innerHTML=h;Object.assign(pk.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(pk)};
-  const pasang=(px,tr)=>{const t=tr?`transform ${tr}`:'none';el.style.transition=t;el.style.transform=px?`translate3d(${px}px,0,0)`:'';if(pk){pk.style.transition=t;pk.style.transform=`translate3d(${px+d*Wd()}px,0,0)`}};
-  const pulih=()=>{el.style.transition=el.style.transform='';V.style.position='';buang()};
+   if(!S.full&&R.p+d>=0&&R.p+d<pages()){h=gambarLain({p:R.p+d});ada=!!h}
+   else{const m=R.n+d,B=SBL[m];if(m>=1&&m<=114){ada=1;h=B?gambarLain({n:m,A:B,p:S.full?0:d<0?Math.ceil(B.length/QPER)-1:0}):'<p class="mut" style="text-align:center;padding:28px 0">Memuat…</p>'}}
+   if(!ada)return;pk=document.createElement('div');pk.className='tpeek';pk.setAttribute('aria-hidden','true');pk.innerHTML=h;
+   Object.assign(pk.style,{left:el.offsetLeft+'px',top:pTop+'px',width:el.offsetWidth+'px'});sn.after(pk)};
+  const pasang=(px,tr)=>{const t=tr?`transform ${tr}`:'none';[el,sn].forEach(g=>{g.style.transition=t;g.style.transform=px?`translate3d(${px}px,0,0)`:''});if(pk){pk.style.transition=t;pk.style.transform=`translate3d(${px+d*Wd()}px,0,0)`}};
+  const pulih=()=>{[el,sn].forEach(g=>g.style.transition=g.style.transform='');V.style.position='';buang()};
   el.addEventListener('touchstart',e=>{sx=null;if(e.touches.length!=1||R.busy||e.touches[0].clientX<24||e.target.closest('button,a,input'))return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;t0=Date.now();dx=0;lk=null;k=V.getBoundingClientRect().width/V.offsetWidth||1},{passive:true});
   el.addEventListener('touchmove',e=>{if(sx===null)return;if(e.touches.length!=1){sx=null;if(lk=='h'){pasang(0,`.2s ${ES}`);setTimeout(pulih,220)}return}
    const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k;
-   if(lk===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;lk=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lk=='h'){V.style.position='relative';isiSebelah(x<0?1:-1)}}
+   if(lk===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;lk=Math.abs(x)>Math.abs(y)*1.6?'h':'v';
+    if(lk=='h'){V.style.position='relative';sc0=V.scrollTop;
+     /* Pratinjau mulai dari atas layar yang terlihat (di bawah kepala surah bila tampil), bukan dari awal daftar yang sudah tergulir */
+     const rh=$('.rh'),hh=rh&&!rh.classList.contains('smb')?rh.offsetHeight:0;pTop=Math.max(el.offsetTop,sc0+hh);isiSebelah(x<0?1:-1)}}
    if(lk!='h')return;if(e.cancelable)e.preventDefault();const nd=x<0?1:-1;if(nd!=d&&x!=0)isiSebelah(nd);dx=x;pasang(ada?dx:dx*.25)},{passive:false});
   el.addEventListener('touchend',()=>{if(sx===null)return;sx=null;if(lk!='h')return;const w=Wd(),vel=dx/Math.max(1,Date.now()-t0),kibas=Math.abs(vel)>.5&&Math.sign(vel)==-d;
    if(ada&&(Math.abs(dx)>w*.22||kibas)){const ms=Math.max(140,Math.min(260,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));pasang(-d*w,`${ms}ms ${ES}`);
-    setTimeout(async()=>{R.instan=1;try{await R.go(d)}finally{R.instan=0;pulih()}},ms+20)}
+    setTimeout(async()=>{R.instan=1;let ok=0;const n0=R.n,p0=R.p;try{await R.go(d);ok=R.n!=n0||R.p!=p0}finally{R.instan=0;
+     /* Isi baru ditaruh tepat di posisi pratinjau tadi: tidak meloncat ke atas, kepala surah tidak ikut bersembunyi/muncul */
+     if(ok){BLU=0;V.scrollTop=sc0-(pTop-el.offsetTop);BLY=V.scrollTop}pulih()}},ms+20)}
    else{pasang(0,`.26s ${ES}`);setTimeout(pulih,280)}},{passive:true});
   el.addEventListener('touchcancel',()=>{if(sx!==null){sx=null;if(lk=='h'){pasang(0,`.2s ${ES}`);setTimeout(pulih,220)}}},{passive:true})}
  hdr();catat();

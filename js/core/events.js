@@ -90,7 +90,9 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  const buang=()=>{if(peek){peek.remove();peek=null}};
  /* Halaman sebelah: lapisan seukuran #view di dalam #app, digeser selebar layar ke sisinya */
  const peekHal=(html,blk)=>{buang();peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
-  Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px'});blk?app.insertBefore(peek,v):app.append(peek)};
+  Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px'});blk?app.insertBefore(peek,v):app.append(peek);
+  /* Fadz AI dibuka di pesan terbaru (bawah): pratinjaunya juga ditampilkan dari bawah */
+  if(peek.querySelector("#aic .aim"))peek.scrollTop=peek.scrollHeight};
  /* Tab sebelah: lapisan seukuran isi tab, tepat di sampingnya */
  const peekTab=html=>{buang();if(!html)return;peek=document.createElement('div');peek.className='tpeek';peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
   Object.assign(peek.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(peek)};

@@ -1380,3 +1380,5 @@ html.tciut::view-transition-old(root){z-index:3}
 .tpeek{position:absolute;pointer-events:none;will-change:transform}
 @media(min-width:600px){.vpeek{padding:20px 24px}}
 @media(max-width:420px){.vpeek{padding-top:12px}}
+/* Pratinjau geser surah (js/pages/quran.js): sama dengan #ay */
+.qpk{padding-bottom:90px}.qpk .mushaf{color:var(--tc,var(--bc,var(--ink)))}
