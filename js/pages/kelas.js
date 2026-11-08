@@ -49,29 +49,38 @@ const kHash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;re
 /* Boleh bicara: pengajar, atau jamaah yang diizinkan (LiveKit: sumber mikrofon diizinkan; kelas kecil: boleh) */
 const kBoleh=p=>{if(!p)return false;if((p.attributes||{}).peran=='ustaz')return true;const m=p.permissions;if(!m||!m.canPublish)return false;const s=m.canPublishSources;return !s||!s.length||s.some(x=>x==2||x=='microphone'||x=='MICROPHONE')};
 /* Video tiap orang: pengajar → panggung besar (KR.video); jamaah → kotaknya (KR.vid) */
-function kSetVid(p,st){if(!KR||!p)return;const self=p===KR.room.localParticipant;if((p.attributes||{}).peran=='ustaz'){KR.video=st||null;KR.videoLokal=!!(st&&self)}else{KR.vid=KR.vid||new Map();st?KR.vid.set(p.identity,st):KR.vid.delete(p.identity)}}
+function kSetVid(p,st){if(!KR||!p)return;KR.vid=KR.vid||new Map();st?KR.vid.set(p.identity,st):KR.vid.delete(p.identity);if((p.attributes||{}).peran=='ustaz'){KR.video=st||null;KR.videoLokal=!!(st&&p===KR.room.localParticipant)}}
+function kSetLayar(p,st){if(!KR||!p)return;KR.layar=KR.layar||new Map();st?KR.layar.set(p.identity,st):KR.layar.delete(p.identity);if(!st&&KR.pin===p.identity)KR.pin=null}
+/* Berbagi layar? LiveKit: ada aliran layar; kelas kecil: tanda kamera='layar' (layar dikirim lewat jalur kamera) */
+const kLayar=p=>!!(p&&((KR.layar&&KR.layar.get(p.identity))||(KR.mode=='mesh'&&(p.attributes||{}).kamera=='layar')));
+function kStream(p){if(!p||!KR)return null;const L=KR.layar&&KR.layar.get(p.identity);if(L)return L;const k=(p.attributes||{}).kamera,saya=p===KR.room.localParticipant;
+ if(KR.mode=='mesh'&&!saya&&!(k===undefined||k=='1'||k=='layar'))return null;return (KR.vid&&KR.vid.get(p.identity))||((p.attributes||{}).peran=='ustaz'?KR.video:null)||null}
 const kAva=(p,z)=>{const f=(p.attributes||{}).foto;if(f&&(/^data:image\/(jpeg|png|webp);base64,/.test(f)||/^https:\/\/[\w.-]+\.(googleusercontent|fbcdn|facebook)\.(com|net)\//.test(f)))return `<img class="ava kzav" src="${esc(f)}" alt="" referrerpolicy="no-referrer" style="width:${z}px;height:${z}px">`;const h=kHash(p.identity)%360;return `<span class="ava kzav" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.42)}px;background:hsl(${h} 42% 86%);color:hsl(${h} 45% 28%)">${esc(((p.name||'J').trim()[0]||'J').toUpperCase())}</span>`};
 function kelasGambar(){const st=$('#kzs'),g=$('#kzg');if(!st||!g||!KR)return;const R=KR.room,saya=R.localParticipant,semua=[saya,...R.remoteParticipants.values()];
- const ust=semua.find(p=>(p.attributes||{}).peran=='ustaz'),jm=semua.filter(p=>p!==ust),nm=p=>p===saya?(p.name||'Kamu')+' (Kamu)':(p.name||'Jamaah');
+ const ust=semua.find(p=>(p.attributes||{}).peran=='ustaz'),nm=p=>p===saya?(p.name||'Kamu')+' (Kamu)':(p.name||'Jamaah');
  if(!ust&&KR.video&&!KR.admin)KR.video=null;/* pengajar keluar → jangan tampilkan gambar terakhirnya */
- const kamOk=p=>{const k=(p.attributes||{}).kamera;return KR.mode!='mesh'||p===saya||k===undefined||k=='1'};
- const v=$('#kzv'),vs=ust&&kamOk(ust)?(KR.video||null):null;if(v.srcObject!==vs){v.srcObject=vs;if(vs)v.play().catch(()=>{})}v.hidden=!vs;v.classList.toggle('cermin',!!(vs&&KR.videoLokal));
- const sa=$('#kzsa'),isi=vs?'':(ust?kAva(ust,104):`<div class="kzw">${ic('siar',28)}<span>Menunggu pengajar masuk…</span></div>`);const sk=(ust?ust.identity+'|'+((ust.attributes||{}).foto||'').length:'')+(vs?'v':'');if(sa.dataset.k!==sk){sa.innerHTML=isi;sa.dataset.k=sk}
- $('#kzsn').innerHTML=ust?`${ust.isSpeaking?ic('speaker',15):''}<span>${esc(nm(ust))}</span><small>Pengajar</small>`:'';st.classList.toggle('bicara',!!(ust&&ust.isSpeaking));
- /* Kotak jamaah diperbarui di tempat (video tidak berkedip) */
- const ada=new Set();jm.forEach(p=>{const id='kzt'+kHash(p.identity);ada.add(id);let t=document.getElementById(id);
-  if(!t){t=document.createElement('div');t.id=id;t.className='kzt';t.innerHTML='<video autoplay playsinline muted hidden></video><span class="kza"></span><span class="kzn"></span>';g.append(t)}
-  const vs=kamOk(p)?((KR.vid&&KR.vid.get(p.identity))||null):null,vv=t.querySelector('video');if(vv.srcObject!==vs){vv.srcObject=vs;if(vs)vv.play().catch(()=>{})}vv.hidden=!vs;vv.classList.toggle('cermin',p===saya);
+ if(KR.pin&&!semua.some(p=>p.identity===KR.pin))KR.pin=null;
+ const fokus=semua.find(p=>p.identity===KR.pin)||semua.find(p=>kLayar(p))||ust;
+ /* Panggung besar */
+ const v=$('#kzv'),vs=fokus?kStream(fokus):null,lay=!!(fokus&&kLayar(fokus));if(v.srcObject!==vs){v.srcObject=vs;if(vs)v.play().catch(()=>{})}v.hidden=!vs;v.classList.toggle('cermin',!!(vs&&fokus===saya&&!lay));v.classList.toggle('layar',lay);
+ const sa=$('#kzsa'),isi=vs?'':(fokus?kAva(fokus,104):`<div class="kzw">${ic('siar',28)}<span>Menunggu pengajar masuk…</span></div>`);const sk=(fokus?fokus.identity+'|'+((fokus.attributes||{}).foto||'').length:'')+(vs?'v':'');if(sa.dataset.k!==sk){sa.innerHTML=isi;sa.dataset.k=sk}
+ $('#kzsn').innerHTML=fokus?`${fokus.isSpeaking?ic('speaker',15):''}<span>${esc(nm(fokus))}</span><small>${lay?'Berbagi layar':(fokus.attributes||{}).peran=='ustaz'?'Pengajar':''}${KR.pin?' · disorot':''}</small>`:'';
+ st.classList.toggle('bicara',!!(fokus&&fokus.isSpeaking));st.dataset.kpin=KR.pin?'':'';st.title=KR.pin?'Ketuk untuk kembali':'';
+ /* Kotak peserta lain (diperbarui di tempat agar video tidak berkedip). Ketuk = sorot di panggung */
+ const ada=new Set();semua.filter(p=>p!==fokus).forEach(p=>{const id='kzt'+kHash(p.identity);ada.add(id);let t=document.getElementById(id);
+  if(!t){t=document.createElement('button');t.type='button';t.id=id;t.className='kzt';t.innerHTML='<video autoplay playsinline muted hidden></video><span class="kza"></span><span class="kzn"></span>';g.append(t)}
+  t.dataset.kpin=p.identity;
+  const vs=kStream(p),vv=t.querySelector('video');if(vv.srcObject!==vs){vv.srcObject=vs;if(vs)vv.play().catch(()=>{})}vv.hidden=!vs;vv.classList.toggle('cermin',p===saya&&!kLayar(p));vv.classList.toggle('layar',kLayar(p));
   const a=t.querySelector('.kza');a.hidden=!!vs;const ak=(p.name||'')+'|'+((p.attributes||{}).foto||'').length;if(a.dataset.k!==ak){a.innerHTML=kAva(p,46);a.dataset.k=ak}
   t.classList.toggle('bicara',!!p.isSpeaking);t.classList.toggle('vid',!!vs);
-  const n=`${(p.attributes||{}).tangan=='1'?`<span class="kzh">${ic('tangan',13)}</span>`:''}${kBoleh(p)?ic('mic',13):''}${esc(nm(p))}`;const ne=t.querySelector('.kzn');if(ne.innerHTML!==n)ne.innerHTML=n});
+  const n=`${(p.attributes||{}).tangan=='1'?`<span class="kzh">${ic('tangan',13)}</span>`:''}${kBoleh(p)?ic('mic',13):''}${esc(nm(p))}${(p.attributes||{}).peran=='ustaz'?' · Pengajar':''}`;const ne=t.querySelector('.kzn');if(ne.innerHTML!==n)ne.innerHTML=n});
  [...g.children].forEach(c=>{if(!ada.has(c.id))g.removeChild(c)})}
 
 function kelasInfo(){const R=KR&&KR.room;if(!R)return;const semua=[R.localParticipant,...R.remoteParticipants.values()],bicara=semua.filter(p=>p.isSpeaking),saya=R.localParticipant,boleh=kBoleh(saya),tangan=(saya.attributes||{}).tangan=='1',mic=saya.isMicrophoneEnabled;
  const i=$('#kinfo');if(i)i.innerHTML=`<div class="kbic">${ic(bicara.length?'speaker':'speaker',18)}<span>${bicara.length?'<b>'+bicara.map(p=>esc(p.name||'Jamaah')).join(', ')+'</b> sedang berbicara':KR.mode=='mesh'&&!KR.admin&&!semua.some(p=>(p.attributes||{}).peran=='ustaz')?'Menunggu pengajar masuk…':'Menunggu suara…'}</span></div>
   <small class="mut">${KR.mode=='mesh'?'Kelas kecil · ':''}${semua.length} orang di majelis · ${KR.admin?'Kamu pengajar (mikrofon '+(mic?'nyala':'mati')+')':boleh?'Kamu diizinkan bicara':'Kamu mendengarkan, mikrofon mati'}</small>${KR.diam?'<button class="btn" data-kaudio style="width:100%;margin-top:10px">Ketuk untuk menyalakan suara</button>':''}`;
  const c=$('#kctl');if(c)c.innerHTML=((KR.admin||boleh)&&!mic?`<div class="kmicn">${ic('mic',20)}<span><b>Mikrofon mati.</b> ${KR.admin?'Tekan Aktifkan mikrofon saat mulai mengajar.':'Kamu diizinkan bicara. Tekan Aktifkan mikrofon untuk mulai berbicara.'}</span></div>`:'')
-  +(KR.admin||boleh?`<button class="btn${mic?' s':''}" data-kmic>${ic('mic',18)} ${mic?'Matikan mikrofon':'Aktifkan mikrofon'}</button>`:`<button class="btn s" data-ktangan>${ic('tangan',18)} ${tangan?'Turunkan tangan':'Angkat tangan'}</button>`)+`<button class="btn s" data-kcam>${ic('camera',18)} ${KR.camOn?'Matikan kamera':'Nyalakan kamera'}</button>`+`<button class="btn s kkel" data-kkeluar>Keluar</button>`+(KR.admin?`<button class="btn s krb" data-krec>${KREC?'<span class="krec">● Merekam</span> Hentikan & simpan':ic('mic',18)+' Rekam kelas'}</button>`:'');
+  +(KR.admin||boleh?`<button class="btn${mic?' s':''}" data-kmic>${ic('mic',18)} ${mic?'Matikan mikrofon':'Aktifkan mikrofon'}</button>`:`<button class="btn s" data-ktangan>${ic('tangan',18)} ${tangan?'Turunkan tangan':'Angkat tangan'}</button>`)+`<button class="btn s" data-kcam>${ic('camera',18)} ${KR.camOn?'Matikan kamera':'Nyalakan kamera'}</button>`+(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?`<button class="btn s${KR.layarOn?' kon':''}" data-klayar>${ic('panel',18)} ${KR.layarOn?'Hentikan berbagi layar':'Bagikan layar'}</button>`:'')+`<button class="btn s kkel" data-kkeluar>Keluar</button>`+(KR.admin?`<button class="btn s krb" data-krec>${KREC?'<span class="krec">● Merekam</span> Hentikan & simpan':ic('mic',18)+' Rekam kelas'}</button>`:'');
  const a=$('#kadm');if(a&&KR.admin){const L=[...R.remoteParticipants.values()],T=L.filter(p=>(p.attributes||{}).tangan=='1'||kBoleh(p));
   a.innerHTML=`<h2>Jamaah yang angkat tangan</h2>`+(T.length?`<div class="list">${T.map(p=>`<div class="srw"><span class="si">${ic(kBoleh(p)?'mic':'tangan',18)}</span><span class="t">${esc(p.name||'Jamaah')}<br><small class="mut">${kBoleh(p)?'Boleh bicara':'Ingin bertanya'}</small></span><button class="btn s" data-kizin="${esc(p.identity)}" data-boleh="${kBoleh(p)?0:1}">${kBoleh(p)?'Bisukan':'Izinkan bicara'}</button></div>`).join('')}</div>`:'<p class="mut">Belum ada. Jamaah yang menekan "Angkat tangan" muncul di sini.</p>')}
  kelasGambar();kelasPil()}
@@ -94,11 +103,12 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelas
  if(!paksaLK&&(kk.mode=='mesh'||(kk.mode!='livekit'&&KSIAP===false)))return kelasMasukMesh(id);
  try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await ldjs(LKJS);const L=LivekitClient,R=new L.Room({adaptiveStream:true,dynacast:true});
   KR={id,room:R,admin:!!t.admin,diam:false,judul:((KELAS||[]).find(x=>x.id==id)||{}).judul||'Kelas online'};const ub=()=>KR&&KR.room===R&&kelasInfo();
-  R.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind=='video'){kSetVid(p,new MediaStream([tr.mediaStreamTrack]));return ub()}if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
-   .on(L.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='video'&&pub.track){kSetVid(R.localParticipant,new MediaStream([pub.track.mediaStreamTrack]));ub()}})
-   .on(L.RoomEvent.TrackUnsubscribed,(tr,pub,p)=>{if(tr.kind=='video'){kSetVid(p,null);ub()}tr.detach().forEach(el=>el.parentNode&&el.parentNode.removeChild(el))})
+  R.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind=='video'){const st=new MediaStream([tr.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(p,st):kSetVid(p,st);return ub()}if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
+   .on(L.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='video'&&pub.track){const st=new MediaStream([pub.track.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(R.localParticipant,st):kSetVid(R.localParticipant,st);ub()}})
+   .on(L.RoomEvent.LocalTrackUnpublished,pub=>{if(pub.source==L.Track.Source.ScreenShare){kSetLayar(R.localParticipant,null);KR.layarOn=false;ub()}})
+   .on(L.RoomEvent.TrackUnsubscribed,(tr,pub,p)=>{if(tr.kind=='video'){pub.source==L.Track.Source.ScreenShare?kSetLayar(p,null):kSetVid(p,null);ub()}tr.detach().forEach(el=>el.parentNode&&el.parentNode.removeChild(el))})
    .on(L.RoomEvent.ParticipantConnected,ub).on(L.RoomEvent.ParticipantDisconnected,ub).on(L.RoomEvent.ActiveSpeakersChanged,ub).on(L.RoomEvent.ParticipantAttributesChanged,ub)
-   .on(L.RoomEvent.LocalTrackPublished,ub).on(L.RoomEvent.LocalTrackUnpublished,ub).on(L.RoomEvent.TrackMuted,(pub,p)=>{if(pub.kind=='video'&&p!==R.localParticipant)kSetVid(p,null);ub()}).on(L.RoomEvent.TrackUnmuted,(pub,p)=>{if(pub.kind=='video'&&pub.track&&p!==R.localParticipant)kSetVid(p,new MediaStream([pub.track.mediaStreamTrack]));ub()})
+   .on(L.RoomEvent.LocalTrackPublished,ub).on(L.RoomEvent.LocalTrackUnpublished,ub).on(L.RoomEvent.TrackMuted,(pub,p)=>{if(pub.kind=='video'&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,null);ub()}).on(L.RoomEvent.TrackUnmuted,(pub,p)=>{if(pub.kind=='video'&&pub.track&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,new MediaStream([pub.track.mediaStreamTrack]));ub()})
    .on(L.RoomEvent.ParticipantPermissionsChanged,(prev,p)=>{if(p===R.localParticipant&&!KR.admin){if(kBoleh(p)&&!kBoleh({permissions:prev})){toast('Kamu diizinkan bicara. Tekan Aktifkan mikrofon.');R.localParticipant.setAttributes({tangan:''}).catch(()=>{})}}ub()})
    .on(L.RoomEvent.AudioPlaybackStatusChanged,()=>{KR.diam=!R.canPlaybackAudio;ub()})
    .on(L.RoomEvent.Disconnected,()=>kelasPutus(R));
@@ -111,7 +121,7 @@ async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(
  try{if(k.status!='live'&&!admin)throw 'belum-mulai';let R=null;
   R=await kelasMesh(id,admin,kNama(),()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}},FBU&&FBU.uid);
   R.onDisconnected=()=>kelasPutus(R);KR={id,room:R,admin,diam:!R.canPlaybackAudio,mode:'mesh',judul:k.judul||'Kelas online'};R.onVideo=st=>{if(KR&&KR.room===R&&!admin){KR.video=st;KR.videoLokal=false;kelasInfo()}};
-  R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
+  R.onLayarSelesai=()=>{if(KR&&KR.room===R){KR.layarOn=false;kSetLayar(R.localParticipant,null);kelasInfo()}};R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
  catch(e){KR=null;console.warn('kelas kecil',e);
   /* Kelas kecil gagal (mis. aturan Firestore belum dipublish) → coba lewat LiveKit bila servernya siap */
@@ -148,6 +158,12 @@ document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-kcam]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.camOn;try{await lp.setCameraEnabled(on);KR.camOn=on;
   let st=null;if(on){if(R.mode=='mesh')st=R.camStream();else{const pub=lp.getTrackPublication(LivekitClient.Track.Source.Camera);if(pub&&pub.track)st=new MediaStream([pub.track.mediaStreamTrack])}}kSetVid(lp,st)}
   catch(x){toast('Kamera belum diizinkan. Izinkan kamera di pengaturan HP.')}return kelasInfo()}
+ if(t.closest('[data-klayar]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.layarOn;
+  try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:false});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
+  catch(x){if(!(x&&x.name=='NotAllowedError'))toast('Layar tidak bisa dibagikan dari perangkat ini.')}return kelasInfo()}
+ /* Ketuk kotak peserta = sorot di panggung besar; ketuk panggung = kembali */
+ const pin=t.closest('.kzt[data-kpin]');if(pin&&KR){KR.pin=pin.dataset.kpin;return kelasInfo()}
+ if(t.closest('#kzs')&&KR&&KR.pin){KR.pin=null;return kelasInfo()}
  if(t.closest('[data-kmic]')&&KR){const lp=KR.room.localParticipant;const on=!lp.isMicrophoneEnabled;try{await lp.setMicrophoneEnabled(on);toast(on?'Mikrofon aktif':'Mikrofon dimatikan')}catch(x){toast('Mikrofon belum diizinkan. Izinkan mikrofon di pengaturan HP.')}return kelasInfo()}
  const iz=t.closest('[data-kizin]');if(iz&&KR){iz.disabled=true;try{if(KR.room.mode=='mesh')await KR.room.izin(iz.dataset.kizin,iz.dataset.boleh=='1');else await kelasToken(KR.id,'izin',{identity:iz.dataset.kizin,boleh:iz.dataset.boleh=='1'})}catch(x){toast('Gagal mengubah izin bicara')}return}
  const ul=t.closest('[data-kulang]');if(ul)return kelasMasuk(ul.dataset.kulang);

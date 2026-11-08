@@ -23,7 +23,7 @@ const HAPUSAKUN=()=>cloudOn()&&FBU?`<h2>Hapus akun</h2><div class="card"><p clas
 SETPAGES.akun=()=>({html:head('Akun & Profil','#/pengaturan')+NAMEBOX()+AKUN()+HAPUSAKUN()});
 document.addEventListener('click',x=>{if(!x.target.closest('[data-hapusakun]')||!FBU)return;
  konfirmasi('Hapus akun & data?','Akun dan semua data cloud-mu akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.','Hapus permanen',async()=>{const u=firebase.auth().currentUser;if(!u)return;
-  try{await FBD.collection('users').doc(u.uid).delete().catch(()=>{});await u.delete();FBU=null;toast('Akun dan data cloud sudah dihapus');route()}
+  try{await FBD.collection('users').doc(u.uid).delete().catch(()=>{});await u.delete();FBU=null;S.foto=null;S.nm='';S.ct=0;try{localStorage.fz=JSON.stringify(S)}catch(e){}tataNav();toast('Akun dan data cloud sudah dihapus');route()}
   catch(e){toast(e.code=='auth/requires-recent-login'?'Demi keamanan, keluar lalu masuk lagi, kemudian ulangi Hapus akun':'Gagal menghapus: '+(e.code||e.message))}})});
 
 /* Masuk dengan email: kata sandi (masuk / daftar / lupa sandi) atau tautan masuk tanpa sandi yang dikirim ke email */

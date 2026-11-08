@@ -18,8 +18,11 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
  /* Peserta lokal (meniru LiveKit) */
  const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:'',foto:(window.fotoProfil&&fotoProfil())||'',kamera:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
   async setAttributes(a){Object.assign(lokal.attributes,a);await tulisSaya();ubah()},
+  async setScreenShare(on){if(on){const d=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:10,max:15}},audio:false});S_.layar=d;const tr=d.getVideoTracks()[0];
+    tr.onended=()=>{if(S_.layar===d)lokal.setScreenShare(false).then(()=>{room.onLayarSelesai&&room.onLayarSelesai()})};S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.attributes.kamera='layar';tulisSaya().catch(()=>{});ubah();return d}
+   if(S_.layar){S_.layar.getTracks().forEach(t=>t.stop());S_.layar=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.attributes.kamera=S_.cam?'1':'';tulisSaya().catch(()=>{});ubah();return null},
   async setCameraEnabled(on){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
-   if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=on?'1':'';tulisSaya().catch(()=>{});ubah()},
+   if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.layar?S_.layar.getVideoTracks()[0]:S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=S_.layar?'layar':on?'1':'';tulisSaya().catch(()=>{});ubah()},
   async setMicrophoneEnabled(on){if(on&&!S_.mic){S_.mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});S_.micLv=level(S_.mic)}
    S_.micOn=!!on;S_.mic&&S_.mic.getAudioTracks().forEach(t=>t.enabled=!!on);lokal.isMicrophoneEnabled=!!on;
    if(admin)campurUlang();else{const p=S_.pc.get('host');if(p&&p.tx)await p.tx.sender.replaceTrack(on&&S_.mic?S_.mic.getAudioTracks()[0]:null)}
@@ -30,7 +33,7 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
   semuaTrack(){return [...(S_.mic?S_.mic.getAudioTracks():[]),...[...S_.masuk.values()].map(m=>m.track)]},
   async izin(identity,boleh){await col.doc('p_'+identity).set({boleh:!!boleh},{merge:true})},
   async disconnect(){if(S_.tutup)return;S_.tutup=true;S_.unsub.forEach(f=>f());clearInterval(S_.hb);clearInterval(S_.lv);S_.pc.forEach(p=>p.pc.close());S_.audio.forEach(el=>{el.srcObject=null;el.parentNode&&el.parentNode.removeChild(el)});
-   S_.mic&&S_.mic.getTracks().forEach(t=>t.stop());S_.cam&&S_.cam.getTracks().forEach(t=>t.stop());try{AC.close()}catch(e){}
+   S_.mic&&S_.mic.getTracks().forEach(t=>t.stop());S_.cam&&S_.cam.getTracks().forEach(t=>t.stop());S_.layar&&S_.layar.getTracks().forEach(t=>t.stop());try{AC.close()}catch(e){}
    const hapus=[col.doc('p_'+pid).delete(),col.doc('o_'+pid).delete(),col.doc('a_'+pid).delete()];if(admin)hapus.push(col.doc('status').set({host:'',bicara:[]}));await Promise.all(hapus.map(p=>p.catch(()=>{})));room.onDisconnected&&room.onDisconnected()}};
  const tulisSaya=async()=>{const d={nama:nama.slice(0,40),peran:lokal.attributes.peran,tangan:lokal.attributes.tangan||'',t:Date.now()};
   /* Foto & status kamera butuh aturan Firestore terbaru; bila ditolak, tulis tanpa keduanya */
@@ -53,13 +56,13 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
    const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set(k,{stream:st,track:e.track,lv:level(st)});putar(k,st);campurUlang();if(KREC)kelasRekamSambung(e.track)};
   pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)&&S_.pc.get(k)===p){S_.pc.delete(k);S_.masuk.delete(k);campurUlang()}};
   await pc.setRemoteDescription({type:'offer',sdp});const T=pc.getTransceivers();p.tx=T.find(t=>t.receiver.track.kind=='audio');p.vtx=T.find(t=>t.receiver.track.kind=='video');p.tx.direction='sendrecv';campurUntuk(k);
-  if(p.vtx){p.vtx.direction='sendrecv';if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{})}
+  if(p.vtx){p.vtx.direction='sendrecv';const v=S_.layar||S_.cam;if(v)p.vtx.sender.replaceTrack(v.getVideoTracks()[0]).catch(()=>{})}
   await pc.setLocalDescription(await pc.createAnswer());await tungguIce(pc);await col.doc('a_'+k).set({sdp:pc.localDescription.sdp,host:hostSesi,t:Date.now()})}
 
  /* ---------- Jamaah: tawarkan sambungan ke pengajar ---------- */
  let hostKini='';
  async function sambungHost(){const lama=S_.pc.get('host');if(lama){lama.pc.close();S_.pc.delete('host')}
-  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});p.vtx=pc.addTransceiver('video',{direction:'sendrecv'});if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{});
+  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});p.vtx=pc.addTransceiver('video',{direction:'sendrecv'});{const v=S_.layar||S_.cam;if(v)p.vtx.sender.replaceTrack(v.getVideoTracks()[0]).catch(()=>{})}
   if(lokal.isMicrophoneEnabled&&S_.mic)await p.tx.sender.replaceTrack(S_.mic.getAudioTracks()[0]);
   pc.ontrack=e=>{if(e.track.kind=='video'){const vs=new MediaStream([e.track]),kirim=on=>room.onVideo&&room.onVideo(on?vs:null);e.track.onmute=()=>kirim(0);e.track.onunmute=()=>kirim(1);if(!e.track.muted)kirim(1);return}
    const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set('host',{stream:st,track:e.track,lv:level(st)});putar('host',st);ubah()};
