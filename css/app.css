@@ -1471,3 +1471,28 @@ html.tciut::view-transition-old(root){z-index:3}
 .izb .izt{background:transparent;border:1px solid var(--line);color:var(--mut)}
 @media(max-width:899px){.phal #izl>p,.phal #izl>h2{margin-left:16px!important;margin-right:16px!important}}
 @media(max-width:420px){.izb{flex-direction:column;align-items:stretch}.izb .btn{padding:6px 10px;font-size:13px}}
+/* ===== Tampilan halus untuk tombol, lencana, dan ikon (gaya seperti Pengaturan Instagram) ===== */
+/* Tombol: bentuk pil, ukuran nyaman, tanpa tepi kotak tebal */
+.btn{border-radius:999px}
+.btn.s{background:color-mix(in srgb,var(--g) 14%,transparent);color:var(--g)}
+.sb{height:32px;padding:0 14px;border-radius:999px}
+.sb.dng{background:color-mix(in srgb,#d6533f 12%,transparent);color:#d6533f}
+/* Lencana status: titik warna kecil + teks, warna kalem di tema gelap maupun terang */
+.bdg{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 7px;vertical-align:middle;background:color-mix(in srgb,var(--g) 13%,transparent);color:var(--g);font-weight:600}
+.bdg::before{content:'';flex:none;width:6px;height:6px;border-radius:50%;background:currentColor}
+.bdg.no{background:color-mix(in srgb,#d6533f 13%,transparent);color:#d6533f}
+.bdg.mid{background:color-mix(in srgb,#c9961a 15%,transparent);color:#c9961a}
+/* Halaman Pengaturan: ikon polos tanpa lingkaran, baris lega tanpa garis */
+.phal .srw{gap:14px;padding:14px 16px;border-bottom:0}
+.phal .srw .si,.phal .list>.row .si{width:28px;height:28px;background:transparent;color:var(--ink)}
+.phal .srw .si .ic,.phal .list>.row .si .ic{width:24px;height:24px;stroke-width:1.7}
+.phal .srw .t{font-size:16px;line-height:1.35}
+.phal .srw .t small{display:block;margin-top:2px;font-size:13px;line-height:1.4}
+.phal .srw .btn.s{height:34px;padding:0 14px;font-size:14px}
+/* Izin Aplikasi: "Izinkan" penuh berwarna, "Tolak" / "Cabut izin" berupa teks */
+.izb{gap:2px}
+.izb .btn{height:34px;padding:0 14px;border-radius:999px;font-size:14px}
+.izb [data-izin]{background:var(--g);color:var(--on)}
+.izb .izt{border:0;background:transparent;color:var(--mut);font-weight:600}
+.izb .izt:active{background:var(--fill)}
+@media(max-width:420px){.izb{flex-direction:row}.izb .btn{padding:0 11px;font-size:13px}}
