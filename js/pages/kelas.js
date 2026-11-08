@@ -73,11 +73,11 @@ async function kelasToken(id,aksi,lain){let idToken=null;try{if(typeof FBU!='und
  const j=await r.json().catch(()=>({}));if(!r.ok)throw j.galat||('http-'+r.status);return j}
 const KGAL={'belum-siap':'Server suara kelas belum disiapkan oleh pengelola aplikasi.','belum-mulai':'Kelas ini belum dimulai. Tunggu sampai pengajar memulai kelas.','kelas-tidak-ada':'Kelas tidak ditemukan.'};
 
-async function kelasMasuk(id){if(KR&&KR.id==id){kelasInfo();return kelasPasangTimer()}
+async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelasPasangTimer()}
  if(KR)await kelasKeluar(1);const i=$('#kinfo');
  if(!navigator.onLine){if(i)i.innerHTML='<p class="mut">Kelas online butuh internet.</p>';return}
  const kk=(KELAS||[]).find(x=>x.id==id)||{};
- if(kk.mode=='mesh'||(kk.mode!='livekit'&&KSIAP===false))return kelasMasukMesh(id);
+ if(!paksaLK&&(kk.mode=='mesh'||(kk.mode!='livekit'&&KSIAP===false)))return kelasMasukMesh(id);
  try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await ldjs(LKJS);const L=LivekitClient,R=new L.Room({adaptiveStream:true,dynacast:true});
   KR={id,room:R,admin:!!t.admin,diam:false,judul:((KELAS||[]).find(x=>x.id==id)||{}).judul||'Kelas online'};const ub=()=>KR&&KR.room===R&&kelasInfo();
   R.on(L.RoomEvent.TrackSubscribed,tr=>{if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
@@ -89,7 +89,7 @@ async function kelasMasuk(id){if(KR&&KR.id==id){kelasInfo();return kelasPasangTi
    .on(L.RoomEvent.Disconnected,()=>kelasPutus(R));
   await R.connect(t.url,t.token);try{await R.startAudio()}catch(e){}KR.diam=!R.canPlaybackAudio;
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(KR.admin&&((KELAS||[]).find(x=>x.id==id)||{}).rekam)kelasRekamMulai()}
- catch(e){KR=null;if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.')}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
+ catch(e){KR=null;console.warn('kelas',e);if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 function kelasPutus(R){if(KR&&KR.room===R){if(KREC)kelasRekamStop();KR=null;kelasPil();const s=$('#klst');if(s)s.textContent='';const x=$('#kinfo');if(x)x.innerHTML='<p class="mut">Kelas sudah berakhir atau sambungan terputus.</p><a class="btn s" href="#/kelas">Kembali ke daftar kelas</a>';const c=$('#kctl');if(c)c.innerHTML='';const a=$('#kadm');if(a)a.innerHTML=''}}
 /* Kelas kecil tanpa LiveKit (js/pages/kelas-mesh.js) */
 async function kelasMasukMesh(id){const i=$('#kinfo'),k=(KELAS||[]).find(x=>x.id==id)||{},admin=kAdmin();
@@ -97,7 +97,10 @@ async function kelasMasukMesh(id){const i=$('#kinfo'),k=(KELAS||[]).find(x=>x.id
   R=await kelasMesh(id,admin,S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah',()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}});
   R.onDisconnected=()=>kelasPutus(R);KR={id,room:R,admin,diam:!R.canPlaybackAudio,mode:'mesh',judul:k.judul||'Kelas online'};
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
- catch(e){KR=null;if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.')}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
+ catch(e){KR=null;console.warn('kelas kecil',e);
+  /* Kelas kecil gagal (mis. aturan Firestore belum dipublish) → coba lewat LiveKit bila servernya siap */
+  if(e!='belum-mulai'&&KSIAP!==false)return kelasMasuk(id,true);
+  if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(e&&e.code=='permission-denied'?'Kelas kecil belum aktif: aturan Firestore terbaru belum dipublish oleh pengelola.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 let KTM=0;function kelasPasangTimer(){clearInterval(KTM);KTM=setInterval(()=>{if(!KR||!$('#kcv'))return clearInterval(KTM);kelasGambar()},500)}
 async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.room;KR=null;clearInterval(KTM);$$('audio.kaud').forEach(a=>a.parentNode.removeChild(a));if(r)try{await r.disconnect()}catch(e){}kelasPil();if(!diam&&/^#\/kelas\//.test(location.hash))location.hash='#/kelas'}
 
