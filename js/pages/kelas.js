@@ -304,6 +304,8 @@ document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.prev
 let KWATCH=null;
 function kelasPantau(){if(KWATCH||!FBD)return;try{KWATCH=FBD.collection('kelas').onSnapshot(q=>{KELAS=q.docs.map(d=>Object.assign({id:d.id},d.data()));try{localStorage.fzkelas=JSON.stringify(KELAS)}catch(e){}
   if(location.hash=='#/kelas')kelasDaftar();kelasBeritahu();
+  /* Aplikasi Android: alarm pengingat kelas (10 menit sebelum & saat mulai) langsung diperbarui, tidak menunggu cek 15 menit */
+  if(window.ANDROID&&window.FadzAndroid&&FadzAndroid.kelasSegarkan){clearTimeout(kelasPantau.t);kelasPantau.t=setTimeout(()=>{try{FadzAndroid.kelasSegarkan()}catch(e){}},1500)}
   /* Kelas yang sedang diikuti diakhiri/dihapus pengajar: semua peserta otomatis keluar */
   if(KR&&!KR.keluarOtomatis){const k=KELAS.find(x=>x.id==KR.id);if(!k||k.status=='selesai'){const id=KR.id;KR.keluarOtomatis=1;kelasKeluar(1).then(()=>{if(location.hash.startsWith('#/kelas/'+id)){history.replaceState(null,'','#/kelas');route()}toast('Kelas telah diakhiri pengajar')})}}},()=>{KWATCH=null})}catch(e){KWATCH=null}}
 addEventListener('fbu',kelasPantau);
