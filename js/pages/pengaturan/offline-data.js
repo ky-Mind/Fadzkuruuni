@@ -45,13 +45,17 @@ window.fadzIzinSelesai=()=>setTimeout(()=>{pembaruanCek().finally(()=>{yangBaruC
 const verLebihBaru=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0}return false};
 /* Baris versi di Tentang & Bantuan diperbarui setelah pemeriksaan (menampilkan tombol Perbarui bila ada versi baru) */
 const upSegar=()=>{if(location.hash=='#/pengaturan/tentang')route()};
+/* Isi & tampilan (web): ambil versi terbaru sekarang (biasanya sudah otomatis); halaman dimuat ulang bila ada yang baru */
+document.addEventListener('click',async e=>{if(!e.target.closest('[data-upweb]'))return;if(!navigator.onLine)return toast('Butuh internet');toast('Memeriksa isi terbaru…');
+ try{const r=await fetch('js/core/state.js?c='+Date.now(),{cache:'no-store'}),t=await r.text(),v=(t.match(/VER='([\d.]+)'/)||[])[1];
+  if(v&&v!==VER){const g='serviceWorker'in navigator&&await navigator.serviceWorker.getRegistration();if(g)await g.update().catch(()=>{});toast('Memuat versi '+v+'…');setTimeout(()=>location.reload(),900)}else toast('Isi & tampilan sudah versi terbaru ('+VER+')')}catch(x){toast('Gagal memeriksa, coba lagi')}});
 async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi||TPRATINJAU)return paksa&&toast('Pemeriksaan pembaruan hanya untuk aplikasi Android');
  if(pembaruanCek.buka)return;
  /* Tiap aplikasi dibuka: rilis terbaru diambil dari GitHub paling sering 30 menit sekali (tersimpan), lembar pembaruan tampil bila ada versi lebih baru */
  let j=null;if(paksa||Date.now()-(S.upCek||0)>=18e5){if(!navigator.onLine)return paksa&&toast('Butuh internet untuk memeriksa pembaruan');
   try{const r=await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest',{cache:'no-store'});if(!r.ok)throw 0;j=await r.json();S.upRil={tag:j.tag_name,body:j.body,assets:(j.assets||[]).map(a=>({name:a.name,browser_download_url:a.browser_download_url})),html_url:j.html_url}}catch(e){return paksa&&toast('Gagal memeriksa pembaruan, coba lagi')}
   S.upCek=Date.now();save()}else j=S.upRil&&{tag_name:S.upRil.tag,body:S.upRil.body,assets:S.upRil.assets,html_url:S.upRil.html_url};if(!j)return;const baru=String(j.tag_name||'').replace(/^v/,''),kini=FadzAndroid.versi();
- if(!baru||!verLebihBaru(baru,kini)){S.upInfo=null;save();upSegar();return paksa&&toast('Aplikasi sudah versi terbaru ('+kini+')')}
+ if(!baru||!verLebihBaru(baru,kini)){S.upInfo=null;save();upSegar();return paksa&&toast('Aplikasi Android sudah versi terbaru ('+kini+')')}
  if(!paksa&&(S.upTunda||0)>Date.now())return;
  const apk=((j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{}).browser_download_url||j.html_url;S.upInfo={v:baru,url:apk};save();upSegar();
  const cat=String(j.body||'').split('\n').map(x=>x.replace(/^[-*]\s*/,'').trim()).filter(Boolean).slice(0,8);
