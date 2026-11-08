@@ -25,17 +25,21 @@ function kelasKartu(k){const live=k.status=='live',sel=k.status=='selesai',adm=k
   <b>${esc(k.judul||'Kelas')}</b>${k.pengajar?`<small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}
   <div class="kla">${live?`<a class="btn" href="#/kelas/${k.id}">${ic(k.yt?'play':'siar',18)} ${k.yt?'Tonton live':'Masuk dan dengarkan'}</a>`:''}${sel&&k.rekaman?(ytId(k.rekaman)?`<a class="sb" href="#/kelas/${k.id}">${ic('play',16)} Putar rekaman</a>`:`<a class="sb" href="${esc(k.rekaman)}" target="_blank" rel="noopener">${ic('play',16)} Putar rekaman</a>`):''}${adm&&!sel?`<button class="sb" data-kytset="${k.id}">${k.yt?'Ubah':'Tempel'} link YouTube</button>`:''}
   ${adm&&!sel?(live?`<button class="sb" data-kakhir="${k.id}">Akhiri kelas</button>`:`<button class="sb pri" data-kmulai="${k.id}">Mulai kelas</button>`):''}${adm&&sel?`<button class="sb" data-ktaut="${k.id}">${k.rekaman?'Ubah':'Isi'} tautan rekaman</button>`:''}${adm?`<button class="sb dng" data-khapus="${k.id}">Hapus</button>`:''}</div>${!k.yt&&k.mode=='mesh'&&!sel?'<small class="mut">Kelas kecil (maks. ±10 jamaah).</small>':''}${k.rekam&&!sel?'<small class="mut">Kelas ini direkam.</small>':''}</div>`}
-function kelasDaftar(){const e=$('#kls');if(!e)return;const L=(KELAS||[]).slice(),now=Date.now();
+function kelasDaftar(){const e=$('#kls');if(e)e.innerHTML=kelasDaftarHtml()}
+function kelasDaftarHtml(){const L=(KELAS||[]).slice(),now=Date.now();
  const live=L.filter(k=>k.status=='live'),akan=L.filter(k=>k.status!='live'&&k.status!='selesai').sort((a,b)=>(a.mulai||0)-(b.mulai||0)),sel=L.filter(k=>k.status=='selesai').sort((a,b)=>(b.mulai||0)-(a.mulai||0)).slice(0,20);
  const peringat=kAdmin()?(KSIAP===false?`<div class="kperingat">${ic('info',18)}<span><b>Server suara belum disiapkan.</b> Isi LIVEKIT_URL, LIVEKIT_API_KEY, dan LIVEKIT_API_SECRET di Vercel (Settings › Environment Variables), lalu Redeploy. Sebelum itu, kelas besar otomatis berjalan sebagai kelas kecil (maks. ±10 jamaah).</span></div>`:'')
   :'';
- e.innerHTML=peringat+(kAdmin()?`<button class="btn kbuat" data-kbuat>${ic('plus',18)} Buat kelas</button>`:'')
+ return peringat+(kAdmin()?`<button class="btn kbuat" data-kbuat>${ic('plus',18)} Buat kelas</button>`:'')
   +(live.length?live.map(kelasKartu).join(''):`<div class="card mut kkosong">${ic('siar',22)}<span>Belum ada kelas yang sedang live. Jadwal kelas berikutnya ada di bawah.</span></div>`)
   +(akan.length?'<h2>Jadwal berikutnya</h2>'+akan.map(kelasKartu).join(''):'')+(sel.length?'<h2>Sudah selesai</h2>'+sel.map(kelasKartu).join(''):'')
   +(!L.length?'<p class="mut">Kelas online (pengajian, ngaji kitab) akan muncul di sini saat dijadwalkan oleh pengurus.</p>':'')}
 
 /* ---------- Ruang majelis ---------- */
-P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls"><p class="mut">Memuat jadwal kelas…</p></div>',init(){if(KELAS)kelasDaftar();kelasAmbil().then(kelasDaftar);if(kAdmin()&&KSIAP===null)kelasCekServer().then(kelasDaftar)}};
+/* Daftar tersimpan dipakai langsung (tanpa "Memuat…") agar geser antarhalaman tidak meloncat; diperbarui setelahnya */
+try{KELAS=KELAS||JSON.parse(localStorage.fzkelas||'null')}catch(e){}
+PRATINJAU.kelas=id=>id?null:head('Kelas online','#/')+'<div id="kls">'+kelasDaftarHtml()+'</div>';
+P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls">'+(KELAS?kelasDaftarHtml():'<p class="mut">Memuat jadwal kelas…</p>')+'</div>',init(){if(KELAS)kelasDaftar();kelasAmbil().then(kelasDaftar);if(kAdmin()&&KSIAP===null)kelasCekServer().then(kelasDaftar)}};
  const k=(KELAS||[]).find(x=>x.id==id)||{id,judul:'Kelas online'},vid=k.yt||(k.status=='selesai'&&ytId(k.rekaman));
  if(vid)return {html:head(esc(k.judul||'Kelas online'),'#/kelas',k.status=='live'?'<span class="klv kll">● Live</span>':'')+`<div class="kvid"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0" title="${esc(k.judul||'Video kelas')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
   <div class="kinfo"><b>${esc(k.judul||'')}</b>${k.pengajar?`<br><small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}<p><a class="sb" href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">${ic('share',16)} Buka di YouTube</a></p></div>`,init(){if(KR&&KR.id!=id)kelasKeluar(1)}};
@@ -221,10 +225,12 @@ async function kelasRekamStop(){const k=KREC;if(!k)return;KREC=null;await new Pr
 /* Status admin baru diketahui setelah akun termuat: gambar ulang daftar kelas (tombol Buat kelas & peringatan) */
 addEventListener('fzadmin',()=>{if(location.hash!='#/kelas'||!$('#kls'))return;kelasDaftar();if(kAdmin()&&KSIAP===null)kelasCekServer().then(kelasDaftar)});
 
+/* Tautan di pesan (https://… atau www.…) tampil berbeda dan bisa diketuk; teks lain tetap aman (di-escape dulu) */
+const kTautan=t=>esc(t).replace(/(https?:\/\/|www\.)[^\s<]+[^\s<.,;:!?)'"]/gi,m=>{const u=/^www\./i.test(m)?'https://'+m:m;return `<a class="kcl-a" href="${u}" target="_blank" rel="noopener noreferrer">${m}</a>`});
 /* ---------- Pesan (chat) di kelas: Firestore kelas/{id}/chat, 60 pesan terakhir ---------- */
 async function kelasChat(id){await fbInit();if(!FBD||!KR||KR.id!=id)return;try{if(KR.chatUnsub)KR.chatUnsub();
  KR.chatUnsub=FBD.collection('kelas').doc(id).collection('chat').orderBy('t').limitToLast(60).onSnapshot(q=>{const e=$('#kcl');if(!e)return;const saya=KR&&KR.room.localParticipant.identity;
-  e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${esc(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{})}catch(x){}}
+  e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${kTautan(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{})}catch(x){}}
 document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.preventDefault();const i=$('#kci'),teks=(i.value||'').trim();if(!teks||!KR)return;i.value='';
  try{await FBD.collection('kelas').doc(KR.id).collection('chat').add({nama:kNama(),teks:teks.slice(0,500),t:Date.now(),pid:KR.room.localParticipant.identity})}
  catch(x){i.value=teks;toast(x&&x.code=='permission-denied'?'Pesan belum aktif: aturan Firestore terbaru belum dipublish.':'Pesan gagal dikirim')}});
