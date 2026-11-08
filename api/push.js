@@ -7,6 +7,8 @@
    2) Aplikasi Android (Firebase Cloud Messaging): FIREBASE_SA = isi JSON kunci service account Firebase.
       Pesan data dikirim ke topik "kelas" (semua HP berlangganan, lihat KelasPesan.java di aplikasi).
    POST {aksi:'kunci'}                              → {kunci} kunci publik VAPID untuk pushManager.subscribe (null bila belum diatur)
+   POST {aksi:'status'}                             → pemeriksaan tanpa mengirim apa pun: {web, android} ('ok' atau sebab gagal);
+                                                       FCM diuji dengan validate_only (pesan divalidasi, tidak dikirim ke HP)
    POST {aksi:'kirim', kelas, jenis, idToken}       → khusus admin; jenis 'baru' (jadwal baru) atau 'mulai' (kelas dimulai)
                                                        → {terkirim, gagal, dibuang, android} */
 import { FS, jawab, b64u, b64uTeks, dariB64u, verifikasi, adminkah } from './_firebase.js';
@@ -81,15 +83,20 @@ async function tokenAkses(sa) {
   AKSES = j.access_token; AKSEST = Date.now() + (j.expires_in - 120) * 1000; return AKSES;
 }
 /* Pesan data (bukan notifikasi) berprioritas tinggi ke topik "kelas": aplikasi yang menampilkan notifikasinya */
-async function kirimAndroid(saTeks, data) {
+async function kirimAndroid(saTeks, data, uji = false) {
+  let sa;
+  try { sa = JSON.parse(saTeks); } catch (e) { return 'FIREBASE_SA bukan JSON yang utuh'; }
+  if (!sa.private_key || !sa.client_email || !sa.project_id) return 'FIREBASE_SA tidak berisi private_key / client_email / project_id';
+  let t; try { t = await tokenAkses(sa); } catch (e) { return 'kunci service account ditolak Google (' + e.message + ')'; }
   try {
-    const sa = JSON.parse(saTeks), t = await tokenAkses(sa);
     const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
       method: 'POST', headers: { authorization: 'Bearer ' + t, 'content-type': 'application/json' },
-      body: JSON.stringify({ message: { topic: 'kelas', data, android: { priority: 'HIGH', ttl: '86400s' } } })
+      body: JSON.stringify({ validate_only: uji, message: { topic: 'kelas', data, android: { priority: 'HIGH', ttl: '86400s' } } })
     });
-    return r.ok ? 'ok' : 'gagal-' + r.status;
-  } catch (e) { return 'gagal'; }
+    if (r.ok) return 'ok';
+    const g = await r.json().catch(() => ({}));
+    return 'FCM ' + r.status + ': ' + String(g.error?.message || '').slice(0, 160);
+  } catch (e) { return 'FCM tidak terjangkau'; }
 }
 
 const tgl = ms => new Date(ms).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
@@ -99,6 +106,7 @@ export default async function handler(req) {
   const PUB = String(process.env.VAPID_PUBLIC || '').trim(), PRIV = String(process.env.VAPID_PRIVATE || '').trim(), SA = String(process.env.FIREBASE_SA || '').trim();
   let b; try { b = await req.json(); } catch (e) { return jawab({ galat: 'isi' }, 400); }
   if (b.aksi == 'kunci') return jawab({ kunci: PUB && PRIV ? PUB : null });
+  if (b.aksi == 'status') return jawab({ web: PUB && PRIV ? 'ok' : 'VAPID_PUBLIC / VAPID_PRIVATE belum diatur', android: SA ? await kirimAndroid(SA, { uji: '1' }, true) : 'FIREBASE_SA belum diatur' });
   if (b.aksi != 'kirim') return jawab({ galat: 'aksi' }, 400);
   if (!(PUB && PRIV) && !SA) return jawab({ galat: 'belum-siap' }, 503);
   const t = String(b.idToken || ''), P = await verifikasi(t);

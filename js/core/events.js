@@ -117,7 +117,7 @@ let GSTAB=0;function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.
  /* Tab sebelah disiapkan saat senggang: isinya diambil dan lapisannya dibangun tersembunyi (sudah ditata), seperti halaman sebelah (VEL).
     Saat jari mulai menggeser tinggal ditampilkan, jadi frame pertama tidak tersendat oleh penyusunan isi panjang (mis. Surah Yasin, daftar wirid) */
  const TEL=new Map();let tpT=0;const tKunci=i=>RT+'|'+location.hash+'|'+i;
- const tSiapkan=paksa=>{if(sx!==null||sibuk||mode||!gsHP())return;const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));if(i<0||!tabIsi())return;
+ const tSiapkan=paksa=>{if(sx!==null||sibuk||mode||!gsHP())return;{const [ra,rb]=(location.hash||'#/').slice(2).split('/');if(tataNavR().includes(ra)&&!rb)return}const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));if(i<0||!tabIsi())return;
   TEL.forEach((p,k)=>{if(paksa||!k.startsWith(tKunci(''))||!p.isConnected){p.remove();TEL.delete(k)}});
   [i-1,i+1].forEach(j=>{if(!T[j])return;const k=tKunci(j),ada=TEL.get(k);if(ada&&ada.isConnected)return;const h=gsTabHtml(T[j]),e=tabIsi();if(!h||!e||/Memuat/.test(h))return;
    const p=document.createElement('div');p.className='tpeek tsiap';p.setAttribute('aria-hidden','true');p.inert=true;p.innerHTML=h;e.after(p);TEL.set(k,p)})};
@@ -147,7 +147,11 @@ let GSTAB=0;function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.
     Jangan dipasang sejak disentuh: will-change:transform membuat elemen position:fixed di dalam #view (mis. pemutar audio
     Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
  const gsLapis=()=>v.classList.add('gsj');
- v.addEventListener('touchstart',e=>{sx=null;if(sibuk||!gsHP()||e.touches.length!=1||document.body.classList.contains('kfull')||gsHalang(e.target))return;
+ v.addEventListener('touchstart',e=>{sx=null;
+  /* Geser lagi sebelum isi halaman tujuan selesai dimuat (mis. Fadz AI): pratinjau dilepas sekarang, geseran baru langsung diterima,
+     bukan diabaikan sampai 1,5 detik (terasa macet saat menggeser beruntun) */
+  if(sibuk&&mode&&mode!='tab'&&tujuan&&hNorm(location.hash)==hNorm(tujuan)){clearTimeout(tm);mode='';pulih()}
+  if(sibuk||!gsHP()||e.touches.length!=1||document.body.classList.contains('kfull')||gsHalang(e.target))return;
   const t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now();dx=0;lock=null;mode='';jejak=[];
   /* Jarak jari (piksel layar) diubah ke piksel CSS: di HP seluruh tampilan memakai zoom, isi harus tepat menempel di jari */
   k=v.getBoundingClientRect().width/v.offsetWidth||1;
