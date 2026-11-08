@@ -1751,3 +1751,6 @@ body.kfull{--gx:24px}
 .jdduha .t small{font-size:11px;margin-left:4px}
 button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:13px;color:var(--mut);text-align:left;cursor:pointer}
 .jdaz .list{margin:4px 0 10px}.jdaz .card.sua{margin:0}
+/* Halaman pengaturan rata tepi (.phal): bagian suara notifikasi kelas & deret tombol tetap berjarak dari tepi layar */
+.phal>.knsw,.phal>.act{margin-left:16px!important;margin-right:16px!important}
+.knsa{justify-content:flex-start}.knsa>.sb{flex:none}

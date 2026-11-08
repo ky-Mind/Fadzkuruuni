@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.38':['Pengaturan › Notifikasi per waktu kini lengkap dan urut: Subuh, Terbit, Duha, Zuhur, Asar, Magrib, Isya (Terbit bisa dinyalakan/dimatikan dan dicoba)'],
  '2.9.37':['Waktu Duha tampil di Beranda (sebaris dengan waktu salat) dan di Jadwal salat, lengkap dengan notifikasi saat masuk waktunya','Jadwal salat › Suara adzan: pilih suara adzan Zuhur–Isya & Subuh, coba dengar, rekaman sendiri, dan pengingat sebelum waktu langsung dari halaman jadwal'],
  '2.9.36':['Tasbih melayang kini digeser mulus dan tetap tepat di bawah jempol, di semua ukuran','Jam & jadwal salat di Beranda tidak lagi digambar ulang tiap detik (lebih hemat dan tidak berkedip)'],
  '2.9.34':['Di layar lebar (tablet, laptop), bilah atas halaman baca kini mentok ke tepi kiri-kanan dan batang gulir ada di tepi layar; isi tetap di tengah'],
