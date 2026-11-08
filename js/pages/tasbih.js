@@ -25,14 +25,23 @@ const FTZ=[['kecil','Kecil'],['sedang','Sedang'],['besar','Besar']],FTZS={kecil:
 /* Ukuran lama (kecil .78, sedang 1, besar 1.22) dipindah sekali: sedang → kecil (tampilan sama), besar → sedang */
 if(!S.ftzv){S.ftz=S.ftz=='besar'?'sedang':'kecil';S.ftzv=1;save()}
 const ftUkuran=()=>document.documentElement.style.setProperty('--fts',FTZS[S.ftz]||1);ftUkuran();
-const place=(x,y)=>{const z=zmKini(),k=FTZS[S.ftz]||1;x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth*z*k);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight*z*k);Object.assign(ftb.style,{left:x/z+'px',top:y/z+'px',right:'auto',bottom:'auto'});return {x,y}};
+/* x,y = pojok kiri atas yang terlihat (koordinat layar). Diukur langsung dari kotak yang tampil, jadi tetap tepat walau
+   tasbih diperbesar (skala dari pojok kanan bawah) dan halaman di-zoom (HP): left/top digeser sebesar selisihnya ÷ zoom */
+const place=(x,y)=>{const r=ftb.getBoundingClientRect(),z=zmKini();x=Math.min(Math.max(0,x),innerWidth-r.width);y=Math.min(Math.max(0,y),innerHeight-r.height);
+ const l=ftb.offsetLeft+(x-r.left)/z,t=ftb.offsetTop+(y-r.top)/z;Object.assign(ftb.style,{left:l+'px',top:t+'px',right:'auto',bottom:'auto'});return {x,y}};
 
-/* Geser dilacak di dokumen (bukan di tombol), jadi tetap jalan walau kursor atau jari keluar dari tombol.
-   Ketukan biasa tidak diubah: klik tetap sampai ke tombol. */
-let dg=null;
-const mv=e=>{if(!dg)return;if(!dg.moved){if(Math.hypot(e.clientX-dg.sx,e.clientY-dg.sy)<6)return;dg.moved=true}place(e.clientX-dg.dx,e.clientY-dg.dy);ftpLetak()};
-const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);if(dg&&dg.moved){const r=ftb.getBoundingClientRect();S.ftp=place(r.left,r.top);save();ftb.dataset.drag=1}dg=null};
-ftb.addEventListener('pointerdown',e=>{if(e.target.closest('#fg'))return;delete ftb.dataset.drag;const r=ftb.getBoundingClientRect();dg={dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false};addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+/* Seret seperti Kisah-Lillah: jari ditangkap tombol (setPointerCapture), posisi = posisi awal + jarak gerak jari,
+   digambar sekali per frame. Tasbih tetap tepat di bawah jempol/kursor dari awal sampai dilepas. Ketukan biasa tetap menghitung. */
+let dg=null,dgRaf=0;
+const dgGambar=()=>{dgRaf=0;if(dg&&dg.moved){place(dg.r.left+dg.x-dg.sx,dg.r.top+dg.y-dg.sy);ftpLetak()}};
+ftb.addEventListener('pointerdown',e=>{if(e.button>0||e.target.closest('#fg'))return;delete ftb.dataset.drag;try{ftb.setPointerCapture(e.pointerId)}catch(x){}
+ dg={id:e.pointerId,sx:e.clientX,sy:e.clientY,x:e.clientX,y:e.clientY,r:ftb.getBoundingClientRect(),moved:false}});
+ftb.addEventListener('pointermove',e=>{if(!dg||dg.id!==e.pointerId)return;dg.x=e.clientX;dg.y=e.clientY;
+ if(!dg.moved){if(Math.hypot(dg.x-dg.sx,dg.y-dg.sy)<6)return;dg.moved=true;ftb.classList.add('seret');ftpTutup&&ftpTutup()}
+ e.preventDefault();if(!dgRaf)dgRaf=requestAnimationFrame(dgGambar)});
+const dgLepas=e=>{if(!dg||dg.id!==e.pointerId)return;cancelAnimationFrame(dgRaf);dgRaf=0;const w=dg;dg=null;ftb.classList.remove('seret');
+ if(w.moved){place(w.r.left+w.x-w.sx,w.r.top+w.y-w.sy);const r=ftb.getBoundingClientRect();S.ftp={x:r.left,y:r.top};save();ftb.dataset.drag=1}};
+ftb.addEventListener('pointerup',dgLepas);ftb.addEventListener('pointercancel',dgLepas);
 ftb.addEventListener('click',e=>{if(ftb.dataset.drag){delete ftb.dataset.drag;e.stopPropagation();e.preventDefault()}},true);
 addEventListener('resize',()=>{if(S.ftp)place(S.ftp.x,S.ftp.y)});
 
