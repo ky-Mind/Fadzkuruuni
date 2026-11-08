@@ -1657,3 +1657,4 @@ img.kzav{object-fit:cover;display:block}
 #klmini .klv{background:#c5221f;color:#fff}
 /* Lapisan tab sebelah yang disiapkan: sudah ditata tetapi tersembunyi dan tidak menambah tinggi halaman */
 .tpeek.tsiap{visibility:hidden;height:0;overflow:hidden;transform:translate3d(-200vw,0,0)}
+.kff{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;margin:4px 0 8px}.kff select{flex:1;min-width:160px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;font:inherit}

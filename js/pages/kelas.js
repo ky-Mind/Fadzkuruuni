@@ -166,8 +166,10 @@ document.addEventListener('click',async e=>{const t=e.target;
   let st=null;if(on){if(R.mode=='mesh')st=R.camStream();else{const pub=lp.getTrackPublication(LivekitClient.Track.Source.Camera);if(pub&&pub.track)st=new MediaStream([pub.track.mediaStreamTrack])}}kSetVid(lp,st)}
   catch(x){toast('Kamera belum diizinkan. Izinkan kamera di pengaturan HP.')}return kelasInfo()}
  if(t.closest('[data-klayar]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.layarOn;
-  try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:false});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
-  catch(x){if(!(x&&x.name=='NotAllowedError'))toast('Layar tidak bisa dibagikan dari perangkat ini.')}return kelasInfo()}
+  try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:LAYAR_OPSI.audio,systemAudio:'include',video:{frameRate:15}});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
+  catch(x){if(!(x&&x.name=='NotAllowedError'))toast('Layar tidak bisa dibagikan dari perangkat ini.')}
+  if(on&&KR&&KR.layarOn){const s=R.mode=='mesh'?R._S.layar:null,ada=s?s.getAudioTracks().length>0:!!lp.getTrackPublication(LivekitClient.Track.Source.ScreenShareAudio);toast(ada?'Layar dan suaranya sedang dibagikan':'Layar dibagikan tanpa suara. Untuk menyertakan suara, centang "Bagikan audio" saat memilih layar.')}
+  return kelasInfo()}
  /* Ketuk kotak peserta = sorot di panggung besar; ketuk panggung = kembali */
  const pin=t.closest('.kzt[data-kpin]');if(pin&&KR){KR.pin=pin.dataset.kpin;return kelasInfo()}
  if(t.closest('#kzs')&&KR&&KR.pin){KR.pin=null;return kelasInfo()}
@@ -198,32 +200,56 @@ function kelasForm(col,segar){const e=document.createElement('div');e.className=
   <label>Pengajar</label><input class="in" id="kfp" maxlength="60" placeholder="Ustaz pondok"><label>Waktu mulai</label><input class="in" id="kfw" type="datetime-local" value="${lok}">
   <label>Keterangan (opsional)</label><input class="in" id="kfk" maxlength="160" placeholder="Bait 12–20">
   <label>Jenis kelas suara</label><select class="in" id="kfm"><option value="mesh"${KSIAP===false?' selected':''}>Kelas kecil (sampai ±10 jamaah, tanpa LiveKit)</option><option value="livekit"${KSIAP===false?'':' selected'}>Kelas besar (LiveKit, puluhan–ratusan jamaah)</option></select>
-  <label class="kcek"><input type="checkbox" id="kfr"> Rekam kelas (file suara disimpan di HP pengajar, folder Download/Fadzkuruuni)</label><div class="act"><button class="sb pri" id="kfs">Simpan jadwal</button><button class="sb" id="kfl">Langsung mulai</button><button class="sb" id="kfb">Batal</button></div></div>`;
+  <label class="kcek"><input type="checkbox" id="kfr"> Rekam kelas (video layar/kamera + semua suara, disimpan di perangkat pengajar: folder Download/Fadzkuruuni)</label><label class="kff" id="kffw" hidden>Format rekaman <select id="kff">${Object.entries(REKAM_FMT).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label><div class="act"><button class="sb pri" id="kfs">Simpan jadwal</button><button class="sb" id="kfl">Langsung mulai</button><button class="sb" id="kfb">Batal</button></div></div>`;
  document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='kfb')tutup()};
  const simpan=async live=>{const j=$('#kfj').value.trim();if(!j)return toast('Isi judul kelas');const w=new Date($('#kfw').value).getTime()||Date.now();
-  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
+  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,rekamFmt:$('#kff').value,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
  $('#kfs').onclick=()=>simpan(0);$('#kfl').onclick=()=>simpan(1);
  /* Tempel link YouTube: langsung tampil gambar videonya, judul & pengajar terisi otomatis */
  $('#kfy').oninput=async()=>{const u=$('#kfy').value.trim(),id=ytId(u),p=$('#kfyp');p.hidden=!id;if(!id)return;p.innerHTML=`<img src="${ytGambar(id)}" alt=""><span class="kyp">${ic('play',22)}</span>`;
   const i=await ytInfo(u);if(i){if(!$('#kfj').value.trim())$('#kfj').value=(i.title||'').slice(0,80);if(!$('#kfp').value.trim())$('#kfp').value=(i.author_name||'').slice(0,60)}}}
 
+/* Bagikan layar dengan suara: di Chrome/Edge komputer centang "Bagikan juga audio tab/sistem" pada jendela pilihan layar.
+   Suara pengguna sendiri tidak diputar ulang di perangkatnya (tidak bergema). */
+const LAYAR_OPSI={video:{frameRate:{ideal:15,max:20}},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},systemAudio:'include',suppressLocalAudioPlayback:false};
 /* ---------- Rekam kelas (di HP pengajar) ----------
-   Semua suara (mikrofon pengajar + suara jamaah yang diizinkan bicara) dicampur lalu direkam (WebM/Opus).
+   Semua suara (mikrofon pengajar, suara jamaah yang diizinkan bicara, dan suara layar yang dibagikan) dicampur.
+   Gambar mengikuti panggung kelas: layar yang sedang dibagikan, atau kamera pengajar, atau kartu judul bila tidak ada video.
+   Format: MP4 (bawaan, paling mudah diputar & diunggah ke Drive/YouTube), WebM, atau suara saja.
    Di aplikasi Android ditulis bertahap ke Download/Fadzkuruuni (tidak menumpuk di memori); di browser diunduh saat selesai. */
 let KREC=null;
 function kelasRekamSambung(tr){if(!KREC||!tr)return;try{KREC.ac.createMediaStreamSource(new MediaStream([tr])).connect(KREC.dst)}catch(e){}}
+const REKAM_FMT={mp4:'MP4 (video, disarankan)',webm:'WebM (video)',audio:'Suara saja'};
+/* Jenis berkas yang didukung perangkat untuk format pilihan (MP4 hanya bila codec H.264 tersedia, "video/mp4" tanpa codec bisa menghasilkan berkas kosong); MP4 tidak didukung → WebM */
+function kRekamJenis(f){const ok=t=>{try{return MediaRecorder.isTypeSupported(t)}catch(e){return false}},cari=L=>L.find(ok);
+ if(f=='audio'){const t=cari(['audio/mp4;codecs=mp4a.40.2','audio/mp4;codecs=opus','audio/webm;codecs=opus','audio/webm']);return t&&{mime:t,ext:/mp4/.test(t)?'m4a':'webm',video:false}}
+ const t=(f!='webm'&&cari(['video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1,mp4a','video/mp4;codecs=avc1,opus','video/mp4;codecs=avc3,mp4a']))||cari(['video/webm;codecs=vp8,opus','video/webm;codecs=vp9,opus','video/webm']);
+ return t&&{mime:t,ext:/mp4/.test(t)?'mp4':'webm',video:true}}
+/* Gambar rekaman: panggung kelas digambar ke kanvas 15 kali per detik (pewaktu di worker agar tetap jalan saat pengajar membuka tab/aplikasi lain) */
+function kRekamKanvas(){const W=window.ANDROID?854:1280,H=window.ANDROID?480:720,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),v=document.createElement('video');v.muted=true;v.playsInline=true;
+ const teks=(t,y,z,w)=>{g.font=`${w||600} ${z}px Georgia,serif`;g.fillStyle='#fff';g.textAlign='center';g.fillText(t,W/2,y,W-80)};
+ const gambar=()=>{if(!KR)return;const R=KR.room,semua=[R.localParticipant,...R.remoteParticipants.values()],ust=semua.find(p=>(p.attributes||{}).peran=='ustaz'),f=semua.find(p=>kLayar(p))||ust,st=f?kStream(f):null;
+  if(v.srcObject!==st){v.srcObject=st;if(st)v.play().catch(()=>{})}g.fillStyle='#111';g.fillRect(0,0,W,H);
+  if(st&&v.videoWidth){const s=Math.min(W/v.videoWidth,H/v.videoHeight),w=v.videoWidth*s,h=v.videoHeight*s;g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}
+  else{teks(KR.judul||'Kelas online',H/2-10,Math.round(H/14));teks(f?(f.name||'Pengajar'):'Fadzkuruuni',H/2+Math.round(H/12),Math.round(H/24),400)}
+  g.font=`600 ${Math.round(H/40)}px sans-serif`;g.textAlign='left';g.fillStyle='rgba(0,0,0,.45)';const lb='● '+(KR.judul||'Kelas online').slice(0,60),lw=g.measureText(lb).width;g.fillRect(12,H-18-H/40-10,lw+20,H/40+16);g.fillStyle='#fff';g.fillText(lb,22,H-24)};
+ const wk=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),66)'],{type:'text/javascript'})));wk.onmessage=gambar;gambar();
+ return {track:c.captureStream(15).getVideoTracks()[0],stop(){wk.terminate();v.srcObject=null}}}
 async function kelasRekamMulai(){if(KREC||!KR)return;if(!window.MediaRecorder)return toast('Perangkat ini tidak mendukung rekam');
- const ac=new (window.AudioContext||window.webkitAudioContext)(),dst=ac.createMediaStreamDestination();KREC={ac,dst,bag:[],antre:Promise.resolve(),nama:'Kelas '+(KR.judul||'').replace(/[^\w\- ]+/g,'').trim().slice(0,40)+' '+new Date().toISOString().slice(0,16).replace(/[T:]/g,'-')+'.webm'};
- const R=KR.room;if(R.mode=='mesh')R.semuaTrack().forEach(kelasRekamSambung);else{const mic=R.localParticipant.getTrackPublication&&R.localParticipant.getTrackPublication(LivekitClient.Track.Source.Microphone);if(mic&&mic.track)kelasRekamSambung(mic.track.mediaStreamTrack);
+ const kd=(KELAS||[]).find(x=>x.id==KR.id)||{},fmt=REKAM_FMT[kd.rekamFmt]?kd.rekamFmt:'mp4',J=kRekamJenis(fmt);if(!J)return toast('Perangkat ini tidak mendukung rekam');
+ if(fmt=='mp4'&&J.ext!='mp4')toast('Perangkat ini belum bisa merekam MP4, direkam sebagai WebM');
+ const ac=new (window.AudioContext||window.webkitAudioContext)(),dst=ac.createMediaStreamDestination();KREC={ac,dst,J,bag:[],antre:Promise.resolve(),nama:'Kelas '+(KR.judul||'').replace(/[^\w\- ]+/g,'').trim().slice(0,40)+' '+new Date().toISOString().slice(0,16).replace(/[T:]/g,'-')+'.'+J.ext};
+ const R=KR.room;if(R.mode=='mesh')R.semuaTrack().forEach(kelasRekamSambung);else{[LivekitClient.Track.Source.Microphone,LivekitClient.Track.Source.ScreenShareAudio].forEach(s=>{const pub=R.localParticipant.getTrackPublication&&R.localParticipant.getTrackPublication(s);if(pub&&pub.track)kelasRekamSambung(pub.track.mediaStreamTrack)});
  R.remoteParticipants.forEach(p=>p.audioTrackPublications.forEach(pub=>pub.track&&kelasRekamSambung(pub.track.mediaStreamTrack)));
  R.on(LivekitClient.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='audio'&&pub.track)kelasRekamSambung(pub.track.mediaStreamTrack)})}
- const and=window.ANDROID&&window.FadzAndroid&&FadzAndroid.rekamMulai&&FadzAndroid.rekamMulai(KREC.nama,'audio/webm');KREC.and=!!and;
- const mr=new MediaRecorder(dst.stream,MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?{mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:32000}:{});KREC.mr=mr;
+ const and=window.ANDROID&&window.FadzAndroid&&FadzAndroid.rekamMulai&&FadzAndroid.rekamMulai(KREC.nama,J.mime.split(';')[0]);KREC.and=!!and;
+ const trk=[...dst.stream.getAudioTracks()];if(J.video){KREC.kv=kRekamKanvas();trk.unshift(KREC.kv.track)}
+ let mr;try{mr=new MediaRecorder(new MediaStream(trk),{mimeType:J.mime,audioBitsPerSecond:J.video?96000:48000,...(J.video?{videoBitsPerSecond:window.ANDROID?900000:1500000}:{})})}catch(e){if(KREC.kv)KREC.kv.stop();try{ac.close()}catch(x){}if(and)try{FadzAndroid.rekamSelesai()}catch(x){}KREC=null;return toast('Perangkat ini tidak bisa merekam format ini')}KREC.mr=mr;
  mr.ondataavailable=ev=>{if(!ev.data||!ev.data.size)return;if(KREC.and){const b=ev.data;KREC.antre=KREC.antre.then(()=>new Promise(ok=>{const f=new FileReader();f.onload=()=>{try{FadzAndroid.rekamTambah(String(f.result).split(',')[1])}catch(e){}ok()};f.readAsDataURL(b)}))}else KREC.bag.push(ev.data)};
- mr.start(5000);toast('Mulai merekam kelas');kelasInfo()}
-async function kelasRekamStop(){const k=KREC;if(!k)return;KREC=null;await new Promise(ok=>{k.mr.onstop=ok;try{k.mr.stop()}catch(e){ok()}});await k.antre;try{k.ac.close()}catch(e){}
+ mr.start(5000);toast('Mulai merekam kelas ('+(J.video?'video ':'suara ')+J.ext.toUpperCase()+')');kelasInfo()}
+async function kelasRekamStop(){const k=KREC;if(!k)return;KREC=null;await new Promise(ok=>{k.mr.onstop=ok;try{k.mr.stop()}catch(e){ok()}});await k.antre;try{k.ac.close()}catch(e){}if(k.kv)k.kv.stop();
  if(k.and){try{FadzAndroid.rekamSelesai()}catch(e){}toast('Rekaman disimpan di Download/Fadzkuruuni')}
- else{const u=URL.createObjectURL(new Blob(k.bag,{type:'audio/webm'})),a=document.createElement('a');a.href=u;a.download=k.nama;document.body.append(a);a.click();a.parentNode.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);toast('Rekaman diunduh')}
+ else{const u=URL.createObjectURL(new Blob(k.bag,{type:k.J.mime.split(';')[0]})),a=document.createElement('a');a.href=u;a.download=k.nama;document.body.append(a);a.click();a.parentNode.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);toast('Rekaman diunduh')}
  if(KR)kelasInfo()}
 /* Status admin baru diketahui setelah akun termuat: gambar ulang daftar kelas (tombol Buat kelas & peringatan) */
 addEventListener('fzadmin',()=>{if(location.hash!='#/kelas'||!$('#kls'))return;kelasDaftar();if(kAdmin()&&KSIAP===null)kelasCekServer().then(kelasDaftar)});
@@ -255,3 +281,5 @@ function kelasBeritahu(){let T=null;try{T=JSON.parse(localStorage.fzkelasT||'nul
 setInterval(()=>{let T={};try{T=JSON.parse(localStorage.fzkelasT||'{}')}catch(e){}let ubah=0;const kini=Date.now();
  (KELAS||[]).forEach(k=>{if(k.status=='jadwal'&&k.mulai&&k.mulai-kini<10*60e3&&k.mulai-kini>-5*60e3&&(T[k.id]||'').indexOf('ingat')<0){kNotif('Kelas segera dimulai',(k.judul||'Kelas')+' · '+kJam(k.mulai),k.id);T[k.id]=(T[k.id]||'jadwal')+'+ingat';ubah=1}});
  if(ubah)try{localStorage.fzkelasT=JSON.stringify(T)}catch(e){}},60e3);
+/* Pilihan format rekaman hanya tampil bila "Rekam kelas" dicentang */
+document.addEventListener('change',e=>{if(e.target.id=='kfr'){const w=$('#kffw');if(w)w.hidden=!e.target.checked}});
