@@ -1682,3 +1682,7 @@ img.kzav{object-fit:cover;display:block}
  .carw:hover .carb,.carb:focus-visible{opacity:1}
  .car{cursor:grab}.car.seret{cursor:grabbing;user-select:none}.car.seret .sl{pointer-events:none}
 }
+/* Lembar pembaruan: bilah kemajuan unduhan APK & bagian aplikasi Android di lembar Yang baru */
+.upd-p{height:6px;margin:10px 0 4px;border-radius:3px;background:var(--fill);overflow:hidden}.upd-p i{display:block;height:100%;width:0;background:var(--g);transition:width .3s}
+.upd-s{display:block;font-size:12.5px}
+.upd-apk{display:flex;flex-direction:column;gap:6px;margin-top:14px;padding:12px;border-radius:12px;background:var(--fill)}.upd-apk small{font-size:12.5px}
