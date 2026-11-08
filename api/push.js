@@ -94,6 +94,11 @@ function bacaSA(t) {
   /* Pembuka { " atau penutup } kadang hilang saat ditempel ke kolom Vercel */
   const bentuk = [t, '{' + t + '}', '{"' + t + '}', '{"' + t, '{' + t, t + '}'];
   for (const x of bentuk) for (const f of [s => s, kunciBaris, satuBaris]) { const o = coba(f(x)); if (o && typeof o == 'object' && o.private_key) return o; }
+  /* Disalin dari tampilan tabel penampil JSON (mis. Firefox): tiap baris `nama<TAB>"nilai"` */
+  if (/^[a-z_]+\t/m.test(t)) {
+    const o = {}; for (const b of t.split(/\r?\n/)) { const m = /^\s*"?([a-z_]+)"?\s*\t\s*(.*)$/.exec(b); if (!m) continue; const v = m[2].trim(); o[m[1]] = coba(v) ?? v.replace(/^"|"$/g, ''); }
+    if (o.private_key) { o.private_key = String(o.private_key).replace(/\\n/g, '\n'); return o; }
+  }
   return null;
 }
 /* Keterangan bentuk isi (tanpa membuka isinya) untuk pemeriksaan */
