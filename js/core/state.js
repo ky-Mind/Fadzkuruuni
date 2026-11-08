@@ -9,7 +9,7 @@ if((S.dv||0)<2){if(S.theme=='auto')S.theme='light';if(!S.ac||S.ac=='emerald')S.a
 const save=()=>{if(PRAT)return;localStorage.fz=JSON.stringify(S);window.cloudPush&&window.cloudPush();setelSinkron()};
 /* Pengaturan yang tampil di beberapa tempat (halaman Pengaturan, lembar pengaturan baca/kitab, panel tasbih melayang,
    pengaturan halaman Tasbih) selalu disamakan setiap kali ada yang berubah, tanpa memuat ulang */
-const SINK_SEG={theme:[['th','sth','kth'],'auto'],uz:[['uz'],'kecil'],ac:[['acw'],'hitam'],ftz:[['tfz','fptz'],'sedang'],vpola:[['tvp','fpvp','tsvp'],'ganda'],tt:[['ftt','fptt','tstt'],33],kw:[['kwr'],null],kmode:[['kmd'],'geser'],kml:[['kml'],'peta']};
+const SINK_SEG={theme:[['th','sth','kth'],'auto'],uz:[['uz'],'kecil'],ac:[['acw'],'hitam'],ftz:[['tfz','fptz'],'kecil'],vpola:[['tvp','fpvp','tsvp'],'ganda'],tt:[['ftt','fptt','tstt'],33],kw:[['kwr'],null],kmode:[['kmd'],'geser'],kml:[['kml'],'peta']};
 const SINK_TG={vib:[['vib','fvb','tsvb'],v=>v!==false],ft:[['fb','tsft'],v=>v!==false],lt:[['lt','s5'],v=>!!v],tr:[['tr','s1'],v=>v!==false],vkuat:[['tsvk'],v=>!!v],kfull:[['kfs'],v=>!!v],klj:[['klj'],v=>v!==false]};
 const SINK_RG={fs:[['fs','s2'],22],fl:[['fl','s6'],15],fi:[['fi','s7'],14],kz:[['kzr'],100]};
 let sinkJ=0;function setelSinkron(){if(sinkJ||typeof document=='undefined')return;sinkJ=setTimeout(()=>{sinkJ=0;try{
@@ -44,7 +44,7 @@ const accent=()=>{const t=document.documentElement.dataset.theme,a=t=='blue'?ACC
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',theme);
 const P={};
-const VER='2.3.1';
+const VER='2.3.2';
 const REPORT={wa:'6289506138191',url:'',nocors:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let LAST='#/',LASTT='';

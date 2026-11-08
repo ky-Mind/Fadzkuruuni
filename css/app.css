@@ -838,14 +838,14 @@ input[type=range]{accent-color:var(--g)}
 
 /* Tasbih melayang: cincin manik-manik, angka besar, rumbai, dan tombol ··· */
 #ftb #fc{position:relative;display:grid;place-content:center;width:84px;height:84px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.18);cursor:pointer;line-height:1;transition:transform .12s}
-#ftb #fc:active{transform:scale(.94)}
+#ftb #fc:active{transform:none}
 #ftb .fcr{position:absolute;inset:0;width:100%;height:100%}
 #ftb .fcr .mk{fill:var(--gs);stroke:color-mix(in srgb,var(--g) 18%,transparent);stroke-width:.6;transition:fill .2s}
 #ftb .fcr .mk.on{fill:var(--g);stroke:none}
 #ftb #fcn{position:relative;font-size:25px;font-weight:700;text-align:center}
 #ftb #fct{position:relative;margin-top:3px;color:var(--mut);font-size:10.5px;text-align:center}
-#ftb #fc.tk #fcn{animation:fcTk .18s ease}
-#ftb #fc.penuh{animation:fcPenuh .6s ease}
+#ftb #fc.tk #fcn{animation:none}
+#ftb #fc.penuh{animation:none}
 @keyframes fcTk{50%{transform:scale(1.18)}}
 @keyframes fcPenuh{30%{transform:scale(1.12);box-shadow:0 0 0 8px color-mix(in srgb,var(--g) 30%,transparent)}}
 #ftb .rumbai{position:absolute;left:50%;top:80px;width:16px;height:28px;margin-left:-8px;fill:var(--g);pointer-events:none}
@@ -1305,10 +1305,10 @@ html.tciut::view-transition-old(root){z-index:3}
 #view:has(>.tsf){display:flex;flex-direction:column}
 #view:has(>.tsf) .bar{flex:none}
 .tsf{--p:0;position:relative;flex:1;min-height:340px;width:100%;margin:0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:0;border-radius:28px;background:var(--g);color:var(--on);cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:0 14px 36px rgba(0,0,0,.18);transition:transform .09s ease}
-.tsf:active{transform:scale(.985)}
+.tsf:active{transform:none}
 .tsf::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),transparent 60%);opacity:0;pointer-events:none}
-.tsf.tk::after{animation:tsdenyut .35s ease-out}
-.tsf.penuh::after{animation:tsdenyut .9s ease-out}
+.tsf.tk::after{animation:none}
+.tsf.penuh::after{animation:none}
 @keyframes tsdenyut{0%{opacity:1}100%{opacity:0}}
 .tsr{position:relative;width:min(62vmin,300px);aspect-ratio:1;border-radius:50%;background:conic-gradient(currentColor calc(var(--p)*1%),color-mix(in srgb,currentColor 18%,transparent) 0);-webkit-mask:radial-gradient(circle,transparent 63%,#000 64%);mask:radial-gradient(circle,transparent 63%,#000 64%);transition:background .2s}
 .tsw{position:relative;display:grid;place-items:center}
@@ -1386,3 +1386,21 @@ html.tciut::view-transition-old(root){z-index:3}
 #view{overflow-anchor:none}
 /* Margin atas elemen pertama melebur ke wadahnya di halaman asli; di lapisan pratinjau tidak, jadi dinolkan agar posisinya sama persis */
 .tpeek>:first-child,.tpeek>.qpk>:first-child{margin-top:0}
+/* Tasbih (melayang & halaman Tasbih): saat dipencet warna dan ukuran tetap, hanya angka yang bertambah */
+#ftb #fc,#ftb #fc:active,#ftb #fc:focus,.tsf,.tsf:active,.tsf:focus{-webkit-tap-highlight-color:transparent;outline:0}
+.tsf:active,.tsf:focus{background:var(--g);color:var(--on)}
+#ftb #fc:active,#ftb #fc:focus{background:var(--card);color:var(--ink)}
+/* Pratinjau geser: jarak tepi sama persis dengan #view di setiap ukuran layar, ruang batang gulir juga disisakan */
+.vpeek{scrollbar-gutter:stable}
+@media(min-width:600px){.vpeek{padding:20px 24px}}
+@media(max-width:420px){.vpeek{padding-top:12px}}
+/* Pengaturan di HP: penuh dari ujung ke ujung (seperti Instagram); judul dan kepala halaman tetap diberi jarak */
+@media(max-width:899px){
+ #view.phal,.vpeek.phal{padding-left:0;padding-right:0}
+ .phal>h1,.phal>h2,.phal>.bar,.phal>p,.phal>small,.phal>.note{margin-left:16px;margin-right:16px}
+ .phal .list,.phal>.card,.phal>div>.card{margin-left:0;margin-right:0;border-radius:0}
+ .phal .list>.row{padding-left:16px;padding-right:16px}
+}
+.vpeek{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.vpeek:has(>.rh){padding-top:0}
+.vpeek:has(>.tsf){display:flex;flex-direction:column}

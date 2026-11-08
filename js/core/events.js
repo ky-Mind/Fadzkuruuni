@@ -73,6 +73,8 @@ const GS_BATAS=.22,GS_KIBAS=.5,GS_DUR=260,GS_EASE='cubic-bezier(.22,.8,.3,1)';
 const gsHP=()=>matchMedia('(max-width:899px)').matches;
 /* Potret isi halaman per alamat (diisi router setiap kali halaman ditinggalkan) */
 const VSNAP=new Map();
+/* Kelas tata letak #view per halaman (dipakai router dan pratinjau geser, agar ukuran/jarak tepi sama persis) */
+const vKelas=h=>/^#\/pengaturan(\/|$)/.test(h||'')?'phal':'';
 function vSnap(h,html){if(!h||!html||html.length>600000)return;VSNAP.delete(h);VSNAP.set(h,html);if(VSNAP.size>24)VSNAP.delete(VSNAP.keys().next().value)}
 /* Isi halaman lain sebagai HTML: potret terakhir, atau dirender dari fungsi halamannya (tanpa init) */
 function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');const pr=PRATINJAU[a]&&PRATINJAU[a](b,c,d);if(pr)return pr;return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
@@ -89,8 +91,10 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  const W=()=>v.clientWidth;
  const buang=()=>{if(peek){peek.remove();peek=null}};
  /* Halaman sebelah: lapisan seukuran #view di dalam #app, digeser selebar layar ke sisinya */
- const peekHal=(html,blk)=>{buang();peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
+ const peekHal=(html,blk)=>{buang();peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'')+(vKelas(tujuan)?' '+vKelas(tujuan):'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
   Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px'});blk?app.insertBefore(peek,v):app.append(peek);
+  /* Kepala halaman yang menempel (dipasang router lewat barLekat) juga dipasang di pratinjau, agar letaknya sama */
+  const lk=peek.querySelector(':scope>.rh')||peek.querySelector(':scope>.bar [data-rs]')?.closest('.bar')||peek.querySelector(':scope>.aibar');lk&&lk.classList.add('lekat');
   /* Fadz AI dibuka di pesan terbaru (bawah): pratinjaunya juga ditampilkan dari bawah */
   if(peek.querySelector("#aic .aim"))peek.scrollTop=peek.scrollHeight};
  /* Tab sebelah: lapisan seukuran isi tab, tepat di sampingnya */
@@ -124,7 +128,9 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
    if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
    else{lock=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lock=='h'){
     /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
-    const ti=tabSemua().length>1?tabIsi():null;mode=ti&&ti.contains(e.target)?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';pilihSebelah(x<0?1:-1)}}}
+    /* Halaman menu bawah (mis. Al-Qur'an): geser di mana saja selalu ke halaman besar sebelah (Beranda / Fadz AI); tab (Surah/Juz/Riwayat) hanya lewat ketukan */
+    const [ra,rb]=(location.hash||'#/').slice(2).split('/'),akar=tataNavR().includes(ra)&&!rb;
+    const ti=!akar&&tabSemua().length>1?tabIsi():null;mode=ti&&ti.contains(e.target)?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';pilihSebelah(x<0?1:-1)}}}
   if(lock!='h')return;if(e.cancelable)e.preventDefault();
   if(mode=='back'){dx=Math.max(0,x);pasang(dx);return}
   /* Arah berbalik melewati titik awal: ganti isi sebelah yang ditampilkan */
