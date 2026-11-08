@@ -24,7 +24,8 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
   async setCameraEnabled(on){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
    if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.layar?S_.layar.getVideoTracks()[0]:S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=S_.layar?'layar':on?'1':'';tulisSaya().catch(()=>{});ubah()},
   async setMicrophoneEnabled(on){if(on&&!S_.mic){S_.mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});S_.micLv=level(S_.mic)}
-   S_.micOn=!!on;S_.mic&&S_.mic.getAudioTracks().forEach(t=>t.enabled=!!on);lokal.isMicrophoneEnabled=!!on;
+   /* Dimatikan = mikrofon benar-benar dilepas (lampu/ikon mikrofon HP padam), bukan sekadar dibisukan; dinyalakan lagi = diminta ulang */
+   S_.micOn=!!on;if(!on&&S_.mic){S_.mic.getTracks().forEach(t=>t.stop());S_.mic=null;S_.micLv=null}lokal.isMicrophoneEnabled=!!on;
    if(admin)campurUlang();else await kirimSuara();
    if(on&&KREC&&S_.mic)kelasRekamSambung(S_.mic.getAudioTracks()[0]);ubah()}};
  const room={_S:S_,mode:'mesh',localParticipant:lokal,remoteParticipants:new Map(),canPlaybackAudio:true,
