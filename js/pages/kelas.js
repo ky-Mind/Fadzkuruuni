@@ -84,7 +84,7 @@ function kelasInfo(){const R=KR&&KR.room;if(!R)return;const semua=[R.localPartic
  const i=$('#kinfo');if(i)i.innerHTML=`<div class="kbic">${ic(bicara.length?'speaker':'speaker',18)}<span>${bicara.length?'<b>'+bicara.map(p=>esc(p.name||'Jamaah')).join(', ')+'</b> sedang berbicara':KR.mode=='mesh'&&!KR.admin&&!semua.some(p=>(p.attributes||{}).peran=='ustaz')?'Menunggu pengajar masuk…':'Menunggu suara…'}</span></div>
   <small class="mut">${KR.mode=='mesh'?'Kelas kecil · ':''}${semua.length} orang di majelis · ${KR.admin?'Kamu pengajar (mikrofon '+(mic?'nyala':'mati')+')':boleh?'Kamu diizinkan bicara':'Kamu mendengarkan, mikrofon mati'}</small>${KR.diam?'<button class="btn" data-kaudio style="width:100%;margin-top:10px">Ketuk untuk menyalakan suara</button>':''}`;
  const c=$('#kctl');if(c)c.innerHTML=((KR.admin||boleh)&&!mic?`<div class="kmicn">${ic('mic',20)}<span><b>Mikrofon mati.</b> ${KR.admin?'Tekan Aktifkan mikrofon saat mulai mengajar.':'Kamu diizinkan bicara. Tekan Aktifkan mikrofon untuk mulai berbicara.'}</span></div>`:'')
-  +(KR.admin||boleh?`<button class="btn${mic?' s':''}" data-kmic>${ic('mic',18)} ${mic?'Matikan mikrofon':'Aktifkan mikrofon'}</button>`:`<button class="btn s" data-ktangan>${ic('tangan',18)} ${tangan?'Turunkan tangan':'Angkat tangan'}</button>`)+`<button class="btn s" data-kcam>${ic('camera',18)} ${KR.camOn?'Matikan kamera':'Nyalakan kamera'}</button>`+(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?`<button class="btn s${KR.layarOn?' kon':''}" data-klayar>${ic('panel',18)} ${KR.layarOn?'Hentikan berbagi layar':'Bagikan layar'}</button>`:'')+`<button class="btn s kkel" data-kkeluar>Keluar</button>`+(KR.admin?`<button class="btn s krb" data-krec>${KREC?'<span class="krec">● Merekam</span> Hentikan & simpan':ic('mic',18)+' Rekam kelas'}</button>`:'');
+  +(KR.admin||boleh?`<button class="btn${mic?' s':''}" data-kmic>${ic('mic',18)} ${mic?'Matikan mikrofon':'Aktifkan mikrofon'}</button>`:`<button class="btn s" data-ktangan>${ic('tangan',18)} ${tangan?'Turunkan tangan':'Angkat tangan'}</button>`)+`<button class="btn s" data-kcam>${ic('camera',18)} ${KR.camOn?'Matikan kamera':'Nyalakan kamera'}</button>`+(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?`<button class="btn s${KR.layarOn?' kon':''}" data-klayar>${ic('panel',18)} ${KR.layarOn?'Hentikan berbagi layar'+(kLayarSuara()?' <small>· dengan suara</small>':' <small>· tanpa suara</small>'):'Bagikan layar'}</button>`:'')+`<button class="btn s kkel" data-kkeluar>Keluar</button>`+(KR.admin?`<button class="btn s kkel" data-kakhirr>Akhiri kelas</button>`:'')+(KR.admin?`<button class="btn s krb" data-krec>${KREC?'<span class="krec">● Merekam</span> Hentikan & simpan':ic('mic',18)+' Rekam kelas'}</button>`:'');
  const a=$('#kadm');if(a&&KR.admin){const L=[...R.remoteParticipants.values()],T=L.filter(p=>(p.attributes||{}).tangan=='1'||kBoleh(p));
   a.innerHTML=`<h2>Jamaah yang angkat tangan</h2>`+(T.length?`<div class="list">${T.map(p=>`<div class="srw"><span class="si">${ic(kBoleh(p)?'mic':'tangan',18)}</span><span class="t">${esc(p.name||'Jamaah')}<br><small class="mut">${kBoleh(p)?'Boleh bicara':'Ingin bertanya'}</small></span><button class="btn s" data-kizin="${esc(p.identity)}" data-boleh="${kBoleh(p)?0:1}">${kBoleh(p)?'Bisukan':'Izinkan bicara'}</button></div>`).join('')}</div>`:'<p class="mut">Belum ada. Jamaah yang menekan "Angkat tangan" muncul di sini.</p>')}
  kelasGambar();kelasPil()}
@@ -165,10 +165,11 @@ document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-kcam]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.camOn;try{await lp.setCameraEnabled(on);KR.camOn=on;
   let st=null;if(on){if(R.mode=='mesh')st=R.camStream();else{const pub=lp.getTrackPublication(LivekitClient.Track.Source.Camera);if(pub&&pub.track)st=new MediaStream([pub.track.mediaStreamTrack])}}kSetVid(lp,st)}
   catch(x){toast('Kamera belum diizinkan. Izinkan kamera di pengaturan HP.')}return kelasInfo()}
+ if(t.closest('[data-klayar]')&&KR&&!KR.layarOn&&!t.closest('[data-klayar]').dataset.ok){const b=t.closest('[data-klayar]');return konfirmasi('Bagikan layar dengan suara','Agar suara video (mis. YouTube) terdengar jamaah: pilih tab "Tab Chrome" yang memutar video, lalu nyalakan "Bagikan juga audio tab". Berbagi seluruh layar atau jendela hanya membawa suara di Windows (centang "Bagikan audio sistem"); di Linux dan Mac tidak ada suaranya.','Pilih layar',()=>{b.dataset.ok='1';b.click();delete b.dataset.ok})}
  if(t.closest('[data-klayar]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.layarOn;
-  try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:LAYAR_OPSI.audio,systemAudio:'include',video:{frameRate:15}});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
+  try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:LAYAR_OPSI.audio,systemAudio:'include',selfBrowserSurface:'exclude',surfaceSwitching:'include',preferCurrentTab:false,video:{displaySurface:'browser'}});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
   catch(x){if(!(x&&x.name=='NotAllowedError'))toast('Layar tidak bisa dibagikan dari perangkat ini.')}
-  if(on&&KR&&KR.layarOn){const s=R.mode=='mesh'?R._S.layar:null,ada=s?s.getAudioTracks().length>0:!!lp.getTrackPublication(LivekitClient.Track.Source.ScreenShareAudio);toast(ada?'Layar dan suaranya sedang dibagikan':'Layar dibagikan tanpa suara. Untuk menyertakan suara, centang "Bagikan audio" saat memilih layar.')}
+  if(on&&KR&&KR.layarOn)toast(kLayarSuara()?'Layar dan suaranya sedang dibagikan':'Layar dibagikan TANPA suara. Untuk video ber-suara, bagikan ulang dan pilih tab Chrome dengan "Bagikan juga audio tab" menyala.',7000)
   return kelasInfo()}
  /* Ketuk kotak peserta = sorot di panggung besar; ketuk panggung = kembali */
  const pin=t.closest('.kzt[data-kpin]');if(pin&&KR){KR.pin=pin.dataset.kpin;return kelasInfo()}
@@ -178,6 +179,7 @@ document.addEventListener('click',async e=>{const t=e.target;
  const ul=t.closest('[data-kulang]');if(ul)return kelasMasuk(ul.dataset.kulang);
  /* Admin: buat / mulai / akhiri / hapus kelas (Firestore lewat SDK, aturan: hanya admin) */
  if(t.closest('[data-krec]')&&KR)return KREC?kelasRekamStop():kelasRekamMulai();
+ if(t.closest('[data-kakhirr]')&&KR&&KR.admin){const id=KR.id;return konfirmasi('Akhiri kelas?','Semua jamaah otomatis keluar dari kelas ini. Rekaman (bila ada) disimpan.','Akhiri',async()=>{try{await FBD.collection('kelas').doc(id).update({status:'selesai'})}catch(x){return toast('Gagal mengakhiri kelas')}await kelasKeluar(1);history.replaceState(null,'','#/kelas');route();toast('Kelas diakhiri')})}
  if(!t.closest('[data-kbuat],[data-kmulai],[data-kakhir],[data-khapus],[data-ktaut],[data-kytset]'))return;
  await fbInit();if(!FBD||!kAdmin())return toast('Khusus admin. Masuk dengan akun admin.');const col=FBD.collection('kelas');
  const segar=async()=>{await kelasAmbil();kelasDaftar()};
@@ -211,7 +213,9 @@ function kelasForm(col,segar){const e=document.createElement('div');e.className=
 
 /* Bagikan layar dengan suara: di Chrome/Edge komputer centang "Bagikan juga audio tab/sistem" pada jendela pilihan layar.
    Suara pengguna sendiri tidak diputar ulang di perangkatnya (tidak bergema). */
-const LAYAR_OPSI={video:{frameRate:{ideal:15,max:20}},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},systemAudio:'include',suppressLocalAudioPlayback:false};
+const LAYAR_OPSI={video:{frameRate:{ideal:15,max:20},displaySurface:'browser'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},systemAudio:'include',suppressLocalAudioPlayback:false,selfBrowserSurface:'exclude',surfaceSwitching:'include',preferCurrentTab:false};
+/* Suara layar ada? (berbeda dari mikrofon: ikut terdengar walau mikrofon dimatikan) */
+const kLayarSuara=()=>{if(!KR||!KR.layarOn)return false;const R=KR.room;if(R.mode=='mesh')return !!(R._S.layar&&R._S.layar.getAudioTracks().some(t=>t.readyState=='live'));try{return !!R.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShareAudio)}catch(e){return false}};
 /* ---------- Rekam kelas (di HP pengajar) ----------
    Semua suara (mikrofon pengajar, suara jamaah yang diizinkan bicara, dan suara layar yang dibagikan) dicampur.
    Gambar mengikuti panggung kelas: layar yang sedang dibagikan, atau kamera pengajar, atau kartu judul bila tidak ada video.
@@ -268,7 +272,9 @@ document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.prev
 /* ---------- Daftar kelas langsung diperbarui + pemberitahuan kelas baru / dimulai / segera dimulai ---------- */
 let KWATCH=null;
 function kelasPantau(){if(KWATCH||!FBD)return;try{KWATCH=FBD.collection('kelas').onSnapshot(q=>{KELAS=q.docs.map(d=>Object.assign({id:d.id},d.data()));try{localStorage.fzkelas=JSON.stringify(KELAS)}catch(e){}
-  if(location.hash=='#/kelas')kelasDaftar();kelasBeritahu()},()=>{KWATCH=null})}catch(e){KWATCH=null}}
+  if(location.hash=='#/kelas')kelasDaftar();kelasBeritahu();
+  /* Kelas yang sedang diikuti diakhiri/dihapus pengajar: semua peserta otomatis keluar */
+  if(KR&&!KR.keluarOtomatis){const k=KELAS.find(x=>x.id==KR.id);if(!k||k.status=='selesai'){const id=KR.id;KR.keluarOtomatis=1;kelasKeluar(1).then(()=>{if(location.hash.startsWith('#/kelas/'+id)){history.replaceState(null,'','#/kelas');route()}toast('Kelas telah diakhiri pengajar')})}}},()=>{KWATCH=null})}catch(e){KWATCH=null}}
 addEventListener('fbu',kelasPantau);
 function kNotif(judul,isi,id){if(window.ANDROID)andPanggil('notifikasi',judul,isi);
  else if(document.hidden&&window.Notification&&Notification.permission=='granted')try{const n=new Notification(judul,{body:isi,icon:'img/icon-192.png',tag:'kelas-'+id});n.onclick=()=>{focus();location.hash='#/kelas/'+id}}catch(e){}
