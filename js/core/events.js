@@ -124,7 +124,10 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  let raf=0,pxT=0,jejak=[];const jadwal=px=>{pxT=px;if(!raf)raf=requestAnimationFrame(()=>{raf=0;if(sx!==null&&lock=='h')pasang(pxT)})};
  const meluncur=(px,lalu,ms=GS_DUR)=>{pasang(px,`${ms}ms ${GS_EASE}`);clearTimeout(tm);tm=setTimeout(()=>lalu&&lalu(),ms+20)};
  /* Halaman baru dipasang router (data-vt=geser, tanpa animasi): potret dilepas */
- document.addEventListener('fz-dipasang',()=>{if(mode&&sibuk){mode='';pulih()}});
+ /* Hanya sinyal dari halaman tujuan geser ini: sinyal terlambat dari halaman sebelumnya (mis. Fadz AI yang init-nya lama, lalu langsung digeser lagi)
+    tidak boleh melepas pratinjau, karena halaman lama akan terlihat sekejap sebelum halaman tujuan terpasang */
+ const hNorm=h=>(h||'#/').replace(/^#?\/?$/,'#/');
+ document.addEventListener('fz-dipasang',e=>{if(mode&&sibuk&&(!e.detail||hNorm(e.detail)==hNorm(tujuan))){mode='';pulih()}});
  /* Router memasang halaman baru dan mengembalikan #view ke tempatnya; pratinjau (sudah tepat di layar) tetap di atas sampai fz-dipasang */
  const pilihSebelah=d=>{dir=d;tujuan=null;buang();
   if(mode=='tab'){const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));tujuan=T[i+d]||null;if(tujuan)peekTab(gsTabHtml(tujuan));return}
@@ -146,7 +149,7 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
   const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k,kini=performance.now();jejak.push([kini,x]);while(jejak.length>2&&kini-jejak[0][0]>100)jejak.shift();
   if(lock===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;
    if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
-   else{lock=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lock=='h'){
+   else{lock=Math.abs(x)>Math.abs(y)*1.6&&!(window.ptrTarik&&ptrTarik())?'h':'v';if(lock=='h'){
     /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
     /* Halaman menu bawah (mis. Al-Qur'an): geser di mana saja selalu ke halaman besar sebelah (Beranda / Fadz AI); tab (Surah/Juz/Riwayat) hanya lewat ketukan */
     const [ra,rb]=(location.hash||'#/').slice(2).split('/'),akar=tataNavR().includes(ra)&&!rb;
@@ -179,7 +182,10 @@ const ptrSet=(y,anim)=>{/* Indikator selalu di tengah kolom konten (di desktop a
  v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${Math.min(y-PTH-12,0)}px)`;ptr.style.opacity=Math.min(1,Math.max(0,(y-24)/40));
  if(!ptr.classList.contains('muter')){const k=Math.min(1,y/PTB);ptr.style.setProperty('--pk',k);$('.pj',ptr).style.strokeDashoffset=100-k*100}};
 addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX},{passive:true});
-addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(0,1);return}
+/* Geser samping (pindah halaman) dan tarik-untuk-memuat tidak boleh berebut transform #view: yang mengunci duluan yang menang */
+window.ptrTarik=()=>pon&&pt>10;
+addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px,gs=$('#view').classList.contains('gsj')&&$('#view').style.overflowY=='hidden';
+ if(gs||$('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;if(pt>0&&!gs)ptrSet(0,1);else if(pt>0){ptr.style.opacity=0}pt=0;return}
  pt=Math.max(0,Math.min(d*.5/zmKini(),130));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
 addEventListener('touchend',()=>{if(!pon)return;pon=0;
  if(pt>PTB)ptrMuat();else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
