@@ -1,6 +1,6 @@
 /* js/core/ui.js - Komponen antarmuka bersama (daftar, tab, segmen, tombol, dialog) */
 const list=(a,fn)=>`<div class="list">${a.map(fn).join('')}</div>`;
-const head=(t,back='#/',x='')=>`<div class="bar"><a class="bk" href="${back=='back'?'javascript:history.back()':back}" aria-label="Kembali">${ic('back',22)}</a><h1>${t}</h1>${x}</div>`;
+const head=(t,back='#/',x='')=>`<div class="bar"><a class="bk" href="${back=='back'?'javascript:history.back()':back}" aria-label="Kembali">${ic('panah',24)}</a><h1>${t}</h1>${x}</div>`;
 const tabs=(a,i=0)=>`<div class="tabs">${a.map((x,k)=>`<button data-tab="${k}" class="${k==i?'on':''}">${x}</button>`).join('')}</div>`;
 const soon=a=>list(a,(x,i)=>`<a class="row" href="#/segera/${encodeURIComponent(x)}"><span class="num">${i+1}</span><span class="t">${x}<br><small>Segera hadir</small></span>${ic('next',18)}</a>`);
 /* Halaman dua tab mengingat tab terakhir yang dibuka (mis. kembali dari Doa keseharian tetap di tab Doa, bukan Wirid) */
