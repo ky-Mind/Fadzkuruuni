@@ -83,9 +83,22 @@ async function tokenAkses(sa) {
   AKSES = j.access_token; AKSEST = Date.now() + (j.expires_in - 120) * 1000; return AKSES;
 }
 /* Pesan data (bukan notifikasi) berprioritas tinggi ke topik "kelas": aplikasi yang menampilkan notifikasinya */
+/* Isi FIREBASE_SA dibaca seluwes mungkin: JSON apa adanya, JSON yang baris private_key-nya berubah jadi baris baru sungguhan
+   saat ditempel, terbungkus tanda kutip, atau dalam bentuk base64 */
+function bacaSA(t) {
+  const coba = s => { try { const o = JSON.parse(s); return typeof o == 'string' ? JSON.parse(o) : o; } catch (e) { return null; } };
+  t = t.trim().replace(/^'([\s\S]*)'$/, '$1');
+  return coba(t)
+    || coba(t.replace(/("private_key"\s*:\s*")([\s\S]*?)(")/, (m, a, k, b) => a + k.replace(/\r?\n/g, '\\n') + b))
+    || coba(t.replace(/\r?\n/g, ' ').replace(/(-----BEGIN PRIVATE KEY-----)([\s\S]*?)(-----END PRIVATE KEY-----)/, (m, a, k, b) => a + k.replace(/ /g, '\\n') + b))
+    || (/^[A-Za-z0-9+/=\s]+$/.test(t) ? coba(atob(t.replace(/\s+/g, ''))) : null);
+}
+/* Keterangan bentuk isi (tanpa membuka isinya) untuk pemeriksaan */
+const bentukSA = t => `panjang ${t.length} karakter, diawali "${t.trim()[0] || ''}", diakhiri "${t.trim().slice(-1)}", ${/private_key/.test(t) ? 'ada' : 'tidak ada'} private_key`;
+
 async function kirimAndroid(saTeks, data, uji = false) {
-  let sa;
-  try { sa = JSON.parse(saTeks); } catch (e) { return 'FIREBASE_SA bukan JSON yang utuh'; }
+  const sa = bacaSA(saTeks);
+  if (!sa) return 'FIREBASE_SA bukan JSON yang utuh (' + bentukSA(saTeks) + ')';
   if (!sa.private_key || !sa.client_email || !sa.project_id) return 'FIREBASE_SA tidak berisi private_key / client_email / project_id';
   let t; try { t = await tokenAkses(sa); } catch (e) { return 'kunci service account ditolak Google (' + e.message + ')'; }
   try {
