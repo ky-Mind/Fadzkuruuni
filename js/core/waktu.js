@@ -10,12 +10,22 @@ function waktu(d,{lat,lng,tz:TZ}){
   return [['Subuh',noon-h(-20)],['Terbit',noon-h(-.833)],['Zuhur',noon+.0333],['Asar',noon+h(asr)],['Magrib',noon+h(-.833)+.0333],['Isya',noon+h(-18)]];
 }
 const hm=h=>{const m=Math.round(((h%24)+24)%24*60)%1440;return String(m/60|0).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
-const hijri=(d=new Date())=>new Intl.DateTimeFormat('id-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d);
+/* Tanggal Hijriah (Umm al-Qura) dihitung sendiri, tidak bergantung pada peramban: WebView di sebagian HP tidak punya data
+   kalender Islam sehingga tampil "28 Mei 1448 SM". Tabel panjang bulan 1440–1480 H dari kalender Umm al-Qura
+   (1 = 30 hari, 0 = 29 hari; mulai 1 Muharam 1440 = 11 Sep 2018); di luar rentang itu memakai algoritma tabular. */
+const HUQ={y0:1440,day0:17785,bits:'01011101010010101101101001010101101010101010101101011001010101110100100101110110010010111010101001011011010100101011011010100101011011100100110110110010010110110101001010110110101001011010110100101010111010010010111101001001011101100100101101101010010101101010110010101101011001010101110101001001110110100100110111010001011011011001010101011010101001011011010100101101101010010101101101001010110101011001010101101100101001101110010010101110101001001111010100101011011010010101011010101010101'};
+const HBLN=['Muharam','Safar','Rabiulawal','Rabiulakhir','Jumadilawal','Jumadilakhir','Rajab','Syakban','Ramadan','Syawal','Zulkaidah','Zulhijah'];
+function hParts(dt){const hari=Math.floor(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate())/864e5);let o=hari-HUQ.day0;
+ if(o>=0)for(let i=0;i<HUQ.bits.length;i++){const L=HUQ.bits[i]=='1'?30:29;if(o<L)return {y:HUQ.y0+Math.floor(i/12),m:i%12+1,d:o+1};o-=L}
+ let l=hari+2440588-1948440+10632;const n=Math.floor((l-1)/10631);l=l-10631*n+354;
+ const j=Math.floor((10985-l)/5316)*Math.floor(50*l/17719)+Math.floor(l/5670)*Math.floor(43*l/15238);
+ l=l-Math.floor((30-j)/15)*Math.floor(17719*j/50)-Math.floor(j/16)*Math.floor(15238*j/43)+29;const m=Math.floor(24*l/709);return {y:30*n+j-30,m,d:l-Math.floor(709*m/24)}}
+const hijri=(d=new Date())=>{const p=hParts(d);return `${p.d} ${HBLN[p.m-1]} ${p.y} H`};
 /* Nama kota dari koordinat (GPS / titik di peta), agar lokasi tampil "Bandung" dsb., bukan "Lokasi saya" */
 const kotaDari=(lat,lng)=>fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`).then(r=>r.ok?r.json():{}).then(j=>(j.city||j.locality||j.principalSubdivision||'').replace(/^(Kota|Kabupaten) /,'').trim()).catch(()=>'');
 const lokasiNama=(lat,lng)=>kotaDari(lat,lng).then(n=>{if(!n||!S.loc||S.loc.lat!=lat||S.loc.lng!=lng)return;S.loc.n=n;save();$$('.lc .t b').forEach(b=>b.textContent=n);const k=$('#kbn');if(k)k.textContent='dari utara sejati · '+n});
 const gps=cb=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{S.loc={lat:p.coords.latitude,lng:p.coords.longitude,n:'Lokasi saya',tz:-new Date().getTimezoneOffset()/60};save();toast('Lokasi diperbarui');cb();lokasiNama(S.loc.lat,S.loc.lng)},()=>toast('Izin lokasi ditolak. Aktifkan GPS dan izinkan akses.'),{timeout:10000}):toast('Perangkat tidak mendukung lokasi');
-const hf=(d,o)=>new Intl.DateTimeFormat('id-u-ca-islamic-umalqura',o).format(d);
+const hf=(d,o={})=>{const p=hParts(d),r=[];if(o.day)r.push(p.d);if(o.month)r.push(o.month=='long'?HBLN[p.m-1]:p.m);if(o.year)r.push(p.y+' H');return r.join(' ')};
 const tzl=()=>({7:'WIB',8:'WITA',9:'WIT'}[S.loc.tz??-new Date().getTimezoneOffset()/60]||'');
 const locNow=()=>{const n=new Date(),tz=S.loc.tz??-n.getTimezoneOffset()/60,u=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600+tz+(S.kor||0)/60;return((u%24)+24)%24};
 const locCard=()=>`<div class="card lc"><span class="si">${ic('pin',20)}</span><span class="t"><b>${S.loc.n}</b><br><small class="mut">${S.loc.lat.toFixed(3)}, ${S.loc.lng.toFixed(3)} · ${tzl()}</small></span><button class="btn s" data-loc>Ubah</button></div>`;

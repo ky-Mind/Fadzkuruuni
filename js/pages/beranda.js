@@ -12,6 +12,13 @@ const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j,kw,kh)=>L.push(
  /* Isi kitab: bab/fasal dari daftar isi (data/kitab-indeks.js), mis. "puasa" → Fathul Qarib, Kitab Puasa, hal. 120 */
  if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=KITAB_DAFTAR.find(x=>x.id==id);if(!k)return;E.forEach(e=>tb(e[1]+' — '+k.judul,`#/kitab/${id}/${e[3]}`,'Kitab'+(e[0]?' · '+e[0]:'')+' · hal. '+e[4],e[2]+' '+e[0],`${id}|${e[3]}|${e[4]}`))});
  Object.entries(TPOOL).forEach(([r,v])=>tb(tNama(r,v[1]),'#/'+r,'Fitur'));
+ /* Pengaturan: tiap kelompok, lalu tiap pengaturan di dalamnya (judul bagian & label sakelar), mis. "tema" → Tampilan & Bacaan */
+ if(typeof SETGROUPS!='undefined')SETGROUPS.forEach(g=>{const h=g[0][0]=='#'?g[0]:'#/pengaturan/'+g[0];tb(g[2],h,'Pengaturan',g[3]);
+  if(g[0][0]=='#'||!SETPAGES[g[0]])return;try{const t=document.createElement('div');t.innerHTML=SETPAGES[g[0]]().html;const lihat=new Set();
+   $$('h2,h3,.tg>span,.ftpr>span,label>span:first-child,.row .t>b,span.t',t).forEach(e=>{const x=(e.firstChild&&e.firstChild.nodeType==3?e.firstChild.textContent:e.textContent).trim();if(x&&x.length<60&&!lihat.has(x)){lihat.add(x);tb(x,h,'Pengaturan · '+g[2])}})}catch(e){}});
+ /* Menu zakat & sedekah, dan video tutorial */
+ if(MENU.zakat)MENU.zakat.forEach(m=>m&&m[1]&&tb(m[1],'#/sedekah/'+m[0],'Zakat & sedekah'));
+ if(typeof TUTOR!='undefined')TUTOR.forEach(v=>tb(v.judul,'#/tutorial/'+v.id,'Video tutorial',v.ket));
  return CARIX=L};
 const cariHasil=q=>{const w=cariNorm(q).split(' ').filter(Boolean);if(!w.length)return [];return cariIndeks().filter(x=>w.every(k=>x[3].includes(k))).sort((a,b)=>(b[3].startsWith(w[0])-a[3].startsWith(w[0]))||(!!b[1]-!!a[1])).slice(0,12)};
 const SK='<svg class="sk" viewBox="0 0 300 40" preserveAspectRatio="none"><path d="M0 40V30h28v-8l3-6 3 6v8h22c0-12 12-18 22-18s22 6 22 18h26v-6h10v-10l4-6 4 6v10h10v6h22v16z" fill="rgba(255,255,255,.12)"/></svg>';

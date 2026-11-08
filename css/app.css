@@ -1428,3 +1428,28 @@ html.tciut::view-transition-old(root){z-index:3}
  .phal>.setcari{margin-left:16px;margin-right:16px}
  .phal .setg h3{margin-left:16px;margin-right:16px}
 }
+/* Kalender: judul bulan bisa diketuk untuk memilih bulan & tahun */
+.mn .mnj{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:16px;cursor:pointer}
+.mn .mnj b{display:flex;align-items:center;gap:4px}.mn .mnj b .ic{color:var(--mut)}.mn .mnj:active{background:var(--fill)}
+.kps .kpy{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}.kps .kpy b{font-size:20px}
+.kps .kpm{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kps .kpm button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;text-transform:capitalize;cursor:pointer}
+.kps .kpm button small{font-size:10.5px;font-weight:400;color:var(--mut);text-transform:none}
+.kps .kpm button.kini{border-color:var(--g)}
+.kps .kpm button.on{background:var(--g);color:var(--on);border-color:var(--g)}.kps .kpm button.on small{color:var(--on);opacity:.8}
+/* Kalkulator zakat: pilihan jenis dan kolom isian yang lebih rapi */
+.zkc{gap:6px;margin-bottom:14px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 24px),transparent)}
+.zkc .chip2{padding:9px 15px;border:0;background:var(--fill);color:var(--ink);font-weight:500}
+.zkc .chip2.on{background:var(--g);color:var(--on);font-weight:700}
+.zk .zkt{margin:4px 0 12px;font-size:19px;color:var(--ink)}
+.zk .zgold{margin-bottom:12px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--g) 12%,var(--card));border:1px solid color-mix(in srgb,var(--g) 30%,transparent)}
+.zk .zgold small{display:block;margin-top:6px;font-size:12px}
+.zk .zf{display:flex;flex-direction:column;gap:14px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.zk .zfi label{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--ink)}
+.zk .zin{position:relative;display:flex;align-items:center;border-radius:12px;background:var(--fill);border:1px solid transparent;transition:border-color .15s}
+.zk .zin:focus-within{border-color:var(--g)}
+.zk .zin .in{flex:1;min-width:0;margin:0;height:48px;border:0;background:transparent;font-size:17px;font-variant-numeric:tabular-nums}
+.zk .zin select.in{padding-right:12px}
+.zk .zin .zu{flex:none;padding:0 14px;color:var(--mut);font-size:14px;font-weight:600}
+.zk .zin.rp .zu{padding:0 0 0 14px}.zk .zin.rp .in{padding-left:8px}
+.zk .zres{margin-top:14px;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--g)}
