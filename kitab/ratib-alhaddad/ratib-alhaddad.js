@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "ratib-alhaddad", "judul": "Ratib Al-Haddad (Edisi Majelis Fadzkuruuni)", "arab": "راتب الحداد", "pengarang": "Imam Abdullah bin Alawi Al-Haddad", "ket": "Wirid harian Majelis Fadzkuruuni", "juzTotal": 1, "juz": [{"no": 1, "halaman": 7, "pola": "kitab/ratib-alhaddad/hal/j1-{n}.webp", "pdf": "kitab/ratib-alhaddad/pdf/juz-1.pdf"}], "rasio": 0.7074});
