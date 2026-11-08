@@ -8,11 +8,31 @@
 <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192.png">
 <!-- admin.html - Dashboard admin: membaca dan menindaklanjuti laporan dari halaman "Laporkan masalah" (koleksi Firestore 'laporan').
      Hanya email di ADMIN yang bisa masuk; aksesnya dijaga Firestore Rules (lihat PANDUAN-FIREBASE.md). Tidak disimpan offline oleh sw.js. -->
-<script>/* Tema sejak awal (tanpa kedip): pilihan admin, bila belum ada ikut tema aplikasi di perangkat ini */try{var t=localStorage.fzadmtema,a=(JSON.parse(localStorage.fz||'{}').theme)||'';if(!t||t=='auto')t=a=='dark'?'gelap':(a=='light'||a=='blue')?'terang':'';if(t)document.documentElement.dataset.tema=t}catch(e){}</script>
+<meta name="theme-color" content="#ffffff">
+<script>/* Tema & warna aksen sejak awal (tanpa kedip), sama dengan aplikasi Fadzkuruuni di perangkat ini (localStorage.fz: theme, ac),
+   kecuali admin memilih tema dashboard sendiri (localStorage.fzadmtema). Tabel warna = ACC di js/core/state.js:
+   [terang utama, gelap utama]. Diperbarui otomatis bila tema/aksen aplikasi diubah di tab lain. */
+function fzWarna(){var r=document.documentElement,S={},t='';try{S=JSON.parse(localStorage.fz||'{}')}catch(e){}try{t=localStorage.fzadmtema||''}catch(e){}
+ if(!t||t=='auto'){var a=S.theme;t=a=='dark'?'gelap':a=='blue'?'biru':a=='light'?'terang':matchMedia('(prefers-color-scheme:dark)').matches?'gelap':'terang'}
+ var ACC={hitam:['#1c1f1e','#e6e9e7'],emerald:['#24584a','#7fb5a2'],teal:['#0f5f63','#7cc7cb'],blue:['#24497d','#8fb6e6'],ungu:['#563d7c','#b9a3df'],marun:['#7a2633','#e59aa6'],
+  coklat:['#6b4423','#d6aa7f'],emas:['#8a6512','#e2c068'],oranye:['#a2481a','#f2a679'],merahmuda:['#a03366','#efa0c4'],abu:['#3f4b55','#aebbc6']};
+ var k=t=='biru'?ACC.blue:ACC[S.ac]||ACC.hitam,dk=t=='gelap',st=r.style;r.dataset.tema=t;
+ st.setProperty('--g',dk?k[1]:k[0]);st.setProperty('--gs','color-mix(in srgb,var(--g) '+(dk?16:11)+'%,var(--card))');st.setProperty('--on',dk?'#06140f':'#fff');
+ var m=document.querySelector('meta[name=theme-color]');m&&m.setAttribute('content',dk?'#121413':t=='biru'?'#eef4fb':'#ffffff')}
+fzWarna();addEventListener('storage',function(e){if(e.key=='fz'||e.key=='fzadmtema')fzWarna()});
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',fzWarna);</script>
 <style>
 :root{--bg:#f6f7f6;--card:#fff;--ink:#1d2b25;--mut:#6b7a72;--line:#e5e7e5;--g:#24584a;--gs:#e7eeea;--fill:#f0f2f1;--on:#fff;--red:#b3382a;--amb:#9a6b00;--ambs:#fbf1d9;--reds:#f8e3df}
-@media (prefers-color-scheme:dark){:root:not([data-tema=terang]){--bg:#0e100f;--card:#161917;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--g:#7fb5a2;--gs:#1d2a26;--fill:#1f2321;--on:#06140f;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}}
-:root[data-tema=gelap]{--bg:#0e100f;--card:#161917;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--g:#7fb5a2;--gs:#1d2a26;--fill:#1f2321;--on:#06140f;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}
+:root[data-tema=gelap]{color-scheme:dark;--bg:#121413;--card:#181b1a;--ink:#eef2ef;--mut:#9aa6a0;--line:#2c312e;--fill:#1f2321;--red:#ef8a7c;--amb:#e3b54f;--ambs:#2d2615;--reds:#331d1a}
+:root[data-tema=biru]{--bg:#eef4fb;--card:#f7faff;--fill:#e2ebf6;--ink:#12263d;--mut:#55687e;--line:#d5e0ed}
+/* Tanpa sorotan biru bawaan peramban: ketukan, fokus, pilihan teks, dan kontrol formulir memakai warna aksen aplikasi */
+html{-webkit-tap-highlight-color:transparent;accent-color:var(--g)}
+::selection{background:color-mix(in srgb,var(--g) 24%,transparent)}
+:focus{outline:0}
+:focus-visible{outline:2px solid color-mix(in srgb,var(--g) 55%,transparent);outline-offset:2px}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--g)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--g) 14%,transparent)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:0}
+select option{background:var(--card);color:var(--ink)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 a{color:var(--g)}
@@ -436,13 +456,11 @@ async function tabKelas(){$('#isi').innerHTML='<div class="empty">Memuat kelasâ€
   const h=t.closest('[data-kh]');if(h&&confirm('Hapus kelas ini?')){await db.collection('kelas').doc(h.dataset.kh).delete();return tabKelas()}
  }catch(x){toast('Gagal: '+(x.code=='permission-denied'?'Firestore Rules belum dipasang':(x.code||x.message)))}}}
 
-/* ===== Pengaturan dashboard (pojok kanan atas): tema Ikuti perangkat / Terang / Gelap, buka aplikasi, keluar ===== */
+/* ===== Pengaturan dashboard (pojok kanan atas): tema Ikuti aplikasi / Terang / Gelap / Biru, buka aplikasi, keluar ===== */
 /* "Ikuti aplikasi" (auto): sama dengan tema yang dipilih di aplikasi Fadzkuruuni di perangkat ini; bila aplikasi memakai tema perangkat, ikut perangkat */
-const temaApp=()=>{try{const a=JSON.parse(localStorage.fz||'{}').theme;return a=='dark'?'gelap':(a=='light'||a=='blue')?'terang':''}catch(e){return ''}};
-const temaDash=t=>{try{t&&t!='auto'?localStorage.fzadmtema=t:delete localStorage.fzadmtema}catch(e){}const x=t&&t!='auto'?t:temaApp();x?document.documentElement.dataset.tema=x:delete document.documentElement.dataset.tema};
-temaDash((()=>{try{return localStorage.fzadmtema}catch(e){return ''}})()||'');
+const temaDash=t=>{try{t&&t!='auto'?localStorage.fzadmtema=t:delete localStorage.fzadmtema}catch(e){}fzWarna()};
 function menuSet(){const ada=$('.mnu');if(ada)return ada.remove();const kini=(()=>{try{return localStorage.fzadmtema||'auto'}catch(e){return 'auto'}})();
- const m=document.createElement('div');m.className='mnu';m.innerHTML=`<b>Tema dashboard</b>${[['auto','Ikuti aplikasi'],['terang','Terang'],['gelap','Gelap']].map(([k,t])=>`<button data-tm="${k}" class="${k==kini?'on':''}">${t}</button>`).join('')}<hr><button data-mn="app">Buka aplikasi</button><button data-mn="out">Keluar (${esc(auth.currentUser?.email||'')})</button>`;
+ const m=document.createElement('div');m.className='mnu';m.innerHTML=`<b>Tema dashboard</b>${[['auto','Ikuti aplikasi'],['terang','Terang'],['gelap','Gelap'],['biru','Biru']].map(([k,t])=>`<button data-tm="${k}" class="${k==kini?'on':''}">${t}</button>`).join('')}<hr><button data-mn="app">Buka aplikasi</button><button data-mn="out">Keluar (${esc(auth.currentUser?.email||'')})</button>`;
  $('#atas').append(m);m.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm){temaDash(b.dataset.tm);m.remove();return}if(b.dataset.mn=='app')keApp();if(b.dataset.mn=='out')auth.signOut().then(()=>toast('Kamu sudah keluar')).catch(e=>toast('Gagal keluar: '+(e.code||e.message)));m.remove()}}
 document.addEventListener('click',e=>{if(!e.target.closest('.mnu,#set'))$('.mnu')?.remove()});
 /* Bilah atas bersembunyi saat digulir ke bawah, muncul saat digulir ke atas */
