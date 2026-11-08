@@ -1517,3 +1517,7 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 /* Izin: "Izinkan" tetap tombol utama berwarna, "Tolak"/"Cabut izin" berupa teks */
 .izb .btn[data-izin]{background:var(--g);color:var(--on)}
 .izb .btn.izt{background:transparent;color:var(--mut)}
+/* Geser halaman mulus: peramban mengurus gulir vertikal sendiri (pendengar sentuh tidak memblokir),
+   halaman & lapisan pratinjau jadi lapisan GPU sehingga cukup dipindah, tidak digambar ulang tiap frame */
+#view,#ay{touch-action:pan-y}
+#view.gsj,.gsj,.vpeek,.tpeek{will-change:transform;backface-visibility:hidden}

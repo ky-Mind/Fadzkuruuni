@@ -79,9 +79,11 @@ function vSnap(h,html){if(!h||!html||html.length>600000)return;VSNAP.delete(h);V
 /* Isi halaman lain sebagai HTML: potret terakhir, atau dirender dari fungsi halamannya (tanpa init) */
 /* Pratinjau yang sudah disiapkan untuk halaman sebelah (dibuang setiap pindah halaman) */
 const VPRE=new Map();
-function vSiapkan(){VPRE.clear();const h=location.hash||'#/',[a,b]=h.slice(2).split('/'),N=tataNavR(),L=[];
+/* Lapisan pratinjau siap pakai per alamat (dibangun saat senggang, disembunyikan); saat jari mulai menggeser tinggal ditampilkan */
+const VEL=new Map();
+function vSiapkan(){VPRE.clear();VEL.forEach(e=>e.remove());VEL.clear();const h=location.hash||'#/',[a,b]=h.slice(2).split('/'),N=tataNavR(),L=[];
  if($('#view .pnav')){$$('#view .pnav [data-nx],#view .pnav [data-pv]').forEach(x=>L.push(x.getAttribute('href')))}else if(N.includes(a)&&!b){const k=N.indexOf(a);[N[k-1],N[k+1]].forEach(r=>r!=null&&L.push('#/'+r))}
- const kerja=()=>L.forEach(t=>{if(!VSNAP.has(t)&&!VPRE.has(t))VPRE.set(t,vHtml(t))});(window.requestIdleCallback||setTimeout)(kerja,{timeout:800})}
+ const kerja=()=>L.forEach(t=>{if(!VSNAP.has(t)&&!VPRE.has(t))VPRE.set(t,vHtml(t));if(window.gsBangun)gsBangun(t)});(window.requestIdleCallback||setTimeout)(kerja,{timeout:800})}
 function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);if(VPRE.has(h))return VPRE.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');const pr=PRATINJAU[a]&&PRATINJAU[a](b,c,d);if(pr)return pr;return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
 /* Jangan bajak geseran di isian, penggeser, lembar, kitab, kalender, carousel, atau daftar yang bisa digeser samping */
 function gsHalang(t){/* Pratinjau admin: elemen yang bisa diatur diseret, bukan menggeser halaman */if(typeof TPRATINJAU!='undefined'&&TPRATINJAU&&t.closest('[data-ta]'))return true;if(t.closest('input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'))return true;
@@ -96,7 +98,14 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  const W=()=>v.clientWidth;
  const buang=()=>{if(peek){peek.remove();peek=null}};
  /* Halaman sebelah: lapisan seukuran #view di dalam #app, digeser selebar layar ke sisinya */
- const peekHal=(html,blk)=>{buang();peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'')+(vKelas(tujuan)?' '+vKelas(tujuan):'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
+ /* Bangun lapisan pratinjau untuk alamat t (tersembunyi di luar layar) */
+ const bangunPeek=(t,html,blk)=>{const p=document.createElement('div');p.className='vpeek'+(blk?' blk':'')+(vKelas(t)?' '+vKelas(t):'');p.setAttribute('aria-hidden','true');p.innerHTML=html;
+  Object.assign(p.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px',visibility:'hidden',transform:'translate3d(-200vw,0,0)'});
+  const lk=p.querySelector(':scope>.rh')||p.querySelector(':scope>.bar [data-rs]')?.closest('.bar')||p.querySelector(':scope>.aibar');lk&&lk.classList.add('lekat');return p};
+ window.gsBangun=t=>{if(VEL.has(t)||!gsHP())return;const p=bangunPeek(t,vHtml(t));app.append(p);VEL.set(t,p)};
+ const peekHal=(html,blk)=>{buang();const siap=!blk&&VEL.get(tujuan);
+  if(siap){peek=siap;VEL.delete(tujuan);Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px',visibility:''});if(peek.querySelector("#aic .aim"))peek.scrollTop=peek.scrollHeight;return}
+  peek=document.createElement('div');peek.className='vpeek'+(blk?' blk':'')+(vKelas(tujuan)?' '+vKelas(tujuan):'');peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
   Object.assign(peek.style,{left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.offsetWidth+'px',height:v.offsetHeight+'px'});blk?app.insertBefore(peek,v):app.append(peek);
   /* Kepala halaman yang menempel (dipasang router lewat barLekat) juga dipasang di pratinjau, agar letaknya sama */
   const lk=peek.querySelector(':scope>.rh')||peek.querySelector(':scope>.bar [data-rs]')?.closest('.bar')||peek.querySelector(':scope>.aibar');lk&&lk.classList.add('lekat');
@@ -108,7 +117,9 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  const pasang=(px,tr)=>{const w=W(),g=mode=='tab'?el:v;g.style.transition=tr?`transform ${tr}`:'none';g.style.transform=px?`translate3d(${px}px,0,0)`:'';
   if(mode=='back'){v.style.boxShadow=px?'-10px 0 24px rgba(0,0,0,.22)':'';if(peek){peek.style.transition=tr?`transform ${tr},filter ${tr}`:'none';peek.style.transform=`translate3d(${(px-w)*.3}px,0,0)`;peek.style.filter=`brightness(${.8+.2*Math.min(1,px/w)})`}}
   else if(peek){peek.style.transition=g.style.transition;peek.style.transform=`translate3d(${px+dir*w}px,0,0)`}};
- const pulih=()=>{[v,el].forEach(g=>{if(g){g.style.transition=g.style.transform='';g.style.boxShadow=''}});v.style.position=v.style.zIndex=v.style.background='';buang();sibuk=false};
+ const pulih=()=>{cancelAnimationFrame(raf);raf=0;[v,el].forEach(g=>{if(g){g.style.transition=g.style.transform='';g.style.boxShadow='';g.classList.remove('gsj')}});v.style.position=v.style.zIndex=v.style.background=v.style.overflowY='';buang();sibuk=false};
+ /* Posisi digambar sekali per frame layar (bukan tiap event sentuh) */
+ let raf=0,pxT=0,jejak=[];const jadwal=px=>{pxT=px;if(!raf)raf=requestAnimationFrame(()=>{raf=0;if(sx!==null&&lock=='h')pasang(pxT)})};
  const meluncur=(px,lalu,ms=GS_DUR)=>{pasang(px,`${ms}ms ${GS_EASE}`);clearTimeout(tm);tm=setTimeout(()=>lalu&&lalu(),ms+20)};
  /* Halaman baru dipasang router (data-vt=geser, tanpa animasi): potret dilepas */
  document.addEventListener('fz-dipasang',()=>{if(mode&&sibuk){mode='';pulih()}});
@@ -119,7 +130,9 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
   if(L)tujuan=L.getAttribute('href');else if(!$('#view .pnav')&&tataNavR().includes(a)&&!b){const N=tataNavR(),k=N.indexOf(a);tujuan=N[k+d]!=null?'#/'+N[k+d]:null}
   if(tujuan)peekHal(vHtml(tujuan))};
  v.addEventListener('touchstart',e=>{sx=null;if(sibuk||!gsHP()||e.touches.length!=1||document.body.classList.contains('kfull')||gsHalang(e.target))return;
-  const t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now();dx=0;lock=null;mode='';
+  const t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now();dx=0;lock=null;mode='';jejak=[];
+  /* Halaman jadi lapisan GPU sendiri sejak disentuh: saat digeser cukup dipindah, tidak digambar ulang tiap frame */
+  v.classList.add('gsj');
   /* Jarak jari (piksel layar) diubah ke piksel CSS: di HP seluruh tampilan memakai zoom, isi harus tepat menempel di jari */
   k=v.getBoundingClientRect().width/v.offsetWidth||1;
   /* Tepi kiri di subhalaman: geser kembali */
@@ -128,20 +141,22 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
   else if(e.target.closest('#ay'))sx=null},{passive:true});
  v.addEventListener('touchmove',e=>{if(sx===null)return;
   if(e.touches.length!=1){const h=lock=='h';sx=null;if(h)meluncur(0,pulih);return}
-  const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k;
+  const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k,kini=performance.now();jejak.push([kini,x]);while(jejak.length>2&&kini-jejak[0][0]>100)jejak.shift();
   if(lock===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;
    if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
    else{lock=Math.abs(x)>Math.abs(y)*1.6?'h':'v';if(lock=='h'){
     /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
     /* Halaman menu bawah (mis. Al-Qur'an): geser di mana saja selalu ke halaman besar sebelah (Beranda / Fadz AI); tab (Surah/Juz/Riwayat) hanya lewat ketukan */
     const [ra,rb]=(location.hash||'#/').slice(2).split('/'),akar=tataNavR().includes(ra)&&!rb;
-    const ti=!akar&&tabSemua().length>1?tabIsi():null;mode=ti&&ti.contains(e.target)?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';pilihSebelah(x<0?1:-1)}}}
-  if(lock!='h')return;if(e.cancelable)e.preventDefault();
-  if(mode=='back'){dx=Math.max(0,x);pasang(dx);return}
+    const ti=!akar&&tabSemua().length>1?tabIsi():null;mode=ti&&ti.contains(e.target)?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';v.style.overflowY='hidden';if(el)el.classList.add('gsj');pilihSebelah(x<0?1:-1)}else v.classList.remove('gsj')}}
+  if(lock!='h')return;
+  if(mode=='back'){dx=Math.max(0,x);jadwal(dx);return}
   /* Arah berbalik melewati titik awal: ganti isi sebelah yang ditampilkan */
-  const nd=x<0?1:-1;if(nd!=dir&&x!=0)pilihSebelah(nd);dx=x;pasang(tujuan?dx:dx*.25)},{passive:false});
- const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h)return;
-  const w=W(),vel=dx/Math.max(1,Date.now()-t0),ms=Math.max(140,Math.min(GS_DUR,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));
+  const nd=x<0?1:-1;if(nd!=dir&&x!=0)pilihSebelah(nd);dx=x;jadwal(tujuan?dx:dx*.25)},{passive:true});
+ const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h){v.classList.remove('gsj');return}cancelAnimationFrame(raf);raf=0;
+  /* Kecepatan dari gerakan ~100 ms terakhir (bukan rata-rata sejak menyentuh): kibasan cepat langsung meluncur */
+  const j0=jejak[0],j1=jejak[jejak.length-1],vJ=j0&&j1&&j1[0]>j0[0]?(j1[1]-j0[1])/(j1[0]-j0[0]):0;
+  const w=W(),vel=Math.abs(vJ)>Math.abs(dx/Math.max(1,Date.now()-t0))?vJ:dx/Math.max(1,Date.now()-t0),ms=Math.max(140,Math.min(GS_DUR,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));
   if(mode=='back'){if(dx>w*.33||vel>GS_KIBAS){sibuk=true;meluncur(w,()=>{if(peek)peek.style.zIndex='2';document.documentElement.dataset.vt='geser';location.replace(tujuan);setTimeout(()=>{if(sibuk){mode='';pulih()}},1500)},ms)}else meluncur(0,()=>{mode='';pulih()});return}
   const kibas=Math.abs(vel)>GS_KIBAS&&Math.sign(vel)==-dir;
   if(tujuan&&(Math.abs(dx)>w*GS_BATAS||kibas)){sibuk=true;
