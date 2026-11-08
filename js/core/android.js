@@ -46,8 +46,8 @@ function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify(
 /* Data widget layar utama: jadwal 6 waktu hari ini s.d. lusa (jam & waktu epoch), lokasi, tanggal, dan kata-kata Beranda */
 let andWidSig='';
 function androidWidget(){if(!ANDROID||!window.FadzAndroid.jadwalWidget)return;const tz=S.loc.tz??-new Date().getTimezoneOffset()/60,kor=(S.kor||0)/60,H=[];
- for(let d=0;d<3;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());H.push(T.map(x=>[x[0],hm(x[1]),Math.round(dasar+(x[1]-tz-kor)*36e5)]))}
- const n=new Date(),o={lok:S.loc.n,zona:tzl(),tgl:n.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})+' / '+(typeof hf=='function'?hf(n,{day:'numeric',month:'long',year:'numeric'}):hijri(n)),h:H,kata:(typeof QA=='function'?QA():[]).map(q=>[q.t,q.p||'any']).slice(0,60)},sig=JSON.stringify([S.loc,S.kor,n.toDateString(),o.kata.length]);
+ const DH=[];for(let d=0;d<3;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());H.push(T.map(x=>[x[0],hm(x[1]),Math.round(dasar+(x[1]-tz-kor)*36e5)]));DH.push(T.duha!=null?hm(T.duha):'')}
+ const n=new Date(),o={lok:S.loc.n,zona:tzl(),tgl:n.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})+' / '+(typeof hf=='function'?hf(n,{day:'numeric',month:'long',year:'numeric'}):hijri(n)),h:H,dh:DH,kata:(typeof QA=='function'?QA():[]).map(q=>[q.t,q.p||'any']).slice(0,60)},sig=JSON.stringify([S.loc,S.kor,n.toDateString(),o.kata.length]);
  if(sig==andWidSig)return;andWidSig=sig;andPanggil('jadwalWidget',JSON.stringify(o))}
 if(ANDROID){document.documentElement.classList.add('android');androidWarna();androidAdzan();
  /* Pilihan suara adzan disamakan ke Android (dipakai pemutar adzan) */
