@@ -33,3 +33,14 @@ Di aplikasi, admin yang masuk dengan Google melihat tombol **Mode admin** di Ber
 
 Data di Firestore: `config/tampilan` (tata letak, field `json`), `config/tampilan/riwayat`, `config/admin` (`emails`), `stat/{YYYY-MM-DD}`.
 **Wajib:** setelah pembaruan ini, salin ulang seluruh isi `firestore.rules` ke Firebase Console > Firestore Database > Rules, lalu **Publish**. Sebelum itu, Tampilan/Statistik/Admin akan menampilkan "permission-denied".
+
+## Notifikasi kelas di peramban (Web Push)
+
+Agar notifikasi "Jadwal kelas baru" dan "Kelas online dimulai" muncul walau situs ditutup (`api/push.js`):
+
+1. Buat sepasang kunci VAPID sekali saja: `npx web-push generate-vapid-keys`.
+2. Vercel › Project Fadzkuruuni › Settings › Environment Variables: tambahkan `VAPID_PUBLIC` (Public Key) dan `VAPID_PRIVATE` (Private Key), lalu Redeploy.
+3. Publish ulang `firestore.rules` (ada koleksi baru `langganan`).
+
+Peramban yang sudah mengizinkan notifikasi otomatis berlangganan. Notifikasi dikirim saat admin membuat jadwal atau memulai kelas.
+Aplikasi Android memakai notifikasi native (KelasCek), bukan Web Push.

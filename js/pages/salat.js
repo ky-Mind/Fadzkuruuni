@@ -89,8 +89,8 @@ P.kiblat=()=>{let b=arahKiblat(S.loc.lat,S.loc.lng);
 const AZMODE={adzan:['Adzan','Suara adzan dan notifikasi','play'],beduk:['Beduk','Suara pukulan beduk dan notifikasi','bell'],alarm:['Alarm','Nada alarm HP dan notifikasi','clock'],bunyi:['Bunyi','Notifikasi dengan bunyi notifikasi biasa, tanpa adzan','bell'],senyap:['Senyap','Notifikasi saja, tanpa suara','eye'],mati:['Mati','Tidak ada pengingat untuk waktu ini','stop']};
 /* Pengaturan pengingat satu waktu salat: jenis pengingat + suara muadzin (bisa didengar dulu) */
 const WSN=k=>k==5?'Terbit':WS[k];
-function jnSheet(k,ulang){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d';let coba='';
- const henti=()=>{stopAdzan();coba='';$$('[data-coba]',e).forEach(b=>{b.classList.remove('on');b.innerHTML=ic('play',14)+' Coba'})};
+function jnSheet(k,ulang){if($('.back-d'))return;const e=document.createElement('div');e.className='back-d';
+ const henti=()=>{stopAdzan();cobaLepas()};
  const umum=k==0?suaraPilih('subuh'):suaraPilih('adzan'),nmS=v=>(SUARA.find(x=>x[0]==v)||[0,'Bawaan aplikasi'])[1];
  const isi=()=>{const md=S.az.on?azMode(k):'mati',sv=azSuara(k);
   return `<div class="am-h"><b>Pengingat ${WSN(k)}</b><button class="ib2" data-x aria-label="Tutup">×</button></div>
@@ -101,8 +101,7 @@ ${md=='adzan'?`<small class="mut jnh">Suara adzan ${WSN(k)}</small><div class="a
  const gambar=()=>{const sc=e.querySelector('.sheet')?.scrollTop||0;e.innerHTML=`<div class="sheet am jns-s" role="dialog" aria-label="Pengingat ${WSN(k)}">${isi()}</div>`;e.querySelector('.sheet').scrollTop=sc};
  gambar();document.body.append(e);
  e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]')){henti();e.remove();return ulang()}
-  const c=x.target.closest('[data-coba]');if(c){x.stopPropagation();const v=c.dataset.coba;if(coba==v)return henti();henti();if(v=='bunyi'){beep();return}coba=v;c.classList.add('on');c.innerHTML=ic('stop',14)+' Henti';
-   suaraSrc(k==0?'subuh':'adzan',v).then(src=>{putarSuara(src);if(ADZ)ADZ.onended=henti});return}
+  const c=x.target.closest('[data-coba]');if(c){x.stopPropagation();const v=c.dataset.coba;return cobaTombol(c,()=>{if(v=='bunyi'){beep();return false}return suaraSrc(k==0?'subuh':'adzan',v).then(putarSuara)})}
   const b=x.target.closest('[data-v]');if(b){const v=b.dataset.v;azSetMode(k,v);henti();gambar();ulang();toast(`${WSN(k)}: ${AZMODE[v][0].toLowerCase()=='mati'?'pengingat dimatikan':AZMODE[v][1].toLowerCase()}`);
    if(v!='mati'&&!window.ANDROID&&'Notification'in window&&Notification.permission!='granted')askNotif();return}
   const s=x.target.closest('[data-sv]');if(s){azSetSuara(k,s.dataset.sv);gambar();ulang()}}}

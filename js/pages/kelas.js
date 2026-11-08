@@ -43,7 +43,7 @@ P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls">'+(KEL
  const k=(KELAS||[]).find(x=>x.id==id)||{id,judul:'Kelas online'},vid=k.yt||(k.status=='selesai'&&ytId(k.rekaman));
  if(vid)return {html:head(esc(k.judul||'Kelas online'),'#/kelas',k.status=='live'?'<span class="klv kll">● Live</span>':'')+`<div class="kvid"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0" title="${esc(k.judul||'Video kelas')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
   <div class="kinfo"><b>${esc(k.judul||'')}</b>${k.pengajar?`<br><small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}<p><a class="sb" href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">${ic('share',16)} Buka di YouTube</a></p></div>`,init(){if(KR&&KR.id!=id)kelasKeluar(1)}};
- return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div></div><div class="kzg" id="kzg"></div></div>
+ return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div><div class="kzg" id="kzg"></div></div>
   <div id="kinfo" class="kinfo"><p class="mut">Menyambungkan ke kelas…</p></div><div id="kctl" class="kctl"></div>
   <div class="kchat"><h2>Pesan</h2><div id="kcl" class="kcl"><p class="mut">Belum ada pesan.</p></div><form id="kcf" class="kcf" autocomplete="off"><input class="in" id="kci" maxlength="500" placeholder="Tulis pesan untuk kelas…" enterkeyhint="send"><button class="btn" type="submit" aria-label="Kirim">${ic('send',18)}</button></form></div><div id="kadm"></div>`,
   init(){kelasMasuk(id)}}};
@@ -158,6 +158,19 @@ addEventListener('pagehide',()=>{if(KR)kelasKeluar(1)});
 let KSEMB=0;document.addEventListener('visibilitychange',()=>{clearTimeout(KSEMB);if(document.hidden&&KR&&!KR.layarOn){const id=KR.id;KSEMB=setTimeout(async()=>{if(!document.hidden||!KR)return;await kelasKeluar(1);
   const x=$('#kinfo');if(x&&location.hash=='#/kelas/'+id){x.innerHTML=`<p class="mut">Kamu keluar dari kelas karena aplikasi ditinggalkan.</p><button class="btn s" data-kulang="${id}">Masuk lagi</button>`;const c=$('#kctl');if(c)c.innerHTML=''}},30000)}});
 
+/* ---------- Layar penuh video kelas (live & YouTube) ----------
+   Video kelas yang dibuat layar penuh (tombol di pojok video live, atau tombol layar penuh pemutar YouTube)
+   diputar ke posisi mendatar (landscape) dan kembali tegak saat keluar.
+   Aplikasi Android memakai jembatan layarMiring (Activity dikunci tegak); peramban memakai screen.orientation.lock. */
+const kVideoPenuh=()=>{const f=document.fullscreenElement||document.webkitFullscreenElement;return !!(f&&f.closest&&f.closest('.kvid,.kzs'))};
+function kMiring(on){const A=window.FadzAndroid;if(A&&A.layarMiring){try{A.layarMiring(!!on)}catch(e){}return}
+ const o=screen.orientation;if(!o)return;if(on)o.lock&&o.lock('landscape').catch(()=>{});else o.unlock&&o.unlock()}
+let KMIRING=false;
+const kPenuhUbah=()=>{const on=kVideoPenuh();if(on==KMIRING)return;KMIRING=on;kMiring(on);const b=$('[data-kzfs]');if(b)b.classList.toggle('on',on)};
+document.addEventListener('fullscreenchange',kPenuhUbah);document.addEventListener('webkitfullscreenchange',kPenuhUbah);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-kzfs]');if(!b)return;const z=b.closest('.kzs'),f=document.fullscreenElement||document.webkitFullscreenElement;
+ if(f)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
+ else (z.requestFullscreen||z.webkitRequestFullscreen||(()=>Promise.reject())).call(z,{navigationUI:'hide'}).catch(()=>toast('Layar penuh tidak didukung di perangkat ini'))});
 document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-kkeluar]'))return kTanyaKeluar('#/kelas');
  if(t.closest('[data-kaudio]')&&KR){try{await KR.room.startAudio()}catch(x){}KR.diam=!KR.room.canPlaybackAudio;return kelasInfo()}
@@ -183,7 +196,7 @@ document.addEventListener('click',async e=>{const t=e.target;
  if(!t.closest('[data-kbuat],[data-kmulai],[data-kakhir],[data-khapus],[data-ktaut],[data-kytset],[data-ktgl]'))return;
  await fbInit();if(!FBD||!kAdmin())return toast('Khusus admin. Masuk dengan akun admin.');const col=FBD.collection('kelas');
  const segar=async()=>{await kelasAmbil();kelasDaftar()};
- const m=t.closest('[data-kmulai]');if(m){try{await col.doc(m.dataset.kmulai).update({status:'live',mulai:Date.now()});await segar();location.hash='#/kelas/'+m.dataset.kmulai}catch(x){toast('Gagal memulai kelas')}return}
+ const m=t.closest('[data-kmulai]');if(m){try{await col.doc(m.dataset.kmulai).update({status:'live',mulai:Date.now()});kelasSiarkan(m.dataset.kmulai,'mulai');await segar();location.hash='#/kelas/'+m.dataset.kmulai}catch(x){toast('Gagal memulai kelas')}return}
  const tg=t.closest('[data-ktgl]');if(tg){const k=(KELAS||[]).find(x=>x.id==tg.dataset.ktgl)||{},d=new Date(k.mulai||Date.now()),v=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16),e=document.createElement('div');e.className='back-d';
   e.innerHTML=`<div class="sheet kfm" role="dialog" aria-label="Ubah tanggal"><b>Ubah tanggal</b><p class="mut">${esc(k.judul||'Kelas')}</p><input class="in" id="ktg" type="datetime-local" value="${v}"><div class="act"><button class="sb pri" id="ktgs">Simpan</button><button class="sb" id="ktgb">Batal</button></div></div>`;
   document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='ktgb')tutup()};
@@ -209,7 +222,7 @@ function kelasForm(col,segar){const e=document.createElement('div');e.className=
   <label class="kcek"><input type="checkbox" id="kfr"> Rekam kelas (video layar/kamera + semua suara, disimpan di perangkat pengajar: folder Download/Fadzkuruuni)</label><label class="kff" id="kffw" hidden>Format rekaman <select id="kff">${Object.entries(REKAM_FMT).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label><div class="act"><button class="sb pri" id="kfv" hidden>Simpan sebagai video</button><button class="sb pri" id="kfs">Simpan jadwal</button><button class="sb" id="kfl">Langsung mulai</button><button class="sb" id="kfb">Batal</button></div></div>`;
  document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='kfb')tutup()};
  const simpan=async live=>{const j=$('#kfj').value.trim();if(!j)return toast('Isi judul kelas');const w=new Date($('#kfw').value).getTime()||Date.now();
-  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,rekamFmt:$('#kff').value,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
+  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,rekamFmt:$('#kff').value,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});kelasSiarkan(r.id,live?'mulai':'baru');tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
  $('#kfs').onclick=()=>simpan(0);$('#kfl').onclick=()=>simpan(1);
  /* Video YouTube yang sudah ada (mis. rekaman pengajian lama): langsung jadi kelas "Sudah selesai" dengan tanggal bebas, bisa diputar ulang jamaah */
  $('#kfv').onclick=async()=>{const id=ytId($('#kfy').value),j=$('#kfj').value.trim();if(!id)return toast('Tempel link YouTube dulu');if(!j)return toast('Isi judul');const w=new Date($('#kfw').value).getTime();if(!w)return toast('Isi tanggal video');
@@ -309,6 +322,24 @@ function kelasPantau(){if(KWATCH||!FBD)return;try{KWATCH=FBD.collection('kelas')
   /* Kelas yang sedang diikuti diakhiri/dihapus pengajar: semua peserta otomatis keluar */
   if(KR&&!KR.keluarOtomatis){const k=KELAS.find(x=>x.id==KR.id);if(!k||k.status=='selesai'){const id=KR.id;KR.keluarOtomatis=1;kelasKeluar(1).then(()=>{if(location.hash.startsWith('#/kelas/'+id)){history.replaceState(null,'','#/kelas');route()}toast('Kelas telah diakhiri pengajar')})}}},()=>{KWATCH=null})}catch(e){KWATCH=null}}
 addEventListener('fbu',kelasPantau);
+/* ---------- Notifikasi kelas saat situs ditutup (Web Push) ----------
+   Peramban yang sudah mengizinkan notifikasi didaftarkan di Firestore `langganan` (id = sidik alamat langganannya).
+   Saat admin membuat jadwal atau memulai kelas, server (api/push.js) mengirim notifikasi ke semua langganan, sehingga muncul
+   walau situs ditutup. Aplikasi Android memakai notifikasi native (KelasCek), jadi tidak didaftarkan di sini. */
+const b64uKe=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
+async function kelasLangganan(){if(window.ANDROID||TPRATINJAU||!('serviceWorker'in navigator)||!('PushManager'in window)||!window.Notification||Notification.permission!='granted'||!cloudOn())return;
+ try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+  if(!sub){const {kunci}=await (await fetch('api/push',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"kunci"}'})).json();if(!kunci)return;
+   sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64uKe(kunci)})}
+  const j=sub.toJSON(),id=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(j.endpoint)))].slice(0,20).map(b=>b.toString(16).padStart(2,'0')).join('');
+  /* Tanda sudah terdaftar disimpan di peramban ini saja (bukan di S yang ikut tersinkron ke perangkat lain) */
+  if(localStorage.fzLangganan==id)return;await fbInit();if(!FBD)return;
+  await FBD.collection('langganan').doc(id).set({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,t:Date.now()});localStorage.fzLangganan=id}catch(e){console.warn('langganan kelas',e)}}
+addEventListener('load',()=>setTimeout(kelasLangganan,5000));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')kelasLangganan()});
+/* Admin: kirim notifikasi kelas ke semua peramban yang berlangganan (jenis 'baru' = jadwal baru, 'mulai' = kelas dimulai) */
+async function kelasSiarkan(id,jenis){try{if(typeof FBU=='undefined'||!FBU)return;const idToken=await FBU.getIdToken();
+ await fetch('api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({aksi:'kirim',kelas:id,jenis,idToken})})}catch(e){}}
 /* Aplikasi Android 2.6+: notifikasi sistem ditangani native (KelasCek) agar tidak dobel; halaman hanya menampilkan pemberitahuan di dalam aplikasi */
 function kNotif(judul,isi,id){if(window.ANDROID){if(!(window.FadzAndroid&&FadzAndroid.kelasSegarkan))andPanggil('notifikasi',judul,isi)}
  else if(document.hidden&&window.Notification&&Notification.permission=='granted')try{const n=new Notification(judul,{body:isi,icon:'img/icon-192.png',tag:'kelas-'+id});n.onclick=()=>{focus();location.hash='#/kelas/'+id}}catch(e){}

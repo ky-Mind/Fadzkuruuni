@@ -74,6 +74,18 @@ service cloud.firestore {
       }
     }
 
+    // Langganan notifikasi kelas (Web Push di peramban, lihat api/push.js). Satu dokumen per peramban (id = sidik alamat langganan).
+    // Siapa pun boleh mendaftarkan / mencabut langganannya; hanya admin yang bisa membaca daftar untuk mengirim notifikasi.
+    match /langganan/{id} {
+      allow read: if isAdmin();
+      allow delete: if true;
+      allow create, update: if id.size() <= 64
+        && request.resource.data.keys().hasOnly(['endpoint', 'p256dh', 'auth', 't'])
+        && request.resource.data.endpoint is string && request.resource.data.endpoint.size() <= 1000 && request.resource.data.endpoint.matches('https://.+')
+        && request.resource.data.p256dh is string && request.resource.data.p256dh.size() <= 200
+        && request.resource.data.auth is string && request.resource.data.auth.size() <= 64;
+    }
+
     match /laporan/{id} {
       allow create: if request.resource.data.keys().hasOnly(['jenis','pesan','lokasi','hal','halJudul','nama','kontak','versi','perangkat','foto','uid','email','status','t'])
         && request.resource.data.pesan is string && request.resource.data.pesan.size() <= 2000

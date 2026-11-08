@@ -1,5 +1,6 @@
 /* js/pages/pengaturan/tentang.js - Pengaturan: Tentang dan Bantuan */
 SETPAGES.tentang=()=>({html:head('Tentang & Bantuan','#/pengaturan')+`<div class="list sg">${lk('#/tentang','info','Tentang aplikasi')}${lk('#/tutorial','play','Video tutorial')}${lk('#/lapor','flag','Laporkan bug atau kesalahan penulisan')}${lk('#/dukung','heart','Dukung kami')}</div>
+<h2>Privasi</h2><div class="list sg">${lk('kebijakan-privasi.html','shield','Kebijakan Privasi')}${lk('hapus-data.html','trash','Penghapusan Data')}</div>
 <h2>Versi</h2><div class="list sg">${(()=>{/* Dua jenis pembaruan, dipisah:
   1) Aplikasi Android (APK): harus diunduh & dipasang ulang bila ada versi baru (dicek ke rilis GitHub)
   2) Isi & tampilan (web): masuk otomatis setiap aplikasi dibuka, tanpa unduh APK */
