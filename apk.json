@@ -1,0 +1,11 @@
+{
+ "tag_name": "v2.6.2",
+ "body": "## Yang baru di Fadzkuruuni 2.6.2\n\n- Perbaikan: notifikasi Kelas online kini muncul saat aplikasi ditinggal ke latar belakang (sebelumnya kelas baru/kelas dimulai bisa tercatat tanpa notifikasi).\n- Saat aplikasi tertutup penuh, kelas tetap dicek tiap ±5 menit; pengingat kelas terjadwal tepat waktu (10 menit sebelum & saat mulai).\n- Notifikasi tidak lagi muncul dobel.\n\nPembaruan tampilan & isi (web) tetap masuk otomatis tanpa memasang APK.\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.2",
+ "assets": [
+  {
+   "name": "fadzkuruuni.apk",
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.2/fadzkuruuni.apk"
+  }
+ ]
+}
