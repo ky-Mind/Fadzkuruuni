@@ -7,7 +7,7 @@ const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j,kw,kh)=>L.push(
  NAMA.forEach((n,i)=>tb(n+' · '+ARTI[i],'#/quran/'+(i+1),'Surah'));
  [['w',WN,WD,'Wirid'],['d',MENU.doa,DD,'Doa']].forEach(([t,N,D,j])=>N.forEach((n,i)=>{const isi=D[i]||[];const as=t=='w'&&i==2;tb(n,as?'#/asma':isi.length?`#/baca/${t}/${i}`:null,j);isi.forEach((x,k)=>x&&x[0]&&tb(x[0],`#/bacaan/${t}/${i}/${k}`,j+' · '+n))}));
  MAULID_DAFTAR.forEach(m=>tb(m.judul,m.berkas?'#/maulid/'+m.id:null,'Maulid'));
- KITAB_DAFTAR.forEach(k=>tb(k.judul,k.berkas?'#/kitab/'+k.id:null,'Kitab'));
+ KITAB_DAFTAR.forEach(k=>tb(k.judul,k.berkas?'#/kitab/'+k.id:null,k.di?(k.di=='wirid'?'Wirid':'Maulid')+' · Majelis Fadzkuruuni':k.kelompok=='pondok'?'Kitab · Karya Pondok Fadzkuruuni':'Kitab'));
  ASMA.forEach(a=>tb(a[1]+' · '+a[2],'#/asma/'+a[0],'Asmaul Husna'));
  /* Isi kitab: bab/fasal dari daftar isi (data/kitab-indeks.js), mis. "puasa" → Fathul Qarib, Kitab Puasa, hal. 120 */
  if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=KITAB_DAFTAR.find(x=>x.id==id);if(!k)return;E.forEach(e=>tb(e[1]+' — '+k.judul,`#/kitab/${id}/${e[3]}`,'Kitab'+(e[0]?' · '+e[0]:'')+' · hal. '+e[4],e[2]+' '+e[0],`${id}|${e[3]}|${e[4]}`))});

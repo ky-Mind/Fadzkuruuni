@@ -39,3 +39,6 @@ function dlg(t,m,fn){const e=mk('dlg',`<div role="dialog"><div class="ok">${ic('
 /* Navigasi bagian sebelumnya/berikutnya. a dan b = [href, judul] atau kosong. Halaman yang memakainya bisa digeser kiri-kanan (js/core/events.js). */
 const pnav=(a,b)=>`<nav class="pnav" aria-label="Pindah bagian">${a?`<a href="${a[0]}" data-pv rel="prev">${ic('back',18)}<span><small>Sebelumnya</small><b>${esc(a[1])}</b></span></a>`:'<i></i>'}${b?`<a href="${b[0]}" data-nx rel="next"><span><small>Berikutnya</small><b>${esc(b[1])}</b></span>${ic('next',18)}</a>`:'<i></i>'}</nav>`;
 const RS=`<button class="ib" data-rs aria-label="Pengaturan baca">${ic('sliders',20)}</button>`;
+
+/* Bagian "Majelis Fadzkuruuni" di halaman Wirid / Maulid: bacaan edisi majelis, dipisah dari yang umum dengan judul & lencana */
+const majelisBagian=(judul,L)=>L.length?`<section class="mjl"><h2 class="mjl-h">${ic('mosque',18)}<span>${judul}</span></h2><div class="list">${L.map(k=>`<a class="row" href="#/kitab/${k.id}"><span class="si mjl-i">${ic(k.di=='wirid'?'beads':'heart',20)}</span><span class="t"><b>${esc(k.judul)}</b>${k.arab?`<br><span class="ar" style="font-size:18px">${k.arab}</span>`:''}<br><small><span class="mjl-b">Edisi Majelis Fadzkuruuni</span> ${esc(k.ket||'')}</small></span>${ic('next',18)}</a>`).join('')}</div></section>`:'';
