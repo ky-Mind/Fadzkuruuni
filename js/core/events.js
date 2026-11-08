@@ -173,7 +173,7 @@ const ptr=mk('',`<span class="plg"><svg viewBox="0 0 48 48"><circle cx="24" cy="
 const ptrBoleh=()=>['','#','#/','#/pengaturan'].includes(location.hash);
 let py=0,px=0,pt=0,pon=0;
 const PTB=72,PTH=70;/* batas tarik; tinggi logo + tulisan (indikator selalu di atas isi halaman, tidak menimpa) */
-const ptrSet=(y,anim)=>{/* Indikator selalu di tengah kolom konten (di desktop ada menu samping) */{const r=$('#view')?.getBoundingClientRect();if(r&&r.width)ptr.style.left=(r.left+r.width/2)+'px'}const v=$('#view'),tr=anim?'transform .32s cubic-bezier(.22,.8,.3,1)':'none';v.style.transition=ptr.style.transition=tr+(anim?',opacity .32s':'');
+const ptrSet=(y,anim)=>{/* Indikator selalu di tengah kolom konten (di desktop ada menu samping) */{/* Di HP (tanpa menu samping) cukup 50% layar; tampilan HP memakai zoom sehingga posisi piksel dari getBoundingClientRect meleset */const r=$('#view')?.getBoundingClientRect();ptr.style.left=innerWidth>=900&&r&&r.width?(r.left+r.width/2)+'px':''}const v=$('#view'),tr=anim?'transform .32s cubic-bezier(.22,.8,.3,1)':'none';v.style.transition=ptr.style.transition=tr+(anim?',opacity .32s':'');
  v.style.transform=y?`translateY(${y}px)`:'';ptr.style.transform=`translate(-50%,${Math.min(y-PTH-12,0)}px)`;ptr.style.opacity=Math.min(1,Math.max(0,(y-24)/40));
  if(!ptr.classList.contains('muter')){const k=Math.min(1,y/PTB);ptr.style.setProperty('--pk',k);$('.pj',ptr).style.strokeDashoffset=100-k*100}};
 addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.touches.length>1||!v||v.scrollTop>0||ptr.classList.contains('muter')||e.target.closest('.back-d,.sheet,#ftb,#ftp,.tdlap,.tdbar,input,textarea,select'))return;pon=1;pt=0;py=e.touches[0].clientY;px=e.touches[0].clientX},{passive:true});
