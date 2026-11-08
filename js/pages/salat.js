@@ -94,18 +94,19 @@ function jnSheet(k,ulang){if($('.back-d'))return;const e=document.createElement(
  const umum=k==0?suaraPilih('subuh'):suaraPilih('adzan'),nmS=v=>(SUARA.find(x=>x[0]==v)||[0,'Bawaan aplikasi'])[1];
  const isi=()=>{const md=S.az.on?azMode(k):'mati',sv=azSuara(k);
   return `<div class="am-h"><b>Pengingat ${WSN(k)}</b><button class="ib2" data-x aria-label="Tutup">×</button></div>
-<small class="mut jnh">Jenis pengingat</small><div class="am-l jnl">${Object.entries(AZMODE).filter(([v])=>!(k==5&&v=='adzan')).map(([v,[n,d,i]])=>`<button data-v="${v}" class="${v==md?'on':''}">${ic(i,20)}<span><b>${n}</b><small class="mut">${d}</small></span>${v==md?ic('check',18):v=='beduk'?`<i class="sb jnc" data-coba="beduk">${ic('play',14)} Coba</i>`:v=='bunyi'||v=='alarm'?`<i class="sb jnc" data-coba="bunyi">${ic('play',14)} Coba</i>`:''}</button>`).join('')}</div>
-${md=='adzan'?`<small class="mut jnh">Suara adzan ${WSN(k)}</small><div class="am-l jnl jns">${[['','Ikuti pengaturan umum ('+nmS(umum)+')'],...SUARA.filter(x=>x[0]!='sendiri'&&(k==0||!x[0].startsWith('subuh-')))].map(([v,n])=>`<button data-sv="${v}" class="${v==sv?'on':''}"><span><b>${esc(n)}</b></span><i class="sb jnc" data-coba="${v||umum}">${ic('play',14)} Coba</i>${v==sv?ic('check',18):''}</button>`).join('')}</div>`:''}
+<small class="mut jnh">Jenis pengingat</small><div class="am-l jnl">${Object.entries(AZMODE).filter(([v])=>!(k==5&&v=='adzan')).map(([v,[n,d,i]])=>{const cb=v=='adzan'?'@adzan':v=='beduk'?'beduk':v=='bunyi'||v=='alarm'?'bunyi':'';return `<button data-v="${v}" class="${v==md?'on':''}">${ic(i,20)}<span><b>${n}</b><small class="mut">${d}</small></span>${cb?`<i class="sb jnc" data-coba="${cb}">${ic('play',14)} Coba</i>`:''}<span class="jck">${ic('check',18)}</span></button>`}).join('')}</div>
+${k==5?'':`<div class="jnsw"${md=='adzan'?'':' hidden'}><small class="mut jnh">Suara adzan ${WSN(k)}</small><div class="am-l jnl jns">${[['','Ikuti pengaturan umum ('+nmS(umum)+')'],...SUARA.filter(x=>x[0]!='sendiri'&&(k==0||!x[0].startsWith('subuh-')))].map(([v,n])=>`<button data-sv="${v}" class="${v==sv?'on':''}"><span><b>${esc(n)}</b></span><i class="sb jnc" data-coba="${v||umum}">${ic('play',14)} Coba</i><span class="jck">${ic('check',18)}</span></button>`).join('')}</div></div>`}
 <button class="btn" data-x style="width:100%;margin-top:12px">Selesai</button>
 <button type="button" class="mut jnk" data-jdaz>Suara adzan, rekaman sendiri, dan pengingat sebelum waktu ›</button>`};
  const gambar=()=>{const sc=e.querySelector('.sheet')?.scrollTop||0;e.innerHTML=`<div class="sheet am jns-s" role="dialog" aria-label="Pengingat ${WSN(k)}">${isi()}</div>`;e.querySelector('.sheet').scrollTop=sc};
  gambar();document.body.append(e);
  e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]')){henti();e.remove();return ulang()}
   if(x.target.closest('[data-jdaz]')){henti();e.remove();ulang();return jdAdzan(ulang)}
-  const c=x.target.closest('[data-coba]');if(c){x.stopPropagation();const v=c.dataset.coba;return cobaTombol(c,()=>{if(v=='bunyi'){beep();return false}return suaraSrc(k==0?'subuh':'adzan',v).then(putarSuara)})}
-  const b=x.target.closest('[data-v]');if(b){const v=b.dataset.v;azSetMode(k,v);henti();gambar();ulang();toast(`${WSN(k)}: ${AZMODE[v][0].toLowerCase()=='mati'?'pengingat dimatikan':AZMODE[v][1].toLowerCase()}`);
+  const c=x.target.closest('[data-coba]');if(c){x.stopPropagation();const v=c.dataset.coba;return cobaTombol(c,()=>{if(v=='bunyi'){beep();return false}return suaraSrc(k==0?'subuh':'adzan',v=='@adzan'?azSuara(k)||umum:v).then(putarSuara)})}
+  /* Memilih hanya memindahkan centang di tempat (lembar tidak digambar ulang, posisi gulir tetap) */
+  const b=x.target.closest('[data-v]');if(b){const v=b.dataset.v;azSetMode(k,v);henti();e.querySelectorAll('[data-v]').forEach(y=>y.classList.toggle('on',y===b));const w=e.querySelector('.jnsw');if(w)w.hidden=v!='adzan';ulang();toast(`${WSN(k)}: ${AZMODE[v][0].toLowerCase()=='mati'?'pengingat dimatikan':AZMODE[v][1].toLowerCase()}`);
    if(v!='mati'&&!window.ANDROID&&'Notification'in window&&Notification.permission!='granted')askNotif();return}
-  const s=x.target.closest('[data-sv]');if(s){azSetSuara(k,s.dataset.sv);gambar();ulang()}}}
+  const s=x.target.closest('[data-sv]');if(s){azSetSuara(k,s.dataset.sv);e.querySelectorAll('[data-sv]').forEach(y=>y.classList.toggle('on',y===s));ulang()}}}
 /* Tanggal yang sedang dilihat di Jadwal Salat (null = hari ini) */
 let JDT=null;
 /* Lembar kalender untuk memilih tanggal: Masehi besar, Hijriah kecil; pindah bulan & tahun */

@@ -1754,3 +1754,7 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 /* Halaman pengaturan rata tepi (.phal): bagian suara notifikasi kelas & deret tombol tetap berjarak dari tepi layar */
 .phal>.knsw,.phal>.act{margin-left:16px!important;margin-right:16px!important}
 .knsa{justify-content:flex-start}.knsa>.sb{flex:none}
+/* Lembar Pengingat: Coba tetap ada di semua pilihan bersuara; centang hanya tampil di pilihan aktif */
+.jnl .jck{display:none;flex:none;margin-left:6px;color:var(--g)}
+.jnl .on .jck{display:inline-flex}
+.jnl button .jnc{margin-left:auto}
