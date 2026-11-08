@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.44':['Video tutorial widget kini memakai rekaman layar HP Android asli: memasang widget Jadwal Salat lengkap dari Subuh sampai Isya, termasuk Duha'],
  '2.9.43':['Perbaikan: widget layar utama langsung terisi jadwal saat aplikasi dibuka (sebelumnya baru terisi setelah keluar-masuk aplikasi)'],
  '2.9.42':['Kotak Duha di Beranda dan widget kini tampil sama jelasnya dengan waktu salat lain','Video tutorial widget khusus untuk HP (tidak tampil di pilihan Desktop, karena widget hanya ada di Android)'],
  '2.9.41':['Widget Jadwal Salat di layar utama HP kini menampilkan waktu Duha (perbarui aplikasi Android ke 2.6.17)','Video tutorial baru: memasang widget di layar utama HP'],
