@@ -1,7 +1,7 @@
 /* js/core/adzan.js - Adzan, notifikasi, izin */
 const WS=['Subuh','Zuhur','Asar','Magrib','Isya'],WI=[0,2,3,4,5];
 /* Pengingat adzan menyala bawaan (sekali dinyalakan juga untuk pengguna lama yang belum pernah mengubahnya: S.azv) */
-S.az=Object.assign({on:true,sound:true,pre:0,w:[1,1,1,1,1]},S.az||{});
+S.az=Object.assign({on:true,sound:true,pre:0,w:[1,1,1,1,1],dh:1},S.az||{});
 if(!S.azv){S.az.on=true;S.azv=1;try{save()}catch(e){}}
 const beep=()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime;[0,.35,.7].forEach(d=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=660;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,t+d);g.gain.exponentialRampToValueAtTime(.001,t+d+.3);o.start(t+d);o.stop(t+d+.3)})}catch(e){}};
 let ADZ=null;
@@ -57,7 +57,9 @@ const ujiNotif=async subuh=>{if(window.ANDROID){const h=andPanggil('ujiNotifikas
  if(!await askNotif())return false;
  notify(subuh?'Tes adzan Subuh':'Tes notifikasi','Pengingat adzan Fadzkuruuni berfungsi.');return play(subuh?0:1,1)};
 let fired='';
-setInterval(()=>{if(!S.az.on)return;const n=new Date(),T=waktu(n,S.loc),mm=Math.floor(locNow()*60),pre=+S.az.pre;WI.forEach((wi,k)=>{if(!S.az.w[k])return;const m=Math.round(T[wi][1]*60)%1440;[[m-pre,1],[m,0]].forEach(([x,isPre])=>{if(isPre&&!pre)return;const key=n.toDateString()+WS[k]+isPre;if(x==mm&&!fired.includes(key)){fired+=key+'|';isPre?notify('Menjelang '+WS[k],pre+' menit lagi masuk waktu '+WS[k]+' ('+S.loc.n+')'):(notify('Waktu '+WS[k]+' telah tiba','Untuk wilayah '+S.loc.n+' dan sekitarnya'),azBunyi(k))}})})},5000);
+setInterval(()=>{if(!S.az.on)return;const n=new Date(),T=waktu(n,S.loc),mm=Math.floor(locNow()*60),pre=+S.az.pre;WI.forEach((wi,k)=>{if(!S.az.w[k])return;const m=Math.round(T[wi][1]*60)%1440;[[m-pre,1],[m,0]].forEach(([x,isPre])=>{if(isPre&&!pre)return;const key=n.toDateString()+WS[k]+isPre;if(x==mm&&!fired.includes(key)){fired+=key+'|';isPre?notify('Menjelang '+WS[k],pre+' menit lagi masuk waktu '+WS[k]+' ('+S.loc.n+')'):(notify('Waktu '+WS[k]+' telah tiba','Untuk wilayah '+S.loc.n+' dan sekitarnya'),azBunyi(k))}})});
+ /* Pengingat Duha (sunah): notifikasi biasa tanpa adzan */
+ if(S.az.dh&&T.duha!=null){const key=n.toDateString()+'Duha';if(Math.round(T.duha*60)%1440==mm&&!fired.includes(key)){fired+=key+'|';notify('Waktu Duha telah masuk','Waktu salat Duha untuk wilayah '+S.loc.n+', hingga menjelang Zuhur')}}},5000);
 const bdg=n=>`<span class="bdg" data-perm="${n}">…</span>`;
 const IZST={granted:'Diizinkan',denied:'Ditolak',prompt:'Belum diminta'};
 async function permFill(){const AI=typeof ANDROID!='undefined'&&ANDROID?andIzinStatus():null;for(const el of $$('[data-perm]')){const n=el.dataset.perm;let s='Belum diminta';if(AI&&(n in AI||n=='persistent-storage')){s=n=='persistent-storage'?'Diizinkan':IZST[AI[n]]||s;el.textContent=s;el.className='bdg '+(s=='Diizinkan'?'':s=='Ditolak'?'no':'mid');continue}try{const r=await navigator.permissions.query({name:n});s={granted:'Diizinkan',denied:'Ditolak',prompt:'Belum diminta'}[r.state]||s}catch(e){if(n=='notifications'&&'Notification'in window)s={granted:'Diizinkan',denied:'Ditolak',default:'Belum diminta'}[Notification.permission]||s}el.textContent=s;el.className='bdg '+(s=='Diizinkan'?'':s=='Ditolak'?'no':'mid')}}
