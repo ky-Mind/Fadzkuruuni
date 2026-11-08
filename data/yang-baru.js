@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.30':['Pembaruan aplikasi Android bisa langsung diunduh & dipasang dari dalam aplikasi (mulai versi 2.6.7), lengkap dengan persentase unduhan','Notifikasi "Pembaruan Fadzkuruuni tersedia" muncul di HP; diketuk langsung membuka layar pembaruan','Lembar "Fadzkuruuni diperbarui" juga menawarkan versi aplikasi Android terbaru'],
  '2.9.29':['Perbaikan: rekaman kelas di aplikasi Android tersimpan utuh (sebelumnya berkas MP4 kosong / tidak bisa diputar)'],
  '2.9.28':['Pengaturan › Waktu Salat & Notifikasi: bagian baru "Notifikasi kelas online" (jadwal baru, kelas dimulai, pengingat, senyap saat adzan, tes notifikasi)','Perbaikan pengiriman notifikasi kelas ke aplikasi Android'],
  '2.9.27':['Geser antarhalaman lebih lancar: geser beruntun langsung direspons, halaman Al-Qur\'an lebih ringan','Beranda di komputer: kartu Ratib, Aqidatul Awam, dll. bisa digeser dengan tombol panah atau diseret tetikus'],

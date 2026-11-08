@@ -33,8 +33,12 @@ function offTawar(){if(TPRATINJAU||typeof DLG=='undefined'||!DLG.semua)return;co
    Daftar ringkas per versi ada di YANG_BARU (data/yang-baru.js). Pemasangan pertama tidak ditampilkan. */
 function yangBaruCek(){if(TPRATINJAU)return;/* Pengguna lama yang belum pernah melihat "Yang baru" (sudah ada riwayat pemakaian) dianggap memperbarui dari 2.9.0 */const lama=S.verLihat||(S.upCek||S.dibuka||S.loc?'2.9.0':null);if(lama==VER)return;S.verLihat=VER;save();if(!lama||typeof YANG_BARU=='undefined')return;
  const L=Object.keys(YANG_BARU).filter(v=>verLebihBaru(v,lama)&&!verLebihBaru(v,VER)).sort((a,b)=>verLebihBaru(a,b)?-1:1),isi=L.flatMap(v=>YANG_BARU[v]).slice(0,8);if(!isi.length)return;
- const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Fadzkuruuni diperbarui</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(VER)} · sudah terpasang otomatis</p><ul class="upd-l">${isi.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><button class="btn" style="width:100%;margin-top:12px" data-ybo>Oke</button></div>`;
- document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-ybo]'))e.remove()}}
+ const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Fadzkuruuni diperbarui</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(VER)} · sudah terpasang otomatis</p><ul class="upd-l">${isi.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${yangBaruApk()}<button class="btn${yangBaruApk()?' s':''}" style="width:100%;margin-top:12px" data-ybo>Oke</button></div>`;
+ document.body.append(e);e.onclick=x=>{if(x.target==e&&apkPerbarui.jalan)return;if(x.target==e||x.target.closest('[data-ybo]'))e.remove()}}
+/* Bagian "Aplikasi Android versi baru" di lembar Yang baru: hanya di aplikasi, bila ada APK lebih baru dan lembar pembaruan APK belum tampil */
+function yangBaruApk(){const u=S.upInfo,kini=window.ANDROID&&window.FadzAndroid&&FadzAndroid.versi?FadzAndroid.versi():'';
+ if(!u||!kini||!verLebihBaru(u.v,kini)||pembaruanCek.tampil)return '';
+ return `<div class="upd-apk"><b>Aplikasi Android ${esc(u.v)} tersedia</b><small class="mut">Terpasang ${esc(kini)}. Perbarui agar fitur baru di HP ikut aktif.</small>${apkTombol(u.v,u.url)}</div>`}
 /* Dipanggil aplikasi Android setelah dialog izin awal selesai; aplikasi lama / web: ditawarkan beberapa detik setelah dibuka */
 window.fadzIzinSelesai=()=>setTimeout(()=>{pembaruanCek().finally(()=>{yangBaruCek();setTimeout(offTawar,600)})},700);
 {const awalAndroid=window.ANDROID&&window.FadzAndroid.izinAwalSudah&&!FadzAndroid.izinAwalSudah();
@@ -63,9 +67,28 @@ async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi
  pembaruanCek.buka=1;return new Promise(res=>{const e=document.createElement('div');e.className='back-d';
   e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Pembaruan tersedia</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(baru)} · terpasang ${esc(kini)}</p>
    ${cat.length?`<ul class="upd-l">${cat.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
-   <p class="mut" style="font-size:12.5px;margin:10px 0 12px">Ketuk Unduh pembaruan, lalu buka berkas <b>fadzkuruuni.apk</b> yang terunduh dan pilih <b>Perbarui</b>. Data dan pengaturanmu tetap aman.</p>
-   <a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${apk}" target="_blank" rel="noopener" data-upy>${ic('down',16)} Unduh pembaruan</a><button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-upn>Nanti saja</button></div>`;
+   <p class="mut" style="font-size:12.5px;margin:10px 0 12px">${apkLangsung()?'Ketuk Perbarui sekarang. Setelah unduhan selesai, layar pasang Android terbuka otomatis: pilih <b>Perbarui</b>.':'Ketuk Unduh pembaruan, lalu buka berkas <b>fadzkuruuni.apk</b> yang terunduh dan pilih <b>Perbarui</b>.'} Data dan pengaturanmu tetap aman.</p>
+   ${apkTombol(baru,apk)}<button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-upn>Nanti saja</button></div>`;
+  pembaruanCek.tampil=1;
   /* Nanti saja = ditanyakan lagi 12 jam kemudian (versi baru tetap ditawarkan, tidak dilewati selamanya) */
-  document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-upn]')){S.upTunda=Date.now()+432e5;save();e.remove();pembaruanCek.buka=0;res()}else if(x.target.closest('[data-upy]')){setTimeout(()=>{e.remove();pembaruanCek.buka=0;res()},300)}}})}
+  document.body.append(e);e.onclick=x=>{if(x.target==e&&apkPerbarui.jalan)return;if(x.target==e||x.target.closest('[data-upn]')){S.upTunda=Date.now()+432e5;save();e.remove();pembaruanCek.buka=0;res()}
+   else if(x.target.closest('[data-upy]')&&!apkLangsung()){setTimeout(()=>{e.remove();pembaruanCek.buka=0;res()},300)}}})}
+/* ===== Pembaruan aplikasi Android langsung dari aplikasi =====
+   APK 2.6.7+ (FadzAndroid.perbaruiApk): diunduh di dalam aplikasi dengan kemajuan, lalu layar pasang Android terbuka sendiri.
+   Versi lama: tautan unduhan biasa (berkas dibuka manual dari folder Download). */
+const apkLangsung=()=>!!(window.ANDROID&&window.FadzAndroid&&FadzAndroid.perbaruiApk);
+const apkTombol=(v,url)=>apkLangsung()
+ ?`<button class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" data-upy data-upv="${esc(v)}" data-upu="${esc(url)}">${ic('down',16)} Perbarui sekarang</button><div class="upd-p" hidden><i></i></div><small class="mut upd-s" hidden></small>`
+ :`<a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${esc(url)}" target="_blank" rel="noopener" data-upy>${ic('down',16)} Unduh pembaruan</a>`;
+function apkPerbarui(b){const w=b.parentElement,bar=$('.upd-p',w),st=$('.upd-s',w);apkPerbarui.jalan=1;b.disabled=true;b.innerHTML=ic('down',16)+' Mengunduh…';bar.hidden=st.hidden=false;
+ window.fzApk=(p,s)=>{if(s=='unduh'){$('i',bar).style.width=p+'%';st.textContent='Mengunduh pembaruan… '+p+'%'}
+  else if(s=='pasang'){$('i',bar).style.width='100%';st.textContent='Unduhan selesai. Pilih "Perbarui" di layar pasang Android.';b.disabled=false;b.innerHTML=ic('down',16)+' Buka layar pasang lagi';apkPerbarui.jalan=0}
+  else if(s=='izin'){st.textContent='Izinkan Fadzkuruuni memasang pembaruan (aktifkan "Izinkan dari sumber ini"), lalu kembali ke aplikasi.'}
+  else{apkPerbarui.jalan=0;b.disabled=false;b.innerHTML=ic('down',16)+' Coba lagi';bar.hidden=true;st.textContent=s=='izin-ditolak'?'Izin memasang belum diberikan. Ketuk Coba lagi dan aktifkan "Izinkan dari sumber ini".':'Unduhan gagal. Periksa internet lalu coba lagi.'}};
+ FadzAndroid.perbaruiApk(b.dataset.upu,b.dataset.upv)}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button[data-upy][data-upu]');if(b&&!b.disabled)apkPerbarui(b)});
+/* Notifikasi "Pembaruan tersedia" dari aplikasi membuka #/perbarui: tampilkan lembar pembaruan */
+const perbaruiDariNotif=()=>{if(location.hash!='#/perbarui')return;history.replaceState(null,'','#/pengaturan/tentang');route();S.upTunda=0;save();setTimeout(()=>pembaruanCek(1),400)};
+addEventListener('hashchange',perbaruiDariNotif);addEventListener('load',()=>setTimeout(perbaruiDariNotif,300));
 /* Kembali ke aplikasi (dari latar belakang): periksa lagi */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible'&&window.ANDROID)setTimeout(()=>pembaruanCek().catch(()=>{}),1500)});
