@@ -309,7 +309,8 @@ function kelasPantau(){if(KWATCH||!FBD)return;try{KWATCH=FBD.collection('kelas')
   /* Kelas yang sedang diikuti diakhiri/dihapus pengajar: semua peserta otomatis keluar */
   if(KR&&!KR.keluarOtomatis){const k=KELAS.find(x=>x.id==KR.id);if(!k||k.status=='selesai'){const id=KR.id;KR.keluarOtomatis=1;kelasKeluar(1).then(()=>{if(location.hash.startsWith('#/kelas/'+id)){history.replaceState(null,'','#/kelas');route()}toast('Kelas telah diakhiri pengajar')})}}},()=>{KWATCH=null})}catch(e){KWATCH=null}}
 addEventListener('fbu',kelasPantau);
-function kNotif(judul,isi,id){if(window.ANDROID)andPanggil('notifikasi',judul,isi);
+/* Aplikasi Android 2.6+: notifikasi sistem ditangani native (KelasCek) agar tidak dobel; halaman hanya menampilkan pemberitahuan di dalam aplikasi */
+function kNotif(judul,isi,id){if(window.ANDROID){if(!(window.FadzAndroid&&FadzAndroid.kelasSegarkan))andPanggil('notifikasi',judul,isi)}
  else if(document.hidden&&window.Notification&&Notification.permission=='granted')try{const n=new Notification(judul,{body:isi,icon:'img/icon-192.png',tag:'kelas-'+id});n.onclick=()=>{focus();location.hash='#/kelas/'+id}}catch(e){}
  let b=$('#knotif');if(!b){b=document.createElement('a');b.id='knotif';document.body.append(b)}b.href='#/kelas/'+id;b.innerHTML=`${ic('siar',20)}<span><b>${esc(judul)}</b><small>${esc(isi)}</small></span>`;b.hidden=false;clearTimeout(b.t);b.t=setTimeout(()=>b.hidden=true,9000);b.onclick=()=>b.hidden=true}
 function kelasBeritahu(){let T=null;try{T=JSON.parse(localStorage.fzkelasT||'null')}catch(e){}const awal=!T;T=T||{};const kini=Date.now(),saya=(typeof FBU!='undefined'&&FBU&&FBU.email)||'';
