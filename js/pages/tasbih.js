@@ -21,7 +21,9 @@ $('#fc').onclick=tap;
 /* Posisi disimpan dalam piksel dan dijepit agar tetap di dalam layar */
 /* x,y dalam koordinat layar; dibagi skala tampilan (zoom di HP) saat dipasang sebagai left/top */
 /* Ukuran tasbih melayang (Kecil/Sedang/Besar): skala dari pojok kanan bawah */
-const FTZ=[['kecil','Kecil'],['sedang','Sedang'],['besar','Besar']],FTZS={kecil:.78,sedang:1,besar:1.22};
+const FTZ=[['kecil','Kecil'],['sedang','Sedang'],['besar','Besar']],FTZS={kecil:1,sedang:1.25,besar:1.5};
+/* Ukuran lama (kecil .78, sedang 1, besar 1.22) dipindah sekali: sedang → kecil (tampilan sama), besar → sedang */
+if(!S.ftzv){S.ftz=S.ftz=='besar'?'sedang':'kecil';S.ftzv=1;save()}
 const ftUkuran=()=>document.documentElement.style.setProperty('--fts',FTZS[S.ftz]||1);ftUkuran();
 const place=(x,y)=>{const z=zmKini(),k=FTZS[S.ftz]||1;x=Math.min(Math.max(0,x),innerWidth-ftb.offsetWidth*z*k);y=Math.min(Math.max(0,y),innerHeight-ftb.offsetHeight*z*k);Object.assign(ftb.style,{left:x/z+'px',top:y/z+'px',right:'auto',bottom:'auto'});return {x,y}};
 
@@ -41,7 +43,7 @@ const ftpLetak=()=>{const p=$('#ftp');if(!p)return;const z=zmKini(),r=ftb.getBou
  let x=Math.min(Math.max(8,r.right-w),innerWidth-w-8),y=r.top-h-10;if(y<8)y=Math.min(r.bottom+10,innerHeight-h-8);
  p.style.left=x/z+'px';p.style.top=y/z+'px';p.style.transformOrigin=`${(r.left+r.width/2-x)/z}px ${y<r.top?h/z:0}px`};
 ftb.querySelector('#fg').onclick=e=>{e.stopPropagation();if($('#ftp'))return ftpTutup();
- const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fpvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('fptt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<small class="mut">Ukuran</small>${seg('fptz',FTZ,S.ftz||'sedang')}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
+ const p=mk('ftp',`<div class="ftph"><b>Tasbih</b><button class="ib2" data-fx aria-label="Tutup">×</button></div><div class="ftpr"><span>Getar saat menghitung</span>${tg('fvb',S.vib!==false)}</div><small class="mut">Getar saat target tercapai</small>${seg('fpvp',VPOLAS,S.vpola||'ganda')}<small class="mut">Target</small>${seg('fptt',[[33,'33'],[99,'99'],[100,'100'],[1000,'1000']],S.tt)}<small class="mut">Ukuran</small>${seg('fptz',FTZ,S.ftz||'kecil')}<div class="ftpa"><button class="sb" id="frz">Reset</button><button class="sb dng" id="fhd">Sembunyikan</button></div>`);
  p.id='ftp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Pengaturan tasbih melayang');ftpLetak();
  $('#fvb').onchange=e=>{S.vib=e.target.checked;save();S.vib&&buzz(18)};segBind('fpvp',v=>{S.vpola=v;save();buzz(VPOLA[v])});
  segBind('fptt',v=>{S.tt=+v;S.tas=0;S.tsp=0;save();tUpd()});segBind('fptz',v=>{S.ftz=v;save();ftUkuran();setTimeout(ftpLetak,220)});
