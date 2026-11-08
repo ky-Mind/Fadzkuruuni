@@ -1530,3 +1530,10 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 /* Chevron di judul bulan: kecil, rapat ke teks, tepat di tengah tinggi huruf */
 .mn .mnj b{display:inline-flex;align-items:center;gap:3px;line-height:1.2}
 .mn .mnj b .ic{width:15px;height:15px;stroke-width:2.4;color:var(--mut);margin-top:1px}
+/* Bilah Fadzkuruuni | Umum: dua tombol sejajar, sudut sedikit membulat */
+.pbar{display:flex;gap:8px;margin:0 0 14px}
+.pbar button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:14.5px;font-weight:600;cursor:pointer}
+.pbar button .ic{width:16px;height:16px}
+.pbar button.on{background:var(--g);border-color:var(--g);color:var(--on)}
+.pbi[hidden]{display:none!important}
+.mjd>.row .mjl-i{background:var(--g);color:var(--on)}
