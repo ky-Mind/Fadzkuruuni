@@ -12,13 +12,15 @@ const TPOOL=(()=>{const P={'':['home','Beranda'],menu:['grid','Lainnya']};MENUAL
 /* Bagian Beranda: id -> nama (untuk dashboard & mode admin) */
 const TBAG={lokasi:'Logo & lokasi',catatan:'Catatan pembuka',pengumuman:'Pengumuman admin',sapa:'Sapaan & tanggal',jadwal:'Jam & jadwal salat',pintasan:'Pintasan',cari:'Pencarian',promo:'Kartu promo (zakat, tahlil, waris)',lanjut:'Lanjutkan membaca',doa:'Doa hari ini'};
 const TATA_BAWAAN={beranda:Object.keys(TBAG).map(id=>({id,on:true})),pintasan:SHORT.map(s=>s[0]),menu:MENUALL.map(g=>({nama:g[0],isi:g[1].map(m=>m[0])})),
- nav:['','quran','ai','kalender','pengaturan'],setelan:null,sembunyiSet:[],label:{},umum:{on:false,judul:'',teks:'',tautan:'',label:'Buka'},bawaan:{}};
+ nav:['','quran','ai','kelas','pengaturan'],setelan:null,sembunyiSet:[],label:{},umum:{on:false,judul:'',teks:'',tautan:'',label:'Buka'},bawaan:{}};
 
 /* Gabungkan konfigurasi admin dengan bawaan: urutan dari admin, bagian baru dari kode tetap muncul (di akhir) */
 /* Fitur baru yang otomatis masuk ke susunan admin yang sudah terbit */
-const TATA_BARU=['sholawat'];
+const TATA_BARU=['sholawat','kelas'];
 function tataGabung(c){const B=JSON.parse(JSON.stringify(TATA_BAWAAN)),T=Object.assign(B,c&&typeof c=='object'?c:{});
  if(c&&Array.isArray(c.beranda)){const ada=new Set(c.beranda.map(x=>x.id));T.beranda=c.beranda.filter(x=>TBAG[x.id]).concat(TATA_BAWAAN.beranda.filter(x=>!ada.has(x.id)))}
+ /* Kelas online menggantikan Kalender di menu bawah (Kalender tetap ada di Semua Menu) */
+ if(Array.isArray(T.nav)&&T.nav.includes('kalender')&&!T.nav.includes('kelas'))T.nav=T.nav.map(r=>r=='kalender'?'kelas':r);
  const sah=r=>r in TPOOL;T.pintasan=(T.pintasan||[]).filter(sah);T.nav=(T.nav||[]).filter(r=>sah(r)&&!r.includes('/')).slice(0,5);if(T.nav.length<2)T.nav=TATA_BAWAAN.nav.slice();
  T.menu=(T.menu||[]).map(g=>({nama:String(g.nama||''),isi:(g.isi||[]).filter(sah)})).filter(g=>g.isi.length);
  /* Fitur yang ditambahkan setelah susunan admin diterbitkan (mis. Sholawat) disisipkan ke kelompok bawaannya, setelah item sebelumnya */
@@ -35,7 +37,7 @@ const tataSetelan=()=>{const G=SETGROUPS,urut=TATA.setelan;let L=G;if(Array.isAr
 const tataNavR=()=>TATA.nav;
 
 /* Menu bawah/samping dibangun dari TATA.nav */
-function tataNav(){const n=$('#nav');if(!n)return;$$('a[data-r]',n).forEach(a=>a.remove());n.insertAdjacentHTML('beforeend',TATA.nav.map(r=>`<a href="#/${r}" data-r="${r}" data-tip="${esc(tNama(r))}">${ic(tIkon(r))}<span>${esc(tNama(r))}</span></a>`).join(''))}
+function tataNav(){const n=$('#nav');if(!n)return;$$('a[data-r]',n).forEach(a=>a.remove());n.insertAdjacentHTML('beforeend',TATA.nav.map(r=>`<a href="#/${r}" data-r="${r}" data-tip="${esc(tNama(r))}">${r=='pengaturan'&&S.foto?`<img class="ava navava" src="${S.foto}" alt="">`:ic(tIkon(r))}<span>${esc(tNama(r))}</span></a>`).join(''));const a=location.hash.slice(2).split('/')[0];$$('a[data-r]',n).forEach(l=>l.classList.toggle('on',l.dataset.r==a))}
 
 /* Tampilan bawaan dari admin: hanya untuk pengguna baru (pengaturan yang belum pernah disimpan di perangkat) */
 const TSU=(()=>{if(TPRATINJAU)return [];try{return Object.keys(JSON.parse(localStorage.fz||'{}'))}catch(e){return []}})();
