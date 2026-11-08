@@ -115,7 +115,7 @@ async function tataAuth(u){TADM=null;if(!u||!u.email||!u.emailVerified)return ta
  if(TADM&&location.hash=='#/pengaturan/akun'&&typeof route=='function')route()}
 const tataAdminKah=()=>!!TADM;
 /* Tombol "Mode admin" muncul di halaman yang bisa diatur */
-function tataAdminUI(){$('#tadm')?.remove();document.body.classList.toggle('tadmon',!!TADMON);const a=location.hash.slice(2).split('/');if(!TADM||TPRATINJAU||!(['','menu'].includes(a[0])||(a[0]=='pengaturan'&&!a[1])))return;
+function tataAdminUI(){dispatchEvent(new Event('fzadmin'));$('#tadm')?.remove();document.body.classList.toggle('tadmon',!!TADMON);const a=location.hash.slice(2).split('/');if(!TADM||TPRATINJAU||!(['','menu'].includes(a[0])||(a[0]=='pengaturan'&&!a[1])))return;
  /* Tombol "Mode admin" tidak melayang di Beranda / Semua Menu (menghalangi isi): hanya di Pengaturan; saat mode admin aktif, bilah Terbitkan tetap tampil */
  /* Tombol "Mode admin" ada di Pengaturan › Akun & Profil (tidak melayang); bilah Terbitkan/Batal hanya tampil saat mode admin aktif */
  if(!TADMON)return;

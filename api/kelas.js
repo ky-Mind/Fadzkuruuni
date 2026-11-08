@@ -50,6 +50,7 @@ export default async function handler(req) {
   const { LIVEKIT_URL: URL_, LIVEKIT_API_KEY: KEY, LIVEKIT_API_SECRET: RHS } = process.env;
   if (!URL_ || !KEY || !RHS) return jawab({ galat: 'belum-siap' }, 503);
   let b; try { b = await req.json(); } catch (e) { return jawab({ galat: 'isi' }, 400); }
+  if (b.aksi == 'cek') return jawab({ siap: true });
   const id = String(b.kelas || ''); if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return jawab({ galat: 'kelas' }, 400);
   const kr = await fetch(FS + '/kelas/' + id); if (!kr.ok) return jawab({ galat: 'kelas-tidak-ada' }, 404);
   const status = (await kr.json()).fields?.status?.stringValue || 'jadwal';
