@@ -1566,3 +1566,9 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 #klmini{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;gap:8px;max-width:min(92vw,420px);padding:8px 12px;border-radius:12px;background:var(--card,#fff);color:var(--ink);border:1px solid var(--line);box-shadow:0 4px 16px rgba(0,0,0,.15);text-decoration:none;font-size:14px}
 #klmini .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#klmini[hidden]{display:none}
 .kfm label{display:block;margin:10px 0 4px;font-size:13px;color:var(--mut)}.kfm .act{margin-top:14px;flex-wrap:wrap}
+/* Deretan tombol tidak boleh terpotong layar: bila tidak muat, geser ke samping (tanpa batang gulir) */
+.act,.card>.act,.fpb .act,.kfm .act,.back-d.tgh .act,.kla{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;min-width:0;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.act::-webkit-scrollbar,.kla::-webkit-scrollbar{display:none}
+.act>*,.card>.act>.sb,.kla>*{flex:1 0 auto;white-space:nowrap}
+.kla>.btn{flex-basis:100%}
+.fpb{min-width:0}.fpb>.act{flex:1}
