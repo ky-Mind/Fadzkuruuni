@@ -46,5 +46,4 @@ P.sedekah=k=>{
  /* Riwayat pembayaran sudah dihapus; menu itu kini Dukung kami */
  if(k=='dukung'||k=='riwayat')return P.dukung();
  if(ZILMU[k]){const t={infak:'Infak & sedekah',mal:'Zakat mal',kurban:'Kurban'}[k];return {html:head(t,'#/zakat')+ilmuHtml(k)+(k=='mal'?'<a class="btn s" style="display:inline-block;margin:10px 0" href="#/zakat/emas">Buka kalkulator zakat</a>':'')}}
- const x={koin:['Koin Fadzkuruuni','Program koin sedekah harian Fadzkuruuni akan segera hadir.'],galang:['Galang dana','Program galang dana akan segera hadir. Kabar terbaru akan ditampilkan di sini.']}[k];
- return x?{html:head(x[0],'#/zakat')+`<div class="card">${x[1]}</div>`}:zhome()};
+ return zhome()};
