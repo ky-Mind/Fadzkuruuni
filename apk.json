@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.10",
- "body": "Pembaruan Fadzkuruuni 2.6.10 (isi web 2.9.34)\n\n- Di layar lebar (tablet, laptop), bilah atas halaman baca mentok ke tepi kiri-kanan dan batang gulir ada di tepi layar; isi tetap di tengah\n- Termasuk semua perbaikan 2.6.9: pilihan suara notifikasi kelas, ganti kamera depan/belakang, Al-Qur'an tanpa bilah pemutar\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.10",
+ "tag_name": "v2.6.11",
+ "body": "Pembaruan Fadzkuruuni 2.6.11 (isi web 2.9.35)\n\n- Dashboard admin: tema dan warna aksen mengikuti aplikasi (Terang, Gelap, Biru), tanpa sorotan biru bawaan peramban saat diklik\n- Termasuk perbaikan sebelumnya: bilah atas mentok di layar lebar, pilihan suara notifikasi kelas, ganti kamera depan/belakang\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.11",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.10/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.11/fadzkuruuni.apk"
   }
  ]
 }
