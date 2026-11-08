@@ -28,7 +28,7 @@ function kelasKartu(k){const live=k.status=='live',sel=k.status=='selesai',adm=k
 function kelasDaftar(){const e=$('#kls');if(!e)return;const L=(KELAS||[]).slice(),now=Date.now();
  const live=L.filter(k=>k.status=='live'),akan=L.filter(k=>k.status!='live'&&k.status!='selesai').sort((a,b)=>(a.mulai||0)-(b.mulai||0)),sel=L.filter(k=>k.status=='selesai').sort((a,b)=>(b.mulai||0)-(a.mulai||0)).slice(0,20);
  const peringat=kAdmin()?(KSIAP===false?`<div class="kperingat">${ic('info',18)}<span><b>Server suara belum disiapkan.</b> Isi LIVEKIT_URL, LIVEKIT_API_KEY, dan LIVEKIT_API_SECRET di Vercel (Settings › Environment Variables), lalu Redeploy. Sebelum itu jamaah belum bisa masuk kelas.</span></div>`:'')
-  +`<div class="kperingat">${ic('info',18)}<span><b>Batas paket gratis.</b> Suara kelas memakai LiveKit Cloud paket gratis yang jatah menit pemakaiannya terbatas tiap bulan (dihitung per pendengar per menit). Bila jatah habis, kelas tidak bisa dimasuki sampai bulan berikutnya. Pantau pemakaian di cloud.livekit.io.</span></div>`:'';
+  :'';
  e.innerHTML=peringat+(kAdmin()?`<button class="btn kbuat" data-kbuat>${ic('plus',18)} Buat kelas</button>`:'')
   +(live.length?live.map(kelasKartu).join(''):`<div class="card mut kkosong">${ic('siar',22)}<span>Belum ada kelas yang sedang live. Jadwal kelas berikutnya ada di bawah.</span></div>`)
   +(akan.length?'<h2>Jadwal berikutnya</h2>'+akan.map(kelasKartu).join(''):'')+(sel.length?'<h2>Sudah selesai</h2>'+sel.map(kelasKartu).join(''):'')
