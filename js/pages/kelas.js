@@ -96,7 +96,7 @@ const KGAL={'belum-siap':'Server suara kelas belum disiapkan oleh pengelola apli
 
 const kAkun=async()=>{await fbInit();if(!window.firebase||!firebase.auth)return null;return new Promise(ok=>{const u=firebase.auth().onAuthStateChanged(x=>{u();ok(x)})})};
 const kNama=()=>(S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah').slice(0,40);
-async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelasPasangTimer()}
+async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id);return kelasPasangTimer()}
  /* Ikut kelas wajib masuk akun: nama & foto profil di kelas diambil dari akun */
  if(!await kAkun()){const i=$('#kinfo');if(i)i.innerHTML=`<div class="kperingat">${ic('user',18)}<span><b>Masuk dulu untuk ikut kelas.</b> Nama dan foto profil dari akunmu akan tampil di kelas.</span></div><a class="btn" href="#/pengaturan/akun">Masuk dengan Google atau Email</a>`;const sa=$('#kzsa');if(sa)sa.innerHTML=`<div class="kzw">${ic('user',28)}<span>Masuk akun untuk bergabung</span></div>`;return}
  /* Dibuka langsung lewat tautan: muat data kelas dulu (status, jenis kelas) */
@@ -125,7 +125,7 @@ async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(
  try{if(k.status!='live'&&!admin)throw 'belum-mulai';let R=null;
   R=await kelasMesh(id,admin,kNama(),()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}},FBU&&FBU.uid);
   R.onDisconnected=()=>kelasPutus(R);KR={id,room:R,admin,diam:!R.canPlaybackAudio,mode:'mesh',judul:k.judul||'Kelas online'};R.onVideo=st=>{if(KR&&KR.room===R&&!admin){KR.video=st;KR.videoLokal=false;kelasInfo()}};
-  R.onLayarSelesai=()=>{if(KR&&KR.room===R){KR.layarOn=false;kSetLayar(R.localParticipant,null);kelasInfo()}};R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
+  R.onLayarSelesai=()=>{if(KR&&KR.room===R){KR.layarOn=false;kSetLayar(R.localParticipant,null);kelasInfo();kelasPil()}};R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
  catch(e){KR=null;console.warn('kelas kecil',e);
   /* Kelas kecil gagal (mis. aturan Firestore belum dipublish) → coba lewat LiveKit bila servernya siap */
@@ -136,7 +136,10 @@ async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.r
  $$('#kzv,.kzt video').forEach(v=>{const s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(t=>{if(t.readyState=='live'&&KR&&KR.videoLokal)t.stop()});v.srcObject=null});if(KR&&KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;clearInterval(KTM);$$('audio.kaud').forEach(a=>a.parentNode.removeChild(a));if(r)try{await r.disconnect()}catch(e){}kelasPil();if(!diam&&/^#\/kelas\//.test(location.hash))location.hash='#/kelas'}
 
 /* Pil "Live" melayang saat kelas berjalan dan pengguna membuka halaman lain */
-function kelasPil(){const p=$('#klmini');if(p)p.hidden=true}
+function kelasPil(){let p=$('#klmini');const di=KR&&location.hash.startsWith('#/kelas/'+KR.id);
+ if(!KR||!KR.layarOn||di){if(p)p.hidden=true;return}
+ if(!p){p=document.createElement('a');p.id='klmini';document.body.append(p)}p.href='#/kelas/'+KR.id;p.hidden=false;p.innerHTML=`<span class="klv">● Berbagi layar</span><span class="t">${esc(KR.judul)} · Kembali ke kelas</span>${ic('next',16)}`}
+addEventListener('hashchange',()=>setTimeout(kelasPil,30));
 /* Keluar otomatis dari kelas (pengajar maupun jamaah):
    - menekan panah kembali / tombol kembali HP / pindah ke halaman lain
    - aplikasi ditutup
@@ -148,11 +151,11 @@ const kTanyaKeluar=tujuan=>{if(KTANYA)return;KTANYA=1;konfirmasi('Keluar dari ke
   history.replaceState(null,'',tujuan||'#/kelas');route();setTimeout(()=>KIZIN=0,300)});
  /* Batal: lembar konfirmasi tertutup tanpa memilih Keluar */const iv=setInterval(()=>{if(!document.querySelector('.back-d.tgh')){clearInterval(iv);KTANYA=0}},300)};
 /* Menekan tautan lain (panah kembali, menu) selama di kelas: tanya dulu */
-document.addEventListener('click',e=>{if(!KR)return;const a=e.target.closest('a[href^="#"]');if(!a)return;const h=a.getAttribute('href');if(h.startsWith('#/kelas/'+KR.id))return;e.preventDefault();e.stopPropagation();kTanyaKeluar(h)},true);
+document.addEventListener('click',e=>{if(!KR||KR.layarOn)return;const a=e.target.closest('a[href^="#"]');if(!a)return;const h=a.getAttribute('href');if(h.startsWith('#/kelas/'+KR.id))return;e.preventDefault();e.stopPropagation();kTanyaKeluar(h)},true);
 /* Tombol kembali HP / riwayat: kembalikan ke kelas lalu tanya */
-addEventListener('hashchange',()=>{if(!KR||KIZIN||location.hash.startsWith('#/kelas/'+KR.id))return;const tujuan=location.hash;history.replaceState(null,'','#/kelas/'+KR.id);route();kTanyaKeluar(tujuan)});
+addEventListener('hashchange',()=>{if(!KR||KR.layarOn||KIZIN||location.hash.startsWith('#/kelas/'+KR.id))return;const tujuan=location.hash;history.replaceState(null,'','#/kelas/'+KR.id);route();kTanyaKeluar(tujuan)});
 addEventListener('pagehide',()=>{if(KR)kelasKeluar(1)});
-let KSEMB=0;document.addEventListener('visibilitychange',()=>{clearTimeout(KSEMB);if(document.hidden&&KR){const id=KR.id;KSEMB=setTimeout(async()=>{if(!document.hidden||!KR)return;await kelasKeluar(1);
+let KSEMB=0;document.addEventListener('visibilitychange',()=>{clearTimeout(KSEMB);if(document.hidden&&KR&&!KR.layarOn){const id=KR.id;KSEMB=setTimeout(async()=>{if(!document.hidden||!KR)return;await kelasKeluar(1);
   const x=$('#kinfo');if(x&&location.hash=='#/kelas/'+id){x.innerHTML=`<p class="mut">Kamu keluar dari kelas karena aplikasi ditinggalkan.</p><button class="btn s" data-kulang="${id}">Masuk lagi</button>`;const c=$('#kctl');if(c)c.innerHTML=''}},30000)}});
 
 document.addEventListener('click',async e=>{const t=e.target;
