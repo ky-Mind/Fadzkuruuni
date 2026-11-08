@@ -45,7 +45,8 @@ P['']=()=>({html:berandaHtml(),
  /* Tanda warna: tetap di waktu yang baru masuk selama 10 menit, lalu pindah ke waktu berikutnya (setelah Isya: Subuh) */
  const tn=Math.max(0,T.findIndex(x=>c<x[1]+10/60));
  const nx=T.findIndex((x,i)=>i!=1&&x[1]>c),ni=nx<0?0:nx;let df=T[ni][1]-c;if(nx<0)df+=24;const D=Math.max(0,Math.round(df*3600));
- $('#nl').textContent='Sekarang · '+T[cur][0];$('#np').innerHTML=hm(c)+' <small>'+tzl()+'</small>';$('#cd').textContent='Menuju '+T[ni][0]+' · -'+z(D/3600|0)+':'+z(D%3600/60|0)+':'+z(D%60);$('#pt').innerHTML=T.map((x,i)=>`<div class="${i==tn?'n':''}">${x[0]}<b>${hm(x[1])}</b></div>`).join('')};tick();clearInterval(P.tk);P.tk=setInterval(tick,1000)}});
+ $('#nl').textContent='Sekarang · '+T[cur][0];$('#np').innerHTML=hm(c)+' <small>'+tzl()+'</small>';$('#cd').textContent='Menuju '+T[ni][0]+' · -'+z(D/3600|0)+':'+z(D%3600/60|0)+':'+z(D%60);/* Kotak waktu salat hanya digambar ulang bila isinya berubah (bukan tiap detik): tidak berkedip, dan susunan/teks dari admin tetap terpasang */
+ const ph=T.map((x,i)=>`<div class="${i==tn?'n':''}">${x[0]}<b>${hm(x[1])}</b></div>`).join(''),pe=$('#pt');if(pe.dataset.h!==ph){pe.innerHTML=ph;pe.dataset.h=ph}};tick();clearInterval(P.tk);P.tk=setInterval(tick,1000)}});
 const periode=()=>{const h=locNow();return h<4?'malam':h<10?'pagi':h<15?'siang':h<18?'sore':'malam'};
 const GREET=()=>`<div class="gr"><small class="mut">${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${hijri()}</small><div class="gh">Selamat ${periode()}${S.nm?', '+esc(S.nm):''}</div></div>`;
 /* Doa hari ini: satu doa (berteks Arab dan terjemah) dari Wirid & Doa */
