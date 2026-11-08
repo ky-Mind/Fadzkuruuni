@@ -1626,3 +1626,14 @@ img.kzav{object-fit:cover;display:block}
 .kzs{cursor:default}.kzt{cursor:pointer;border:0;font:inherit;color:inherit}
 .kzs video.layar,.kzt video.layar{object-fit:contain;background:#111}
 .kctl .btn.kon{background:#fde8e6;color:#c5221f}
+/* Daftar pilihan suara adzan, tiap pilihan bisa dicoba */
+.sual{display:flex;flex-direction:column;gap:6px;margin:4px 0 14px}
+.suai{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 4px;border:1px solid var(--line);border-radius:10px}
+.suai.on{border-color:var(--g);background:color-mix(in srgb,var(--g) 8%,transparent)}
+.suap{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:6px;border:0;background:none;color:inherit;font:inherit;font-size:14.5px;text-align:left;cursor:pointer}
+.sur{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
+.suai.on .sur{border-color:var(--g);box-shadow:inset 0 0 0 4px var(--card,#fff);background:var(--g)}
+.suai .sb{flex:none}
+.srw [data-wcoba]{margin-right:8px}
+.kcm .kcl-a{color:#1a73e8;text-decoration:underline;word-break:break-all;font-weight:600}
+.kcm.saya .kcl-a{color:#0b57d0}

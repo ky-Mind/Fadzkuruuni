@@ -8,6 +8,8 @@ function info(y,m,d){const [hm,hd]=HK(y,m,d),w=new Date(y,m,d).getDay(),ev=[],pu
  else{if(hm==1&&hd==9)pu.push("Puasa Tasu'a");if(hm==1&&hd==10)pu.push('Puasa Asyura');if(hm==12&&hd==9)pu.push('Puasa Arafah');if(hm==12&&hd<=8)pu.push('Puasa awal Zulhijah');if(hm==10&&hd>=2&&hd<=7)pu.push('Puasa 6 hari Syawal');if(hd>=13&&hd<=15)pu.push('Puasa Ayyamul Bidh');if(w==1)pu.push('Puasa sunnah Senin');if(w==4)pu.push('Puasa sunnah Kamis')}
  return {hd,hm,ev,pu,haram}}
 let CAL=null;
+/* Kalender juga ditampilkan di halaman Jadwal Salat: di sana pindah bulan cukup menggambar ulang bagian kalender (KALRENDER), bukan seluruh halaman */
+let KALRENDER=null;
 P.kalender=()=>{const t=new Date();CAL=CAL||{y:t.getFullYear(),m:t.getMonth(),d:t.getDate()};const {y,m}=CAL,f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),now=y==t.getFullYear()&&m==t.getMonth();CAL.d=Math.min(CAL.d,n);
  const a=hf(new Date(y,m,1),{month:'long'}),b=hf(new Date(y,m,n),{month:'long',year:'numeric'});
  const sel=d=>{const k=info(y,m,d),dt=new Date(y,m,d);return `<b>${HARI[dt.getDay()]} ${pas(y,m,d)}, ${dt.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</b><br><span class="mut">${hf(dt,{day:'numeric',month:'long',year:'numeric'})}</span><div>${k.ev.map(e=>`<span class="tag t1">${e}</span>`).join('')}${k.pu.map(e=>`<span class="tag ${k.haram?'t3':'t2'}">${e}</span>`).join('')}${k.ev.length+k.pu.length?'':'<span class="mut" style="display:block;margin-top:6px">Tidak ada peringatan khusus.</span>'}</div>`};
@@ -18,7 +20,7 @@ P.kalender=()=>{const t=new Date();CAL=CAL||{y:t.getFullYear(),m:t.getMonth(),d:
  <div class="card" id="cdet" style="margin-top:12px">${sel(CAL.d)}</div>
  <div class="leg"><span><i class="dg1"></i>Hari besar</span><span><i class="dg2"></i>Puasa</span><span><i class="dg3"></i>Haram puasa</span><button class="btn s" id="td">Hari ini</button></div>
  <h2>Hari besar dan puasa bulan ini</h2>${L.length?list(L,x=>`<div class="row"><span class="num">${x[0]}</span><span class="t">${x[1]}</span><span class="tag ${x[2]}" style="margin:0">${x[2]=='t1'?'Hari besar':x[2]=='t3'?'Haram puasa':'Puasa'}</span></div>`):'<div class="card mut">Tidak ada peringatan bulan ini.</div>'}<p class="mut">Angka kecil kiri atas adalah tanggal Hijriah (Umm al-Qura). Awal bulan resmi di Indonesia bisa berbeda satu hari. Puasa Senin dan Kamis tidak dicantumkan di daftar.</p>`,
- init(){$$('[data-n]').forEach(x=>x.onclick=()=>{const d=new Date(CAL.y,CAL.m+ +x.dataset.n,1);CAL={y:d.getFullYear(),m:d.getMonth(),d:1};route()});$$('.cd').forEach(x=>x.onclick=()=>{CAL.d=+x.dataset.d;$$('.cd').forEach(z=>z.classList.toggle('s',z==x));$('#cdet').innerHTML=sel(CAL.d)});$('#td').onclick=()=>{CAL=null;route()};$('[data-pilih]').onclick=kalPilih}}};
+ init(){$$('[data-n]').forEach(x=>x.onclick=()=>{const d=new Date(CAL.y,CAL.m+ +x.dataset.n,1);CAL={y:d.getFullYear(),m:d.getMonth(),d:1};(KALRENDER||route)()});$$('.cd').forEach(x=>x.onclick=()=>{CAL.d=+x.dataset.d;$$('.cd').forEach(z=>z.classList.toggle('s',z==x));$('#cdet').innerHTML=sel(CAL.d)});$('#td').onclick=()=>{CAL=null;(KALRENDER||route)()};$('[data-pilih]').onclick=kalPilih}}};
 /* Pilih bulan & tahun: ketuk judul bulan → lembar berisi tahun (bisa maju-mundur) dan 12 bulan */
 function kalPilih(){let th=CAL.y,modeTh=0,awal=0;const t=new Date(),e=document.createElement('div');e.className='back-d';
  const isi=()=>`<div class="sheet kps" role="dialog"><b>Pilih bulan & tahun</b><div class="kpy"><button type="button" class="ib" data-ty="-1" aria-label="Tahun sebelumnya">${ic('back',22)}</button><button type="button" class="kpth" data-pth aria-label="Pilih tahun">${modeTh?`${awal} – ${awal+11}`:th} ${ic('bawah',18)}</button><button type="button" class="ib" data-ty="1" aria-label="Tahun berikutnya">${ic('next',22)}</button></div>
@@ -30,5 +32,5 @@ function kalPilih(){let th=CAL.y,modeTh=0,awal=0;const t=new Date(),e=document.c
  e.onclick=x=>{if(x.target==e)return e.remove();if(x.target.closest('[data-pth]')){modeTh=!modeTh;awal=th-(((th%12)+12)%12);return gambar()}
   const by=x.target.closest('[data-by]');if(by){th=+by.dataset.by;modeTh=0;return gambar()}
   const ty=x.target.closest('[data-ty]');if(ty){if(modeTh)awal+=12*(+ty.dataset.ty);else th+= +ty.dataset.ty;return gambar()}
-  const bm=x.target.closest('[data-bm]');if(bm){CAL={y:th,m:+bm.dataset.bm,d:1};e.remove();return route()}
-  if(x.target.closest('[data-kini]')){CAL=null;e.remove();route()}}}
+  const bm=x.target.closest('[data-bm]');if(bm){CAL={y:th,m:+bm.dataset.bm,d:1};e.remove();return (KALRENDER||route)()}
+  if(x.target.closest('[data-kini]')){CAL=null;e.remove();(KALRENDER||route)()}}}
