@@ -97,7 +97,12 @@ function bacaSA(t) {
   return null;
 }
 /* Keterangan bentuk isi (tanpa membuka isinya) untuk pemeriksaan */
-const bentukSA = t => `panjang ${t.length} karakter, diawali "${t.trim()[0] || ''}", diakhiri "${t.trim().slice(-1)}", ${/private_key/.test(t) ? 'ada' : 'tidak ada'} private_key`;
+const bentukSA = t => {
+  /* Hanya bentuknya (huruf & angka disamarkan jadi x), tidak membuka isi kunci */
+  const samar = s => s.replace(/[A-Za-z0-9+/=]/g, 'x').replace(/x{4,}/g, 'xxxx');
+  let galat = ''; try { JSON.parse('{"' + t.trim() + '}'); } catch (e) { const m = /position (\d+)/.exec(e.message), i = m ? +m[1] - 2 : -1; galat = e.message.replace(/ in JSON.*$/, '') + (i >= 0 ? ' dekat «' + samar(t.trim().slice(Math.max(0, i - 25), i + 25)) + '»' : ''); }
+  return `panjang ${t.length} karakter, diawali "${samar(t.trim().slice(0, 12))}", diakhiri "${samar(t.trim().slice(-12))}", ${(t.match(/\n/g) || []).length} baris baru, ${(t.match(/\\n/g) || []).length} tanda \\n, kolom: ${(t.match(/"?([a-z_]+)"\s*:/g) || []).map(x => x.replace(/["\s:]/g, '')).join(',')}; ${galat}`;
+};
 
 async function kirimAndroid(saTeks, data, uji = false) {
   const sa = bacaSA(saTeks);
