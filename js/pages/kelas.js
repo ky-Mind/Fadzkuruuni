@@ -245,9 +245,10 @@ async function kelasRekamMulai(){if(KREC||!KR)return;if(!window.MediaRecorder)re
  const and=window.ANDROID&&window.FadzAndroid&&FadzAndroid.rekamMulai&&FadzAndroid.rekamMulai(KREC.nama,J.mime.split(';')[0]);KREC.and=!!and;
  const trk=[...dst.stream.getAudioTracks()];if(J.video){KREC.kv=kRekamKanvas();trk.unshift(KREC.kv.track)}
  let mr;try{mr=new MediaRecorder(new MediaStream(trk),{mimeType:J.mime,audioBitsPerSecond:J.video?96000:48000,...(J.video?{videoBitsPerSecond:window.ANDROID?900000:1500000}:{})})}catch(e){if(KREC.kv)KREC.kv.stop();try{ac.close()}catch(x){}if(and)try{FadzAndroid.rekamSelesai()}catch(x){}KREC=null;return toast('Perangkat ini tidak bisa merekam format ini')}KREC.mr=mr;
- mr.ondataavailable=ev=>{if(!ev.data||!ev.data.size)return;if(KREC.and){const b=ev.data;KREC.antre=KREC.antre.then(()=>new Promise(ok=>{const f=new FileReader();f.onload=()=>{try{FadzAndroid.rekamTambah(String(f.result).split(',')[1])}catch(e){}ok()};f.readAsDataURL(b)}))}else KREC.bag.push(ev.data)};
+ /* Potongan terakhir datang setelah stop (KREC sudah dikosongkan): pakai objek rekaman ini sendiri, bukan KREC */
+ const RK=KREC;mr.ondataavailable=ev=>{if(!ev.data||!ev.data.size)return;if(RK.and){const b=ev.data;RK.antre=RK.antre.then(()=>new Promise(ok=>{const f=new FileReader();f.onload=()=>{try{FadzAndroid.rekamTambah(String(f.result).split(',')[1])}catch(e){}ok()};f.readAsDataURL(b)}))}else RK.bag.push(ev.data)};
  mr.start(5000);toast('Mulai merekam kelas ('+(J.video?'video ':'suara ')+J.ext.toUpperCase()+')');kelasInfo()}
-async function kelasRekamStop(){const k=KREC;if(!k)return;KREC=null;await new Promise(ok=>{k.mr.onstop=ok;try{k.mr.stop()}catch(e){ok()}});await k.antre;try{k.ac.close()}catch(e){}if(k.kv)k.kv.stop();
+async function kelasRekamStop(){const k=KREC;if(!k)return;KREC=null;await new Promise(ok=>{k.mr.onstop=ok;try{k.mr.stop()}catch(e){ok()}});await new Promise(r=>setTimeout(r,0));await k.antre;try{k.ac.close()}catch(e){}if(k.kv)k.kv.stop();
  if(k.and){try{FadzAndroid.rekamSelesai()}catch(e){}toast('Rekaman disimpan di Download/Fadzkuruuni')}
  else{const u=URL.createObjectURL(new Blob(k.bag,{type:k.J.mime.split(';')[0]})),a=document.createElement('a');a.href=u;a.download=k.nama;document.body.append(a);a.click();a.parentNode.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);toast('Rekaman diunduh')}
  if(KR)kelasInfo()}
