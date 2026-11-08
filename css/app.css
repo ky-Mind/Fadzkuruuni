@@ -1453,3 +1453,10 @@ html.tciut::view-transition-old(root){z-index:3}
 .zk .zin .zu{flex:none;padding:0 14px;color:var(--mut);font-size:14px;font-weight:600}
 .zk .zin.rp .zu{padding:0 0 0 14px}.zk .zin.rp .in{padding-left:8px}
 .zk .zres{margin-top:14px;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--g)}
+/* Bagian Majelis Fadzkuruuni (Wirid, Maulid): dipisah jelas dari bacaan umum */
+.mjl{margin:0 0 6px;padding:12px 0 4px;border-radius:16px;background:color-mix(in srgb,var(--g) 9%,transparent)}
+.mjl .mjl-h{display:flex;align-items:center;gap:8px;margin:0 14px 8px;font-size:15px;color:var(--g)}
+.mjl .list>.row{background:transparent}
+.mjl .mjl-i{background:var(--g);color:var(--on)}
+.mjl-b{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:99px;background:var(--g);color:var(--on);font-size:11px;font-weight:700}
+.mjl-u{margin-top:18px}
