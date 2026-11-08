@@ -1500,3 +1500,20 @@ html.tciut::view-transition-old(root){z-index:3}
 /* Pratinjau admin: elemen yang sedang diseret (tekan lama lalu geser) */
 .sret{position:relative;z-index:50;transition:none!important;box-shadow:0 12px 28px rgba(0,0,0,.28);border-radius:14px;background:var(--card);opacity:.96;cursor:grabbing}
 body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!important;touch-action:none!important}
+/* ===== Tombol gaya aplikasi pada umumnya (seperti Instagram): kotak bersudut sedikit membulat, bukan pil =====
+   Tinggi seragam, tulisan tebal di tengah; utama berwarna penuh, kedua abu-abu lembut, berbahaya bertulisan merah. */
+.btn{border-radius:10px;height:40px;padding:0 16px;font-size:14.5px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1}
+.btn.s{height:36px;padding:0 14px;border-radius:9px;font-size:14px;background:var(--fill);color:var(--ink)}
+.sb{height:34px;padding:0 14px;border-radius:9px;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sb.pri{background:var(--g);color:var(--on)}
+.sb.dng{background:var(--fill);color:#d6533f}
+.izb .btn{border-radius:9px;height:34px}
+.phal .srw .btn.s{border-radius:9px}
+/* Tombol tunggal di kartu memenuhi lebar; pasangan tombol dibagi sama lebar */
+.card>.act{flex-wrap:nowrap}.card>.act>.sb{flex:1;height:38px;font-size:14px}
+[data-hapusakun]{width:100%;height:40px!important;color:#d6533f!important}
+/* Tombol tersembunyi tetap tersembunyi walau tombol memakai display:inline-flex */
+.btn[hidden],.sb[hidden]{display:none!important}
+/* Izin: "Izinkan" tetap tombol utama berwarna, "Tolak"/"Cabut izin" berupa teks */
+.izb .btn[data-izin]{background:var(--g);color:var(--on)}
+.izb .btn.izt{background:transparent;color:var(--mut)}
