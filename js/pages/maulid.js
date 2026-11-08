@@ -2,7 +2,7 @@
    Rute: #/maulid, #/maulid/<id> (daftar bagian + unduh), #/maulid/<id>/<bagian> (bacaan). */
 const maulidAmbil=async id=>{const d=MAULID_DAFTAR.find(x=>x.id==id);if(!d||!d.berkas)return null;if(!MAULID_ISI[id])await ldjs(d.berkas);return MAULID_ISI[id]||null};
 MAULID_DAFTAR.filter(m=>m.berkas).forEach(m=>paket('maulid:'+m.id,{judul:m.judul,kat:'maulid',urls:async()=>[m.berkas],berkas:m.pdf?async()=>[{url:m.pdf,nama:m.judul.replace(/'/g,'')+'.pdf'}]:null}));
-const maulidIsi=(m,k)=>{const B=m.bagian,b=B[k];return b.isi.map(x=>`<div class="ay2"><span class="n">${x.no}</span><div class="ar2" style="font-size:${S.fs}px">${esc(x.ar)}</div>${x.lt?`<p class="lt">${esc(x.lt)}</p>`:''}${x.id?`<p class="tr mut">${esc(x.id)}</p>`:''}</div>`).join('')+(m.sumber?`<p class="mut">Sumber: ${esc(m.sumber)}</p>`:'')+pnav(k>0&&['#/maulid/'+m.id+'/'+(k-1),B[k-1].judul],k<B.length-1&&['#/maulid/'+m.id+'/'+(k+1),B[k+1].judul])};
+const maulidIsi=(m,k)=>{const B=m.bagian,b=B[k];return b.isi.map(x=>`<div class="ay2"><span class="n">${x.no}</span><div class="ar2" style="font-size:${S.fs}px">${esc(x.ar)}</div>${x.lt?`<p class="lt">${esc(x.lt)}</p>`:''}${x.id?`<p class="tr mut">${esc(x.id)}</p>`:''}</div>`).join('')+KOREKSI+pnav(k>0&&['#/maulid/'+m.id+'/'+(k-1),B[k-1].judul],k<B.length-1&&['#/maulid/'+m.id+'/'+(k+1),B[k+1].judul])};
 function maulidBaca(el,m,k){const B=m.bagian,b=B[k];if(!b){el.innerHTML='<div class="card mut">Bagian tidak ditemukan.</div>';return}$('#view h1').textContent=b.judul;
  el.innerHTML=maulidIsi(m,k)}
 /* Pratinjau bagian sebelah saat digeser (isi maulid sudah termuat karena bagian ini sedang dibaca) */

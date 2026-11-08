@@ -21,7 +21,7 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
   async setScreenShare(on){if(on){const d=await navigator.mediaDevices.getDisplayMedia(LAYAR_OPSI);S_.layar=d;const tr=d.getVideoTracks()[0];kirimSuara();if(admin)campurUlang();if(KREC&&d.getAudioTracks()[0])kelasRekamSambung(d.getAudioTracks()[0]);
     tr.onended=()=>{if(S_.layar===d)lokal.setScreenShare(false).then(()=>{room.onLayarSelesai&&room.onLayarSelesai()})};S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.attributes.kamera='layar';tulisSaya().catch(()=>{});ubah();return d}
    if(S_.layar){S_.layar.getTracks().forEach(t=>t.stop());S_.layar=null;kirimSuara();if(admin)campurUlang()}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.attributes.kamera=S_.cam?'1':'';tulisSaya().catch(()=>{});ubah();return null},
-  async setCameraEnabled(on){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
+  async setCameraEnabled(on,o){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:(o&&o.facingMode)||'user'}});
    if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.layar?S_.layar.getVideoTracks()[0]:S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=S_.layar?'layar':on?'1':'';tulisSaya().catch(()=>{});ubah()},
   async setMicrophoneEnabled(on){if(on&&!S_.mic){S_.mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});S_.micLv=level(S_.mic)}
    /* Dimatikan = mikrofon benar-benar dilepas (lampu/ikon mikrofon HP padam), bukan sekadar dibisukan; dinyalakan lagi = diminta ulang */
@@ -31,6 +31,10 @@ async function kelasMesh(id,admin,nama,onUbah,uid){await fbInit();if(!FBD)throw 
  const room={_S:S_,mode:'mesh',localParticipant:lokal,remoteParticipants:new Map(),canPlaybackAudio:true,
   async startAudio(){try{await AC.resume()}catch(e){}let ok=true;for(const el of S_.audio.values())try{await el.play()}catch(e){ok=false}room.canPlaybackAudio=ok;ubah()},
   camStream(){return S_.cam||null},
+  /* Ganti kamera depan/belakang: kamera lama dilepas dulu (banyak HP tidak bisa membuka dua kamera sekaligus); gagal = kembali ke kamera semula */
+  async gantiKamera(f){if(!S_.cam)return null;const v=f=>({video:{width:{ideal:640},height:{ideal:360},facingMode:f}}),lama=f=='user'?'environment':'user';S_.cam.getTracks().forEach(t=>t.stop());
+   let baru;try{baru=await navigator.mediaDevices.getUserMedia(v({exact:f}))}catch(e){S_.cam=await navigator.mediaDevices.getUserMedia(v(lama));throw e}
+   S_.cam=baru;if(!S_.layar){const tr=baru.getVideoTracks()[0];S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}))}ubah();return baru},
   semuaTrack(){return [...(S_.mic?S_.mic.getAudioTracks():[]),...(S_.layar?S_.layar.getAudioTracks():[]),...[...S_.masuk.values()].map(m=>m.track)]},
   async izin(identity,boleh){await col.doc('p_'+identity).set({boleh:!!boleh},{merge:true})},
   async disconnect(){if(S_.tutup)return;S_.tutup=true;S_.unsub.forEach(f=>f());clearInterval(S_.hb);clearInterval(S_.lv);S_.pc.forEach(p=>p.pc.close());S_.audio.forEach(el=>{el.srcObject=null;el.parentNode&&el.parentNode.removeChild(el)});

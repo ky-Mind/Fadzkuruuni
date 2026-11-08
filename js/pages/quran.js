@@ -25,27 +25,27 @@ NAMA.forEach((_,i)=>paket('audio:'+(i+1),{judul:'Audio '+NAMA[i],kat:'audio',sel
 /* Pembaca surah. Mode kartu dibagi per halaman (QPER ayat) dan bisa digeser ke samping; mode mushaf satu halaman penuh bergaris.
    Pindah halaman, surah, atau mode dilakukan di tempat (tanpa memuat ulang) dengan animasi geser, dan posisi ayat dipertahankan. */
 const QPER=12;
-const surah=(n,sc)=>{n=+n;if(!NAMA[n-1])return P.quran();return {html:`<div class="rh"><a class="bk" href="#/quran" aria-label="Daftar surah">${ic('panah',24)}</a><div class="rt"><b id="qt"></b><small id="qa"></small></div><div class="mseg" role="group" aria-label="Mode baca"><button type="button" data-md="0" aria-label="Mode kartu: ayat per kartu dengan terjemah">${ic('cards',16)}<span>Kartu</span></button><button type="button" data-md="1" aria-label="Mode mushaf: teks Arab bersambung">${ic('book',16)}<span>Mushaf</span></button></div><button class="ib" id="qs" aria-label="Pengaturan baca">${ic('sliders',20)}</button></div><audio id="au" preload="none"></audio><div class="pl"><button class="ib" id="pp" aria-label="Putar audio">${ic('play',20)}</button><div class="pb"><i id="pg"></i></div><span id="qdl"></span></div><div id="ay"><p class="mut">Memuat…</p></div><div class="snav" id="snav"></div>`,
+const surah=(n,sc)=>{n=+n;if(!NAMA[n-1])return P.quran();return {html:`<div class="rh"><a class="bk" href="#/quran" aria-label="Daftar surah">${ic('panah',24)}</a><div class="rt"><b id="qt"></b><small id="qa"></small></div><div class="mseg" role="group" aria-label="Mode baca"><button type="button" data-md="0" aria-label="Mode kartu: ayat per kartu dengan terjemah">${ic('cards',16)}<span>Kartu</span></button><button type="button" data-md="1" aria-label="Mode mushaf: teks Arab bersambung">${ic('book',16)}<span>Mushaf</span></button></div><button class="ib" id="qs" aria-label="Pengaturan baca">${ic('sliders',20)}</button></div><audio id="au" preload="none"></audio><div class="qmini" id="qmini" hidden><button class="ib" id="pp" aria-label="Jeda">${ic('pause',18)}</button><span id="qmt"></span><button class="ib2" id="qstop" aria-label="Hentikan audio">×</button></div><div id="ay"><p class="mut">Memuat…</p></div><div class="snav" id="snav"></div>`,
  init(){qReader(n,+sc||0)}}};
 function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('#qs').onclick=qsheet;
  const pages=()=>S.full?1:Math.ceil(R.A.length/QPER);
  const segOn=()=>$$('.mseg button').forEach(b=>b.classList.toggle('on',(b.dataset.md=='1')==!!S.full));
- /* Pemutar: memutar ayat satu per satu dan menyorot ayat yang sedang dibaca */
+ /* Pemutar: diputar dari menu ayat (ketuk ayat › Putar). Ayat yang dibaca disorot; selama berbunyi tampil kapsul kecil jeda/hentikan */
  const au=$('#au'),pl={n:0,i:0,L:[]};
+ const kapsul=()=>{const m=$('#qmini');if(!m)return;const k=pl.satu?pl.satu:pl.i-(pl.L.length-AYAT[pl.n-1])+1;m.hidden=!pl.L.length;$('#qmt').textContent=pl.L.length?NAMA[pl.n-1]+(k>0?' · ayat '+k:''):''};
  const tandai=()=>{$$('#ay .qplay').forEach(x=>x.classList.remove('qplay'));if(!pl.L.length||pl.n!=R.n)return;const k=pl.satu?pl.satu-1:pl.i-(pl.L.length-AYAT[pl.n-1]);const t=k>=0&&$('#a'+(k+1));t&&t.classList.add('qplay')};
- const putar=i=>{pl.i=i;au.src=pl.L[i];au.play().catch(()=>{});tandai()};
- const henti=()=>{au.pause();au.removeAttribute('src');pl.L=[];pl.i=0;pl.satu=0;$('#pg').style.width='0';tandai()};
+ const putar=i=>{pl.i=i;au.src=pl.L[i];au.play().catch(()=>{});tandai();kapsul()};
+ const henti=()=>{au.pause();au.removeAttribute('src');pl.L=[];pl.i=0;pl.satu=0;tandai();kapsul()};
  R.dari=k=>{pl.n=R.n;pl.satu=0;pl.L=qAudList(R.n);putar(k-1+(pl.L.length-AYAT[R.n-1]))};
  /* Putar hanya satu ayat (berhenti setelah ayat itu selesai) */
  R.satu=k=>{const L=qAudList(R.n);pl.n=R.n;pl.satu=k;pl.L=[L[k-1+(L.length-AYAT[R.n-1])]];putar(0)};
- $('#pp').onclick=()=>{if(pl.n!=R.n||!pl.L.length||(pl.satu&&au.ended)){pl.satu=0;pl.n=R.n;pl.L=qAudList(R.n);putar(0)}else au.paused?au.play().catch(()=>{}):au.pause()};
- au.onplay=()=>$('#pp').innerHTML=ic('pause',20);au.onpause=()=>$('#pp').innerHTML=ic('play',20);
+ $('#pp').onclick=()=>au.paused?au.play().catch(()=>{}):au.pause();$('#qstop').onclick=henti;
+ au.onplay=()=>{$('#pp').innerHTML=ic('pause',18);$('#pp').ariaLabel='Jeda'};au.onpause=()=>{$('#pp').innerHTML=ic('play',18);$('#pp').ariaLabel='Lanjutkan'};
  au.onended=()=>{pl.i+1<pl.L.length?putar(pl.i+1):henti()};
  au.onerror=()=>{if(!pl.L.length||!au.getAttribute('src'))return;if(navigator.onLine===false&&pl.i+1<pl.L.length)return putar(pl.i+1);toast('Audio ayat ini belum tersimpan dan internet tidak tersedia');henti()};
- au.ontimeupdate=()=>{if(pl.L.length)$('#pg').style.width=((pl.i+(au.currentTime/au.duration||0))/pl.L.length*100)+'%'};
- const hdr=()=>{$('#qt').textContent=R.n+'. '+NAMA[R.n-1];$('#qa').textContent=ARTI[R.n-1]+' · '+AYAT[R.n-1]+' ayat';segOn();henti();$('#qdl').innerHTML=dlW('audio:'+R.n)};
+ const hdr=()=>{$('#qt').textContent=R.n+'. '+NAMA[R.n-1];$('#qa').textContent=ARTI[R.n-1]+' · '+AYAT[R.n-1]+' ayat';segOn();henti()};
  const nav=()=>{const np=pages(),first=R.p<=0,last=R.p>=np-1,lbl=S.full||np<2?'':`Ayat ${R.p*QPER+1}–${Math.min(R.A.length,(R.p+1)*QPER)} dari ${R.A.length}`;
-  $('#snav').innerHTML=`<button class="btn s" data-qn="-1" ${first&&R.n<=1?'disabled':''}>‹ ${first?'Surah sebelumnya':'Sebelumnya'}</button>${lbl?`<small class="mut">${lbl}</small>`:''}<button class="btn" data-qn="1" ${last&&R.n>=114?'disabled':''}>${last?'Surah berikutnya':'Berikutnya'} ›</button>`};
+  $('#snav').innerHTML=`<button class="snb" data-qn="-1" aria-label="${first?'Surah sebelumnya':'Halaman sebelumnya'}" ${first&&R.n<=1?'disabled':''}>‹</button><small class="mut">${lbl||'Geser ke samping untuk pindah surah'}</small><button class="snb" data-qn="1" aria-label="${last?'Surah berikutnya':'Halaman berikutnya'}" ${last&&R.n>=114?'disabled':''}>›</button>`};
  const draw=()=>{drawAy(el,R.A,R.n,S.full?null:R.p);nav();tandai();const t=R.tuju&&$('#a'+R.tuju);t&&t.classList.add('aytuju')};
  /* Ayat yang dituju (dari penanda, terakhir dibaca, pencarian) diberi blok warna dan berkedip 3 kali; blok tetap sampai ayat lain dipilih */
  window.ayTuju=k=>{R.tuju=k;$$('#ay .aytuju,#ay .aykedip').forEach(x=>x.classList.remove('aytuju','aykedip'));const t=$('#a'+k);if(!t)return;t.classList.add('aytuju');void t.offsetWidth;t.classList.add('aykedip')};
@@ -151,6 +151,7 @@ function qsheet(cb){const e=document.createElement('div'),qr=!!$('#ay'),jd=($('#
 <div class="qpv"><span class="qpa" id="qpa">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span><small class="qpl" id="qpl">Bismillaahir Rahmaanir Raheem</small><small class="qpt" id="qpt">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</small></div>
 <div class="ksh-l">Tema aplikasi</div>${seg('sth',[['auto','Perangkat'],['light','Terang'],['dark','Gelap'],['blue','Biru']],S.theme||'auto')}
 ${qr||$('#view .ay2')?`<div class="ksh-l">Mode baca</div>${seg('smd',[['0','Kartu'],['1','Mushaf']],(qr?S.full:S.mbaca=='mushaf')?'1':'0')}`:''}
+${qr&&window.QR?`<div class="ksh-l">Audio surah ini</div><div class="qsdl"><span class="mut">Simpan murattal ${esc(NAMA[QR.n-1])} agar bisa diputar tanpa internet</span>${dlW('audio:'+QR.n)}</div>`:''}
 <div class="ksh-l">Tampilkan</div>
 <p class="mut ksh-mn">Mode Mushaf hanya menampilkan teks Arab bersambung. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.</p>
 <div class="list sg ksh-c ksh-mt">${row('search','Teks Latin','Transliterasi di bawah teks Arab',tg('s5',S.lt))}${row('news','Terjemah','Arti dalam bahasa Indonesia',tg('s1',S.tr))}</div>
