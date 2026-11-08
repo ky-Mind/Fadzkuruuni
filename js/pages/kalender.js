@@ -20,11 +20,15 @@ P.kalender=()=>{const t=new Date();CAL=CAL||{y:t.getFullYear(),m:t.getMonth(),d:
  <h2>Hari besar dan puasa bulan ini</h2>${L.length?list(L,x=>`<div class="row"><span class="num">${x[0]}</span><span class="t">${x[1]}</span><span class="tag ${x[2]}" style="margin:0">${x[2]=='t1'?'Hari besar':x[2]=='t3'?'Haram puasa':'Puasa'}</span></div>`):'<div class="card mut">Tidak ada peringatan bulan ini.</div>'}<p class="mut">Angka kecil kiri atas adalah tanggal Hijriah (Umm al-Qura). Awal bulan resmi di Indonesia bisa berbeda satu hari. Puasa Senin dan Kamis tidak dicantumkan di daftar.</p>`,
  init(){$$('[data-n]').forEach(x=>x.onclick=()=>{const d=new Date(CAL.y,CAL.m+ +x.dataset.n,1);CAL={y:d.getFullYear(),m:d.getMonth(),d:1};route()});$$('.cd').forEach(x=>x.onclick=()=>{CAL.d=+x.dataset.d;$$('.cd').forEach(z=>z.classList.toggle('s',z==x));$('#cdet').innerHTML=sel(CAL.d)});$('#td').onclick=()=>{CAL=null;route()};$('[data-pilih]').onclick=kalPilih}}};
 /* Pilih bulan & tahun: ketuk judul bulan → lembar berisi tahun (bisa maju-mundur) dan 12 bulan */
-function kalPilih(){let th=CAL.y;const t=new Date(),e=document.createElement('div');e.className='back-d';
- const isi=()=>`<div class="sheet kps" role="dialog"><b>Pilih bulan & tahun</b><div class="kpy"><button type="button" class="ib" data-ty="-1" aria-label="Tahun sebelumnya">${ic('back',22)}</button><b>${th}</b><button type="button" class="ib" data-ty="1" aria-label="Tahun berikutnya">${ic('next',22)}</button></div>
-  <div class="kpm">${Array.from({length:12},(_,i)=>`<button type="button" data-bm="${i}" class="${th==CAL.y&&i==CAL.m?'on':''} ${th==t.getFullYear()&&i==t.getMonth()?'kini':''}">${new Date(2000,i,1).toLocaleDateString('id-ID',{month:'short'})}<small>${hf(new Date(th,i,15),{month:'long'})}</small></button>`).join('')}</div>
+function kalPilih(){let th=CAL.y,modeTh=0,awal=0;const t=new Date(),e=document.createElement('div');e.className='back-d';
+ const isi=()=>`<div class="sheet kps" role="dialog"><b>Pilih bulan & tahun</b><div class="kpy"><button type="button" class="ib" data-ty="-1" aria-label="Tahun sebelumnya">${ic('back',22)}</button><button type="button" class="kpth" data-pth aria-label="Pilih tahun">${modeTh?`${awal} – ${awal+11}`:th} ${ic('bawah',18)}</button><button type="button" class="ib" data-ty="1" aria-label="Tahun berikutnya">${ic('next',22)}</button></div>
+  ${modeTh?`<div class="kpm">${Array.from({length:12},(_,i)=>awal+i).map(y=>`<button type="button" data-by="${y}" class="${y==th?'on':''} ${y==t.getFullYear()?'kini':''}">${y}<small>${hf(new Date(y,6,1),{year:'numeric'})}</small></button>`).join('')}</div>`:''}
+  <div class="kpm" ${modeTh?'hidden':''}>${Array.from({length:12},(_,i)=>`<button type="button" data-bm="${i}" class="${th==CAL.y&&i==CAL.m?'on':''} ${th==t.getFullYear()&&i==t.getMonth()?'kini':''}">${new Date(2000,i,1).toLocaleDateString('id-ID',{month:'short'})}<small>${hf(new Date(th,i,15),{month:'long'})}</small></button>`).join('')}</div>
   <button class="btn" style="width:100%;margin-top:12px" data-kini>Bulan ini</button></div>`;
  const gambar=()=>{e.innerHTML=isi()};gambar();document.body.append(e);
- e.onclick=x=>{if(x.target==e)return e.remove();const ty=x.target.closest('[data-ty]');if(ty){th+= +ty.dataset.ty;return gambar()}
+ /* Ketuk angka tahun: kisi 12 tahun (panah menggeser 12 tahun); pilih tahun lalu kembali ke pilihan bulan */
+ e.onclick=x=>{if(x.target==e)return e.remove();if(x.target.closest('[data-pth]')){modeTh=!modeTh;awal=th-(((th%12)+12)%12);return gambar()}
+  const by=x.target.closest('[data-by]');if(by){th=+by.dataset.by;modeTh=0;return gambar()}
+  const ty=x.target.closest('[data-ty]');if(ty){if(modeTh)awal+=12*(+ty.dataset.ty);else th+= +ty.dataset.ty;return gambar()}
   const bm=x.target.closest('[data-bm]');if(bm){CAL={y:th,m:+bm.dataset.bm,d:1};e.remove();return route()}
   if(x.target.closest('[data-kini]')){CAL=null;e.remove();route()}}}
