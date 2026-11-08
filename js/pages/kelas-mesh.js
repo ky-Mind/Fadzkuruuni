@@ -16,16 +16,19 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
  /* Peserta lokal (meniru LiveKit) */
  const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
   async setAttributes(a){Object.assign(lokal.attributes,a);await tulisSaya();ubah()},
+  async setCameraEnabled(on){if(!admin)return;if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
+   if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;ubah()},
   async setMicrophoneEnabled(on){if(on&&!S_.mic){S_.mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});S_.micLv=level(S_.mic)}
    S_.micOn=!!on;S_.mic&&S_.mic.getAudioTracks().forEach(t=>t.enabled=!!on);lokal.isMicrophoneEnabled=!!on;
    if(admin)campurUlang();else{const p=S_.pc.get('host');if(p&&p.tx)await p.tx.sender.replaceTrack(on&&S_.mic?S_.mic.getAudioTracks()[0]:null)}
    if(on&&KREC&&S_.mic)kelasRekamSambung(S_.mic.getAudioTracks()[0]);ubah()}};
  const room={_S:S_,mode:'mesh',localParticipant:lokal,remoteParticipants:new Map(),canPlaybackAudio:true,
   async startAudio(){try{await AC.resume()}catch(e){}let ok=true;for(const el of S_.audio.values())try{await el.play()}catch(e){ok=false}room.canPlaybackAudio=ok;ubah()},
+  camStream(){return S_.cam||null},
   semuaTrack(){return [...(S_.mic?S_.mic.getAudioTracks():[]),...[...S_.masuk.values()].map(m=>m.track)]},
   async izin(identity,boleh){await col.doc('p_'+identity).set({boleh:!!boleh},{merge:true})},
   async disconnect(){if(S_.tutup)return;S_.tutup=true;S_.unsub.forEach(f=>f());clearInterval(S_.hb);clearInterval(S_.lv);S_.pc.forEach(p=>p.pc.close());S_.audio.forEach(el=>{el.srcObject=null;el.parentNode&&el.parentNode.removeChild(el)});
-   S_.mic&&S_.mic.getTracks().forEach(t=>t.stop());try{AC.close()}catch(e){}
+   S_.mic&&S_.mic.getTracks().forEach(t=>t.stop());S_.cam&&S_.cam.getTracks().forEach(t=>t.stop());try{AC.close()}catch(e){}
    const hapus=[col.doc('p_'+pid).delete(),col.doc('o_'+pid).delete(),col.doc('a_'+pid).delete()];if(admin)hapus.push(col.doc('status').set({host:'',bicara:[]}));await Promise.all(hapus.map(p=>p.catch(()=>{})));room.onDisconnected&&room.onDisconnected()}};
  const tulisSaya=()=>col.doc('p_'+pid).set({nama:nama.slice(0,40),peran:lokal.attributes.peran,tangan:lokal.attributes.tangan||'',t:Date.now()},{merge:true});
  /* Daftar hadir → remoteParticipants (yang aktif < 60 detik terakhir) */
@@ -42,17 +45,19 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
  async function jawab(k,sdp){if(S_.pc.has(k)){S_.pc.get(k).pc.close();S_.pc.delete(k)}
   if(S_.pc.size>=MESH_MAKS){await col.doc('a_'+k).set({penuh:true,t:Date.now()});return}
   const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set(k,p);
-  pc.ontrack=e=>{const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set(k,{stream:st,track:e.track,lv:level(st)});putar(k,st);campurUlang();if(KREC)kelasRekamSambung(e.track)};
+  pc.ontrack=e=>{if(e.track.kind!='audio')return;const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set(k,{stream:st,track:e.track,lv:level(st)});putar(k,st);campurUlang();if(KREC)kelasRekamSambung(e.track)};
   pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)&&S_.pc.get(k)===p){S_.pc.delete(k);S_.masuk.delete(k);campurUlang()}};
-  await pc.setRemoteDescription({type:'offer',sdp});p.tx=pc.getTransceivers()[0];p.tx.direction='sendrecv';campurUntuk(k);
+  await pc.setRemoteDescription({type:'offer',sdp});const T=pc.getTransceivers();p.tx=T.find(t=>t.receiver.track.kind=='audio');p.vtx=T.find(t=>t.receiver.track.kind=='video');p.tx.direction='sendrecv';campurUntuk(k);
+  if(p.vtx){p.vtx.direction='sendonly';if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{})}
   await pc.setLocalDescription(await pc.createAnswer());await tungguIce(pc);await col.doc('a_'+k).set({sdp:pc.localDescription.sdp,host:pid,t:Date.now()})}
 
  /* ---------- Jamaah: tawarkan sambungan ke pengajar ---------- */
  let hostKini='';
  async function sambungHost(){const lama=S_.pc.get('host');if(lama){lama.pc.close();S_.pc.delete('host')}
-  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});
+  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});pc.addTransceiver('video',{direction:'recvonly'});
   if(lokal.isMicrophoneEnabled&&S_.mic)await p.tx.sender.replaceTrack(S_.mic.getAudioTracks()[0]);
-  pc.ontrack=e=>{const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set('host',{stream:st,track:e.track,lv:level(st)});putar('host',st);ubah()};
+  pc.ontrack=e=>{if(e.track.kind=='video'){const vs=new MediaStream([e.track]),kirim=on=>room.onVideo&&room.onVideo(on?vs:null);e.track.onmute=()=>kirim(0);e.track.onunmute=()=>kirim(1);if(!e.track.muted)kirim(1);return}
+   const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set('host',{stream:st,track:e.track,lv:level(st)});putar('host',st);ubah()};
   pc.onconnectionstatechange=()=>{if(pc.connectionState=='failed'&&S_.pc.get('host')===p&&!S_.tutup)setTimeout(()=>!S_.tutup&&sambungHost(),2000)};
   await pc.setLocalDescription(await pc.createOffer());await tungguIce(pc);p.menunggu=true;
   await col.doc('a_'+pid).delete().catch(()=>{});await col.doc('o_'+pid).set({sdp:pc.localDescription.sdp,host:hostKini,t:Date.now()})}

@@ -1589,3 +1589,18 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 .kvid{margin:0 0 12px;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000}.kvid iframe{width:100%;height:100%;border:0;display:block}
 .kctl .kmicn{grid-column:1/-1;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--g) 10%,transparent);font-size:13.5px;line-height:1.45}
 .kctl .kmicn .ic{flex:none;color:var(--g)}
+/* Kelas online gaya Zoom */
+.kz{margin:0 0 12px}
+.kzs{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#1f2421;display:flex;align-items:center;justify-content:center;outline:3px solid transparent;outline-offset:-3px;transition:outline-color .2s}
+.kzs.bicara{outline-color:#3ecf8e}
+.kzs video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}.kzs video.cermin{transform:scaleX(-1)}
+.kzsa{position:relative;display:flex;align-items:center;justify-content:center}
+.kzw{display:flex;flex-direction:column;align-items:center;gap:8px;color:#c9d1cc;font-size:14px}
+.kzsn{position:absolute;left:10px;bottom:10px;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.55);color:#fff;font-size:13px}
+.kzsn:empty{display:none}.kzsn small{opacity:.75}.kzsn .ic{color:#3ecf8e}
+.kzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}
+.kzg:empty{display:none}
+.kzt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;background:var(--fill,#f0f2f1);outline:2px solid transparent;outline-offset:-2px}
+.kzt.bicara{outline-color:#3ecf8e}
+.kzn{display:flex;align-items:center;gap:3px;max-width:100%;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kzn .ic{flex:none;color:var(--mut)}.kzh{display:inline-flex;color:#c98a00}.kzh .ic{color:#c98a00}
