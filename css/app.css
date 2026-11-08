@@ -1525,3 +1525,8 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 @media(max-width:899px){html,body,#view,.vpeek,.sheet,.list,.chips,.car{scrollbar-width:none}
  html::-webkit-scrollbar,body::-webkit-scrollbar,#view::-webkit-scrollbar,.sheet::-webkit-scrollbar,.car::-webkit-scrollbar{display:none;width:0;height:0}
  #view{scrollbar-gutter:auto}.vpeek{scrollbar-gutter:auto}}
+.kps .kpth{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border:0;border-radius:10px;background:var(--fill);color:var(--ink);font:inherit;font-size:20px;font-weight:700;cursor:pointer}
+.kps .kpth .ic{width:16px;height:16px;color:var(--mut);stroke-width:2.2}
+/* Chevron di judul bulan: kecil, rapat ke teks, tepat di tengah tinggi huruf */
+.mn .mnj b{display:inline-flex;align-items:center;gap:3px;line-height:1.2}
+.mn .mnj b .ic{width:15px;height:15px;stroke-width:2.4;color:var(--mut);margin-top:1px}
