@@ -51,7 +51,8 @@ function androidWidget(){if(!ANDROID||!window.FadzAndroid.jadwalWidget)return;co
  if(sig==andWidSig)return;andWidSig=sig;andPanggil('jadwalWidget',JSON.stringify(o))}
 if(ANDROID){document.documentElement.classList.add('android');androidWarna();androidAdzan();
  /* Pilihan suara adzan disamakan ke Android (dipakai pemutar adzan) */
- andPanggil('aturSuara','adzan',S.az.sa||'bawaan');andPanggil('aturSuara','subuh',S.az.ss||'bawaan');setInterval(androidAdzan,15000);
+ andPanggil('aturSuara','adzan',S.az.sa||'bawaan');andPanggil('aturSuara','subuh',S.az.ss||'bawaan');/* Jadwal widget layar utama dikirim sejak aplikasi dibuka (bukan hanya saat kembali ke aplikasi), lalu dicek berkala; tanda (sig) mencegah kiriman berulang */
+ androidWidget();setInterval(()=>{androidAdzan();androidWidget()},15000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){andAdzanSig='';androidAdzan();andWidSig='';androidWidget()}});
  /* Sekali: minta izin "jalan di latar belakang" (pengecualian hemat baterai). Tanpa ini banyak HP (OPPO, Realme, Xiaomi, Vivo)
     menahan atau membatalkan alarm adzan saat aplikasi ditutup dan layar mati. */
