@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.8",
- "body": "Pembaruan Fadzkuruuni 2.6.8 (isi web 2.9.32)\n\n- Semua video tutorial kini bersuara: tiap langkah dibacakan, versi HP dan desktop\n- Admin kini punya kategori akses: semua akses, pengajar Kelas online, laporan & donasi, tampilan aplikasi, atau peta & statistik\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.8",
+ "tag_name": "v2.6.9",
+ "body": "Pembaruan Fadzkuruuni 2.6.9 (isi web 2.9.33)\n\n- Notifikasi kelas online punya pilihan suara: bawaan HP, bel, lonceng, getar saja, atau suara sendiri (berkas dari HP atau rekam), berlaku juga saat aplikasi ditutup\n- Kelas online: bisa ganti kamera depan atau belakang\n- Al-Qur'an lebih bersih: bilah pemutar dan tombol surah dihapus; audio diputar lewat ketuk ayat, dengan kapsul kecil untuk jeda/hentikan\n- Pengaturan Al-Qur'an memburamkan latar dengan sama di mode Kartu dan Mushaf\n- Baris sumber di akhir bacaan diganti himbauan kecil untuk melapor bila ada kesalahan teks\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.9",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.8/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.9/fadzkuruuni.apk"
   }
  ]
 }
