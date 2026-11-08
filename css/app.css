@@ -1740,3 +1740,14 @@ body.kfull{--gx:24px}
 .tedt button[data-te=x]{margin-left:auto;width:32px;padding:0;font-size:18px}
 .tedt small{display:block;margin-top:6px;color:var(--mut)}
 .sret{will-change:transform}
+
+/* Kotak waktu salat + Duha (7 kotak): satu baris; di HP sempit 4 di atas + 3 di bawah yang melebar rata.
+   Duha ditandai garis putus-putus karena salat sunah, bukan waktu wajib */
+.pt{grid-template-columns:repeat(7,minmax(0,1fr))}
+@media(max-width:899px){.pt{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:420px){.pt{grid-template-columns:repeat(12,minmax(0,1fr))}.pt>div{grid-column:span 3}.pt>div:nth-child(n+5){grid-column:span 4}}
+.pt div.snh{border-style:dashed!important;opacity:.92}
+.pt div.snh b{font-weight:600}
+.jdduha .t small{font-size:11px;margin-left:4px}
+button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:13px;color:var(--mut);text-align:left;cursor:pointer}
+.jdaz .list{margin:4px 0 10px}.jdaz .card.sua{margin:0}

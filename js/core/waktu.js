@@ -7,7 +7,10 @@ function waktu(d,{lat,lng,tz:TZ}){
   const noon=12+tz-lng/15-n(q/15-ra),sL=Math.sin(lat*r),cL=Math.cos(lat*r),sD=Math.sin(dec),cD=Math.cos(dec);
   const h=a=>Math.acos(Math.max(-1,Math.min(1,(Math.sin(a*r)-sL*sD)/(cL*cD))))/r/15;
   const asr=Math.atan(1/(1+Math.tan(Math.abs(lat*r-dec))))/r;
-  return [['Subuh',noon-h(-20)],['Terbit',noon-h(-.833)],['Zuhur',noon+.0333],['Asar',noon+h(asr)],['Magrib',noon+h(-.833)+.0333],['Isya',noon+h(-18)]];
+  const W=[['Subuh',noon-h(-20)],['Terbit',noon-h(-.833)],['Zuhur',noon+.0333],['Asar',noon+h(asr)],['Magrib',noon+h(-.833)+.0333],['Isya',noon+h(-18)]];
+  /* Awal waktu Duha (sunah): matahari setinggi 4,5° setelah terbit, kriteria Kemenag. Disimpan sebagai properti, bukan elemen ke-7,
+     agar indeks 6 waktu di seluruh aplikasi (adzan, widget, Android) tidak berubah */
+  W.duha=noon-h(4.5);return W;
 }
 const hm=h=>{const m=Math.round(((h%24)+24)%24*60)%1440;return String(m/60|0).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 /* Tanggal Hijriah (Umm al-Qura) dihitung sendiri, tidak bergantung pada peramban: WebView di sebagian HP tidak punya data

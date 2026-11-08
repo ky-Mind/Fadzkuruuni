@@ -34,10 +34,11 @@ const andJenis=k=>{const md=azMode(k),v2=window.FadzAndroid&&FadzAndroid.versiAd
  if(az.sound===false||md=='bunyi'||!v2&&(md=='senyap'||md=='beduk'||md=='alarm'))return {jenis:'pengingat'};
  if(md=='senyap')return {jenis:'senyap'};if(md=='beduk'||md=='alarm')return {jenis:'adzan',suara:md};
  return {jenis:k==0?'subuh':'adzan',suara:v2?azSuara(k):''}};
-function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,az.m,az.v,az.sound,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
+function androidAdzan(){if(!ANDROID)return;const az=S.az||{},sig=JSON.stringify([az.on,az.pre,az.w,az.m,az.v,az.sound,az.dh,S.loc,S.kor,new Date().toDateString()]);if(sig==andAdzanSig)return;andAdzanSig=sig;
  const L=[];if(az.on){const tz=S.loc.tz??-new Date().getTimezoneOffset()/60,pre=+az.pre||0,kor=(S.kor||0)/60;
   for(let d=0;d<30;d++){const h=new Date();h.setDate(h.getDate()+d);const T=waktu(h,S.loc),dasar=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());
    if(azMode(5)!='mati')L.push({t:dasar+(T[1][1]-tz-kor)*36e5,judul:'Matahari terbit',isi:'Waktu Subuh telah berakhir. Wilayah '+S.loc.n,...andJenis(5)});
+   if(az.dh&&T.duha!=null)L.push({t:dasar+(T.duha-tz-kor)*36e5,judul:'Waktu Duha telah masuk',isi:'Waktu salat Duha untuk wilayah '+S.loc.n+', hingga menjelang Zuhur',jenis:'pengingat'});
    WI.forEach((wi,k)=>{if(!az.w[k])return;const jam=T[wi][1],t=dasar+(jam-tz-kor)*36e5;
     if(pre)L.push({t:t-pre*6e4,judul:'Menjelang '+WS[k],isi:pre+' menit lagi masuk waktu '+WS[k]+' ('+S.loc.n+')',jenis:'pengingat'});
     L.push({t,judul:'Waktu '+WS[k]+' telah tiba',isi:'Untuk wilayah '+S.loc.n+' dan sekitarnya',...andJenis(k)})})}}
