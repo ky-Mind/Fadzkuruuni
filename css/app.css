@@ -1637,3 +1637,15 @@ img.kzav{object-fit:cover;display:block}
 .srw [data-wcoba]{margin-right:8px}
 .kcm .kcl-a{color:#1a73e8;text-decoration:underline;word-break:break-all;font-weight:600}
 .kcm.saya .kcl-a{color:#0b57d0}
+/* Jadwal salat: pilih tanggal */
+.jdate{display:flex;align-items:center;gap:6px;margin:14px 0 6px}
+.jdate .jdl{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:1px solid var(--line);border-radius:10px;background:none;color:inherit;font:inherit;cursor:pointer}
+.jdate .jdl b{font-size:15px}.jdate .jdl small{font-size:12.5px}
+.jdk{display:flex;gap:8px;justify-content:center;margin:0 0 6px}.jdk .sb{display:inline-flex;align-items:center;gap:6px}.jdk [hidden]{display:none}
+.jdpm{display:flex;align-items:center;gap:4px;margin:10px 0}.jdpm span{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center}.jdpm small{font-size:12px}
+.jdpm .ib{font-size:18px;font-weight:700}
+.jdpg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.jdpg i{font-style:normal;font-size:11.5px;color:var(--mut);padding:2px 0}
+.jdpg button{display:flex;flex-direction:column;align-items:center;padding:6px 0;border:0;border-radius:9px;background:var(--fill);color:inherit;font:inherit;font-size:15px;cursor:pointer}
+.jdpg button small{font-size:10px;color:var(--mut)}.jdpg button.kini{outline:1.5px solid var(--g)}
+.jdpg button.on{background:var(--g);color:var(--on)}.jdpg button.on small{color:inherit;opacity:.8}
+.srw.upada{background:color-mix(in srgb,var(--g) 9%,transparent)}.srw.upada small b{color:var(--g)}
