@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.5",
- "body": "Pembaruan aplikasi Android 2.6.5 (isi web 2.9.28)\n\n- Perbaikan: notifikasi kelas online kini benar-benar terkirim ke aplikasi (kunci server sebelumnya tidak terbaca)\n- Pengaturan baru di Waktu Salat & Notifikasi › Notifikasi kelas online: nyala/mati, jadwal baru, kelas dimulai, pengingat sebelum kelas\n- Notifikasi kelas punya saluran sendiri, terpisah dari adzan; pilihan \"Senyap saat adzan berbunyi\" agar tidak menabrak suara adzan\n- Tombol Tes notifikasi kelas dan status pendaftaran perangkat\n- Geser antarhalaman lebih lancar; kartu Beranda bisa digeser di komputer\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.5",
+ "tag_name": "v2.6.6",
+ "body": "Pembaruan Fadzkuruuni 2.6.6 (isi web 2.9.29)\n\n- Perbaikan: rekaman kelas online di aplikasi Android kini tersimpan utuh di Download/Fadzkuruuni dan bisa diputar (sebelumnya berkas MP4 kosong, 0 byte)\n- Perbaikan ini masuk otomatis lewat pembaruan isi; aplikasi 2.6.5 juga sudah ikut terperbaiki tanpa memasang ulang\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.6",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.5/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.6/fadzkuruuni.apk"
   }
  ]
 }
