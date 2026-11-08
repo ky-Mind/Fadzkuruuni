@@ -37,13 +37,15 @@ window.fadzIzinSelesai=()=>setTimeout(()=>{pembaruanCek().finally(()=>setTimeout
 /* ===== Pemberitahuan pembaruan aplikasi Android: rilis terbaru di GitHub dibandingkan dengan versi terpasang =====
    Dicek paling sering tiap 6 jam (atau saat diminta dari Pengaturan › Tentang & Bantuan). */
 const verLebihBaru=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0}return false};
+/* Baris versi di Tentang & Bantuan diperbarui setelah pemeriksaan (menampilkan tombol Perbarui bila ada versi baru) */
+const upSegar=()=>{if(location.hash=='#/pengaturan/tentang')route()};
 async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi||TPRATINJAU)return paksa&&toast('Pemeriksaan pembaruan hanya untuk aplikasi Android');
  if(!paksa&&Date.now()-(S.upCek||0)<216e5)return;if(!navigator.onLine)return paksa&&toast('Butuh internet untuk memeriksa pembaruan');
  let j;try{const r=await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest',{cache:'no-store'});if(!r.ok)throw 0;j=await r.json()}catch(e){return paksa&&toast('Gagal memeriksa pembaruan, coba lagi')}
  S.upCek=Date.now();save();const baru=String(j.tag_name||'').replace(/^v/,''),kini=FadzAndroid.versi();
- if(!baru||!verLebihBaru(baru,kini))return paksa&&toast('Aplikasi sudah versi terbaru ('+kini+')');
+ if(!baru||!verLebihBaru(baru,kini)){S.upInfo=null;save();upSegar();return paksa&&toast('Aplikasi sudah versi terbaru ('+kini+')')}
  if(!paksa&&S.upLewati==baru)return;
- const apk=((j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{}).browser_download_url||j.html_url;
+ const apk=((j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{}).browser_download_url||j.html_url;S.upInfo={v:baru,url:apk};save();upSegar();
  const cat=String(j.body||'').split('\n').map(x=>x.replace(/^[-*]\s*/,'').trim()).filter(Boolean).slice(0,8);
  return new Promise(res=>{const e=document.createElement('div');e.className='back-d';
   e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Pembaruan tersedia</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(baru)} · terpasang ${esc(kini)}</p>
