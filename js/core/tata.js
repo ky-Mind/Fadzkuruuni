@@ -103,10 +103,15 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)tataKirim()
 let TADM=null,TADMON=false,TDRAF=null;
 async function tataAuth(u){TADM=null;if(!u||!u.email||!u.emailVerified)return tataAdminUI();const e=u.email.toLowerCase();
  let L=TPEMILIK.slice();try{const d=await FBD.collection('config').doc('admin').get();if(d.exists)L=L.concat((d.data().emails||[]).map(x=>String(x).toLowerCase()))}catch(x){}
- if(L.includes(e))TADM=e;tataAdminUI()}
+ if(L.includes(e))TADM=e;tataAdminUI();
+ /* Halaman Akun & Profil yang sudah terbuka digambar ulang agar baris "Mode admin" muncul */
+ if(TADM&&location.hash=='#/pengaturan/akun'&&typeof route=='function')route()}
 const tataAdminKah=()=>!!TADM;
 /* Tombol "Mode admin" muncul di halaman yang bisa diatur */
 function tataAdminUI(){$('#tadm')?.remove();document.body.classList.toggle('tadmon',!!TADMON);const a=location.hash.slice(2).split('/');if(!TADM||TPRATINJAU||!(['','menu'].includes(a[0])||(a[0]=='pengaturan'&&!a[1])))return;
+ /* Tombol "Mode admin" tidak melayang di Beranda / Semua Menu (menghalangi isi): hanya di Pengaturan; saat mode admin aktif, bilah Terbitkan tetap tampil */
+ /* Tombol "Mode admin" ada di Pengaturan › Akun & Profil (tidak melayang); bilah Terbitkan/Batal hanya tampil saat mode admin aktif */
+ if(!TADMON)return;
  document.body.insertAdjacentHTML('beforeend',`<div id="tadm" class="tadm${TADMON?' on':''}">${TADMON?`<b>Mode admin</b><button type="button" data-tadm="simpan" class="pri">Terbitkan</button><button type="button" data-tadm="batal">Batal</button><a href="admin.html" target="_blank" rel="noopener">Dashboard</a>`:`<button type="button" data-tadm="mulai">${ic('sliders',16)} Mode admin</button>`}</div>`)}
 /* Kendali naik/turun/sembunyikan dipasang pada elemen ber-data-ta="jenis:kunci" */
 function tataAdminPasang(){if(!TADMON)return;$$('#view [data-ta]').forEach(el=>{if($(':scope > .tak',el))return;const [j,k]=el.dataset.ta.split(':'),sembunyi=el.classList.contains('tah');
@@ -121,7 +126,9 @@ function tataGeser(j,k,aksi){const D=TDRAF,pind=(A,i,d)=>{const t=i+d;if(i<0||t<
 async function tataTerbitkan(c,ket){const v=Date.now(),json=JSON.stringify(c);const ref=FBD.collection('config').doc('tampilan');
  await ref.set({json,v,t:v,oleh:TADM||'',ket:ket||''});await ref.collection('riwayat').add({json,v,t:v,oleh:TADM||'',ket:ket||''});TATAV=v;try{localStorage.fztata=JSON.stringify({v,c})}catch(e){}}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-tadm]');if(b){const a=b.dataset.tadm;
-  if(a=='mulai'){TADMON=true;TDRAF=JSON.parse(JSON.stringify(TATA));toast('Mode admin: geser atau sembunyikan bagian, lalu Terbitkan')}
+  if(a=='mulai'){TADMON=true;TDRAF=JSON.parse(JSON.stringify(TATA));toast('Mode admin: geser atau sembunyikan bagian, lalu Terbitkan');
+   /* Dimulai dari Akun & Profil: buka Beranda agar bisa langsung mengatur */
+   const h=location.hash.slice(2).split('/');if(!(['','menu'].includes(h[0])||(h[0]=='pengaturan'&&!h[1]))){location.hash='#/';return}}
   else if(a=='batal'){TADMON=false;TDRAF=null;TATA=tataGabung((tataBaca()||{}).c);toast('Perubahan dibatalkan')}
   else if(a=='simpan'){b.disabled=true;try{await tataTerbitkan(TDRAF,'Mode admin di aplikasi');TADMON=false;TATA=tataGabung(TDRAF);TDRAF=null;toast('Tampilan diterbitkan untuk semua pengguna')}catch(x){b.disabled=false;return toast('Gagal menerbitkan: '+(x.code||x.message))}}
   route();return}

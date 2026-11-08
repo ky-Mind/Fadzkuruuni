@@ -1521,3 +1521,7 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
    halaman & lapisan pratinjau jadi lapisan GPU sehingga cukup dipindah, tidak digambar ulang tiap frame */
 #view,#ay{touch-action:pan-y}
 #view.gsj,.gsj,.vpeek,.tpeek{will-change:transform;backface-visibility:hidden}
+/* Tanpa garis batang gulir di HP (seperti aplikasi pada umumnya); gulir tetap jalan */
+@media(max-width:899px){html,body,#view,.vpeek,.sheet,.list,.chips,.car{scrollbar-width:none}
+ html::-webkit-scrollbar,body::-webkit-scrollbar,#view::-webkit-scrollbar,.sheet::-webkit-scrollbar,.car::-webkit-scrollbar{display:none;width:0;height:0}
+ #view{scrollbar-gutter:auto}.vpeek{scrollbar-gutter:auto}}
