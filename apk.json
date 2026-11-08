@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.7",
- "body": "Pembaruan Fadzkuruuni 2.6.7 (isi web 2.9.30)\n\n- Pembaruan aplikasi kini bisa langsung diunduh dan dipasang dari dalam aplikasi, lengkap dengan persentase unduhan; layar pasang Android terbuka otomatis setelah selesai\n- Notifikasi \"Pembaruan Fadzkuruuni tersedia\" muncul di HP saat ada versi baru; diketuk langsung membuka layar pembaruan\n- Lembar \"Fadzkuruuni diperbarui\" juga menawarkan versi aplikasi Android terbaru\n- Termasuk perbaikan rekaman kelas (MP4 tersimpan utuh) dan pengaturan notifikasi kelas online\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.7",
+ "tag_name": "v2.6.8",
+ "body": "Pembaruan Fadzkuruuni 2.6.8 (isi web 2.9.32)\n\n- Semua video tutorial kini bersuara: tiap langkah dibacakan, versi HP dan desktop\n- Admin kini punya kategori akses: semua akses, pengajar Kelas online, laporan & donasi, tampilan aplikasi, atau peta & statistik\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.8",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.7/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.8/fadzkuruuni.apk"
   }
  ]
 }
