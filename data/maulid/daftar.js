@@ -8,4 +8,4 @@ const MAULID_DAFTAR=[
  {id:'simtud-durar',judul:'Maulid Simtud Durar',bagian:20,berkas:'data/maulid/simtud-durar.js',pdf:'data/maulid/simtud-durar.pdf'},
  {id:'burdah',judul:'Qasidah Burdah',bagian:10,berkas:'data/maulid/burdah.js',pdf:'data/maulid/burdah.pdf'},
  {id:'adl',judul:"Maulid Adl-Dliya'ul Lami'",bagian:11,berkas:'data/maulid/adl.js',pdf:'data/maulid/adl.pdf'},
- {id:'azab',judul:'Maulid Azab',berkas:null}];
+ {id:'azab',judul:'Maulid Azab',bagian:11,berkas:'data/maulid/azab.js'}];
