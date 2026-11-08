@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.3",
- "body": "Pembaruan aplikasi Android 2.6.3 (isi web 2.9.25)\n\n- Kitab, Maulid, Wirid & Sholawat: tombol perbesar, layar penuh, nomor halaman, dan pengaturan bacaan berfungsi lagi\n- Al-Qur'an: geser antarhalaman lebih halus (cepat maupun pelan), bisa digeser dari bagian kosong di bawah ayat; tombol Sebelumnya/Berikutnya ikut meluncur halus\n- Al-Qur'an: pemutar audio tetap di tempatnya saat halaman digulir\n- Kelas online: video YouTube dan video kelas live bisa layar penuh mendatar (landscape), gambar di tengah layar\n- Tombol Coba suara adzan berubah menjadi Hentikan selama diputar\n- Kebijakan Privasi & Penghapusan Data: teks dirapikan, tautannya muncul di aplikasi (bawah Akun & Profil dan Tentang & Bantuan)\n\nYang perlu APK baru: layar penuh mendatar di kelas online. Perbaikan lain sudah masuk otomatis lewat pembaruan isi.\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.3",
+ "tag_name": "v2.6.4",
+ "body": "Pembaruan aplikasi Android 2.6.4 (isi web 2.9.26)\n\n- Notifikasi kelas online kini muncul seketika saat admin membuat jadwal atau memulai kelas, walau aplikasi sedang ditutup (seperti notifikasi adzan)\n- Pengingat kelas terjadwal (10 menit sebelum dan saat mulai) tetap tepat waktu\n- Termasuk semua perbaikan 2.6.3: tombol kitab, geser Al-Qur'an yang halus, layar penuh mendatar di kelas online, tombol Coba/Hentikan\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.4",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.3/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.4/fadzkuruuni.apk"
   }
  ]
 }
