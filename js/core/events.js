@@ -77,7 +77,12 @@ const VSNAP=new Map();
 const vKelas=h=>/^#\/pengaturan(\/|$)/.test(h||'')?'phal':'';
 function vSnap(h,html){if(!h||!html||html.length>600000)return;VSNAP.delete(h);VSNAP.set(h,html);if(VSNAP.size>24)VSNAP.delete(VSNAP.keys().next().value)}
 /* Isi halaman lain sebagai HTML: potret terakhir, atau dirender dari fungsi halamannya (tanpa init) */
-function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');const pr=PRATINJAU[a]&&PRATINJAU[a](b,c,d);if(pr)return pr;return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
+/* Pratinjau yang sudah disiapkan untuk halaman sebelah (dibuang setiap pindah halaman) */
+const VPRE=new Map();
+function vSiapkan(){VPRE.clear();const h=location.hash||'#/',[a,b]=h.slice(2).split('/'),N=tataNavR(),L=[];
+ if($('#view .pnav')){$$('#view .pnav [data-nx],#view .pnav [data-pv]').forEach(x=>L.push(x.getAttribute('href')))}else if(N.includes(a)&&!b){const k=N.indexOf(a);[N[k-1],N[k+1]].forEach(r=>r!=null&&L.push('#/'+r))}
+ const kerja=()=>L.forEach(t=>{if(!VSNAP.has(t)&&!VPRE.has(t))VPRE.set(t,vHtml(t))});(window.requestIdleCallback||setTimeout)(kerja,{timeout:800})}
+function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);if(VPRE.has(h))return VPRE.get(h);try{const [a='',b,c,d]=h.replace(/^#\/?/,'').split('/');const pr=PRATINJAU[a]&&PRATINJAU[a](b,c,d);if(pr)return pr;return ((a=='quran'&&b?surah(b,c):(P[a]||P[''])(b,c,d))||{}).html||''}catch(e){return ''}}
 /* Jangan bajak geseran di isian, penggeser, lembar, kitab, kalender, carousel, atau daftar yang bisa digeser samping */
 function gsHalang(t){if(t.closest('input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'))return true;
  for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false}
