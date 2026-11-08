@@ -90,7 +90,7 @@ function gsHalang(t){/* Deretan tombol yang bisa digeser samping */{const sc=t.c
  for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false}
 /* Isi tab sebelah: tab itu dipilih sebentar untuk mengambil isinya, lalu tab asli dan isinya (simpul yang sama, lengkap dengan isian) dikembalikan */
 function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on')),el=tabIsi(),v=$('#view');if(!cur||!el)return '';
- const simpan=[...el.childNodes],sy=v.scrollTop;let h='';try{nb.click();h=(tabIsi()||el).innerHTML}catch(e){}
+ const simpan=[...el.childNodes],sy=v.scrollTop;let h='';try{nb.click();const isi=tabIsi()||el;if(window.pbarTerap)pbarTerap(isi);h=isi.innerHTML}catch(e){}
  try{cur.click()}catch(e){}const el2=tabIsi()||el;el2.replaceChildren(...simpan);v.scrollTop=sy;tabPil();return h}
 {
  const v=$('#view'),app=$('#app');
@@ -148,7 +148,7 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
     /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
     /* Halaman menu bawah (mis. Al-Qur'an): geser di mana saja selalu ke halaman besar sebelah (Beranda / Fadz AI); tab (Surah/Juz/Riwayat) hanya lewat ketukan */
     const [ra,rb]=(location.hash||'#/').slice(2).split('/'),akar=tataNavR().includes(ra)&&!rb;
-    const ti=!akar&&tabSemua().length>1?tabIsi():null;mode=ti&&ti.contains(e.target)?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';v.style.overflowY='hidden';if(el)el.classList.add('gsj');pilihSebelah(x<0?1:-1)}else v.classList.remove('gsj')}}
+    const ti=!akar&&tabSemua().length>1?tabIsi():null;/* Geser di mana saja di bawah judul (termasuk ruang kosong di bawah isi) = pindah tab */mode=ti&&!e.target.closest('.bar')?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';v.style.overflowY='hidden';if(el)el.classList.add('gsj');pilihSebelah(x<0?1:-1)}else v.classList.remove('gsj')}}
   if(lock!='h')return;
   if(mode=='back'){dx=Math.max(0,x);jadwal(dx);return}
   /* Arah berbalik melewati titik awal: ganti isi sebelah yang ditampilkan */
