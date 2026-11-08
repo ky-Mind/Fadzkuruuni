@@ -16,7 +16,8 @@ const kJam=t=>t?new Date(t).toLocaleString('id-ID',{weekday:'long',day:'numeric'
 const ytId=u=>{const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/|shorts\/))([\w-]{11})/);return m?m[1]:''};
 const ytGambar=id=>`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const ytInfo=async u=>{try{const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(u));return r.ok?await r.json():null}catch(e){return null}};
-const kAdmin=()=>typeof TADM!='undefined'&&!!TADM;
+/* Admin kelas: pemilik / admin dengan akses "semua" atau "kelas" (pengajar Kelas online) */
+const kAdmin=()=>typeof adminBisa=='function'&&adminBisa('kelas');
 
 /* ---------- Daftar kelas ---------- */
 function kelasKartu(k){const live=k.status=='live',sel=k.status=='selesai',adm=kAdmin();

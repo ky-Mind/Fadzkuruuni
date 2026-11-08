@@ -26,13 +26,18 @@ export async function verifikasi(t) {
   } catch (e) { return null; }
 }
 
-/* Admin = pemilik, atau email di dokumen config/admin (dibaca dengan token pengguna itu sendiri) */
-export async function adminkah(P, t) {
+/* Admin = pemilik, atau email di dokumen config/admin (dibaca dengan token pengguna itu sendiri).
+   akses (opsional): kategori yang dibutuhkan, mis. 'kelas'. Admin tanpa kategori tersimpan dianggap 'semua' (sama dengan firestore.rules). */
+export async function adminkah(P, t, akses) {
   if (!P || !P.email || !P.email_verified) return false;
   const e = P.email.toLowerCase(); if (PEMILIK.includes(e)) return true;
   try {
     const r = await fetch(FS + '/config/admin', { headers: { authorization: 'Bearer ' + t } }); if (!r.ok) return false;
     const d = await r.json();
-    return ((d.fields?.emails?.arrayValue?.values) || []).some(v => String(v.stringValue || '').toLowerCase() == e);
+    if (!((d.fields?.emails?.arrayValue?.values) || []).some(v => String(v.stringValue || '').toLowerCase() == e)) return false;
+    if (!akses) return true;
+    const L = d.fields?.akses?.mapValue?.fields?.[e]?.arrayValue?.values;
+    const A = L ? L.map(v => v.stringValue) : ['semua'];
+    return A.includes('semua') || A.includes(akses);
   } catch (x) { return false; }
 }

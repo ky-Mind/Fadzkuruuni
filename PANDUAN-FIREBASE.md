@@ -46,3 +46,10 @@ Peramban yang sudah mengizinkan notifikasi otomatis berlangganan. Notifikasi dik
 Aplikasi Android (APK 2.6.4+) menerima notifikasi seketika lewat Firebase Cloud Messaging: isi variabel Vercel `FIREBASE_SA`
 dengan seluruh isi JSON kunci service account (Firebase › Project settings › Service accounts › Generate new private key).
 Aplikasi berlangganan topik `kelas` (KelasPesan.java); pesan dari server memicu pengecekan daftar kelas (KelasCek).
+
+## Kategori akses admin
+
+Di dashboard admin › tab Admin, pemilik memilih akses tiap admin: Semua akses, Pengajar Kelas online, Laporan & donasi,
+Tampilan aplikasi, atau Peta & statistik (boleh lebih dari satu). Disimpan di `config/admin.akses`; admin lama tanpa kategori = semua.
+Dikunci di `firestore.rules` (fungsi `bisa()`), di server (`api/_firebase.js` adminkah), dan di aplikasi (`adminBisa()`).
+Setelah pembaruan ini, publish ulang `firestore.rules`.

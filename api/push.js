@@ -136,7 +136,7 @@ export default async function handler(req) {
   if (b.aksi != 'kirim') return jawab({ galat: 'aksi' }, 400);
   if (!(PUB && PRIV) && !SA) return jawab({ galat: 'belum-siap' }, 503);
   const t = String(b.idToken || ''), P = await verifikasi(t);
-  if (!await adminkah(P, t)) return jawab({ galat: 'bukan-admin' }, 403);
+  if (!await adminkah(P, t, 'kelas')) return jawab({ galat: 'bukan-admin' }, 403);
   const id = String(b.kelas || ''); if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return jawab({ galat: 'kelas' }, 400);
   const kr = await fetch(FS + '/kelas/' + id); if (!kr.ok) return jawab({ galat: 'kelas-tidak-ada' }, 404);
   const f = (await kr.json()).fields || {}, judul = f.judul?.stringValue || 'Kelas online', oleh = f.pengajar?.stringValue || '';

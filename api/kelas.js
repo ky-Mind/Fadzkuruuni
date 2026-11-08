@@ -26,7 +26,7 @@ export default async function handler(req) {
   const id = String(b.kelas || ''); if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return jawab({ galat: 'kelas' }, 400);
   const kr = await fetch(FS + '/kelas/' + id); if (!kr.ok) return jawab({ galat: 'kelas-tidak-ada' }, 404);
   const status = (await kr.json()).fields?.status?.stringValue || 'jadwal';
-  const P = b.idToken ? await verifikasi(String(b.idToken)) : null, admin = await adminkah(P, b.idToken), n = Math.floor(Date.now() / 1000), room = 'kelas-' + id;
+  const P = b.idToken ? await verifikasi(String(b.idToken)) : null, admin = await adminkah(P, b.idToken, 'kelas'), n = Math.floor(Date.now() / 1000), room = 'kelas-' + id;
 
   if (b.aksi == 'token') {
     if (status != 'live' && !admin) return jawab({ galat: 'belum-mulai' }, 409);
