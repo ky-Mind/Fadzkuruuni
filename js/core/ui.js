@@ -55,3 +55,5 @@ const majelisBagian=(judul,L)=>L.length?`<section class="mjl"><h2 class="mjl-h">
 /* Isi Blob sebagai teks base64 (untuk dikirim ke jembatan Android). Diambil setelah penanda ";base64,", bukan setelah koma
    pertama: jenis berkas bisa memuat koma, mis. "video/mp4;codecs=avc1.42E01F,mp4a.40.2" */
 const blobB64=b=>new Promise((ok,gagal)=>{const r=new FileReader();r.onload=()=>{const s=String(r.result),i=s.indexOf(';base64,');ok(i<0?'':s.slice(i+8))};r.onerror=()=>gagal(r.error);r.readAsDataURL(b)});
+/* Himbauan kecil di akhir bacaan (menggantikan baris sumber/catatan panjang): ajak pembaca melapor bila ada salah teks */
+const KOREKSI='<p class="koreksi">Menemukan kesalahan pada teks? Mohon bantu koreksi lewat <a href="#/lapor">Laporkan</a>.</p>';
