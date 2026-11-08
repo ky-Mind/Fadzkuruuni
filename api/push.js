@@ -1,11 +1,14 @@
-/* api/push.js - Notifikasi kelas online lewat Web Push (fungsi Vercel, runtime edge), agar pemberitahuan kelas
-   tetap muncul walau situs Fadzkuruuni sedang ditutup (seperti notifikasi aplikasi biasa).
-   Butuh variabel lingkungan di Vercel: VAPID_PUBLIC dan VAPID_PRIVATE (pasangan kunci dari `npx web-push generate-vapid-keys`).
-   Langganan tiap peramban disimpan di Firestore koleksi `langganan` (lihat firestore.rules); hanya admin yang bisa membacanya,
-   jadi pengiriman memakai ID token admin yang memicunya (tanpa service account).
+/* api/push.js - Notifikasi kelas online (fungsi Vercel, runtime edge), agar pemberitahuan kelas tetap muncul
+   walau situs / aplikasi Fadzkuruuni sedang ditutup (seperti notifikasi adzan).
+   Dua jalur, masing-masing aktif bila variabel lingkungannya ada di Vercel:
+   1) Peramban (Web Push): VAPID_PUBLIC dan VAPID_PRIVATE (dari `npx web-push generate-vapid-keys`).
+      Langganan tiap peramban disimpan di Firestore koleksi `langganan` (lihat firestore.rules); hanya admin yang bisa
+      membacanya, jadi daftar dibaca dengan ID token admin yang memicunya.
+   2) Aplikasi Android (Firebase Cloud Messaging): FIREBASE_SA = isi JSON kunci service account Firebase.
+      Pesan data dikirim ke topik "kelas" (semua HP berlangganan, lihat KelasPesan.java di aplikasi).
    POST {aksi:'kunci'}                              → {kunci} kunci publik VAPID untuk pushManager.subscribe (null bila belum diatur)
    POST {aksi:'kirim', kelas, jenis, idToken}       → khusus admin; jenis 'baru' (jadwal baru) atau 'mulai' (kelas dimulai)
-                                                       → {terkirim, gagal, dibuang} */
+                                                       → {terkirim, gagal, dibuang, android} */
 import { FS, jawab, b64u, b64uTeks, dariB64u, verifikasi, adminkah } from './_firebase.js';
 
 export const config = { runtime: 'edge' };
@@ -64,25 +67,52 @@ async function daftarLangganan(t) {
   return L;
 }
 
+/* ---------- Firebase Cloud Messaging (aplikasi Android) ---------- */
+let AKSES = null, AKSEST = 0;
+async function tokenAkses(sa) {
+  if (AKSES && Date.now() < AKSEST) return AKSES;
+  const n = Math.floor(Date.now() / 1000);
+  const isi = b64uTeks(JSON.stringify({ alg: 'RS256', typ: 'JWT' })) + '.' + b64uTeks(JSON.stringify({ iss: sa.client_email, scope: 'https://www.googleapis.com/auth/firebase.messaging', aud: 'https://oauth2.googleapis.com/token', iat: n, exp: n + 3600 }));
+  const der = dariB64u(sa.private_key.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '').replace(/\+/g, '-').replace(/\//g, '_'));
+  const k = await crypto.subtle.importKey('pkcs8', der, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const jwt = isi + '.' + b64u(await crypto.subtle.sign('RSASSA-PKCS1-v1_5', k, teks(isi)));
+  const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt });
+  const j = await r.json(); if (!j.access_token) throw new Error('oauth ' + r.status);
+  AKSES = j.access_token; AKSEST = Date.now() + (j.expires_in - 120) * 1000; return AKSES;
+}
+/* Pesan data (bukan notifikasi) berprioritas tinggi ke topik "kelas": aplikasi yang menampilkan notifikasinya */
+async function kirimAndroid(saTeks, data) {
+  try {
+    const sa = JSON.parse(saTeks), t = await tokenAkses(sa);
+    const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+      method: 'POST', headers: { authorization: 'Bearer ' + t, 'content-type': 'application/json' },
+      body: JSON.stringify({ message: { topic: 'kelas', data, android: { priority: 'HIGH', ttl: '86400s' } } })
+    });
+    return r.ok ? 'ok' : 'gagal-' + r.status;
+  } catch (e) { return 'gagal'; }
+}
+
 const tgl = ms => new Date(ms).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 
 export default async function handler(req) {
   if (req.method != 'POST') return jawab({ galat: 'metode' }, 405);
-  const PUB = String(process.env.VAPID_PUBLIC || '').trim(), PRIV = String(process.env.VAPID_PRIVATE || '').trim();
+  const PUB = String(process.env.VAPID_PUBLIC || '').trim(), PRIV = String(process.env.VAPID_PRIVATE || '').trim(), SA = String(process.env.FIREBASE_SA || '').trim();
   let b; try { b = await req.json(); } catch (e) { return jawab({ galat: 'isi' }, 400); }
   if (b.aksi == 'kunci') return jawab({ kunci: PUB && PRIV ? PUB : null });
   if (b.aksi != 'kirim') return jawab({ galat: 'aksi' }, 400);
-  if (!PUB || !PRIV) return jawab({ galat: 'belum-siap' }, 503);
+  if (!(PUB && PRIV) && !SA) return jawab({ galat: 'belum-siap' }, 503);
   const t = String(b.idToken || ''), P = await verifikasi(t);
   if (!await adminkah(P, t)) return jawab({ galat: 'bukan-admin' }, 403);
   const id = String(b.kelas || ''); if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return jawab({ galat: 'kelas' }, 400);
   const kr = await fetch(FS + '/kelas/' + id); if (!kr.ok) return jawab({ galat: 'kelas-tidak-ada' }, 404);
   const f = (await kr.json()).fields || {}, judul = f.judul?.stringValue || 'Kelas online', oleh = f.pengajar?.stringValue || '';
   const mulai = +(f.mulai?.integerValue || f.mulai?.doubleValue || 0);
-  const pesan = JSON.stringify(b.jenis == 'mulai'
+  const P_ = b.jenis == 'mulai'
     ? { judul: 'Kelas online dimulai', isi: judul + (oleh ? ' · ' + oleh : '') + '. Ketuk untuk bergabung.', url: './#/kelas/' + id, tag: 'kelas-' + id }
-    : { judul: 'Jadwal kelas baru', isi: judul + (mulai ? ' · ' + tgl(mulai) : '') + (oleh ? ' · ' + oleh : ''), url: './#/kelas/' + id, tag: 'kelas-' + id });
-  const L = await daftarLangganan(t);
+    : { judul: 'Jadwal kelas baru', isi: judul + (mulai ? ' · ' + tgl(mulai) : '') + (oleh ? ' · ' + oleh : ''), url: './#/kelas/' + id, tag: 'kelas-' + id };
+  const pesan = JSON.stringify(P_);
+  const android = SA ? kirimAndroid(SA, { judul: P_.judul, isi: P_.isi, id, jenis: String(b.jenis || 'baru') }) : Promise.resolve('belum-siap');
+  const L = PUB && PRIV ? await daftarLangganan(t) : [];
   let terkirim = 0, gagal = 0, dibuang = 0;
   /* Dikirim bertahap 20 sekaligus */
   for (let i = 0; i < L.length; i += 20) {
@@ -92,5 +122,5 @@ export default async function handler(req) {
       else { dibuang++; return fetch('https://firestore.googleapis.com/v1/' + L[i + j].nama, { method: 'DELETE', headers: { authorization: 'Bearer ' + t } }).catch(() => {}); }
     }));
   }
-  return jawab({ terkirim, gagal, dibuang });
+  return jawab({ terkirim, gagal, dibuang, android: await android });
 }
