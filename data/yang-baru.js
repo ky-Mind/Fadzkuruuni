@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.32':['Semua video tutorial (Pengaturan › Tentang & Bantuan › Video tutorial) kini bersuara: tiap langkah dibacakan, versi HP dan desktop'],
  '2.9.31':['Admin kini punya kategori akses: semua akses, pengajar Kelas online, laporan & donasi, tampilan aplikasi, atau peta & statistik'],
  '2.9.30':['Pembaruan aplikasi Android bisa langsung diunduh & dipasang dari dalam aplikasi (mulai versi 2.6.7), lengkap dengan persentase unduhan','Notifikasi "Pembaruan Fadzkuruuni tersedia" muncul di HP; diketuk langsung membuka layar pembaruan','Lembar "Fadzkuruuni diperbarui" juga menawarkan versi aplikasi Android terbaru'],
  '2.9.29':['Perbaikan: rekaman kelas di aplikasi Android tersimpan utuh (sebelumnya berkas MP4 kosong / tidak bisa diputar)'],
