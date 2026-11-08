@@ -202,3 +202,8 @@ const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contente
 
 /* Pengaturan › Tentang & Bantuan: cek pembaruan aplikasi sekarang */
 document.addEventListener('click',e=>{if(e.target.closest('[data-upcek]'))pembaruanCek(1)});
+
+/* Membuka halaman utama (Al-Qur'an, Fadz AI, Kelas, Pengaturan) dari Semua Menu: tandai agar menu bawah disembunyikan */
+window.DARIMENU=null;
+document.addEventListener('click',e=>{if(e.target.closest('#nav a[data-r]')){window.DARIMENU=null;return}const a=e.target.closest('#view a[href^="#/"]');if(!a||location.hash!='#/menu')return;
+ const r=a.getAttribute('href').slice(2).split('/');window.DARIMENU=tataNavR().includes(r[0])&&!r[1]?r[0]:null},true);

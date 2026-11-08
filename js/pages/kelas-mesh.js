@@ -14,10 +14,10 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
  const level=st=>{try{const a=AC.createAnalyser();a.fftSize=512;AC.createMediaStreamSource(st).connect(a);const d=new Uint8Array(a.fftSize);return ()=>{a.getByteTimeDomainData(d);let m=0;for(const v of d)m=Math.max(m,Math.abs(v-128));return m}}catch(e){return ()=>0}};
  const putar=(k,st)=>{let el=S_.audio.get(k);if(!el){el=document.createElement('audio');el.autoplay=true;el.playsInline=true;el.className='kaud';document.body.append(el);S_.audio.set(k,el)}el.srcObject=st;el.play().catch(()=>{room.canPlaybackAudio=false;ubah()})};
  /* Peserta lokal (meniru LiveKit) */
- const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
+ const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:'',foto:(typeof S!='undefined'&&S.foto)||'',kamera:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
   async setAttributes(a){Object.assign(lokal.attributes,a);await tulisSaya();ubah()},
-  async setCameraEnabled(on){if(!admin)return;if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
-   if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;ubah()},
+  async setCameraEnabled(on){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
+   if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=on?'1':'';tulisSaya().catch(()=>{});ubah()},
   async setMicrophoneEnabled(on){if(on&&!S_.mic){S_.mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});S_.micLv=level(S_.mic)}
    S_.micOn=!!on;S_.mic&&S_.mic.getAudioTracks().forEach(t=>t.enabled=!!on);lokal.isMicrophoneEnabled=!!on;
    if(admin)campurUlang();else{const p=S_.pc.get('host');if(p&&p.tx)await p.tx.sender.replaceTrack(on&&S_.mic?S_.mic.getAudioTracks()[0]:null)}
@@ -30,10 +30,12 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
   async disconnect(){if(S_.tutup)return;S_.tutup=true;S_.unsub.forEach(f=>f());clearInterval(S_.hb);clearInterval(S_.lv);S_.pc.forEach(p=>p.pc.close());S_.audio.forEach(el=>{el.srcObject=null;el.parentNode&&el.parentNode.removeChild(el)});
    S_.mic&&S_.mic.getTracks().forEach(t=>t.stop());S_.cam&&S_.cam.getTracks().forEach(t=>t.stop());try{AC.close()}catch(e){}
    const hapus=[col.doc('p_'+pid).delete(),col.doc('o_'+pid).delete(),col.doc('a_'+pid).delete()];if(admin)hapus.push(col.doc('status').set({host:'',bicara:[]}));await Promise.all(hapus.map(p=>p.catch(()=>{})));room.onDisconnected&&room.onDisconnected()}};
- const tulisSaya=()=>col.doc('p_'+pid).set({nama:nama.slice(0,40),peran:lokal.attributes.peran,tangan:lokal.attributes.tangan||'',t:Date.now()},{merge:true});
+ const tulisSaya=async()=>{const d={nama:nama.slice(0,40),peran:lokal.attributes.peran,tangan:lokal.attributes.tangan||'',t:Date.now()};
+  /* Foto & status kamera butuh aturan Firestore terbaru; bila ditolak, tulis tanpa keduanya */
+  if(S_.lama)return col.doc('p_'+pid).set(d,{merge:true});try{await col.doc('p_'+pid).set(Object.assign({foto:(lokal.attributes.foto||'').length<=20000?lokal.attributes.foto||'':'',kamera:lokal.attributes.kamera||''},d),{merge:true})}catch(e){if(e&&e.code=='permission-denied'){S_.lama=1;return col.doc('p_'+pid).set(d,{merge:true})}throw e}};
  /* Daftar hadir → remoteParticipants (yang aktif < 60 detik terakhir) */
  const segarPeserta=()=>{const M=new Map(),kini=Date.now();S_.peserta.forEach((d,k)=>{if(k==pid||kini-(d.t||0)>60000)return;
-   M.set(k,{identity:k,name:d.nama||'Jamaah',attributes:{peran:d.peran||'jamaah',tangan:d.tangan||''},permissions:{canPublish:d.peran=='ustaz'||!!d.boleh},isSpeaking:(S_.status.bicara||[]).includes(k)})});
+   M.set(k,{identity:k,name:d.nama||'Jamaah',attributes:{peran:d.peran||'jamaah',tangan:d.tangan||'',foto:d.foto||'',kamera:d.kamera},permissions:{canPublish:d.peran=='ustaz'||!!d.boleh},isSpeaking:(S_.status.bicara||[]).includes(k)})});
   room.remoteParticipants=M;lokal.isSpeaking=(S_.status.bicara||[]).includes(pid);
   if(!admin){const saya=S_.peserta.get(pid)||{},boleh=!!saya.boleh;if(boleh!=lokal.permissions.canPublish){lokal.permissions.canPublish=boleh;if(boleh){toast('Kamu diizinkan bicara. Tekan Aktifkan mikrofon.');lokal.setAttributes({tangan:''}).catch(()=>{})}else if(lokal.isMicrophoneEnabled)lokal.setMicrophoneEnabled(false)}}ubah()};
 
@@ -45,16 +47,17 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
  async function jawab(k,sdp){if(S_.pc.has(k)){S_.pc.get(k).pc.close();S_.pc.delete(k)}
   if(S_.pc.size>=MESH_MAKS){await col.doc('a_'+k).set({penuh:true,t:Date.now()});return}
   const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set(k,p);
-  pc.ontrack=e=>{if(e.track.kind!='audio')return;const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set(k,{stream:st,track:e.track,lv:level(st)});putar(k,st);campurUlang();if(KREC)kelasRekamSambung(e.track)};
+  pc.ontrack=e=>{if(e.track.kind=='video'){const vs=new MediaStream([e.track]),kirim=on=>room.onVideoJamaah&&room.onVideoJamaah(k,on?vs:null);e.track.onmute=()=>kirim(0);e.track.onunmute=()=>kirim(1);if(!e.track.muted)kirim(1);return}
+   const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set(k,{stream:st,track:e.track,lv:level(st)});putar(k,st);campurUlang();if(KREC)kelasRekamSambung(e.track)};
   pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)&&S_.pc.get(k)===p){S_.pc.delete(k);S_.masuk.delete(k);campurUlang()}};
   await pc.setRemoteDescription({type:'offer',sdp});const T=pc.getTransceivers();p.tx=T.find(t=>t.receiver.track.kind=='audio');p.vtx=T.find(t=>t.receiver.track.kind=='video');p.tx.direction='sendrecv';campurUntuk(k);
-  if(p.vtx){p.vtx.direction='sendonly';if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{})}
+  if(p.vtx){p.vtx.direction='sendrecv';if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{})}
   await pc.setLocalDescription(await pc.createAnswer());await tungguIce(pc);await col.doc('a_'+k).set({sdp:pc.localDescription.sdp,host:pid,t:Date.now()})}
 
  /* ---------- Jamaah: tawarkan sambungan ke pengajar ---------- */
  let hostKini='';
  async function sambungHost(){const lama=S_.pc.get('host');if(lama){lama.pc.close();S_.pc.delete('host')}
-  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});pc.addTransceiver('video',{direction:'recvonly'});
+  const pc=new RTCPeerConnection({iceServers:MESH_ICE}),p={pc};S_.pc.set('host',p);p.tx=pc.addTransceiver('audio',{direction:'sendrecv'});p.vtx=pc.addTransceiver('video',{direction:'sendrecv'});if(S_.cam)p.vtx.sender.replaceTrack(S_.cam.getVideoTracks()[0]).catch(()=>{});
   if(lokal.isMicrophoneEnabled&&S_.mic)await p.tx.sender.replaceTrack(S_.mic.getAudioTracks()[0]);
   pc.ontrack=e=>{if(e.track.kind=='video'){const vs=new MediaStream([e.track]),kirim=on=>room.onVideo&&room.onVideo(on?vs:null);e.track.onmute=()=>kirim(0);e.track.onunmute=()=>kirim(1);if(!e.track.muted)kirim(1);return}
    const st=e.streams[0]||new MediaStream([e.track]);S_.masuk.set('host',{stream:st,track:e.track,lv:level(st)});putar('host',st);ubah()};

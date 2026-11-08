@@ -65,7 +65,7 @@ export default async function handler(req) {
     const identity = P ? P.sub : 'tamu-' + crypto.randomUUID().slice(0, 8);
     const token = await jwt({
       iss: KEY, sub: identity, name: String(b.nama || 'Jamaah').slice(0, 40), nbf: n - 10, exp: n + 6 * 3600,
-      video: { room, roomJoin: true, canSubscribe: true, canPublish: admin, canPublishData: true, canUpdateOwnMetadata: true },
+      video: { room, roomJoin: true, canSubscribe: true, canPublish: true, canPublishSources: admin ? ['camera', 'microphone', 'screen_share', 'screen_share_audio'] : ['camera'], canPublishData: true, canUpdateOwnMetadata: true },
       attributes: { peran: admin ? 'ustaz' : 'jamaah' }
     }, RHS);
     return jawab({ url: URL_, token, identity, admin });
@@ -75,7 +75,7 @@ export default async function handler(req) {
     const t = await jwt({ iss: KEY, sub: 'server', nbf: n - 10, exp: n + 60, video: { room, roomAdmin: true } }, RHS);
     const r = await fetch(URL_.replace(/^ws/, 'http').replace(/\/$/, '') + '/twirp/livekit.RoomService/UpdateParticipant', {
       method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + t },
-      body: JSON.stringify({ room, identity: String(b.identity || ''), permission: { canSubscribe: true, canPublish: !!b.boleh, canPublishData: true, canUpdateMetadata: true } })
+      body: JSON.stringify({ room, identity: String(b.identity || ''), permission: { canSubscribe: true, canPublish: true, canPublishSources: b.boleh ? ['CAMERA', 'MICROPHONE'] : ['CAMERA'], canPublishData: true, canUpdateMetadata: true } })
     });
     return r.ok ? jawab({ ok: true }) : jawab({ galat: 'livekit-' + r.status }, 502);
   }
