@@ -160,7 +160,18 @@ addEventListener('touchstart',e=>{pon=0;const v=$('#view');if(!ptrBoleh()||e.tou
 addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,dx=e.touches[0].clientX-px;if($('#view').scrollTop>0||(pt==0&&Math.abs(dx)>Math.abs(d))){pon=0;ptrSet(0,1);return}
  pt=Math.max(0,Math.min(d*.5/zmKini(),130));ptrSet(pt);const siap=pt>PTB;if(siap!=ptr.classList.contains('siap')){ptr.classList.toggle('siap',siap);$('small',ptr).textContent=siap?'Lepaskan untuk memuat ulang':'Tarik untuk memuat ulang'}},{passive:true});
 addEventListener('touchend',()=>{if(!pon)return;pon=0;
- if(pt>PTB){ptr.classList.add('muter');$('small',ptr).textContent='Memuat…';ptrSet(PTH+18,1);setTimeout(()=>location.reload(),700)}else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
+ if(pt>PTB)ptrMuat();else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
+/* Muat ulang dengan tampilan tarik-untuk-memuat (dipakai juga saat menu bawah yang aktif dipencet lagi) */
+function ptrMuat(){ptr.classList.add('siap','muter');$('small',ptr).textContent='Memuat…';ptrSet(PTH+18,1);setTimeout(()=>location.reload(),700)}
+/* Menu bawah seperti Instagram: pindah halaman langsung tanpa animasi keluar-masuk.
+   Memencet menu yang sedang aktif: bila halaman sedang digulir, kembali ke atas; bila sudah di atas, hanya Beranda yang dimuat ulang. */
+document.addEventListener('click',e=>{const a=e.target.closest('#nav a[data-r]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
+ const tuju=a.getAttribute('href')||'#/',kini=location.hash||'#/',sama=tuju.replace(/^#\/?$/,'#/')==kini.replace(/^#\/?$/,'#/');
+ if(!sama){document.documentElement.dataset.vt='nav';return}
+ e.preventDefault();const v=$('#view');if(v.scrollTop>4)keAtas(v);else if(tuju.replace(/^#\/?$/,'#/')=='#/')ptrMuat()},true);
+/* Gulir ke atas dengan animasi sendiri (gulir halus bawaan peramban tidak selalu jalan di dalam WebView) */
+function keAtas(v){const y0=v.scrollTop,t0=performance.now(),D=Math.min(520,240+y0*.08);if(gerakOff())return v.scrollTop=0;
+ const f=t=>{const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);v.scrollTop=y0*(1-e);if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
 /* Cegah salin, potong, seret, dan menu klik kanan pada isi aplikasi; kolom isian tetap bisa diketik dan ditempel */
 const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contenteditable]');
 ['copy','cut','dragstart','contextmenu','selectstart'].forEach(t=>document.addEventListener(t,e=>{if(!bebasSalin(e))e.preventDefault()}));
