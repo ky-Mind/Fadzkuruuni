@@ -11,4 +11,42 @@ const OFFL=()=>`<h2>Mode offline</h2><div class="card"><p class="mut" style="mar
 window.dlUkuran=async()=>{const e=$('#ouk');if(!e||!navigator.storage||!navigator.storage.estimate)return;try{const s=await navigator.storage.estimate();e.textContent='Ruang terpakai di perangkat: '+(s.usage/1048576).toFixed(1)+' MB'}catch(x){}};
 async function offFill(){try{const n=(await (await caches.open('fz-data')).keys()).filter(r=>/surah\//.test(r.url)).length;if(n>=114&&!dlSudah('quran')){dlTandai('quran',1);dlSegar('quran')}}catch(e){}dlUkuran()}
 
-SETPAGES.offline=()=>({html:head('Offline & Data','#/pengaturan')+OFFL()+`<h2>Data</h2><div class="list sg">${lk('#/bookmark','star','Daftar penanda ayat')}${row('back','Hapus riwayat bacaan','','<button class="sb dng" id="hx">Hapus</button>')}</div>`,init(){offFill();$('#hx').onclick=()=>konfirmasi('Hapus riwayat bacaan?','Daftar surah yang pernah kamu baca akan dikosongkan. Penanda ayat tidak ikut terhapus.','Hapus',()=>{S.hist=[];save();toast('Riwayat dihapus')})}});
+SETPAGES.offline=()=>({html:head('Offline & Data','#/pengaturan')+OFFL()+`<h2>Data</h2><div class="list sg">${lk('#/bookmark','star','Daftar penanda ayat')}${row('clock','Riwayat bacaan Al-Qur\'an',`<span id="hxk">${(S.hist||[]).length?(S.hist||[]).length+' surah di tab Riwayat, beserta posisi terakhir dibaca. Penanda ayat tidak ikut terhapus.':'Riwayat kosong.'}</span>`,`<button class="sb dng" id="hx" ${(S.hist||[]).length?'':'disabled'}>${ic('trash',14)} Hapus</button>`)}</div>`,init(){offFill();
+ /* Hapus riwayat: mengosongkan tab Riwayat di Al-Qur'an dan posisi terakhir dibaca tiap surah; penanda ayat (bintang) & tanda "terakhir dibaca" tetap */
+ $('#hx').onclick=()=>konfirmasi('Hapus riwayat bacaan?','Daftar surah di tab Riwayat Al-Qur\'an dan posisi terakhir dibaca tiap surah akan dikosongkan. Penanda ayat tidak ikut terhapus.','Hapus',()=>{S.hist=[];S.qpos={};save();toast('Riwayat bacaan dihapus');$('#hxk')&&($('#hxk').textContent='Riwayat kosong.');$('#hx')&&($('#hx').disabled=true)})}});
+
+/* ===== Tawaran mode offline: langkah terakhir setelah izin awal (dan setelah pembaruan bila ada isi baru) =====
+   Diizinkan: semua isi (Al-Qur'an, kitab kuning, maulid) diunduh di latar; isi baru setelah pembaruan ikut diunduh otomatis.
+   "Nanti saja": ditanyakan lagi hanya bila ada isi baru yang belum pernah ditawarkan. */
+function offTawar(){if(TPRATINJAU||typeof DLG=='undefined'||!DLG.semua)return;const I=DLG.semua(),sisa=I.filter(i=>!dlSudah(i));if(!sisa.length)return;
+ if(S.offOn){dlSemua(sisa);return}
+ const lihat=S.offLihat||[];if(!sisa.some(i=>!lihat.includes(i)))return;
+ if($('.back-d')||!navigator.onLine)return setTimeout(offTawar,5000);
+ const e=document.createElement('div');e.className='back-d';
+ e.innerHTML=`<div class="sheet offt" role="dialog"><div class="offt-i">${ic('down',28)}</div><b style="font-size:18px">Izinkan mode offline?</b>
+  <p class="mut" style="margin:8px 0 12px">Unduh semua isi aplikasi (Al-Qur'an, kitab kuning, dan maulid) supaya tetap bisa dibaca tanpa internet. Unduhan berjalan di latar dan bisa dibatalkan kapan saja di Pengaturan › Offline & Data.</p>
+  <button class="btn" style="width:100%" data-ofy>${ic('down',16)} Izinkan &amp; unduh semua</button><button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-ofn>Nanti saja</button></div>`;
+ document.body.append(e);const tutup=()=>{S.offLihat=I;save();e.remove()};
+ e.onclick=x=>{if(x.target==e||x.target.closest('[data-ofn]'))return tutup();if(x.target.closest('[data-ofy]')){S.offOn=1;tutup();dlSemua(sisa);toast('Mengunduh '+sisa.length+' paket untuk mode offline')}}}
+/* Dipanggil aplikasi Android setelah dialog izin awal selesai; aplikasi lama / web: ditawarkan beberapa detik setelah dibuka */
+window.fadzIzinSelesai=()=>setTimeout(()=>{pembaruanCek().finally(()=>setTimeout(offTawar,600))},700);
+{const awalAndroid=window.ANDROID&&window.FadzAndroid.izinAwalSudah&&!FadzAndroid.izinAwalSudah();
+ if(!awalAndroid)setTimeout(()=>{pembaruanCek().finally(()=>setTimeout(offTawar,800))},4000)}
+
+/* ===== Pemberitahuan pembaruan aplikasi Android: rilis terbaru di GitHub dibandingkan dengan versi terpasang =====
+   Dicek paling sering tiap 6 jam (atau saat diminta dari Pengaturan › Tentang & Bantuan). */
+const verLebihBaru=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0}return false};
+async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi||TPRATINJAU)return paksa&&toast('Pemeriksaan pembaruan hanya untuk aplikasi Android');
+ if(!paksa&&Date.now()-(S.upCek||0)<216e5)return;if(!navigator.onLine)return paksa&&toast('Butuh internet untuk memeriksa pembaruan');
+ let j;try{const r=await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest',{cache:'no-store'});if(!r.ok)throw 0;j=await r.json()}catch(e){return paksa&&toast('Gagal memeriksa pembaruan, coba lagi')}
+ S.upCek=Date.now();save();const baru=String(j.tag_name||'').replace(/^v/,''),kini=FadzAndroid.versi();
+ if(!baru||!verLebihBaru(baru,kini))return paksa&&toast('Aplikasi sudah versi terbaru ('+kini+')');
+ if(!paksa&&S.upLewati==baru)return;
+ const apk=((j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{}).browser_download_url||j.html_url;
+ const cat=String(j.body||'').split('\n').map(x=>x.replace(/^[-*]\s*/,'').trim()).filter(Boolean).slice(0,8);
+ return new Promise(res=>{const e=document.createElement('div');e.className='back-d';
+  e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Pembaruan tersedia</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(baru)} · terpasang ${esc(kini)}</p>
+   ${cat.length?`<ul class="upd-l">${cat.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+   <p class="mut" style="font-size:12.5px;margin:10px 0 12px">Ketuk Unduh pembaruan, lalu buka berkas <b>fadzkuruuni.apk</b> yang terunduh dan pilih <b>Perbarui</b>. Data dan pengaturanmu tetap aman.</p>
+   <a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${apk}" target="_blank" rel="noopener" data-upy>${ic('down',16)} Unduh pembaruan</a><button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-upn>Nanti saja</button></div>`;
+  document.body.append(e);e.onclick=x=>{if(x.target==e||x.target.closest('[data-upn]')){S.upLewati=baru;save();e.remove();res()}else if(x.target.closest('[data-upy]')){setTimeout(()=>{e.remove();res()},300)}}})}
