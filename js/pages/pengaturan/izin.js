@@ -11,13 +11,19 @@ const IZIN=[
 const izinSensorTxt=()=>window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'Diminta saat membuka Kiblat':'Tidak perlu izin';
 /* Di aplikasi Android (native) izin adalah izin aplikasi Android: penyimpanan tidak perlu izin, ada tambahan Alarm tepat waktu untuk adzan */
 const izinDaftar=()=>window.ANDROID?IZIN.filter(x=>x[0]!='persistent-storage').concat([['alarm','clock','Alarm tepat waktu','Agar notifikasi adzan berbunyi tepat pada waktunya walau aplikasi ditutup'],['baterai','shield','Jalan di latar belakang','Agar adzan tetap berbunyi saat aplikasi ditutup dan layar mati (pengecualian hemat baterai)']]):IZIN;
-SETPAGES.izin=()=>({html:head('Izin Aplikasi','#/pengaturan')+`<div id="izl"><p class="mut" style="margin:0 0 10px">Izin hanya dipakai untuk fiturnya masing-masing. Ketuk <b>Izinkan</b> untuk memberi izin; izin yang sudah ditolak bisa dibuka lagi lewat ${window.ANDROID?'Pengaturan HP':'pengaturan browser atau HP'}.</p>
-<div class="list sg">${izinDaftar().map(([n,i,t,k])=>row(i,`${t} ${bdg(n)}`,k,`<button class="btn s" data-izin="${n}">Izinkan</button>`)).join('')}
+/* Dua pilihan per izin: belum diizinkan → Tolak / Izinkan; sudah diizinkan → Cabut izin (membuka pengaturan HP/browser, karena aplikasi tidak bisa mencabut izinnya sendiri) */
+const izinTombol=n=>`<div class="izb"><button class="btn s izt" data-tolak="${n}">Tolak</button><button class="btn s" data-izin="${n}">Izinkan</button><button class="btn s izt" data-cabut="${n}" hidden>Cabut izin</button></div>`;
+SETPAGES.izin=()=>({html:head('Izin Aplikasi','#/pengaturan')+`<div id="izl"><p class="mut" style="margin:0 0 10px">Izin hanya dipakai untuk fiturnya masing-masing. Ketuk <b>Izinkan</b> untuk memberi izin, atau <b>Tolak</b> bila tidak ingin. Izin yang sudah diberikan bisa dicabut lewat <b>Cabut izin</b>; izin yang sudah ditolak bisa dibuka lagi lewat ${window.ANDROID?'Pengaturan HP':'pengaturan browser atau HP'}.</p>
+<div class="list sg">${izinDaftar().map(([n,i,t,k])=>row(i,`${t} ${bdg(n)}`,k,izinTombol(n))).join('')}
 ${row('compass','Sensor kompas <span class="bdg">'+izinSensorTxt()+'</span>','Menunjukkan arah kiblat dengan memutar HP',window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'<button class="btn s" data-izin="sensor">Izinkan</button>':'')}
 ${row('beads','Getar <span class="bdg">Tidak perlu izin</span>','Getaran tasbih dan pesan suara','<button class="btn s" data-izin="getar">Coba</button>')}
 ${row('play','Suara & audio <span class="bdg">Tidak perlu izin</span>','Murattal, adzan, dan Dengarkan jawaban Fadz AI','<button class="btn s" data-izin="suara">Coba</button>')}</div>
 <h2>Izin ditolak?</h2>${window.ANDROID?`<div class="card"><p class="mut" style="margin:0 0 10px;line-height:1.7">Buka <b>Pengaturan HP › Aplikasi › Fadzkuruuni › Izin</b>, lalu izinkan yang diperlukan. Setelah itu kembali ke halaman ini.</p><button class="btn" data-izin="buka">Buka pengaturan aplikasi</button></div>`:`<div class="card"><p class="mut" style="margin:0;line-height:1.7">Di <b>Chrome</b>: ketuk ikon di kiri alamat situs › <b>Izin</b> (atau Setelan situs) › izinkan yang diperlukan.<br>Di <b>aplikasi terpasang</b>: tekan lama ikon Fadzkuruuni › <b>Info aplikasi</b> › <b>Izin</b>.<br>Setelah itu buka lagi halaman ini untuk melihat statusnya.</p></div>`}</div>`,
- init(){izinIsi();if(window.ANDROID)document.addEventListener('visibilitychange',function f(){if(!$('#izl'))return document.removeEventListener('visibilitychange',f);if(!document.hidden)izinIsi()});$('#izl').onclick=async e=>{const b=e.target.closest('[data-izin]');if(!b)return;const n=b.dataset.izin;b.disabled=true;
+ init(){izinIsi();document.addEventListener('visibilitychange',function f(){if(!$('#izl'))return document.removeEventListener('visibilitychange',f);if(!document.hidden)izinIsi()});$('#izl').onclick=async e=>{
+  const tl=e.target.closest('[data-tolak]'),cb=e.target.closest('[data-cabut]');
+  if(tl){const n=tl.dataset.tolak;S.izinTolak={...(S.izinTolak||{}),[n]:1};save();toast('Tidak diizinkan. Bisa diizinkan kapan saja di halaman ini.');return izinIsi()}
+  if(cb){if(window.ANDROID){andPanggil('bukaPengaturan');toast('Buka Izin, lalu matikan izin yang ingin dicabut')}else toast('Cabut lewat ikon di kiri alamat situs › Izin (atau Setelan situs)');return}
+  const b=e.target.closest('[data-izin]');if(!b)return;if(S.izinTolak&&S.izinTolak[b.dataset.izin]){delete S.izinTolak[b.dataset.izin];save()}const n=b.dataset.izin;b.disabled=true;
   try{if(window.ANDROID&&['geolocation','microphone','camera','alarm','baterai','buka'].includes(n)){if(n=='buka')andPanggil('bukaPengaturan');else{const st=await andMintaIzin(n);if(n!='alarm'&&n!='baterai')toast(st=='granted'?'Izin diberikan':st=='denied'?'Izin ditolak. Buka pengaturan aplikasi untuk mengizinkan.':'Izin belum diberikan')}}
    else if(n=='notifications')await askNotif();
    else if(n=='geolocation')await new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(ok,no,{timeout:15000}):no()).then(()=>toast('Izin lokasi diberikan'),()=>toast('Lokasi tidak diizinkan atau tidak tersedia'));
@@ -30,4 +36,6 @@ ${row('play','Suara & audio <span class="bdg">Tidak perlu izin</span>','Murattal
   b.disabled=false;izinIsi()}}});
 /* Isi status tiap izin; tombol Izinkan disembunyikan bila sudah diizinkan */
 async function izinIsi(){await permFill();for(const n of ['persistent-storage']){const e=$(`[data-perm="${n}"]`);if(e&&navigator.storage&&navigator.storage.persisted){try{const p=await navigator.storage.persisted();e.textContent=p?'Diizinkan':'Belum aktif';e.className='bdg '+(p?'':'mid')}catch(x){}}}
- $$('[data-perm]').forEach(e=>{const b=$(`[data-izin="${e.dataset.perm}"]`);if(b)b.hidden=e.textContent=='Diizinkan'})}
+ $$('[data-perm]').forEach(e=>{const n=e.dataset.perm,ok=e.textContent=='Diizinkan',b=$(`[data-izin="${n}"]`),t=$(`[data-tolak="${n}"]`),c=$(`[data-cabut="${n}"]`);
+  if(!ok&&S.izinTolak&&S.izinTolak[n]){e.textContent='Kamu tolak';e.className='bdg no'}
+  if(b)b.hidden=ok;if(t)t.hidden=ok||!!(S.izinTolak&&S.izinTolak[n]);if(c)c.hidden=!ok||n=='persistent-storage'})}

@@ -184,3 +184,6 @@ function keAtas(v){const y0=v.scrollTop,t0=performance.now(),D=Math.min(520,240+
 /* Cegah salin, potong, seret, dan menu klik kanan pada isi aplikasi; kolom isian tetap bisa diketik dan ditempel */
 const bebasSalin=e=>e.target.closest&&e.target.closest('input,textarea,[contenteditable]');
 ['copy','cut','dragstart','contextmenu','selectstart'].forEach(t=>document.addEventListener(t,e=>{if(!bebasSalin(e))e.preventDefault()}));
+
+/* Pengaturan › Tentang & Bantuan: cek pembaruan aplikasi sekarang */
+document.addEventListener('click',e=>{if(e.target.closest('[data-upcek]'))pembaruanCek(1)});

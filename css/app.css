@@ -1460,3 +1460,14 @@ html.tciut::view-transition-old(root){z-index:3}
 .mjl .mjl-i{background:var(--g);color:var(--on)}
 .mjl-b{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:99px;background:var(--g);color:var(--on);font-size:11px;font-weight:700}
 .mjl-u{margin-top:18px}
+/* Lembar tawaran offline & pembaruan */
+.offt,.upd{text-align:left}
+.offt-i{display:grid;place-items:center;width:52px;height:52px;margin-bottom:10px;border-radius:16px;background:color-mix(in srgb,var(--g) 16%,transparent);color:var(--g)}
+.upd-l{margin:0;padding-left:18px;max-height:34vh;overflow:auto;font-size:13.5px;line-height:1.5}
+.upd-l li{margin:3px 0}
+.sb:disabled{opacity:.4;cursor:default}
+/* Izin Aplikasi: dua pilihan per izin */
+.izb{display:flex;flex:none;gap:6px;align-items:center}
+.izb .izt{background:transparent;border:1px solid var(--line);color:var(--mut)}
+@media(max-width:899px){.phal #izl>p,.phal #izl>h2{margin-left:16px!important;margin-right:16px!important}}
+@media(max-width:420px){.izb{flex-direction:column;align-items:stretch}.izb .btn{padding:6px 10px;font-size:13px}}
