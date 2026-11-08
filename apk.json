@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.18",
- "body": "Pembaruan Fadzkuruuni 2.6.18 (isi web 2.9.42)\n\n- Kotak Duha di widget Jadwal Salat tampil sama jelasnya dengan waktu salat lain, dan selalu ada (sebelum aplikasi dibuka menampilkan --:--)\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.18",
+ "tag_name": "v2.6.19",
+ "body": "Pembaruan Fadzkuruuni 2.6.19 (isi web 2.9.44)\n\n- Perbaikan: widget layar utama langsung terisi jadwal saat aplikasi dibuka\n- Video tutorial widget memakai rekaman layar HP Android asli\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.19",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.18/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.19/fadzkuruuni.apk"
   }
  ]
 }
