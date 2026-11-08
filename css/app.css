@@ -1622,3 +1622,7 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 /* Titik status AI: hijau hanya saat online; selain itu abu-abu */
 .aidot.off{background:var(--mut);box-shadow:none;opacity:.6}
 img.kzav{object-fit:cover;display:block}
+/* Sorot & berbagi layar */
+.kzs{cursor:default}.kzt{cursor:pointer;border:0;font:inherit;color:inherit}
+.kzs video.layar,.kzt video.layar{object-fit:contain;background:#111}
+.kctl .btn.kon{background:#fde8e6;color:#c5221f}
