@@ -43,4 +43,6 @@ Agar notifikasi "Jadwal kelas baru" dan "Kelas online dimulai" muncul walau situ
 3. Publish ulang `firestore.rules` (ada koleksi baru `langganan`).
 
 Peramban yang sudah mengizinkan notifikasi otomatis berlangganan. Notifikasi dikirim saat admin membuat jadwal atau memulai kelas.
-Aplikasi Android memakai notifikasi native (KelasCek), bukan Web Push.
+Aplikasi Android (APK 2.6.4+) menerima notifikasi seketika lewat Firebase Cloud Messaging: isi variabel Vercel `FIREBASE_SA`
+dengan seluruh isi JSON kunci service account (Firebase › Project settings › Service accounts › Generate new private key).
+Aplikasi berlangganan topik `kelas` (KelasPesan.java); pesan dari server memicu pengecekan daftar kelas (KelasCek).
