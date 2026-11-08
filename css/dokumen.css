@@ -1,0 +1,52 @@
+/* css/dokumen.css - Tampilan halaman dokumen (Kebijakan Privasi, Penghapusan Data).
+   Tema mengikuti pilihan di aplikasi (localStorage fz), atau tema perangkat bila dibuka dari luar aplikasi; bisa diganti lewat tombol di bilah atas. */
+:root{--g:#2f7f74;--on:#ffffff;--ink:#1d2622;--mut:#5f6d66;--bg:#f6f7f6;--card:#ffffff;--fill:#eef1ef;--line:#e2e6e3;--sh:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.04)}
+[data-theme=dark]{--g:#7cc7cb;--on:#06140f;--ink:#eef2ef;--mut:#9aa6a0;--bg:#121413;--card:#1a1d1c;--fill:#222624;--line:#2c312e;--sh:none}
+[data-theme=blue]{--g:#2a6fb0;--on:#ffffff;--ink:#14263a;--mut:#5a6b7d;--bg:#eef4fb;--card:#ffffff;--fill:#e3ecf6;--line:#d6e2ee}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--g);font-weight:600;text-decoration:none}a:hover{text-decoration:underline}
+b{font-weight:650}
+/* Bilah atas */
+.dbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;height:56px;padding:0 8px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.dbar a.dk,.dbar button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+.dbar a.dk:active,.dbar button:active{background:var(--fill)}
+.dbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dbar .dj{flex:1;min-width:0;font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{max-width:740px;margin:0 auto;padding:20px 16px 56px}
+/* Kepala halaman */
+.dhead{display:flex;align-items:center;gap:14px;margin:6px 0 18px}
+.dhead img{width:56px;height:56px;border-radius:16px;box-shadow:var(--sh)}
+.dhead h1{margin:0;font-size:clamp(24px,6vw,30px);line-height:1.2;letter-spacing:-.01em}
+.dhead small{display:block;margin-top:2px;color:var(--mut);font-size:13.5px}
+.lead{font-size:16.5px}
+/* Ringkasan */
+.kotak{display:flex;gap:12px;align-items:flex-start;margin:16px 0;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--g) 11%,var(--card));border:1px solid color-mix(in srgb,var(--g) 25%,transparent)}
+.kotak svg{flex:none;width:22px;height:22px;margin-top:3px;fill:none;stroke:var(--g);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Daftar isi */
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px;padding:0;list-style:none}
+.toc a{display:inline-block;padding:6px 12px;border-radius:999px;background:var(--fill);color:var(--ink);font-size:13.5px;font-weight:600}
+.toc a:hover{text-decoration:none;background:color-mix(in srgb,var(--g) 15%,var(--fill))}
+/* Bagian */
+.sec{margin:14px 0;padding:18px 18px 12px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
+.sec h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:18.5px;line-height:1.35}
+.sec h2 .no{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb,var(--g) 15%,transparent);color:var(--g);font-size:14px;font-weight:800}
+p{margin:0 0 10px}
+ul,ol{margin:0 0 10px;padding-left:22px}
+li{margin:0 0 6px}
+li::marker{color:var(--g)}
+/* Langkah bernomor */
+.langkah{counter-reset:l;list-style:none;padding:0}
+.langkah li{counter-increment:l;position:relative;padding-left:40px;min-height:30px}
+.langkah li::before{content:counter(l);position:absolute;left:0;top:0;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--g);color:var(--on);font-size:14px;font-weight:800}
+/* Kontak */
+.kontak{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
+.kontak a{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:var(--g);color:var(--on);font-size:14.5px}
+.kontak a.s{background:var(--fill);color:var(--ink)}
+.kontak a:hover{text-decoration:none;filter:brightness(1.05)}
+.kontak svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.alamat{color:var(--mut);font-size:14px}
+.kaki{margin-top:24px;text-align:center;color:var(--mut);font-size:13.5px}
+.kaki a{display:inline-flex;align-items:center;gap:6px;margin:0 6px}
+@media(min-width:700px){main{padding:28px 24px 72px}.sec{padding:22px 24px 14px}}
