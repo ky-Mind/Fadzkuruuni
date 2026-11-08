@@ -188,7 +188,7 @@ const masuk=()=>DIAPP?(navigator.onLine?FadzAndroid.masukGoogle():toast('Butuh i
 
 /* Admin = pemilik (ADMIN, tetap) + daftar tambahan di Firestore config/admin (diatur di tab Admin) */
 let ADMX=[],PEMILIK=false;
-const TABS=[['laporan','Laporan'],['donasi','Donasi'],['tampilan','Tampilan'],['peta','Peta aplikasi'],['statistik','Statistik'],['admin','Admin']];
+const TABS=[['laporan','Laporan'],['donasi','Donasi'],['tampilan','Tampilan'],['peta','Peta aplikasi'],['statistik','Statistik'],['kelas','Kelas online'],['admin','Admin']];
 auth.onAuthStateChanged(async u=>{stop&&stop();stop=null;
  if(!u)return gate('Dashboard Admin','Masuk dengan akun Google admin untuk mengelola Fadzkuruuni.','<button class="btn" id="in">Masuk dengan Google</button>'),$('#in').onclick=masuk;
  const em=(u.email||'').toLowerCase();try{const d=await db.collection('config').doc('admin').get();ADMX=(d.exists&&d.data().emails)||[]}catch(e){ADMX=[]}
@@ -199,7 +199,7 @@ auth.onAuthStateChanged(async u=>{stop&&stop();stop=null;
 addEventListener('hashchange',()=>{if($('#atab'))bukaTab()});
 function bukaTab(){const k=TABS.some(t=>t[0]==location.hash.slice(1))?location.hash.slice(1):'laporan';stop&&stop();stop=null;
  document.querySelectorAll('#atab a').forEach(a=>a.classList.toggle('on',a.dataset.tab==k));$('#isi').className='wrap'+(k=='tampilan'?' lebar':'');
- ({laporan:()=>tabLaporan(0),donasi:()=>tabLaporan(1),tampilan:tabTampilan,peta:tabPeta,statistik:tabStatistik,admin:tabAdmin})[k]()}
+ ({laporan:()=>tabLaporan(0),donasi:()=>tabLaporan(1),tampilan:tabTampilan,peta:tabPeta,statistik:tabStatistik,kelas:tabKelas,admin:tabAdmin})[k]()}
 /* Tab Laporan dan tab Donasi memakai koleksi yang sama ('laporan'); konfirmasi donasi dari halaman Dukung kami berjenis 'Donasi' */
 function tabLaporan(don){DON=don;F.j='';
  $('#isi').innerHTML=`<div class="stats" id="stats"></div>${DON?'<div class="tot" id="tot"></div>':''}<div class="bar"><input id="q" type="search" placeholder="${DON?'Cari nama, metode, pesan…':'Cari isi laporan, nama, halaman…'}">${DON?'':'<select id="j"><option value="">Semua jenis</option><option>Bug</option><option>Salah tulis</option><option>Konten kurang</option><option>Saran</option></select>'}</div><div id="list"><div class="empty">Memuat…</div></div>`;
@@ -383,10 +383,31 @@ async function tabStatistik(){if(!TI)await siapTI();$('#isi').innerHTML='<div cl
 /* ===================== ADMIN: kelola daftar admin (hanya pemilik yang bisa mengubah) ===================== */
 function tabAdmin(){
  $('#isi').innerHTML=`<div class="blok"><h3>Pemilik</h3><p>Selalu menjadi admin dan satu-satunya yang bisa menambah atau menghapus admin lain.</p><div class="ls">${ADMIN.map(e=>`<div class="it"><span>${esc(e)}</span><small>pemilik</small></div>`).join('')}</div></div>
- <div class="blok"><h3>Admin lain</h3><p>Admin bisa membaca laporan, mengatur tampilan, melihat peta dan statistik, serta memakai Mode admin di aplikasi. Mereka harus masuk dengan akun Google memakai email ini.</p><div class="ls" id="adl">${ADMX.map((e,i)=>`<div class="it"><span>${esc(e)}</span>${PEMILIK?`<button class="btn d" data-ah="${i}">Hapus</button>`:''}</div>`).join('')||'<div class="empty">Belum ada admin lain.</div>'}</div>
+ <div class="blok"><h3>Admin lain</h3><p>Admin bisa membaca laporan, mengatur tampilan, melihat peta dan statistik, membuat dan memulai Kelas online, serta memakai Mode admin di aplikasi. Mereka harus masuk dengan akun Google memakai email ini.</p><div class="ls" id="adl">${ADMX.map((e,i)=>`<div class="it"><span>${esc(e)}</span>${PEMILIK?`<button class="btn d" data-ah="${i}">Hapus</button>`:''}</div>`).join('')||'<div class="empty">Belum ada admin lain.</div>'}</div>
  ${PEMILIK?`<div class="tam"><input id="ae" type="email" placeholder="email@gmail.com"><button class="btn" id="at">Tambah admin</button></div>`:'<p style="margin-top:10px">Hanya pemilik yang bisa mengubah daftar ini.</p>'}</div>`;
  const simpan=async L=>{try{await db.collection('config').doc('admin').set({emails:L,oleh:auth.currentUser.email,t:Date.now()});ADMX=L;tabAdmin();toast('Daftar admin disimpan')}catch(e){toast('Gagal menyimpan: '+(e.code=='permission-denied'?'Firestore Rules belum dipasang':(e.code||e.message)))}};
  $('#isi').onclick=e=>{const h=e.target.closest('[data-ah]');if(h&&confirm('Hapus admin ini?'))simpan(ADMX.filter((_,i)=>i!=+h.dataset.ah));if(e.target.id=='at'){const v=$('#ae').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return toast('Email tidak valid');if(ADMIN.includes(v)||ADMX.includes(v))return toast('Sudah admin');simpan([...ADMX,v])}}}
+
+/* ===== Kelas online: jadwal, mulai / akhiri, tautan rekaman. Suara lewat LiveKit (api/kelas). ===== */
+async function tabKelas(){$('#isi').innerHTML='<div class="empty">Memuat kelas…</div>';
+ let L=[],siap=null;try{L=(await db.collection('kelas').get()).docs.map(d=>({id:d.id,...d.data()}))}catch(e){return $('#isi').innerHTML='<div class="empty">Gagal membaca kelas: '+esc(e.code||e.message)+'. Pastikan Firestore Rules terbaru sudah dipublish.</div>'}
+ try{siap=(await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"cek"}'})).ok}catch(e){}
+ const jam=t=>t?new Date(t).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}):'-',st={live:'● Live',jadwal:'Terjadwal',selesai:'Selesai'};
+ L.sort((a,b)=>({live:0,jadwal:1,selesai:2}[a.status]??1)-({live:0,jadwal:1,selesai:2}[b.status]??1)||(a.status=='selesai'?(b.mulai||0)-(a.mulai||0):(a.mulai||0)-(b.mulai||0)));
+ $('#isi').innerHTML=(siap===false?'<div class="blok" style="border-color:#e0a030"><h3>Server suara belum disiapkan</h3><p>Isi LIVEKIT_URL, LIVEKIT_API_KEY, dan LIVEKIT_API_SECRET di Vercel (Settings › Environment Variables), lalu Redeploy. Sebelum itu jamaah belum bisa masuk kelas.</p></div>':'')
+ +'<div class="blok" style="border-color:#e0a030"><h3>Batas paket gratis LiveKit</h3><p>Suara kelas memakai LiveKit Cloud paket gratis. Jatah menit pemakaiannya terbatas tiap bulan (dihitung per pendengar per menit). Bila habis, kelas tidak bisa dimasuki sampai bulan berikutnya. Pantau di <a href="https://cloud.livekit.io" target="_blank" rel="noopener">cloud.livekit.io</a>.</p></div>'
+ +`<div class="blok"><h3>Buat kelas</h3><p>Hanya admin yang bisa membuat dan memulai kelas. Admin bisa ditambah di tab Admin. Pengajar memulai kelas dari aplikasi (Kelas online › Mulai kelas) agar mikrofonnya tersambung.</p>
+  <div class="fl" style="display:grid;gap:8px"><input id="kj" maxlength="80" placeholder="Judul, mis. Ngaji Aqidatul Awam"><input id="kp" maxlength="60" placeholder="Pengajar"><input id="kw" type="datetime-local"><input id="kk" maxlength="160" placeholder="Keterangan (opsional)"><input id="ky" type="url" placeholder="Link live streaming YouTube (opsional)">
+  <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kr" style="flex:none;height:auto"> Rekam kelas (disimpan di HP pengajar)</label><button class="btn" id="kb">Simpan jadwal</button></div></div>`
+ +`<div class="blok"><h3>Daftar kelas</h3><div class="ls">${L.map(k=>`<div class="it" style="flex-wrap:wrap"><span style="flex:1;min-width:180px"><b>${esc(k.judul||'Kelas')}</b><br><small>${st[k.status]||'Terjadwal'} · ${jam(k.mulai)}${k.pengajar?' · '+esc(k.pengajar):''}${k.rekam?' · direkam':''}${k.yt?' · YouTube':''}</small>${k.status=='selesai'?`<br><input data-kru="${k.id}" placeholder="Tautan rekaman (Drive/YouTube)" value="${esc(k.rekaman||'')}" style="width:100%;margin-top:6px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit">`:''}</span>
+  ${k.status=='live'?`<button class="btn s" data-kst="${k.id}" data-v="selesai">Akhiri</button>`:k.status!='selesai'?`<button class="btn s" data-kst="${k.id}" data-v="live">Mulai</button>`:`<button class="btn s" data-krs="${k.id}">Simpan tautan</button>`}<button class="btn d" data-kh="${k.id}">Hapus</button></div>`).join('')||'<div class="empty">Belum ada kelas.</div>'}</div></div>`;
+ const d=new Date(Date.now()+3600e3);d.setMinutes(0,0,0);$('#kw').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
+ $('#isi').onclick=async e=>{const t=e.target;try{
+  if(t.id=='kb'){const j=$('#kj').value.trim();if(!j)return toast('Isi judul');await db.collection('kelas').add({judul:j,pengajar:$('#kp').value.trim(),ket:$('#kk').value.trim(),mulai:new Date($('#kw').value).getTime()||Date.now(),status:'jadwal',rekam:$('#kr').checked,yt:((($('#ky').value||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/|shorts\/))([\w-]{11})/)||[])[1]||''),oleh:auth.currentUser.email,dibuat:Date.now()});toast('Kelas dijadwalkan');return tabKelas()}
+  const s=t.closest('[data-kst]');if(s){const v=s.dataset.v;await db.collection('kelas').doc(s.dataset.kst).update(v=='live'?{status:'live',mulai:Date.now()}:{status:v});toast(v=='live'?'Kelas dimulai. Buka aplikasi untuk berbicara.':'Kelas diakhiri');return tabKelas()}
+  const r=t.closest('[data-krs]');if(r){const v=$(`[data-kru="${r.dataset.krs}"]`).value.trim();if(v&&!/^https?:\/\//.test(v))return toast('Tautan harus diawali https://');await db.collection('kelas').doc(r.dataset.krs).update({rekaman:v});return toast('Tautan rekaman disimpan')}
+  const h=t.closest('[data-kh]');if(h&&confirm('Hapus kelas ini?')){await db.collection('kelas').doc(h.dataset.kh).delete();return tabKelas()}
+ }catch(x){toast('Gagal: '+(x.code=='permission-denied'?'Firestore Rules belum dipasang':(x.code||x.message)))}}}
 
 /* ===== Pengaturan dashboard (pojok kanan atas): tema Ikuti perangkat / Terang / Gelap, buka aplikasi, keluar ===== */
 /* "Ikuti aplikasi" (auto): sama dengan tema yang dipilih di aplikasi Fadzkuruuni di perangkat ini; bila aplikasi memakai tema perangkat, ikut perangkat */

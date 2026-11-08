@@ -6,11 +6,13 @@ const SETPAGES={};
 /* Kelompok seperti Pengaturan Instagram: judul kecil abu-abu, pemisah tebal antar kelompok. Urutan kelompok mengikuti urutan item (bisa diatur admin). */
 const SETKEL=[['Akun Anda',['akun']],['Ibadah & pengingat',['salat']],['Tampilan & konten',['tampilan','beranda']],['Data & perangkat',['offline','izin']],['Info & bantuan',['#/hadits/info','tentang']]];
 const setBaris=x=>`<a class="row${(TATA.sembunyiSet||[]).includes(x[0])?' tah':''}" data-ta="set:${x[0]}" href="${x[0][0]=='#'?x[0]:'#/pengaturan/'+x[0]}"><span class="si">${ic(x[1],20)}</span><span class="t">${esc(x[2])}<br><small>${x[3]}</small></span>${ic('next',18)}</a>`;
-function setKelompok(L){const kel=k=>(SETKEL.find(g=>g[1].includes(k))||['Lainnya'])[0],G=[];L.forEach(x=>{const n=kel(x[0]);let g=G.find(y=>y[0]==n);if(!g)G.push(g=[n,[]]);g[1].push(x)});
+function setKelompok(L){L=L.filter(x=>x[0]!='akun');const kel=k=>(SETKEL.find(g=>g[1].includes(k))||['Lainnya'])[0],G=[];L.forEach(x=>{const n=kel(x[0]);let g=G.find(y=>y[0]==n);if(!g)G.push(g=[n,[]]);g[1].push(x)});
  return G.map(g=>`<section class="setg"><h3>${esc(g[0])}</h3><div class="list">${g[1].map(setBaris).join('')}</div></section>`).join('')}
 P.pengaturan=g=>{if(SETPAGES[g])return SETPAGES[g]();const adm=TADMON&&TDRAF;
- const ph=`<a class="setpro" href="#/pengaturan/akun">${avatarHtml(64)}<span class="t"><b>${esc(S.nm||(FBU&&FBU.displayName)||'Pengguna Fadzkuruuni')}</b><br><small>${FBU?esc(FBU.email||'Sudah masuk'):'Belum masuk · ketuk untuk masuk'}</small></span><span class="sb">Ubah profil</span></a>`;
+ const ph=`<a class="setpro" href="#/pengaturan/akun">${avatarHtml(64)}<span class="t"><b>${esc(S.nm||(FBU&&FBU.displayName)||'Pengguna Fadzkuruuni')}</b><br><small>${FBU?esc(FBU.email||'Sudah masuk'):'Belum masuk · ketuk untuk masuk'}</small></span>${ic('next',18)}</a>`;
  return {html:head('Pengaturan','#/')+ph+`<label class="setcari">${ic('search',18)}<input type="search" id="setq" placeholder="Cari" autocomplete="off"></label>`+(adm?`<div class="list">${SETGROUPS.slice().sort((p,q)=>(TATA.setelan||SETGROUPS.map(x=>x[0])).indexOf(p[0])-(TATA.setelan||SETGROUPS.map(x=>x[0])).indexOf(q[0])).map(setBaris).join('')}</div>`:setKelompok(tataSetelan()))+'<p class="mut setkosong" hidden>Tidak ada pengaturan yang cocok.</p>',
   /* Cari: saring item menurut judul & keterangan; kelompok yang kosong disembunyikan */
   init(){const q=$('#setq');if(!q)return;q.oninput=()=>{const t=q.value.trim().toLowerCase();let ada=0;$$('#view .row[data-ta]').forEach(r=>{const ok=!t||r.textContent.toLowerCase().includes(t);r.hidden=!ok;ada+=ok});
    $$('#view .setg').forEach(s=>s.hidden=!$$('.row[data-ta]:not([hidden])',s).length);$('#view .setkosong').hidden=!!ada}}}};
+/* Setelah status akun termuat, perbarui kepala profil di halaman Pengaturan */
+addEventListener('fbu',()=>{if(location.hash=='#/pengaturan')route()});
