@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.16",
- "body": "Pembaruan Fadzkuruuni 2.6.16 (isi web 2.9.40)\n\n- Notifikasi singkat dan pemberitahuan kelas selalu tampil di depan, tidak tertutup lembar atau latar buram\n- Lembar Pengingat: pilihan aktif ditandai latar lembut dan centang di samping namanya\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.16",
+ "tag_name": "v2.6.17",
+ "body": "Pembaruan Fadzkuruuni 2.6.17 (isi web 2.9.41)\n\n- Widget Jadwal Salat di layar utama kini menampilkan waktu Duha (4 kotak di atas, 3 di bawah, sama dengan Beranda)\n- Video tutorial baru: memasang widget di layar utama HP\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.17",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.16/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.17/fadzkuruuni.apk"
   }
  ]
 }
