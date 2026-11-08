@@ -105,7 +105,7 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id
  if(!navigator.onLine){if(i)i.innerHTML='<p class="mut">Kelas online butuh internet.</p>';return}
  const kk=(KELAS||[]).find(x=>x.id==id)||{};
  if(!paksaLK&&(kk.mode=='mesh'||(kk.mode!='livekit'&&KSIAP===false)))return kelasMasukMesh(id);
- try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await ldjs(LKJS);const L=LivekitClient,R=new L.Room({adaptiveStream:true,dynacast:true});
+ try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await ldjs(LKJS);const L=LivekitClient,R=new L.Room({adaptiveStream:true,dynacast:true,stopMicTrackOnMute:true});
   KR={id,room:R,admin:!!t.admin,diam:false,judul:((KELAS||[]).find(x=>x.id==id)||{}).judul||'Kelas online'};const ub=()=>KR&&KR.room===R&&kelasInfo();
   R.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind=='video'){const st=new MediaStream([tr.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(p,st):kSetVid(p,st);return ub()}if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
    .on(L.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='video'&&pub.track){const st=new MediaStream([pub.track.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(R.localParticipant,st):kSetVid(R.localParticipant,st);ub()}})
@@ -165,16 +165,16 @@ document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-kcam]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.camOn;try{await lp.setCameraEnabled(on);KR.camOn=on;
   let st=null;if(on){if(R.mode=='mesh')st=R.camStream();else{const pub=lp.getTrackPublication(LivekitClient.Track.Source.Camera);if(pub&&pub.track)st=new MediaStream([pub.track.mediaStreamTrack])}}kSetVid(lp,st)}
   catch(x){toast('Kamera belum diizinkan. Izinkan kamera di pengaturan HP.')}return kelasInfo()}
- if(t.closest('[data-klayar]')&&KR&&!KR.layarOn&&!t.closest('[data-klayar]').dataset.ok){const b=t.closest('[data-klayar]');return konfirmasi('Bagikan layar dengan suara','Agar suara video (mis. YouTube) terdengar jamaah: pilih tab "Tab Chrome" yang memutar video, lalu nyalakan "Bagikan juga audio tab". Berbagi seluruh layar atau jendela hanya membawa suara di Windows (centang "Bagikan audio sistem"); di Linux dan Mac tidak ada suaranya.','Pilih layar',()=>{b.dataset.ok='1';b.click();delete b.dataset.ok})}
+ if(t.closest('[data-klayar]')&&KR&&!KR.layarOn&&!t.closest('[data-klayar]').dataset.ok){const b=t.closest('[data-klayar]');return konfirmasi('Bagikan layar dengan suara',window.ANDROID?'Seluruh layar HP akan dibagikan. Suara dari aplikasi lain yang sedang diputar (mis. YouTube) ikut terdengar jamaah, terpisah dari mikrofon. Kamu boleh pindah ke aplikasi lain; kelas tetap berjalan. Hentikan dari tombol di kelas atau dari notifikasi.':'Agar suara video (mis. YouTube) terdengar jamaah: pilih tab "Tab Chrome" yang memutar video, lalu nyalakan "Bagikan juga audio tab". Berbagi seluruh layar atau jendela hanya membawa suara di Windows (centang "Bagikan audio sistem"); di Linux dan Mac tidak ada suaranya.','Pilih layar',()=>{b.dataset.ok='1';b.click();delete b.dataset.ok})}
  if(t.closest('[data-klayar]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.layarOn;
   try{if(R.mode=='mesh'){const st=await lp.setScreenShare(on);kSetLayar(lp,st||null)}else{await lp.setScreenShareEnabled(on,{audio:LAYAR_OPSI.audio,systemAudio:'include',selfBrowserSurface:'exclude',surfaceSwitching:'include',preferCurrentTab:false,video:{displaySurface:'browser'}});const pub=lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);kSetLayar(lp,on&&pub&&pub.track?new MediaStream([pub.track.mediaStreamTrack]):null)}KR.layarOn=on;if(on)KR.pin=null}
   catch(x){if(!(x&&x.name=='NotAllowedError'))toast('Layar tidak bisa dibagikan dari perangkat ini.')}
-  if(on&&KR&&KR.layarOn)toast(kLayarSuara()?'Layar dan suaranya sedang dibagikan':'Layar dibagikan TANPA suara. Untuk video ber-suara, bagikan ulang dan pilih tab Chrome dengan "Bagikan juga audio tab" menyala.',7000)
+  if(on&&KR&&KR.layarOn)toast(kLayarSuara()?'Layar dan suaranya sedang dibagikan':window.ANDROID?'Layar dibagikan tanpa suara (suara aplikasi lain butuh Android 10 ke atas dan izin mikrofon).':'Layar dibagikan TANPA suara. Untuk video ber-suara, bagikan ulang dan pilih tab Chrome dengan "Bagikan juga audio tab" menyala.',7000)
   return kelasInfo()}
  /* Ketuk kotak peserta = sorot di panggung besar; ketuk panggung = kembali */
  const pin=t.closest('.kzt[data-kpin]');if(pin&&KR){KR.pin=pin.dataset.kpin;return kelasInfo()}
  if(t.closest('#kzs')&&KR&&KR.pin){KR.pin=null;return kelasInfo()}
- if(t.closest('[data-kmic]')&&KR){const lp=KR.room.localParticipant;const on=!lp.isMicrophoneEnabled;try{await lp.setMicrophoneEnabled(on);toast(on?'Mikrofon aktif':'Mikrofon dimatikan')}catch(x){toast('Mikrofon belum diizinkan. Izinkan mikrofon di pengaturan HP.')}return kelasInfo()}
+ if(t.closest('[data-kmic]')&&KR){const lp=KR.room.localParticipant;const on=!lp.isMicrophoneEnabled;try{await lp.setMicrophoneEnabled(on);/* LiveKit: lepas jalur mikrofon sepenuhnya saat dimatikan (perangkat mikrofon tidak lagi dipakai) */if(!on&&KR.room.mode!='mesh'){const pub=lp.getTrackPublication&&lp.getTrackPublication(LivekitClient.Track.Source.Microphone);if(pub&&pub.track)try{await lp.unpublishTrack(pub.track,true)}catch(e){}}toast(on?'Mikrofon aktif':'Mikrofon dimatikan')}catch(x){toast('Mikrofon belum diizinkan. Izinkan mikrofon di pengaturan HP.')}return kelasInfo()}
  const iz=t.closest('[data-kizin]');if(iz&&KR){iz.disabled=true;try{if(KR.room.mode=='mesh')await KR.room.izin(iz.dataset.kizin,iz.dataset.boleh=='1');else await kelasToken(KR.id,'izin',{identity:iz.dataset.kizin,boleh:iz.dataset.boleh=='1'})}catch(x){toast('Gagal mengubah izin bicara')}return}
  const ul=t.closest('[data-kulang]');if(ul)return kelasMasuk(ul.dataset.kulang);
  /* Admin: buat / mulai / akhiri / hapus kelas (Firestore lewat SDK, aturan: hanya admin) */
@@ -216,6 +216,30 @@ function kelasForm(col,segar){const e=document.createElement('div');e.className=
 const LAYAR_OPSI={video:{frameRate:{ideal:15,max:20},displaySurface:'browser'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},systemAudio:'include',suppressLocalAudioPlayback:false,selfBrowserSurface:'exclude',surfaceSwitching:'include',preferCurrentTab:false};
 /* Suara layar ada? (berbeda dari mikrofon: ikut terdengar walau mikrofon dimatikan) */
 const kLayarSuara=()=>{if(!KR||!KR.layarOn)return false;const R=KR.room;if(R.mode=='mesh')return !!(R._S.layar&&R._S.layar.getAudioTracks().some(t=>t.readyState=='live'));try{return !!R.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShareAudio)}catch(e){return false}};
+/* ---------- Bagikan layar dari aplikasi Android ----------
+   WebView tidak punya getDisplayMedia. Di aplikasi (APK dengan LayarLayanan), layar ditangkap native (MediaProjection):
+   gambar JPEG & suara PCM diambil lewat jembatan lalu dijadikan jalur video/audio biasa (MediaStreamTrackGenerator),
+   sehingga kelas kecil maupun LiveKit memperlakukannya sama seperti berbagi layar di komputer.
+   Pewaktu memakai worker agar tetap jalan saat pengguna berpindah ke aplikasi lain. */
+function kLayarAndroid(w,h,adaSuara){const G=window.MediaStreamTrackGenerator;let vt,vw,at,aw,cv,cg;
+ if(G&&window.VideoFrame){const g=new G({kind:'video'});vw=g.writable.getWriter();vt=g}else{cv=document.createElement('canvas');cv.width=w;cv.height=h;cg=cv.getContext('2d');vt=cv.captureStream(8).getVideoTracks()[0]}
+ if(adaSuara&&G&&window.AudioData){const g=new G({kind:'audio'});aw=g.writable.getWriter();at=g}
+ let n=-1,k=0,hidup=true,sibuk=0,ats=Math.round(performance.now()*1000);
+ const wk=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),60)'],{type:'text/javascript'})));
+ wk.onmessage=async()=>{if(!hidup)return;k++;
+  if(aw){const b=FadzAndroid.layarSuara();if(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);const q=new Int16Array(u.buffer,0,u.length>>1),f=new Float32Array(q.length);for(let i=0;i<q.length;i++)f[i]=q[i]/32768;
+   try{aw.write(new AudioData({format:'f32',sampleRate:48000,numberOfFrames:f.length,numberOfChannels:1,timestamp:ats,data:f}))}catch(e){}ats+=Math.round(f.length/48000*1e6)}}
+  if(k%2||sibuk)return;const r=FadzAndroid.layarGambar(n);if(!r)return;const i=r.indexOf('|');n=+r.slice(0,i);sibuk=1;
+  try{const bl=await (await fetch('data:image/jpeg;base64,'+r.slice(i+1))).blob(),bm=await createImageBitmap(bl);
+   if(vw){const fr=new VideoFrame(bm,{timestamp:Math.round(performance.now()*1000)});await vw.write(fr);fr.close()}else{if(cv.width!=bm.width){cv.width=bm.width;cv.height=bm.height}cg.drawImage(bm,0,0)}bm.close()}catch(e){}sibuk=0};
+ const henti=()=>{if(!hidup)return;hidup=false;wk.terminate();try{FadzAndroid.layarHenti()}catch(e){}};
+ /* Halaman menghentikan jalur (Hentikan berbagi layar / keluar kelas) → hentikan tangkapan native */
+ [vt,at].forEach(t=>{if(!t)return;const s=t.stop.bind(t);t.stop=()=>{s();henti()}});
+ /* Dihentikan dari notifikasi / sistem → beri tahu kelas seperti saat berbagi layar di komputer dihentikan */
+ window.fzLayarSelesai=()=>{if(!hidup)return;hidup=false;wk.terminate();[vt,at].forEach(t=>{if(t)try{t.dispatchEvent(new Event('ended'))}catch(e){}})};
+ return new MediaStream([vt,at].filter(Boolean))}
+if(window.ANDROID&&window.FadzAndroid&&FadzAndroid.layarMulai&&navigator.mediaDevices&&!navigator.mediaDevices.getDisplayMedia){
+ navigator.mediaDevices.getDisplayMedia=()=>new Promise((ok,gagal)=>{window.fzLayarSiap=(y,w,h,s)=>{window.fzLayarSiap=null;if(!y)return gagal(new DOMException('Ditolak','NotAllowedError'));try{const st=kLayarAndroid(w,h,!!s);st.fzAndroidSuara=!!s;ok(st)}catch(e){try{FadzAndroid.layarHenti()}catch(x){}gagal(e)}};FadzAndroid.layarMulai()})}
 /* ---------- Rekam kelas (di HP pengajar) ----------
    Semua suara (mikrofon pengajar, suara jamaah yang diizinkan bicara, dan suara layar yang dibagikan) dicampur.
    Gambar mengikuti panggung kelas: layar yang sedang dibagikan, atau kamera pengajar, atau kartu judul bila tidak ada video.
