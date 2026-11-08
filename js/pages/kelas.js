@@ -327,7 +327,7 @@ addEventListener('fbu',kelasPantau);
    Saat admin membuat jadwal atau memulai kelas, server (api/push.js) mengirim notifikasi ke semua langganan, sehingga muncul
    walau situs ditutup. Aplikasi Android memakai notifikasi native (KelasCek), jadi tidak didaftarkan di sini. */
 const b64uKe=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
-async function kelasLangganan(){if(window.ANDROID||TPRATINJAU||!('serviceWorker'in navigator)||!('PushManager'in window)||!window.Notification||Notification.permission!='granted'||!cloudOn())return;
+async function kelasLangganan(){if(!kn().on||window.ANDROID||TPRATINJAU||!('serviceWorker'in navigator)||!('PushManager'in window)||!window.Notification||Notification.permission!='granted'||!cloudOn())return;
  try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
   if(!sub){const {kunci}=await (await fetch('api/push',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"kunci"}'})).json();if(!kunci)return;
    sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64uKe(kunci)})}
@@ -335,23 +335,34 @@ async function kelasLangganan(){if(window.ANDROID||TPRATINJAU||!('serviceWorker'
   /* Tanda sudah terdaftar disimpan di peramban ini saja (bukan di S yang ikut tersinkron ke perangkat lain) */
   if(localStorage.fzLangganan==id)return;await fbInit();if(!FBD)return;
   await FBD.collection('langganan').doc(id).set({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,t:Date.now()});localStorage.fzLangganan=id}catch(e){console.warn('langganan kelas',e)}}
-addEventListener('load',()=>setTimeout(kelasLangganan,5000));
+addEventListener('load',()=>setTimeout(()=>{if(window.ANDROID)knTerap();else kelasLangganan()},5000));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')kelasLangganan()});
 /* Admin: kirim notifikasi kelas ke semua peramban yang berlangganan (jenis 'baru' = jadwal baru, 'mulai' = kelas dimulai) */
 async function kelasSiarkan(id,jenis){try{if(typeof FBU=='undefined'||!FBU)return;const idToken=await FBU.getIdToken();
  await fetch('api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({aksi:'kirim',kelas:id,jenis,idToken})})}catch(e){}}
+/* Pengaturan notifikasi kelas (Pengaturan › Waktu Salat & Notifikasi › Kelas online), terpisah dari adzan:
+   on = semua notifikasi kelas; baru = jadwal baru; mulai = kelas dimulai; ingat = 10 menit sebelum; senyap = tanpa bunyi saat adzan berbunyi */
+const KN_AWAL={on:true,baru:true,mulai:true,ingat:true,senyap:true};
+const kn=()=>Object.assign({},KN_AWAL,S.kn||{});
+const knBoleh=j=>{const a=kn();return a.on&&a[j]!==false};
+/* Kirim pengaturan ke aplikasi Android (APK 2.6.5+), dan atur langganan notifikasi peramban */
+function knTerap(){const a=kn();if(window.ANDROID&&window.FadzAndroid&&FadzAndroid.aturKelas){try{FadzAndroid.aturKelas(JSON.stringify(a))}catch(e){}}
+ if(!window.ANDROID){if(a.on)kelasLangganan();else kelasBerhenti()}}
+/* Peramban: berhenti berlangganan notifikasi kelas */
+async function kelasBerhenti(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();const id=localStorage.fzLangganan;
+ if(sub)await sub.unsubscribe();if(id){await fbInit();if(FBD)await FBD.collection('langganan').doc(id).delete().catch(()=>{})}delete localStorage.fzLangganan}catch(e){}}
 /* Aplikasi Android 2.6+: notifikasi sistem ditangani native (KelasCek) agar tidak dobel; halaman hanya menampilkan pemberitahuan di dalam aplikasi */
-function kNotif(judul,isi,id){if(window.ANDROID){if(!(window.FadzAndroid&&FadzAndroid.kelasSegarkan))andPanggil('notifikasi',judul,isi)}
+function kNotif(judul,isi,id,jenis){if(jenis&&!knBoleh(jenis))return;if(window.ANDROID){if(!(window.FadzAndroid&&FadzAndroid.kelasSegarkan))andPanggil('notifikasi',judul,isi)}
  else if(document.hidden&&window.Notification&&Notification.permission=='granted')try{const n=new Notification(judul,{body:isi,icon:'img/icon-192.png',tag:'kelas-'+id});n.onclick=()=>{focus();location.hash='#/kelas/'+id}}catch(e){}
  let b=$('#knotif');if(!b){b=document.createElement('a');b.id='knotif';document.body.append(b)}b.href='#/kelas/'+id;b.innerHTML=`${ic('siar',20)}<span><b>${esc(judul)}</b><small>${esc(isi)}</small></span>`;b.hidden=false;clearTimeout(b.t);b.t=setTimeout(()=>b.hidden=true,9000);b.onclick=()=>b.hidden=true}
 function kelasBeritahu(){let T=null;try{T=JSON.parse(localStorage.fzkelasT||'null')}catch(e){}const awal=!T;T=T||{};const kini=Date.now(),saya=(typeof FBU!='undefined'&&FBU&&FBU.email)||'';
  (KELAS||[]).forEach(k=>{const lama=T[k.id]||'';if(!awal&&k.oleh!==saya){
-   if(k.status=='live'&&lama.indexOf('live')<0&&kini-(k.mulai||0)<3*3600e3)kNotif('Kelas online dimulai',(k.judul||'Kelas')+(k.pengajar?' · '+k.pengajar:'')+'. Ketuk untuk bergabung.',k.id);
-   else if(k.status=='jadwal'&&!lama)kNotif('Kelas baru dijadwalkan',(k.judul||'Kelas')+' · '+kJam(k.mulai),k.id)}
+   if(k.status=='live'&&lama.indexOf('live')<0&&kini-(k.mulai||0)<3*3600e3)kNotif('Kelas online dimulai',(k.judul||'Kelas')+(k.pengajar?' · '+k.pengajar:'')+'. Ketuk untuk bergabung.',k.id,'mulai');
+   else if(k.status=='jadwal'&&!lama)kNotif('Kelas baru dijadwalkan',(k.judul||'Kelas')+' · '+kJam(k.mulai),k.id,'baru')}
   T[k.id]=(k.status||'jadwal')+(lama.indexOf('ingat')>=0?'+ingat':'')});try{localStorage.fzkelasT=JSON.stringify(T)}catch(e){}}
 /* Pengingat 10 menit sebelum kelas terjadwal dimulai (selama aplikasi terbuka; saat tertutup ditangani aplikasi Android) */
 setInterval(()=>{let T={};try{T=JSON.parse(localStorage.fzkelasT||'{}')}catch(e){}let ubah=0;const kini=Date.now();
- (KELAS||[]).forEach(k=>{if(k.status=='jadwal'&&k.mulai&&k.mulai-kini<10*60e3&&k.mulai-kini>-5*60e3&&(T[k.id]||'').indexOf('ingat')<0){kNotif('Kelas segera dimulai',(k.judul||'Kelas')+' · '+kJam(k.mulai),k.id);T[k.id]=(T[k.id]||'jadwal')+'+ingat';ubah=1}});
+ (KELAS||[]).forEach(k=>{if(k.status=='jadwal'&&k.mulai&&k.mulai-kini<10*60e3&&k.mulai-kini>-5*60e3&&(T[k.id]||'').indexOf('ingat')<0){kNotif('Kelas segera dimulai',(k.judul||'Kelas')+' · '+kJam(k.mulai),k.id,'ingat');T[k.id]=(T[k.id]||'jadwal')+'+ingat';ubah=1}});
  if(ubah)try{localStorage.fzkelasT=JSON.stringify(T)}catch(e){}},60e3);
 /* Pilihan format rekaman hanya tampil bila "Rekam kelas" dicentang */
 document.addEventListener('change',e=>{if(e.target.id=='kfr'){const w=$('#kffw');if(w)w.hidden=!e.target.checked}});

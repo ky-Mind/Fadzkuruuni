@@ -87,11 +87,14 @@ async function tokenAkses(sa) {
    saat ditempel, terbungkus tanda kutip, atau dalam bentuk base64 */
 function bacaSA(t) {
   const coba = s => { try { const o = JSON.parse(s); return typeof o == 'string' ? JSON.parse(o) : o; } catch (e) { return null; } };
+  const kunciBaris = s => s.replace(/("private_key"\s*:\s*")([\s\S]*?)(")/, (m, a, k, b) => a + k.replace(/\r?\n/g, '\\n') + b);
+  const satuBaris = s => s.replace(/\r?\n/g, ' ').replace(/(-----BEGIN PRIVATE KEY-----)([\s\S]*?)(-----END PRIVATE KEY-----)/, (m, a, k, b) => a + k.replace(/ /g, '\\n') + b);
   t = t.trim().replace(/^'([\s\S]*)'$/, '$1');
-  return coba(t)
-    || coba(t.replace(/("private_key"\s*:\s*")([\s\S]*?)(")/, (m, a, k, b) => a + k.replace(/\r?\n/g, '\\n') + b))
-    || coba(t.replace(/\r?\n/g, ' ').replace(/(-----BEGIN PRIVATE KEY-----)([\s\S]*?)(-----END PRIVATE KEY-----)/, (m, a, k, b) => a + k.replace(/ /g, '\\n') + b))
-    || (/^[A-Za-z0-9+/=\s]+$/.test(t) ? coba(atob(t.replace(/\s+/g, ''))) : null);
+  if (/^[A-Za-z0-9+/=\s]+$/.test(t)) try { t = atob(t.replace(/\s+/g, '')).trim(); } catch (e) { }
+  /* Pembuka { " atau penutup } kadang hilang saat ditempel ke kolom Vercel */
+  const bentuk = [t, '{' + t + '}', '{"' + t + '}', '{"' + t, '{' + t, t + '}'];
+  for (const x of bentuk) for (const f of [s => s, kunciBaris, satuBaris]) { const o = coba(f(x)); if (o && typeof o == 'object' && o.private_key) return o; }
+  return null;
 }
 /* Keterangan bentuk isi (tanpa membuka isinya) untuk pemeriksaan */
 const bentukSA = t => `panjang ${t.length} karakter, diawali "${t.trim()[0] || ''}", diakhiri "${t.trim().slice(-1)}", ${/private_key/.test(t) ? 'ada' : 'tidak ada'} private_key`;

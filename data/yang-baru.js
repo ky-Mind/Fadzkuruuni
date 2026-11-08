@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.28':['Pengaturan › Waktu Salat & Notifikasi: bagian baru "Notifikasi kelas online" (jadwal baru, kelas dimulai, pengingat, senyap saat adzan, tes notifikasi)','Perbaikan pengiriman notifikasi kelas ke aplikasi Android'],
  '2.9.27':['Geser antarhalaman lebih lancar: geser beruntun langsung direspons, halaman Al-Qur\'an lebih ringan','Beranda di komputer: kartu Ratib, Aqidatul Awam, dll. bisa digeser dengan tombol panah atau diseret tetikus'],
  '2.9.26':['Aplikasi Android 2.6.4: notifikasi kelas online muncul seketika saat jadwal dibuat atau kelas dimulai, walau aplikasi ditutup'],
  '2.9.25':['Kitab, Maulid, Wirid & Sholawat: tombol perbesar, layar penuh, dan pengaturan bacaan berfungsi lagi','Al-Qur\'an: geser antarhalaman lebih halus, cepat maupun pelan, dan bisa digeser dari bagian kosong di bawah ayat','Al-Qur\'an: pemutar audio tetap di tempatnya saat halaman digulir','Kelas online: video layar penuh di tengah dan mendatar; video kelas live punya tombol layar penuh','Tombol Coba suara adzan berubah menjadi Hentikan selama diputar','Kelas online: notifikasi jadwal & kelas dimulai muncul walau situs ditutup (peramban)','Kebijakan Privasi & Penghapusan Data: teks dirapikan, tautannya kini juga muncul di aplikasi (bawah Akun & Profil dan Tentang & Bantuan)'],
