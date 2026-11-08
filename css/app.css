@@ -1133,7 +1133,9 @@ section.tb{display:contents}
 @media(hover:hover){.tlb:hover{filter:brightness(1.05)}}
 
 /* Ukuran tampilan di HP: seluruh aplikasi diperkecil (Pengaturan > Tampilan & Bacaan > Ukuran tampilan) */
-@media (max-width:640px){html{zoom:var(--zm,.86)}}
+@media (max-width:640px){html{zoom:var(--zm,.86)}
+ /* Elemen layar penuh (video YouTube / video kelas) tidak ikut diperkecil, agar memenuhi layar dan berada di tengah */
+ :not(html):fullscreen{zoom:calc(1 / var(--zm,.86))}}
 
 /* Kartu waktu salat di Beranda: foto Pondok Fadzkuruuni dengan lapisan gelap, ubin waktu kaca, waktu sekarang krem keemasan */
 .hero.hfoto{padding:20px 16px 18px;border-radius:18px;background:linear-gradient(180deg,rgba(18,32,64,.42),rgba(10,14,22,.62) 70%,rgba(8,10,14,.72)),url(../img/pondok.jpg) center 40%/cover,var(--hero);text-shadow:0 1px 8px rgba(0,0,0,.35)}
@@ -1598,8 +1600,8 @@ body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!im
 .kzw{display:flex;flex-direction:column;align-items:center;gap:8px;color:#c9d1cc;font-size:14px}
 .kzsn{position:absolute;left:10px;bottom:10px;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.55);color:#fff;font-size:13px}
 .kzsn:empty{display:none}.kzsn small{opacity:.75}.kzsn .ic{color:#3ecf8e}
-.kzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}
-.kzg:empty{display:none}
+.kz .kzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}
+.kz .kzg:empty{display:none}
 .kzt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;background:var(--fill,#f0f2f1);outline:2px solid transparent;outline-offset:-2px}
 .kzt.bicara{outline-color:#3ecf8e}
 .kzn{display:flex;align-items:center;gap:3px;max-width:100%;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -1661,3 +1663,9 @@ img.kzav{object-fit:cover;display:block}
 .kbl~.kwarn,#kh.kwarn{color:#b45309;background:color-mix(in srgb,#f59e0b 12%,transparent);border-radius:10px;padding:10px 12px;text-align:left}
 [data-klayar] small{font-weight:400;opacity:.8}
 .kfwk{display:block;margin:-4px 0 8px;font-size:12.5px}
+/* Video kelas live: tombol layar penuh di pojok, dan tampilan saat layar penuh (mendatar, video utuh) */
+.kzfs{position:absolute;top:8px;right:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:rgba(0,0,0,.5);color:#fff;cursor:pointer}
+.kzfs .ic{color:#fff}.kzfs:hover{background:rgba(0,0,0,.7)}
+.kzs:fullscreen{aspect-ratio:auto;width:100%;height:100%;border-radius:0;outline:0;background:#000}
+.kzs:fullscreen video{object-fit:contain}
+.kzs:-webkit-full-screen{aspect-ratio:auto;width:100%;height:100%;border-radius:0;background:#000}

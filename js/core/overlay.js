@@ -10,7 +10,7 @@ addEventListener('popstate',e=>{
  if(OVSKIP>0){OVSKIP--;return}
  const o=document.querySelectorAll('.back-d');if(o.length){const d=o[o.length-1];if(d.dataset.wajib){history.pushState({ov:1},'');wajibGoyang(d);return}OVPOP++;d.remove();return}
  if(FSPUSH&&document.body.classList.contains('full')){FSPUSH=0;fsSet(false,null,true)}});
-function fsSet(on,n,viaBack){S.full=on;save();document.body.classList.toggle('full',on);if(window.QA&&$('#ay'))drawAy($('#ay'),window.QA,n||+location.hash.split('/')[2]);
+function fsSet(on,n,viaBack){S.full=on;save();document.body.classList.toggle('full',on);if(window.QAYAT&&$('#ay'))drawAy($('#ay'),window.QAYAT,n||+location.hash.split('/')[2]);
  if(on){history.pushState({fs:1},'');FSPUSH=1}else if(!viaBack&&FSPUSH&&history.state&&history.state.fs){FSPUSH=0;OVSKIP++;history.back()}}
 /* Dialog yang wajib dijawab (data-wajib) hanya digoyang bila pengguna mencoba menutupnya dengan cara lain */
 const wajibGoyang=d=>{const s=d.querySelector('.sheet');if(!s)return;s.classList.remove('goyang');void s.offsetWidth;s.classList.add('goyang');navigator.vibrate&&navigator.vibrate(30)};

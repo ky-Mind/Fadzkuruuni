@@ -21,25 +21,14 @@ main{max-width:740px;margin:0 auto;padding:20px 16px 56px}
 .dhead h1{margin:0;font-size:clamp(24px,6vw,30px);line-height:1.2;letter-spacing:-.01em}
 .dhead small{display:block;margin-top:2px;color:var(--mut);font-size:13.5px}
 .lead{font-size:16.5px}
-/* Ringkasan */
-.kotak{display:flex;gap:12px;align-items:flex-start;margin:16px 0;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--g) 11%,var(--card));border:1px solid color-mix(in srgb,var(--g) 25%,transparent)}
-.kotak svg{flex:none;width:22px;height:22px;margin-top:3px;fill:none;stroke:var(--g);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-/* Daftar isi */
-.toc{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px;padding:0;list-style:none}
-.toc a{display:inline-block;padding:6px 12px;border-radius:999px;background:var(--fill);color:var(--ink);font-size:13.5px;font-weight:600}
-.toc a:hover{text-decoration:none;background:color-mix(in srgb,var(--g) 15%,var(--fill))}
-/* Bagian */
-.sec{margin:14px 0;padding:18px 18px 12px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
-.sec h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:18.5px;line-height:1.35}
-.sec h2 .no{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb,var(--g) 15%,transparent);color:var(--g);font-size:14px;font-weight:800}
+main>p{margin-bottom:14px}
+/* Bagian: tulisan biasa dengan garis pemisah tipis, seperti surat/artikel (bukan kartu bernomor) */
+.sec{margin:0;padding:20px 0 10px;border-top:1px solid var(--line)}
+.sec h2{margin:0 0 8px;font-size:18px;line-height:1.35}
 p{margin:0 0 10px}
 ul,ol{margin:0 0 10px;padding-left:22px}
 li{margin:0 0 6px}
 li::marker{color:var(--g)}
-/* Langkah bernomor */
-.langkah{counter-reset:l;list-style:none;padding:0}
-.langkah li{counter-increment:l;position:relative;padding-left:40px;min-height:30px}
-.langkah li::before{content:counter(l);position:absolute;left:0;top:0;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--g);color:var(--on);font-size:14px;font-weight:800}
 /* Kontak */
 .kontak{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
 .kontak a{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:var(--g);color:var(--on);font-size:14.5px}
@@ -49,4 +38,4 @@ li::marker{color:var(--g)}
 .alamat{color:var(--mut);font-size:14px}
 .kaki{margin-top:24px;text-align:center;color:var(--mut);font-size:13.5px}
 .kaki a{display:inline-flex;align-items:center;gap:6px;margin:0 6px}
-@media(min-width:700px){main{padding:28px 24px 72px}.sec{padding:22px 24px 14px}}
+@media(min-width:700px){main{padding:28px 24px 72px}}

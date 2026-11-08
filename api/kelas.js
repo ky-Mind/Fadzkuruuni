@@ -3,46 +3,14 @@
    POST {aksi:'token', kelas, nama, idToken?}            → {url, token, identity, admin}
         Admin (pemilik / daftar config/admin) boleh berbicara; jamaah hanya mendengar. Tamu tanpa akun boleh mendengar.
    POST {aksi:'izin', kelas, idToken, identity, boleh}  → izinkan / cabut izin bicara seorang jamaah (khusus admin). */
+import { FS, jawab, b64u, b64uTeks, verifikasi, adminkah } from './_firebase.js';
+
 export const config = { runtime: 'edge' };
-
-const PID = 'fadzkuruuni-88a8b';
-const PEMILIK = ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
-const FS = `https://firestore.googleapis.com/v1/projects/${PID}/databases/(default)/documents`;
-const JSONH = { 'content-type': 'application/json', 'cache-control': 'no-store' };
-const jawab = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: JSONH });
-
-const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const b64uTeks = s => b64u(new TextEncoder().encode(s));
-const dariB64u = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
 
 async function jwt(payload, rahasia) {
   const kepala = b64uTeks(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' + b64uTeks(JSON.stringify(payload));
   const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(rahasia), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   return kepala + '.' + b64u(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(kepala)));
-}
-
-/* Verifikasi ID token Firebase (RS256, kunci publik Google) */
-let JWKS = null, JWKT = 0;
-async function verifikasi(t) {
-  try {
-    const [h, p, s] = t.split('.'); const H = JSON.parse(new TextDecoder().decode(dariB64u(h))), P = JSON.parse(new TextDecoder().decode(dariB64u(p)));
-    if (!JWKS || Date.now() - JWKT > 3600e3) { JWKS = (await (await fetch('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')).json()).keys; JWKT = Date.now(); }
-    const j = JWKS.find(x => x.kid == H.kid); if (!j) return null;
-    const k = await crypto.subtle.importKey('jwk', j, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-    if (!await crypto.subtle.verify('RSASSA-PKCS1-v1_5', k, dariB64u(s), new TextEncoder().encode(h + '.' + p))) return null;
-    const n = Date.now() / 1000;
-    if (P.aud != PID || P.iss != 'https://securetoken.google.com/' + PID || P.exp < n || !P.sub) return null;
-    return P;
-  } catch (e) { return null; }
-}
-async function adminkah(P, t) {
-  if (!P || !P.email || !P.email_verified) return false;
-  const e = P.email.toLowerCase(); if (PEMILIK.includes(e)) return true;
-  try {
-    const r = await fetch(FS + '/config/admin', { headers: { authorization: 'Bearer ' + t } }); if (!r.ok) return false;
-    const d = await r.json();
-    return ((d.fields?.emails?.arrayValue?.values) || []).some(v => String(v.stringValue || '').toLowerCase() == e);
-  } catch (x) { return false; }
 }
 
 export default async function handler(req) {

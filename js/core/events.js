@@ -28,10 +28,10 @@ document.addEventListener('click',e=>{const t=e.target;
 });
 document.addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-rs]'))return qsheet(()=>route());
- if(t.closest('[data-stop]')){if(window.ANDROID)andPanggil('hentikanAdzan');return stopAdzan()}
- if(t.closest('[data-tsub]'))return window.ANDROID?ujiNotif(1):play(0,1);
+ if(t.closest('[data-stop]'))return hentikanSuara();
+ {const b=t.closest('[data-tsub]');if(b)return cobaTombol(b,()=>window.ANDROID?ujiNotif(1):play(0,1),window.ANDROID?24e4:0)}
  /* Coba notifikasi tiap waktu salat (Subuh memakai suara adzan Subuh) */
- {const w=t.closest('[data-wcoba]');if(w){const k=+w.dataset.wcoba;if(window.ANDROID)return ujiNotif(k==0);play(k,1);try{if(window.Notification&&Notification.permission=='granted')new Notification('Waktu '+WS[k]+' (coba)',{body:'Contoh pengingat adzan Fadzkuruuni.',icon:'img/icon-192.png'})}catch(e){}return toast('Mencoba notifikasi '+WS[k])}}
+ {const w=t.closest('[data-wcoba]');if(w){const k=+w.dataset.wcoba;return cobaTombol(w,()=>{if(window.ANDROID)return ujiNotif(k==0);const p=play(k,1);try{if(window.Notification&&Notification.permission=='granted')new Notification('Waktu '+WS[k]+' (coba)',{body:'Contoh pengingat adzan Fadzkuruuni.',icon:'img/icon-192.png'})}catch(e){}toast('Mencoba notifikasi '+WS[k]);return p},window.ANDROID?24e4:0)}}
  if(t.closest('[data-notif]')){await askNotif();return permFill()}
  const gi=t.closest('[data-gin]');if(gi){const fb=gi.dataset.gin=='fb',nm=fb?'Facebook':'Google';if(window.ANDROID){if(!navigator.onLine)return toast('Butuh internet untuk masuk dengan '+nm);/* Masuk lewat tab Chrome aman (Google & Facebook tidak mengizinkan dari WebView); aplikasi lama hanya punya masukGoogle */return fb?(window.FadzAndroid.masukFacebook?andPanggil('masukFacebook'):toast('Perbarui aplikasi Fadzkuruuni untuk masuk dengan Facebook')):andPanggil('masukGoogle')}if(!window.firebase||!firebase.auth)return toast('Butuh internet untuk masuk dengan '+nm);const pr=fb?new firebase.auth.FacebookAuthProvider():new firebase.auth.GoogleAuthProvider();return firebase.auth().signInWithPopup(pr).catch(err=>{const c=err.code||'';if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment')return firebase.auth().signInWithRedirect(pr);toast(c=='auth/unauthorized-domain'?'Domain ini belum diizinkan di Firebase (Authentication > Settings > Authorized domains)':c=='auth/popup-closed-by-user'?'Masuk dibatalkan':c=='auth/operation-not-allowed'||c=='auth/configuration-not-found'?'Masuk dengan '+nm+' belum diaktifkan oleh pengelola aplikasi':c=='auth/account-exists-with-different-credential'?'Email ini sudah terdaftar lewat cara masuk lain. Coba masuk dengan Google.':fb?FBGAGAL+' ('+c+')':'Gagal masuk: '+c)})}
  if(t.closest('[data-gout]'))return konfirmasi('Keluar dari akun?','Foto profil dan nama panggilan tersimpan di akunmu dan akan kembali saat kamu masuk lagi.','Keluar',()=>firebase.auth().signOut().then(()=>{FBU=null;S.foto=null;S.nm='';S.ct=0;try{localStorage.fz=JSON.stringify(S)}catch(e){}tataNav();route()}));
@@ -143,31 +143,33 @@ let GSTAB=0;function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.
   const h=location.hash||'#/',[a,b]=h.slice(2).split('/');let L=$(d>0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
   if(L)tujuan=L.getAttribute('href');else if(!$('#view .pnav')&&tataNavR().includes(a)&&!b){const N=tataNavR(),k=N.indexOf(a);tujuan=N[k+d]!=null?'#/'+N[k+d]:null}
   if(tujuan)peekHal(vHtml(tujuan))};
+ /* Halaman jadi lapisan GPU sendiri hanya selama digeser ke samping (cukup dipindah, tidak digambar ulang tiap frame).
+    Jangan dipasang sejak disentuh: will-change:transform membuat elemen position:fixed di dalam #view (mis. pemutar audio
+    Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
+ const gsLapis=()=>v.classList.add('gsj');
  v.addEventListener('touchstart',e=>{sx=null;if(sibuk||!gsHP()||e.touches.length!=1||document.body.classList.contains('kfull')||gsHalang(e.target))return;
   const t=e.touches[0];sx=t.clientX;sy=t.clientY;t0=Date.now();dx=0;lock=null;mode='';jejak=[];
-  /* Halaman jadi lapisan GPU sendiri sejak disentuh: saat digeser cukup dipindah, tidak digambar ulang tiap frame */
-  v.classList.add('gsj');
   /* Jarak jari (piksel layar) diubah ke piksel CSS: di HP seluruh tampilan memakai zoom, isi harus tepat menempel di jari */
   k=v.getBoundingClientRect().width/v.offsetWidth||1;
   /* Tepi kiri di subhalaman: geser kembali */
   if(t.clientX<24&&document.body.classList.contains('subhal'))mode='back';
-  /* Isi surah punya geser sendiri (halaman kartu / surah sebelah, lihat qReader di js/pages/quran.js) */
-  else if(e.target.closest('#ay'))sx=null},{passive:true});
+  /* Halaman surah punya geser sendiri di seluruh halaman (halaman kartu / surah sebelah, lihat qReader di js/pages/quran.js) */
+  else if(v.querySelector(':scope > #ay'))sx=null},{passive:true});
  v.addEventListener('touchmove',e=>{if(sx===null)return;
   if(e.touches.length!=1){const h=lock=='h';sx=null;if(h)meluncur(0,pulih);return}
   const x=(e.touches[0].clientX-sx)/k,y=(e.touches[0].clientY-sy)/k,kini=performance.now();jejak.push([kini,x]);while(jejak.length>2&&kini-jejak[0][0]>100)jejak.shift();
   if(lock===null){if(Math.abs(x)<12&&Math.abs(y)<12)return;
-   if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
+   if(mode=='back'){lock=x>0&&x>Math.abs(y)?'h':'v';if(lock=='h'){gsLapis();dir=-1;tujuan=tujuanKembali();Object.assign(v.style,{position:'relative',zIndex:'1',background:'var(--bg)'});peekHal(vHtml(tujuan),1)}}
    else{lock=Math.abs(x)>Math.abs(y)*1.6&&!(window.ptrTarik&&ptrTarik())?'h':'v';if(lock=='h'){
     /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
     /* Halaman menu bawah (mis. Al-Qur'an): geser di mana saja selalu ke halaman besar sebelah (Beranda / Fadz AI); tab (Surah/Juz/Riwayat) hanya lewat ketukan */
     const [ra,rb]=(location.hash||'#/').slice(2).split('/'),akar=tataNavR().includes(ra)&&!rb;
-    const ti=!akar&&tabSemua().length>1?tabIsi():null;/* Geser di mana saja di bawah judul (termasuk ruang kosong di bawah isi) = pindah tab */mode=ti&&!e.target.closest('.bar')?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';v.style.overflowY='hidden';if(el)el.classList.add('gsj');pilihSebelah(x<0?1:-1)}else v.classList.remove('gsj')}}
+    const ti=!akar&&tabSemua().length>1?tabIsi():null;/* Geser di mana saja di bawah judul (termasuk ruang kosong di bawah isi) = pindah tab */mode=ti&&!e.target.closest('.bar')?'tab':'hal';el=mode=='tab'?ti:null;v.style.position='relative';v.style.overflowY='hidden';gsLapis();if(el)el.classList.add('gsj');pilihSebelah(x<0?1:-1)}}}
   if(lock!='h')return;
   if(mode=='back'){dx=Math.max(0,x);jadwal(dx);return}
   /* Arah berbalik melewati titik awal: ganti isi sebelah yang ditampilkan */
   const nd=x<0?1:-1;if(nd!=dir&&x!=0)pilihSebelah(nd);dx=x;jadwal(tujuan?dx:dx*.25)},{passive:true});
- const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h){v.classList.remove('gsj');return}cancelAnimationFrame(raf);raf=0;
+ const lepas=()=>{if(sx===null)return;const h=lock=='h';sx=null;if(!h)return;cancelAnimationFrame(raf);raf=0;
   /* Kecepatan dari gerakan ~100 ms terakhir (bukan rata-rata sejak menyentuh): kibasan cepat langsung meluncur */
   const j0=jejak[0],j1=jejak[jejak.length-1],vJ=j0&&j1&&j1[0]>j0[0]?(j1[1]-j0[1])/(j1[0]-j0[0]):0;
   const w=W(),vel=Math.abs(vJ)>Math.abs(dx/Math.max(1,Date.now()-t0))?vJ:dx/Math.max(1,Date.now()-t0),ms=Math.max(140,Math.min(GS_DUR,(w-Math.abs(dx))/Math.max(.6,Math.abs(vel))));

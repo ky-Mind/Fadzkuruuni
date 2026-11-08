@@ -4,6 +4,7 @@
 /* Gambar halaman & PDF kitab (±180 MB) dilayani GitHub Pages dari repo yang sama, bukan Vercel, agar setiap deployment Vercel kecil.
    Saat uji lokal tetap dari folder sendiri. */
 const KITAB_ASAL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'':'https://ky-mind.github.io/Fadzkuruuni/';
+/* Pembaca kitab yang sedang terbuka disimpan di window.KBACA (ke, cur, stabil, tampil). Jangan memakai nama KR: itu milik kelas online (js/pages/kelas.js). */
 const padn=n=>String(n).padStart(2,'0'),pgUrl=(j,n)=>KITAB_ASAL+j.pola.replace('{n}',padn(n));
 const kitabCss=h=>{if(!h||document.querySelector('link[data-kc="'+h+'"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=h;l.dataset.kc=h;document.head.append(l)};
 const kitabAmbil=async id=>{const d=KITAB_DAFTAR.find(x=>x.id==id);if(!d||!d.berkas)return null;if(!KITAB_ISI[id])await ldjs(d.berkas);const k=KITAB_ISI[id];if(k&&k.css)kitabCss(k.css);return k||null};
@@ -23,13 +24,13 @@ const kwarna=()=>S.kw||(S.kinv===false?'asli':'tema'),kwKls=()=>({tema:'inv',sep
 /* Cara membaca di layar penuh (berlaku untuk semua kitab): 'geser' = satu halaman per layar, geser kanan/kiri;
    'gulir' = semua halaman bersambung ke bawah seperti PDF */
 const kGeser=()=>document.body.classList.contains('kfull')&&!document.body.classList.contains('kgulir');
-function kitabMode(m){S.kmode=m;save();window.KR&&KR.stabil&&KR.stabil();const R=window.KR,n=R&&$('#kp')?R.cur():0;document.body.classList.toggle('kgulir',m=='gulir');$$('[data-kmd]').forEach(b=>b.classList.toggle('on',b.dataset.v==m));if(n)setTimeout(()=>R.ke(n),40)}
-function kitabFull(on,pulih){S.kfull=on;save();window.KR&&KR.stabil&&KR.stabil();document.body.classList.toggle('kfull',on);document.body.classList.toggle('kgulir',S.kmode=='gulir');if(window.ANDROID)andPanggil('layarPenuh',!!on);const b=$('[data-kfs]');if(b)b.classList.toggle('on',on);const R=window.KR;if(R&&$('#kp')){const n=R.cur();setTimeout(()=>{R.ke(n);on&&R.tampil&&R.tampil()},40)}if(pulih)return;
+function kitabMode(m){S.kmode=m;save();window.KBACA&&KBACA.stabil&&KBACA.stabil();const R=window.KBACA,n=R&&$('#kp')?R.cur():0;document.body.classList.toggle('kgulir',m=='gulir');$$('[data-kmd]').forEach(b=>b.classList.toggle('on',b.dataset.v==m));if(n)setTimeout(()=>R.ke(n),40)}
+function kitabFull(on,pulih){S.kfull=on;save();window.KBACA&&KBACA.stabil&&KBACA.stabil();document.body.classList.toggle('kfull',on);document.body.classList.toggle('kgulir',S.kmode=='gulir');if(window.ANDROID)andPanggil('layarPenuh',!!on);const b=$('[data-kfs]');if(b)b.classList.toggle('on',on);const R=window.KBACA;if(R&&$('#kp')){const n=R.cur();setTimeout(()=>{R.ke(n);on&&R.tampil&&R.tampil()},40)}if(pulih)return;
  const de=document.documentElement,fe=document.fullscreenElement||document.webkitFullscreenElement;
  if(on&&!fe)(de.requestFullscreen||de.webkitRequestFullscreen||(()=>Promise.reject())).call(de).catch(()=>{});else if(!on&&fe)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}
 /* Keluar layar penuh lewat tombol Esc/kembali di perangkat: tampilan ikut kembali normal */
-addEventListener('keydown',e=>{if(!document.body.classList.contains('kfull')||!window.KR||!$('#kp')||e.target.closest?.('input'))return;
- if(e.key=='ArrowLeft'||e.key=='ArrowRight'){e.preventDefault();KR.ke(KR.cur()+(e.key=='ArrowLeft'?1:-1))}else if(e.key=='Escape')kitabFull(false)});
+addEventListener('keydown',e=>{if(!document.body.classList.contains('kfull')||!window.KBACA||!$('#kp')||e.target.closest?.('input'))return;
+ if(e.key=='ArrowLeft'||e.key=='ArrowRight'){e.preventDefault();KBACA.ke(KBACA.cur()+(e.key=='ArrowLeft'?1:-1))}else if(e.key=='Escape')kitabFull(false)});
 addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('kfull'))kitabFull(false,1)});
 /* Hasil pencarian bab kitab (data-kh="id|juz|halaman") membuka kitab langsung di halaman babnya */
 let KITAB_KE=null;
@@ -42,7 +43,7 @@ function kitabHalaman(el,k,j){let cur=0;const key=k.id+'-'+j.no,kkh=KITAB_KE&&KI
 <div class="kfo" id="kfo"><button type="button" class="kfo-x" data-kfx aria-label="Keluar layar penuh">×</button><button type="button" class="kfo-x kfo-s" data-kfset aria-label="Pengaturan membaca">${ic('sliders',16)}</button><span id="kfp">${last} / ${j.halaman}</span></div>
 ${pnav(jn(j.no-1)&&[`#/kitab/${k.id}/${j.no-1}`,'Juz '+(j.no-1)],jn(j.no+1)&&[`#/kitab/${k.id}/${j.no+1}`,'Juz '+(j.no+1)])}`;
  const zoom=v=>{S.kz=Math.max(60,Math.min(400,v));save();$$('#kp img').forEach(i=>i.style.width=S.kz+'%');$('#kzv').textContent=S.kz+'%';const r=$('#kzr');if(r){r.value=S.kz;$('#kzrv').textContent=S.kz+'%'}};
- const ke=n=>{const t=$('#kp img[data-p="'+n+'"]');if(!t)return toast('Halaman tidak ada');window.KR&&KR.stabil&&KR.stabil();if(kGeser()){const kp=$('#kp');kp.scrollLeft=-(n-1)*kp.clientWidth;cur=n;$('#kfp').textContent=n+' / '+j.halaman;$('#kgo').value=n}else{t.scrollIntoView({block:'start'});cur=n}setTimeout(()=>{y0=vw.scrollTop;ktb.classList.remove('smb')},60)};
+ const ke=n=>{const t=$('#kp img[data-p="'+n+'"]');if(!t)return toast('Halaman tidak ada');window.KBACA&&KBACA.stabil&&KBACA.stabil();if(kGeser()){const kp=$('#kp');kp.scrollLeft=-(n-1)*kp.clientWidth;cur=n;$('#kfp').textContent=n+' / '+j.halaman;$('#kgo').value=n}else{t.scrollIntoView({block:'start'});cur=n}setTimeout(()=>{y0=vw.scrollTop;ktb.classList.remove('smb')},60)};
  $$('[data-kz]').forEach(b=>b.onclick=()=>zoom(z()+ +b.dataset.kz));
  $('#kgf').onsubmit=e=>{e.preventDefault();ke(+$('#kgo').value);$('#kgo').blur()};$('#kgo').onchange=()=>ke(+$('#kgo').value);$('#kgo').onfocus=e=>e.target.select();
  /* Judul, tombol layar penuh, dan pengaturan ikut menempel di atas bersama bilah halaman */
@@ -74,11 +75,11 @@ ${tanpaJuz(k)?`<div class="ksh-l">Unduh</div><div class="ksh-c kdl"><div class="
   $('#klj',e).onchange=x=>{S.klj=x.target.checked;save()};$('#kfs',e).onchange=x=>kitabFull(x.target.checked);segBind('kmd',kitabMode)};
  /* Layar penuh: satu halaman memenuhi layar, geser kanan/kiri untuk pindah halaman (urutan kanan-ke-kiri seperti kitab Arab).
     Ketuk halaman untuk memunculkan nomor halaman & tombol keluar sebentar. */
- cur=last;window.KR={ke,cur:()=>cur};kitabCubit($('#kp'),zoom);document.body.classList.toggle('kgulir',S.kmode=='gulir');const kfo=$('#kfo');let kt=0;const kfoTampil=()=>{kfo.classList.add('on');clearTimeout(kt);kt=setTimeout(()=>kfo.classList.remove('on'),2500)};
+ cur=last;window.KBACA={ke,cur:()=>cur};kitabCubit($('#kp'),zoom);document.body.classList.toggle('kgulir',S.kmode=='gulir');const kfo=$('#kfo');let kt=0;const kfoTampil=()=>{kfo.classList.add('on');clearTimeout(kt);kt=setTimeout(()=>kfo.classList.remove('on'),2500)};
  /* Ketuk sekali = munculkan/sembunyikan; ditunda sebentar agar ketuk dua kali (perbesar/stabilkan) tidak ikut memicunya */
  let kk=0;$('#kp').onclick=()=>{if(!document.body.classList.contains('kfull'))return;clearTimeout(kk);kk=setTimeout(()=>{if(Date.now()-(+$('#kp')?.dataset.dbl||0)<500)return;kfo.classList.contains('on')?kfo.classList.remove('on'):kfoTampil()},330)};
  $('[data-kfset]').onclick=()=>{kfo.classList.remove('on');ksBuka()};
- $('[data-kfx]').onclick=()=>kitabFull(false);window.KR.tampil=kfoTampil;
+ $('[data-kfx]').onclick=()=>kitabFull(false);window.KBACA.tampil=kfoTampil;
  /* Di layar penuh, halaman aktif dihitung langsung dari posisi geser (lebih cepat & pasti daripada pengamat visibilitas) */
  const kp=$('#kp');let ts=0;kp.addEventListener('scroll',()=>{if(!kGeser())return;const p=Math.min(j.halaman,Math.round(Math.abs(kp.scrollLeft)/kp.clientWidth)+1);if(p==cur)return;
   cur=p;$('#kfp').textContent=p+' / '+j.halaman;$('#kgo').value=p;$('#kpb').style.width=p/j.halaman*100+'%';(S.kh=S.kh||{})[key]=p;clearTimeout(ts);ts=setTimeout(save,700)},{passive:true});
@@ -116,7 +117,7 @@ function kitabCubit(kp,zoomKe){if(!kp)return;const kpi=kp.querySelector('.kpi');
  const terap=()=>{if(img)img.style.transform=sk>1||tx||ty?`translate(${tx}px,${ty}px) scale(${sk})`:''};
  const batas=()=>{if(!img)return;const w=Math.max(0,img.clientWidth*(sk-1)/2),h=Math.max(0,img.clientHeight*(sk-1)/2);tx=Math.max(-w,Math.min(w,tx));ty=Math.max(-h,Math.min(h,ty))};
  const stabil=()=>{if(img){img.style.transition='transform .22s ease';sk=1;tx=ty=0;terap();const i=img;setTimeout(()=>i.style.transition='',240)}img=null;kunci(false)};
- const halIni=()=>kp.querySelector(`img[data-p="${window.KR?KR.cur():1}"]`);
+ const halIni=()=>kp.querySelector(`img[data-p="${window.KBACA?KBACA.cur():1}"]`);
  /* Titik layar m tetap di bawah jari saat skala berubah dari s0 ke s1 (asal transformasi = tengah gambar) */
  const fokus=(m,s0,t0x,t0y,s1,m1=m)=>{const r=img.getBoundingClientRect(),cx=r.left+r.width/2-t0x,cy=r.top+r.height/2-t0y;
   /* r sudah memuat translate+scale; tengah tanpa transformasi = tengah r dikurangi translate */
@@ -160,4 +161,4 @@ function kitabCubit(kp,zoomKe){if(!kp)return;const kpi=kp.querySelector('.kpi');
   const V=vs(),kr0=kpi.getBoundingClientRect(),hr=kp.getBoundingClientRect(),ox=e.clientX-kr0.left,oy=e.clientY-kr0.top,r=z1/z0;zoomKe(z1);
   kp.scrollLeft=Math.max(0,ox*r-(e.clientX-hr.left));const kr1=kpi.getBoundingClientRect();V.scrollTop+=kr1.top-kr0.top+oy*r-(e.clientY-kr0.top)},{passive:false});
  /* Pindah halaman/mode: kunci & perbesaran mode Geser dilepas */
- window.KR&&(KR.stabil=stabil)}
+ window.KBACA&&(KBACA.stabil=stabil)}
