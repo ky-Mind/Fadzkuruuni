@@ -1,0 +1,17 @@
+{
+ "id": "aqidatul-awam-fadzkuruuni",
+ "judul": "Aqidatul Awam (Edisi Majelis Fadzkuruuni)",
+ "arab": "متن عقيدة العوام",
+ "pengarang": "Syekh Ahmad Al-Marzuqi · dinukil & disyarah Khadim Majelis Fadzkuruuni",
+ "ket": "Matan akidah 50, edisi Majelis Fadzkuruuni",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 13,
+   "pola": "kitab/aqidatul-awam-fadzkuruuni/hal/j1-{n}.webp",
+   "pdf": "kitab/aqidatul-awam-fadzkuruuni/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.7072
+}

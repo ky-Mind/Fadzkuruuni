@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "ma-fil-wujud", "judul": "Qasidah Ma fil Wujud", "arab": "ما في الوجود", "pengarang": "Imam Abdullah bin Alawi Al-Haddad", "ket": "Qasidah munajat dengan terjemah, dibaca di Majelis Fadzkuruuni", "juzTotal": 1, "juz": [{"no": 1, "halaman": 3, "pola": "kitab/ma-fil-wujud/hal/j1-{n}.webp", "pdf": "kitab/ma-fil-wujud/pdf/juz-1.pdf"}], "rasio": 0.6538});
