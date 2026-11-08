@@ -51,12 +51,21 @@ service cloud.firestore {
     match /kelas/{id} {
       allow read: if true;
       allow write: if isAdmin();
+      // Pesan di kelas: siapa pun yang membuka kelas boleh mengirim pesan pendek; admin boleh menghapus
+      match /chat/{pesan} {
+        allow read: if true;
+        allow create: if request.resource.data.keys().hasOnly(['nama','teks','t','pid'])
+          && request.resource.data.teks is string && request.resource.data.teks.size() > 0 && request.resource.data.teks.size() <= 500
+          && request.resource.data.nama is string && request.resource.data.nama.size() <= 40;
+        allow delete: if isAdmin();
+      }
       // Kelas kecil (tanpa LiveKit): daftar hadir & sinyal sambungan suara antar-HP. Data sementara, dihapus saat keluar.
       match /mesh/{doc} {
         allow read: if true;
         allow delete: if true;
         allow create, update: if doc.size() <= 24
-          && request.resource.data.keys().hasOnly(['nama','peran','tangan','boleh','t','sdp','host','penuh','bicara'])
+          && request.resource.data.keys().hasOnly(['nama','peran','tangan','boleh','t','sdp','host','penuh','bicara','foto','kamera'])
+          && request.resource.data.get('foto', '').size() <= 20000
           && request.resource.data.get('sdp', '').size() <= 20000
           && request.resource.data.get('nama', '').size() <= 40
           && (request.resource.data.get('peran', 'jamaah') != 'ustaz' || isAdmin())
