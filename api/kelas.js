@@ -47,7 +47,10 @@ async function adminkah(P, t) {
 
 export default async function handler(req) {
   if (req.method != 'POST') return jawab({ galat: 'metode' }, 405);
-  const { LIVEKIT_URL: URL_, LIVEKIT_API_KEY: KEY, LIVEKIT_API_SECRET: RHS } = process.env;
+  const { LIVEKIT_API_KEY: KEY, LIVEKIT_API_SECRET: RHS } = process.env;
+  /* Alamat project LiveKit boleh ditulis tanpa wss:// (seperti di dashboard LiveKit) */
+  let URL_ = String(process.env.LIVEKIT_URL || '').trim().replace(/\/+$/, '');
+  if (URL_ && !/^wss?:\/\//.test(URL_)) URL_ = 'wss://' + URL_.replace(/^https?:\/\//, '');
   if (!URL_ || !KEY || !RHS) return jawab({ galat: 'belum-siap' }, 503);
   let b; try { b = await req.json(); } catch (e) { return jawab({ galat: 'isi' }, 400); }
   if (b.aksi == 'cek') return jawab({ siap: true });

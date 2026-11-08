@@ -51,6 +51,18 @@ service cloud.firestore {
     match /kelas/{id} {
       allow read: if true;
       allow write: if isAdmin();
+      // Kelas kecil (tanpa LiveKit): daftar hadir & sinyal sambungan suara antar-HP. Data sementara, dihapus saat keluar.
+      match /mesh/{doc} {
+        allow read: if true;
+        allow delete: if true;
+        allow create, update: if doc.size() <= 24
+          && request.resource.data.keys().hasOnly(['nama','peran','tangan','boleh','t','sdp','host','penuh','bicara'])
+          && request.resource.data.get('sdp', '').size() <= 20000
+          && request.resource.data.get('nama', '').size() <= 40
+          && (request.resource.data.get('peran', 'jamaah') != 'ustaz' || isAdmin())
+          && (doc != 'status' || isAdmin())
+          && (!('boleh' in request.resource.data) || isAdmin() || (resource != null && request.resource.data.boleh == resource.data.get('boleh', false)));
+      }
     }
 
     match /laporan/{id} {
