@@ -59,7 +59,7 @@ async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi
  if(!baru||!verLebihBaru(baru,kini)){S.upInfo=null;save();upSegar();return paksa&&toast('Aplikasi Android sudah versi terbaru ('+kini+')')}
  if(!paksa&&(S.upTunda||0)>Date.now())return;
  const apk=((j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{}).browser_download_url||j.html_url;S.upInfo={v:baru,url:apk};save();upSegar();
- const cat=String(j.body||'').split('\n').map(x=>x.replace(/^[-*]\s*/,'').trim()).filter(Boolean).slice(0,8);
+ const cat=String(j.body||'').split('\n').filter(x=>/^\s*[-*]\s/.test(x)).map(x=>x.replace(/^\s*[-*]\s*/,'').replace(/\*\*/g,'').trim()).filter(Boolean).slice(0,8);
  pembaruanCek.buka=1;return new Promise(res=>{const e=document.createElement('div');e.className='back-d';
   e.innerHTML=`<div class="sheet upd" role="dialog"><div class="offt-i">${ic('rot',28)}</div><b style="font-size:18px">Pembaruan tersedia</b><p class="mut" style="margin:4px 0 10px">Versi ${esc(baru)} · terpasang ${esc(kini)}</p>
    ${cat.length?`<ul class="upd-l">${cat.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
