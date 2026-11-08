@@ -21,7 +21,8 @@ SETPAGES.offline=()=>({html:head('Offline & Data','#/pengaturan')+OFFL()+`<h2>Da
 function offTawar(){if(TPRATINJAU||typeof DLG=='undefined'||!DLG.semua)return;const I=DLG.semua(),sisa=I.filter(i=>!dlSudah(i));if(!sisa.length)return;
  if(S.offOn){dlSemua(sisa);return}
  const lihat=S.offLihat||[];if(!sisa.some(i=>!lihat.includes(i)))return;
- if($('.back-d')||!navigator.onLine)return setTimeout(offTawar,5000);
+ /* Hanya ditawarkan di Beranda, agar tidak muncul tiba-tiba di tengah halaman lain */
+ if($('.back-d')||!navigator.onLine||!['','#','#/'].includes(location.hash))return setTimeout(offTawar,5000);
  const e=document.createElement('div');e.className='back-d';
  e.innerHTML=`<div class="sheet offt" role="dialog"><div class="offt-i">${ic('down',28)}</div><b style="font-size:18px">Izinkan mode offline?</b>
   <p class="mut" style="margin:8px 0 12px">Unduh semua isi aplikasi (Al-Qur'an, kitab kuning, dan maulid) supaya tetap bisa dibaca tanpa internet. Unduhan berjalan di latar dan bisa dibatalkan kapan saja di Pengaturan › Offline & Data.</p>

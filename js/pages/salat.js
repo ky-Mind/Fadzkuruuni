@@ -24,12 +24,28 @@ P.kiblat=()=>{let b=arahKiblat(S.loc.lat,S.loc.lng);
 <div class="kmf"><button type="button" class="sb" data-kmgps>${ic('pin',14)} Lokasi saya</button><button type="button" class="sb" data-kmsaya>${ic('compass',14)} Ke titikku</button><button type="button" class="sb" data-kmkb>${ic('kaaba',14)} Ka'bah</button><button type="button" class="sb" data-kmrot>${ic('compass',14)} Ikuti kompas</button></div>
 <small class="mut kmk">Garis hijau adalah arah kiblat (jalur terpendek ke Ka'bah). Geser penanda <b>titikmu</b> atau ketuk lama di peta untuk memindahkan lokasi.</small></div>`,
  init(){let pas=0;$('#cmp').onclick=async()=>{try{if(DeviceOrientationEvent.requestPermission&&await DeviceOrientationEvent.requestPermission()!='granted')throw 0}catch(e){return toast('Izin sensor ditolak')}
-  const f=e=>{const h=e.webkitCompassHeading??(e.alpha!=null?360-e.alpha:null);if(h==null||!$('#nd'))return;$('#nd').style.transform=`rotate(${-h}deg)`;
+  /* Arah HP dari sensor, dibuat stabil:
+     - di Android sensor "absolut" (mengacu utara) dipakai; event biasa diabaikan karena nol-nya sembarang dan membuat jarum meloncat
+     - iPhone: webkitCompassHeading; rotasi layar diperhitungkan
+     - dihaluskan dengan rata-rata melingkar (gerakan kecil diredam, belokan besar cepat diikuti)
+     - jarum berputar lewat jalur terpendek (tidak berputar penuh saat melewati 0°/360°), digambar sekali per frame */
+  let hS=null,rot=0,abs=0,tAkhir=0,gbr=0;const t0=performance.now();/* HP tanpa sensor absolut: setelah 1,5 detik sensor biasa tetap dipakai */
+  const sudutLayar=()=>(screen.orientation&&screen.orientation.angle)||window.orientation||0;
+  const gambar=()=>{gbr=0;const nd=$('#nd');if(!nd||hS==null)return;const h=hS;
+   const tuju=-h,d=((tuju-rot)%360+540)%360-180;rot+=d;nd.style.transform=`rotate(${rot.toFixed(2)}deg)`;
    /* Lurus ke kiblat (selisih < 4°): jarum & Ka'bah menyala, getar sekali */
-   const d=Math.abs(((b-h)%360+540)%360-180),ok=d<4;$('.kbl')?.classList.toggle('pas',ok);if(ok&&!pas)getarKe([70,60,70,60,160]);pas=ok;
+   const sel=Math.abs(((b-h)%360+540)%360-180),ok=sel<4;$('.kbl')?.classList.toggle('pas',ok);if(ok&&!pas)getarKe([70,60,70,60,160]);pas=ok;
    /* Peta ikut berputar sesuai arah HP: arah atas peta = arah HP menghadap, jadi garis kiblat sejajar jarum kompas */
-   kompasH=h;if(S.kmrot!==false&&M&&M.setBearing&&!putarJ)putarJ=requestAnimationFrame(()=>{putarJ=0;M&&M.setBearing(-kompasH)});
+   kompasH=h;if(S.kmrot!==false&&M&&M.setBearing)M.setBearing(-h);
    $('#kh').textContent=ok?'Sudah menghadap kiblat.':'Putar badan hingga Ka\'bah di ujung jarum berada di penanda atas.'};
+  const f=e=>{if(!$('#nd'))return;let h=null;
+   if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;
+   else{if(e.type=='deviceorientationabsolute'||e.absolute===true)abs=1;else if(abs||('ondeviceorientationabsolute' in window&&performance.now()-t0<1500))return;
+    if(e.alpha==null)return;h=360-e.alpha}
+   h=((h+sudutLayar())%360+360)%360;
+   const kini=performance.now(),dt=Math.min(.25,(kini-(tAkhir||kini))/1000)||.016;tAkhir=kini;
+   if(hS==null)hS=h;else{const d=((h-hS)%360+540)%360-180,k=Math.min(1,(Math.abs(d)>25?14:5)*dt);hS=((hS+d*k)%360+360)%360}
+   if(!gbr)gbr=requestAnimationFrame(gambar)};
   addEventListener('deviceorientationabsolute',f,true);addEventListener('deviceorientation',f,true);kompasOn=1;rotUI();if(M&&S.kmrot!==false)M.setView([S.loc.lat,S.loc.lng],Math.max(M.getZoom(),15));toast('Kompas aktif')};
   /* Peta (Leaflet + OpenStreetMap / citra satelit Esri): bisa digeser & dicubit seperti Google Maps */
   const kmp=$('#kmp');let M=null,lap={},saya=null,kb=null,gr=null,kompasH=0,putarJ=0,kompasOn=0;
