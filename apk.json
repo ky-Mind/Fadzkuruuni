@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.15",
- "body": "Pembaruan Fadzkuruuni 2.6.15 (isi web 2.9.39)\n\n- Lembar Pengingat waktu salat: tombol Coba ada di semua pilihan bersuara, termasuk Adzan dan pilihan yang sedang aktif\n- Memilih jenis pengingat atau suara tidak lagi membuat lembar dimuat ulang\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.15",
+ "tag_name": "v2.6.16",
+ "body": "Pembaruan Fadzkuruuni 2.6.16 (isi web 2.9.40)\n\n- Notifikasi singkat dan pemberitahuan kelas selalu tampil di depan, tidak tertutup lembar atau latar buram\n- Lembar Pengingat: pilihan aktif ditandai latar lembut dan centang di samping namanya\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.16",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.15/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.16/fadzkuruuni.apk"
   }
  ]
 }
