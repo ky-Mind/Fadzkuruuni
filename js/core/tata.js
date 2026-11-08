@@ -77,6 +77,10 @@ const TSTAT={hal:{},pv:0};let TSTT=0;
 const tKunci=s=>String(s||'lain').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40)||'lain';
 const tHari=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const tJenis=()=>window.ANDROID||/; wv\)/.test(navigator.userAgent)||document.referrer.startsWith('android-app://')?'android':matchMedia('(display-mode: standalone)').matches?'terpasang':'browser';
+/* Merek/model HP untuk statistik (mis. "SM-A055F"); tanpa identitas. Dari Client Hints bila ada, kalau tidak dari user agent */
+let TMODEL='';(async()=>{try{const u=navigator.userAgentData;if(u&&u.getHighEntropyValues){const h=await u.getHighEntropyValues(['model','platform']);if(h.model)TMODEL=h.model;else if(h.platform&&!/android/i.test(h.platform))TMODEL='Komputer '+h.platform}}catch(e){}
+ if(!TMODEL||TMODEL=='K'){const u=navigator.userAgent,m=u.match(/Android [\d.]+; (?:[a-z]{2}[-_][a-zA-Z]{2}; )?([^;)]+?)(?: Build|\))/);TMODEL=m&&m[1]!='K'?m[1].trim():/iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?'Android':/Windows/.test(u)?'Komputer Windows':/Mac OS/.test(u)?'Komputer Mac':/Linux/.test(u)?'Komputer Linux':'Lainnya'}})();
+const tVersi=()=>window.ANDROID&&window.FadzAndroid&&FadzAndroid.versi?'apk '+FadzAndroid.versi():'web '+VER;
 const tStatAktif=()=>!TPRATINJAU&&!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&S.stat!==false;
 function tataCatat(a){if(!tStatAktif())return;const k=tKunci(a||'beranda');TSTAT.hal[k]=(TSTAT.hal[k]||0)+1;TSTAT.pv++;clearTimeout(TSTT);TSTT=setTimeout(tataKirim,30000)}
 function tataKirim(){if(!tStatAktif()||!navigator.onLine)return;const hari=tHari(),F=[];let baru=0;
@@ -88,7 +92,11 @@ function tataKirim(){if(!tStatAktif()||!navigator.onLine)return;const hari=tHari
  TSTAT.hal={};TSTAT.pv=0;
  fetch(FSURL.replace(/\/documents$/,'/documents:commit')+'?key='+FBCFG.apiKey,{method:'POST',keepalive:true,headers:{'content-type':'application/json'},
   body:JSON.stringify({writes:[{transform:{document:'projects/'+FBCFG.projectId+'/databases/(default)/documents/stat/'+hari,fieldTransforms:F}}]})})
-  .then(r=>{if(r.ok&&baru)try{localStorage.fzstat=hari}catch(e){}}).catch(()=>{})}
+  .then(r=>{if(r.ok&&baru){try{localStorage.fzstat=hari}catch(e){}
+   /* Model HP & versi dikirim terpisah: bila Firestore Rules belum diperbarui, hanya kiriman ini yang ditolak (statistik utama tetap tercatat) */
+   const G=[{fieldPath:'model.'+tKunci(TMODEL||'lainnya'),increment:{integerValue:'1'}},{fieldPath:'versi.'+tKunci(tVersi()),increment:{integerValue:'1'}}];
+   fetch(FSURL.replace(/\/documents$/,'/documents:commit')+'?key='+FBCFG.apiKey,{method:'POST',keepalive:true,headers:{'content-type':'application/json'},
+    body:JSON.stringify({writes:[{transform:{document:'projects/'+FBCFG.projectId+'/databases/(default)/documents/stat/'+hari,fieldTransforms:G}}]})}).catch(()=>{})}}).catch(()=>{})}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)tataKirim()});
 
 /* ===== Mode admin di aplikasi: admin yang masuk bisa menggeser/menyembunyikan bagian Beranda, pintasan, Semua Menu, dan Pengaturan ===== */
