@@ -57,3 +57,8 @@ const majelisBagian=(judul,L)=>L.length?`<section class="mjl"><h2 class="mjl-h">
 const blobB64=b=>new Promise((ok,gagal)=>{const r=new FileReader();r.onload=()=>{const s=String(r.result),i=s.indexOf(';base64,');ok(i<0?'':s.slice(i+8))};r.onerror=()=>gagal(r.error);r.readAsDataURL(b)});
 /* Himbauan kecil di akhir bacaan (menggantikan baris sumber/catatan panjang): ajak pembaca melapor bila ada salah teks */
 const KOREKSI='<p class="koreksi">Menemukan kesalahan pada teks? Mohon bantu koreksi lewat <a href="#/lapor">Laporkan</a>.</p>';
+/* Jarak tepi area isi (lihat css "Area isi selebar layar"): dihitung ulang setiap #view berubah lebar (jendela, menu sisi diciutkan) */
+function lebarIsi(){const v=document.getElementById('view'),r=document.documentElement;if(!v||!window.ResizeObserver)return;
+ const atur=()=>{const c=getComputedStyle(v),b=parseFloat(c.getPropertyValue('--gxb'))||24,m=parseFloat(c.getPropertyValue('--vmax'))||760;r.style.setProperty('--gx',Math.max(b,Math.round((v.clientWidth-m)/2+b))+'px')};
+ new ResizeObserver(atur).observe(v);atur()}
+document.readyState=='loading'?document.addEventListener('DOMContentLoaded',lebarIsi):lebarIsi();

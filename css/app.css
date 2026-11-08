@@ -1715,3 +1715,17 @@ body.subhal .qmini,.full .qmini{bottom:calc(18px + env(safe-area-inset-bottom))}
 .knsl button.on{border-color:var(--g);background:var(--g);color:var(--on)}
 .knsa{flex-wrap:wrap}
 .knsa label.sb{cursor:pointer}
+/* Area isi selebar layar (≥600 px): batang gulir di tepi kanan dan bilah atas yang menempel (.rh, .bar.lekat, .ktb) serta
+   kolom tanya Fadz AI (.aif) mentok kiri-kanan. Isi tetap di tengah selebar --vmax karena jarak tepi --gx dihitung js/core/ui.js
+   (lebarIsi) dari lebar #view: gx = max(--gxb, (lebar - --vmax) / 2 + --gxb). Layar penuh kitab memakai jarak tepi biasa. */
+:root{--gxb:24px;--vmax:760px}
+@media(min-width:900px){:root{--vmax:880px}body.nav-off{--vmax:1040px}}
+body.kfull{--gx:24px}
+@media(min-width:600px){
+ html #view,html body.nav-off #view{max-width:none;padding-left:var(--gx,24px);padding-right:var(--gx,24px)}
+ .vpeek{padding-left:var(--gx,24px);padding-right:var(--gx,24px)}
+ .rh,.bar.lekat,.ktb,.aif{margin-left:calc(-1 * var(--gx,24px));margin-right:calc(-1 * var(--gx,24px))}
+ .rh{padding-left:calc(var(--gx,24px) - 8px);padding-right:calc(var(--gx,24px) - 8px)}
+ .bar.lekat,.aif{padding-left:var(--gx,24px);padding-right:var(--gx,24px)}
+ .ktb{padding-left:calc(var(--gx,24px) - 4px);padding-right:calc(var(--gx,24px) - 4px)}
+}
