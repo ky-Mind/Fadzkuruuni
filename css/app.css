@@ -1755,6 +1755,13 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .phal>.knsw,.phal>.act{margin-left:16px!important;margin-right:16px!important}
 .knsa{justify-content:flex-start}.knsa>.sb{flex:none}
 /* Lembar Pengingat: Coba tetap ada di semua pilihan bersuara; centang hanya tampil di pilihan aktif */
-.jnl .jck{display:none;flex:none;margin-left:6px;color:var(--g)}
+.jnl .jck{display:none;margin-left:6px;vertical-align:-2px;color:var(--g)}
 .jnl .on .jck{display:inline-flex}
+/* Pilihan aktif: latar aksen lembut + centang kecil di samping namanya (bukan di ujung kanan) */
+.jnl button.on{background:color-mix(in srgb,var(--g) 8%,transparent);border-radius:12px}
+.jnl button.on+button{border-top-color:transparent}
 .jnl button .jnc{margin-left:auto}
+
+/* Notifikasi singkat & pemberitahuan kelas selalu di lapisan paling depan, di atas lembar/dialog dan latar buramnya */
+#toast{z-index:100}
+#knotif{z-index:99}

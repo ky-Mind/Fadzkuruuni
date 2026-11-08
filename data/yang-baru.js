@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.40':['Notifikasi singkat (mis. "Subuh: suara adzan…") dan pemberitahuan kelas kini selalu tampil di depan, tidak tertutup lembar atau latar buram','Lembar Pengingat: pilihan aktif ditandai latar lembut dan centang di samping namanya'],
  '2.9.39':['Lembar Pengingat waktu salat: tombol Coba ada di semua pilihan bersuara (termasuk Adzan dan pilihan yang sedang aktif), dan memilih tidak lagi membuat lembar dimuat ulang'],
  '2.9.38':['Pengaturan › Notifikasi per waktu kini lengkap dan urut: Subuh, Terbit, Duha, Zuhur, Asar, Magrib, Isya (Terbit bisa dinyalakan/dimatikan dan dicoba)'],
  '2.9.37':['Waktu Duha tampil di Beranda (sebaris dengan waktu salat) dan di Jadwal salat, lengkap dengan notifikasi saat masuk waktunya','Jadwal salat › Suara adzan: pilih suara adzan Zuhur–Isya & Subuh, coba dengar, rekaman sendiri, dan pengingat sebelum waktu langsung dari halaman jadwal'],
