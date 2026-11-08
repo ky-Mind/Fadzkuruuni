@@ -15,7 +15,7 @@ function tabKe(nb,d){const el=tabIsi();if(!el){nb.click();return}tabSibuk=1;cons
 document.addEventListener('click',e=>{const b=e.target.closest('#view .tabs [data-tab]');if(!b||!e.isTrusted||b.classList.contains('on'))return;
  const T=tabSemua(),i=T.findIndex(x=>x.classList.contains('on')),k=T.indexOf(b);if(i<0||k<0)return;e.stopImmediatePropagation();e.preventDefault();if(!tabSibuk)tabKe(b,k>i?1:-1)},true);
 /* Pil hijau di bilah tab meluncur ke tab yang aktif */
-function tabPil(){const tb=$('#view .tabs');if(!tb)return;const T=$$('[data-tab]',tb),i=T.findIndex(b=>b.classList.contains('on'));tb.style.setProperty('--n',T.length);tb.style.setProperty('--ti',Math.max(i,0));tb.classList.add('pil')}
+function tabPil(){const tb=$('#view .tabs');if(!tb)return;const T=$$('[data-tab]',tb),i=T.findIndex(b=>b.classList.contains('on'));tb.style.setProperty('--n',T.length);tb.style.setProperty('--ti',Math.max(i,0));tb.classList.add('pil');if(!GSTAB&&window.tabSiapkan)tabSiapkan()}
 let tWx=0,tWt=0;addEventListener('wheel',e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)||tabSemua().length<2||e.target.closest('.back-d,.kp,.car'))return;
  if(Date.now()-tWt<600)return;tWx+=e.deltaX;if(Math.abs(tWx)>90){tabGanti(tWx>0?1:-1);tWx=0;tWt=Date.now()}},{passive:true});
 document.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c){const v=c.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast(v.length>30?'Teks disalin':'Disalin: '+v),()=>toast('Tidak bisa menyalin. Salin manual.'));return}
@@ -91,9 +91,9 @@ function vHtml(h){if(VSNAP.has(h))return VSNAP.get(h);if(VPRE.has(h))return VPRE
 function gsHalang(t){/* Deretan tombol yang bisa digeser samping */{const sc=t.closest('.act,.kla');if(sc&&sc.scrollWidth>sc.clientWidth+1)return true}/* Pratinjau admin: elemen yang bisa diatur diseret, bukan menggeser halaman */if(typeof TPRATINJAU!='undefined'&&TPRATINJAU&&t.closest('[data-ta]'))return true;if(t.closest('input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'))return true;
  for(let e=t;e&&e.id!='view';e=e.parentElement)if(e.scrollWidth>e.clientWidth+2&&/auto|scroll/.test(getComputedStyle(e).overflowX))return true;return false}
 /* Isi tab sebelah: tab itu dipilih sebentar untuk mengambil isinya, lalu tab asli dan isinya (simpul yang sama, lengkap dengan isian) dikembalikan */
-function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on')),el=tabIsi(),v=$('#view');if(!cur||!el)return '';
+let GSTAB=0;function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on')),el=tabIsi(),v=$('#view');if(!cur||!el)return '';GSTAB=1;
  const simpan=[...el.childNodes],sy=v.scrollTop;let h='';try{nb.click();const isi=tabIsi()||el;if(window.pbarTerap)pbarTerap(isi);h=isi.innerHTML}catch(e){}
- try{cur.click()}catch(e){}const el2=tabIsi()||el;el2.replaceChildren(...simpan);v.scrollTop=sy;tabPil();return h}
+ try{cur.click()}catch(e){}const el2=tabIsi()||el;el2.replaceChildren(...simpan);v.scrollTop=sy;tabPil();GSTAB=0;return h}
 {
  const v=$('#view'),app=$('#app');
  let sx=null,sy=0,t0=0,dx=0,lock=null,mode='',dir=0,tujuan=null,peek=null,el=null,sibuk=false,tm=0,k=1;
@@ -114,6 +114,14 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
   /* Fadz AI dibuka di pesan terbaru (bawah): pratinjaunya juga ditampilkan dari bawah */
   if(peek.querySelector("#aic .aim"))peek.scrollTop=peek.scrollHeight};
  /* Tab sebelah: lapisan seukuran isi tab, tepat di sampingnya */
+ /* Tab sebelah disiapkan saat senggang: isinya diambil dan lapisannya dibangun tersembunyi (sudah ditata), seperti halaman sebelah (VEL).
+    Saat jari mulai menggeser tinggal ditampilkan, jadi frame pertama tidak tersendat oleh penyusunan isi panjang (mis. Surah Yasin, daftar wirid) */
+ const TEL=new Map();let tpT=0;const tKunci=i=>RT+'|'+location.hash+'|'+i;
+ const tSiapkan=paksa=>{if(sx!==null||sibuk||mode||!gsHP())return;const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));if(i<0||!tabIsi())return;
+  TEL.forEach((p,k)=>{if(paksa||!k.startsWith(tKunci(''))||!p.isConnected){p.remove();TEL.delete(k)}});
+  [i-1,i+1].forEach(j=>{if(!T[j])return;const k=tKunci(j),ada=TEL.get(k);if(ada&&ada.isConnected)return;const h=gsTabHtml(T[j]),e=tabIsi();if(!h||!e||/Memuat/.test(h))return;
+   const p=document.createElement('div');p.className='tpeek tsiap';p.setAttribute('aria-hidden','true');p.inert=true;p.innerHTML=h;e.after(p);TEL.set(k,p)})};
+ window.tabSiapkan=paksa=>{clearTimeout(tpT);tpT=setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>tSiapkan(paksa),{timeout:900}),paksa?0:250)};
  const peekTab=html=>{buang();if(!html)return;peek=document.createElement('div');peek.className='tpeek';peek.setAttribute('aria-hidden','true');peek.innerHTML=html;
   Object.assign(peek.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'});el.after(peek)};
  const pasang=(px,tr)=>{const w=W(),g=mode=='tab'?el:v;g.style.transition=tr?`transform ${tr}`:'none';g.style.transform=px?`translate3d(${px}px,0,0)`:'';
@@ -130,7 +138,8 @@ function gsTabHtml(nb){const T=tabSemua(),cur=T.find(b=>b.classList.contains('on
  document.addEventListener('fz-dipasang',e=>{if(mode&&sibuk&&(!e.detail||hNorm(e.detail)==hNorm(tujuan))){mode='';pulih()}});
  /* Router memasang halaman baru dan mengembalikan #view ke tempatnya; pratinjau (sudah tepat di layar) tetap di atas sampai fz-dipasang */
  const pilihSebelah=d=>{dir=d;tujuan=null;buang();
-  if(mode=='tab'){const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));tujuan=T[i+d]||null;if(tujuan)peekTab(gsTabHtml(tujuan));return}
+  if(mode=='tab'){const T=tabSemua(),i=T.findIndex(b=>b.classList.contains('on'));tujuan=T[i+d]||null;if(!tujuan)return;
+   const k=tKunci(i+d),p=TEL.get(k);if(p&&p.isConnected){TEL.delete(k);peek=p;p.classList.remove('tsiap');Object.assign(p.style,{left:el.offsetLeft+'px',top:el.offsetTop+'px',width:el.offsetWidth+'px'})}else peekTab(gsTabHtml(tujuan));return}
   const h=location.hash||'#/',[a,b]=h.slice(2).split('/');let L=$(d>0?'#view .pnav [data-nx]':'#view .pnav [data-pv]');
   if(L)tujuan=L.getAttribute('href');else if(!$('#view .pnav')&&tataNavR().includes(a)&&!b){const N=tataNavR(),k=N.indexOf(a);tujuan=N[k+d]!=null?'#/'+N[k+d]:null}
   if(tujuan)peekHal(vHtml(tujuan))};
