@@ -53,7 +53,8 @@ async function pembaruanCek(paksa){if(!window.ANDROID||!window.FadzAndroid.versi
  if(pembaruanCek.buka)return;
  /* Tiap aplikasi dibuka: rilis terbaru diambil dari GitHub paling sering 30 menit sekali (tersimpan), lembar pembaruan tampil bila ada versi lebih baru */
  let j=null;if(paksa||Date.now()-(S.upCek||0)>=18e5){if(!navigator.onLine)return paksa&&toast('Butuh internet untuk memeriksa pembaruan');
-  try{const r=await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest',{cache:'no-store'});if(!r.ok)throw 0;j=await r.json();S.upRil={tag:j.tag_name,body:j.body,assets:(j.assets||[]).map(a=>({name:a.name,browser_download_url:a.browser_download_url})),html_url:j.html_url}}catch(e){return paksa&&toast('Gagal memeriksa pembaruan, coba lagi')}
+  /* Sumber utama: apk.json di situs ini (diperbarui tiap rilis, tanpa batas 60 permintaan/jam seperti API GitHub); cadangan: API GitHub */
+  try{let r=await fetch('apk.json?c='+Date.now(),{cache:'no-store'}).catch(()=>null);if(!r||!r.ok)r=await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest',{cache:'no-store'});if(!r.ok)throw 0;j=await r.json();if(!j.tag_name)throw 0;S.upRil={tag:j.tag_name,body:j.body,assets:(j.assets||[]).map(a=>({name:a.name,browser_download_url:a.browser_download_url})),html_url:j.html_url}}catch(e){return paksa&&toast('Gagal memeriksa pembaruan, coba lagi')}
   S.upCek=Date.now();save()}else j=S.upRil&&{tag_name:S.upRil.tag,body:S.upRil.body,assets:S.upRil.assets,html_url:S.upRil.html_url};if(!j)return;const baru=String(j.tag_name||'').replace(/^v/,''),kini=FadzAndroid.versi();
  if(!baru||!verLebihBaru(baru,kini)){S.upInfo=null;save();upSegar();return paksa&&toast('Aplikasi Android sudah versi terbaru ('+kini+')')}
  if(!paksa&&(S.upTunda||0)>Date.now())return;
