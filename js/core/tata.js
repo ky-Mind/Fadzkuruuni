@@ -107,15 +107,18 @@ function tataKirim(){if(!tStatAktif()||!navigator.onLine)return;const hari=tHari
 document.addEventListener('visibilitychange',()=>{if(document.hidden)tataKirim()});
 
 /* ===== Mode admin di aplikasi: admin yang masuk bisa menggeser/menyembunyikan bagian Beranda, pintasan, Semua Menu, dan Pengaturan ===== */
-let TADM=null,TADMON=false,TDRAF=null;
-async function tataAuth(u){TADM=null;if(!u||!u.email||!u.emailVerified)return tataAdminUI();const e=u.email.toLowerCase();
- let L=TPEMILIK.slice();try{const d=await FBD.collection('config').doc('admin').get();if(d.exists)L=L.concat((d.data().emails||[]).map(x=>String(x).toLowerCase()))}catch(x){}
- if(L.includes(e))TADM=e;tataAdminUI();
+/* TADM = email admin yang sedang masuk; TAKSES = kategori aksesnya (lihat adminBisa) */
+let TADM=null,TADMON=false,TDRAF=null,TAKSES=[];
+/* Kategori akses admin: semua | kelas (pengajar Kelas online) | laporan | tampilan | statistik. Pemilik & admin lama = semua */
+const adminBisa=a=>!!TADM&&(TAKSES.includes('semua')||TAKSES.includes(a));
+async function tataAuth(u){TADM=null;TAKSES=[];if(!u||!u.email||!u.emailVerified)return tataAdminUI();const e=u.email.toLowerCase();
+ let L=TPEMILIK.slice(),A={};try{const d=await FBD.collection('config').doc('admin').get();if(d.exists){L=L.concat((d.data().emails||[]).map(x=>String(x).toLowerCase()));A=d.data().akses||{}}}catch(x){}
+ if(L.includes(e)){TADM=e;TAKSES=TPEMILIK.includes(e)?['semua']:(A[e]||['semua'])}tataAdminUI();
  /* Halaman Akun & Profil yang sudah terbuka digambar ulang agar baris "Mode admin" muncul */
  if(TADM&&location.hash=='#/pengaturan/akun'&&typeof route=='function')route()}
-const tataAdminKah=()=>!!TADM;
+const tataAdminKah=()=>adminBisa('tampilan');
 /* Tombol "Mode admin" muncul di halaman yang bisa diatur */
-function tataAdminUI(){dispatchEvent(new Event('fzadmin'));$('#tadm')?.remove();document.body.classList.toggle('tadmon',!!TADMON);const a=location.hash.slice(2).split('/');if(!TADM||TPRATINJAU||!(['','menu'].includes(a[0])||(a[0]=='pengaturan'&&!a[1])))return;
+function tataAdminUI(){dispatchEvent(new Event('fzadmin'));$('#tadm')?.remove();document.body.classList.toggle('tadmon',!!TADMON);const a=location.hash.slice(2).split('/');if(!adminBisa('tampilan')||TPRATINJAU||!(['','menu'].includes(a[0])||(a[0]=='pengaturan'&&!a[1])))return;
  /* Tombol "Mode admin" tidak melayang di Beranda / Semua Menu (menghalangi isi): hanya di Pengaturan; saat mode admin aktif, bilah Terbitkan tetap tampil */
  /* Tombol "Mode admin" ada di Pengaturan › Akun & Profil (tidak melayang); bilah Terbitkan/Batal hanya tampil saat mode admin aktif */
  if(!TADMON)return;
