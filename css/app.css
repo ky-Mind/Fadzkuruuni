@@ -844,7 +844,7 @@ input[type=range]{accent-color:var(--g)}
 #ftb .fcr .mk.on{fill:var(--g);stroke:none}
 #ftb #fcn{position:relative;font-size:25px;font-weight:700;text-align:center}
 #ftb #fct{position:relative;margin-top:3px;color:var(--mut);font-size:10.5px;text-align:center}
-#ftb #fc.tk #fcn{animation:none}
+#ftb #fc.ketuk #fcn{animation:none}
 #ftb #fc.penuh{animation:none}
 @keyframes fcTk{50%{transform:scale(1.18)}}
 @keyframes fcPenuh{30%{transform:scale(1.12);box-shadow:0 0 0 8px color-mix(in srgb,var(--g) 30%,transparent)}}
@@ -1248,7 +1248,8 @@ body.subhal #ftb{bottom:calc(8px + env(safe-area-inset-bottom))}
 .kbd svg{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 20px rgba(0,0,0,.08))}
 .kbc{fill:var(--card);stroke:var(--line);stroke-width:2}
 .kbi{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
-.tk{stroke:var(--mut);stroke-width:1;opacity:.5}.tkm{stroke:var(--mut);stroke-width:1.5}.tkp{stroke:var(--ink);stroke-width:2.5}
+/* Garis skala kompas Kiblat (khusus elemen line, agar kelas lain bernama sama tidak ikut pudar) */
+line.tk{stroke:var(--mut);stroke-width:1;opacity:.5}line.tkm{stroke:var(--mut);stroke-width:1.5}line.tkp{stroke:var(--ink);stroke-width:2.5}
 .ma,.mau{font:700 15px var(--ui);text-anchor:middle;fill:var(--mut)}.mau{fill:var(--g)}
 .kbj{fill:var(--g)}.kbe{fill:var(--line)}
 /* Ka'bah & warna kompas mengikuti tema (terang/gelap) dan aksen */
@@ -1307,7 +1308,7 @@ html.tciut::view-transition-old(root){z-index:3}
 .tsf{--p:0;position:relative;flex:1;min-height:340px;width:100%;margin:0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:0;border-radius:28px;background:var(--g);color:var(--on);cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:0 14px 36px rgba(0,0,0,.18);transition:transform .09s ease}
 .tsf:active{transform:none}
 .tsf::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),transparent 60%);opacity:0;pointer-events:none}
-.tsf.tk::after{animation:none}
+.tsf.ketuk::after{animation:none}
 .tsf.penuh::after{animation:none}
 @keyframes tsdenyut{0%{opacity:1}100%{opacity:0}}
 .tsr{position:relative;width:min(62vmin,300px);aspect-ratio:1;border-radius:50%;background:conic-gradient(currentColor calc(var(--p)*1%),color-mix(in srgb,currentColor 18%,transparent) 0);-webkit-mask:radial-gradient(circle,transparent 63%,#000 64%);mask:radial-gradient(circle,transparent 63%,#000 64%);transition:background .2s}

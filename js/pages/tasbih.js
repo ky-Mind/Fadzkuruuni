@@ -10,8 +10,8 @@ const buzz=p=>{if(S.vib!==false)getarKe(p)};
 const MANIK=33,MANIKSVG=Array.from({length:MANIK},(_,i)=>{const a=(i/MANIK)*2*Math.PI-Math.PI/2;return `<circle class="mk" cx="${(50+42*Math.cos(a)).toFixed(2)}" cy="${(50+42*Math.sin(a)).toFixed(2)}" r="3.7"/>`}).join('');
 const tUpd=()=>{const f=$('#fc');if(f){const n=Math.round(S.tas/S.tt*MANIK);$('#fcn').textContent=S.tas;$('#fct').textContent=S.tas+'/'+S.tt;$$('#fc .mk').forEach((m,i)=>m.classList.toggle('on',i<n))}
  const c=$('#c');if(c){$('#cn').textContent=S.tas;$('#tg').textContent=S.tas+' / '+S.tt;c.style.setProperty('--p',(S.tas/S.tt*100).toFixed(2));$('#tgk').textContent='Putaran ke-'+((S.tsp||0)+1)}};
-const tap=()=>{S.tas++;const f=$('#fc'),c=$('#c');let kls='tk';if(S.tas>=S.tt){buzz(VPOLA[S.vpola]||VPOLA.ganda);toast('Target '+S.tt+' tercapai');S.tas=0;S.tsp=(S.tsp||0)+1;kls='penuh'}else buzz(S.vkuat?40:18);
- [f,c].forEach(x=>{if(x){x.classList.remove('tk','penuh');void x.offsetWidth;x.classList.add(kls)}});save();tUpd()};
+const tap=()=>{S.tas++;const f=$('#fc'),c=$('#c');let kls='ketuk';if(S.tas>=S.tt){buzz(VPOLA[S.vpola]||VPOLA.ganda);toast('Target '+S.tt+' tercapai');S.tas=0;S.tsp=(S.tsp||0)+1;kls='penuh'}else buzz(S.vkuat?40:18);
+ [f,c].forEach(x=>{if(x){x.classList.remove('ketuk','penuh');void x.offsetWidth;x.classList.add(kls)}});save();tUpd()};
 const tReset=()=>{S.tas=0;S.tsp=0;save();tUpd()};
 const ftb=mk('',`<button id="fc" aria-label="Tasbih: tambah hitungan"><svg class="fcr" viewBox="0 0 100 100" aria-hidden="true">${MANIKSVG}</svg><b id="fcn">0</b><small id="fct">0/33</small></button><svg class="rumbai" viewBox="0 0 20 34" aria-hidden="true"><circle cx="10" cy="4" r="3.6"/><path d="M8 7h4l1 4h-6z"/><path d="M6.5 11h7l3 21H3.5z"/></svg><button id="fg" aria-label="Pengaturan tasbih">${ic('more',18)}</button>`);
 /* Disembunyikan sampai halaman pertama siap (ftUpd), agar tidak sempat muncul sekilas saat aplikasi dimuat ulang */
