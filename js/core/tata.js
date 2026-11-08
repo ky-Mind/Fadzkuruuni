@@ -15,10 +15,15 @@ const TATA_BAWAAN={beranda:Object.keys(TBAG).map(id=>({id,on:true})),pintasan:SH
  nav:['','quran','ai','kalender','pengaturan'],setelan:null,sembunyiSet:[],label:{},umum:{on:false,judul:'',teks:'',tautan:'',label:'Buka'},bawaan:{}};
 
 /* Gabungkan konfigurasi admin dengan bawaan: urutan dari admin, bagian baru dari kode tetap muncul (di akhir) */
+/* Fitur baru yang otomatis masuk ke susunan admin yang sudah terbit */
+const TATA_BARU=['sholawat'];
 function tataGabung(c){const B=JSON.parse(JSON.stringify(TATA_BAWAAN)),T=Object.assign(B,c&&typeof c=='object'?c:{});
  if(c&&Array.isArray(c.beranda)){const ada=new Set(c.beranda.map(x=>x.id));T.beranda=c.beranda.filter(x=>TBAG[x.id]).concat(TATA_BAWAAN.beranda.filter(x=>!ada.has(x.id)))}
  const sah=r=>r in TPOOL;T.pintasan=(T.pintasan||[]).filter(sah);T.nav=(T.nav||[]).filter(r=>sah(r)&&!r.includes('/')).slice(0,5);if(T.nav.length<2)T.nav=TATA_BAWAAN.nav.slice();
- T.menu=(T.menu||[]).map(g=>({nama:String(g.nama||''),isi:(g.isi||[]).filter(sah)})).filter(g=>g.isi.length);T.label=T.label||{};T.umum=Object.assign({},TATA_BAWAAN.umum,T.umum||{});T.bawaan=T.bawaan||{};return T}
+ T.menu=(T.menu||[]).map(g=>({nama:String(g.nama||''),isi:(g.isi||[]).filter(sah)})).filter(g=>g.isi.length);
+ /* Fitur yang ditambahkan setelah susunan admin diterbitkan (mis. Sholawat) disisipkan ke kelompok bawaannya, setelah item sebelumnya */
+ if(c&&Array.isArray(c.menu)){const semua=new Set(T.menu.flatMap(g=>g.isi));TATA_BARU.forEach(r=>{if(semua.has(r)||(c.dihapus||[]).includes(r))return;const gb=TATA_BAWAAN.menu.find(g=>g.isi.includes(r));if(!gb)return;
+  const g=T.menu.find(x=>x.nama==gb.nama)||T.menu[0];if(!g)return;const sbl=gb.isi[gb.isi.indexOf(r)-1],k=g.isi.indexOf(sbl);g.isi.splice(k<0?g.isi.length:k+1,0,r)})}T.label=T.label||{};T.umum=Object.assign({},TATA_BAWAAN.umum,T.umum||{});T.bawaan=T.bawaan||{};return T}
 const tataBaca=()=>{try{return JSON.parse(localStorage.fztata||'null')}catch(e){return null}};
 let TATAV=(tataBaca()||{}).v||0,TATA=tataGabung((tataBaca()||{}).c);
 
