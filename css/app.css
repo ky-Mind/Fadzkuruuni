@@ -1672,3 +1672,13 @@ img.kzav{object-fit:cover;display:block}
 .pkaki{font-size:12.5px;margin:16px 2px 0}.pkaki a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 /* Daftar 114 surah: baris di luar layar tidak ditata/digambar sampai digulir mendekat (halaman Al-Qur'an terbuka & digeser lebih ringan) */
 #ql>.row{content-visibility:auto;contain-intrinsic-size:auto 64px}
+/* Kartu geser di komputer: panah kiri/kanan (lihat js/pages/beranda.js), tampil saat kursor di atas kartu */
+.carw{position:relative}
+.carb{display:none}
+@media (hover:hover) and (pointer:fine){
+ .carb{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:38px;height:38px;margin-top:-12px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.14);cursor:pointer;opacity:0;transition:opacity .15s}
+ .carb[hidden]{display:none}
+ .carb[data-carb="-1"]{left:-12px}.carb.kn{right:-12px}
+ .carw:hover .carb,.carb:focus-visible{opacity:1}
+ .car{cursor:grab}.car.seret{cursor:grabbing;user-select:none}.car.seret .sl{pointer-events:none}
+}
