@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.4",
- "body": "Pembaruan aplikasi Android 2.6.4 (isi web 2.9.26)\n\n- Notifikasi kelas online kini muncul seketika saat admin membuat jadwal atau memulai kelas, walau aplikasi sedang ditutup (seperti notifikasi adzan)\n- Pengingat kelas terjadwal (10 menit sebelum dan saat mulai) tetap tepat waktu\n- Termasuk semua perbaikan 2.6.3: tombol kitab, geser Al-Qur'an yang halus, layar penuh mendatar di kelas online, tombol Coba/Hentikan\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.4",
+ "tag_name": "v2.6.5",
+ "body": "Pembaruan aplikasi Android 2.6.5 (isi web 2.9.28)\n\n- Perbaikan: notifikasi kelas online kini benar-benar terkirim ke aplikasi (kunci server sebelumnya tidak terbaca)\n- Pengaturan baru di Waktu Salat & Notifikasi › Notifikasi kelas online: nyala/mati, jadwal baru, kelas dimulai, pengingat sebelum kelas\n- Notifikasi kelas punya saluran sendiri, terpisah dari adzan; pilihan \"Senyap saat adzan berbunyi\" agar tidak menabrak suara adzan\n- Tombol Tes notifikasi kelas dan status pendaftaran perangkat\n- Geser antarhalaman lebih lancar; kartu Beranda bisa digeser di komputer\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.5",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.4/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.5/fadzkuruuni.apk"
   }
  ]
 }
