@@ -45,6 +45,31 @@ tataBawaan();
 /* Data untuk dashboard admin (dibaca dari iframe pratinjau, sama asal) */
 if(TPRATINJAU)window.TATAINFO={TPOOL,TBAG,TATA_BAWAAN,setelan:()=>SETGROUPS,ACC,FAR,FLT,gabung:tataGabung,aktif:()=>TATA};
 if(TPRATINJAU){addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||!e.data.tata)return;tataTerap(e.data.tata,0,0);if(e.data.ke!=null&&location.hash!=e.data.ke)location.hash=e.data.ke})}
+
+/* ===== Pratinjau di dashboard admin: tekan lama lalu geser untuk mengubah urutan =====
+   Berlaku untuk menu bawah (#nav), pintasan & bagian Beranda, item Semua Menu, dan item Pengaturan (elemen ber-data-ta).
+   Saat dilepas, urutan baru dikirim ke dashboard (postMessage {urut:{j,k}}); dashboard memperbarui draf lalu mengirim ulang tata. */
+if(TPRATINJAU){let sr=null,tm=0,x0=0,y0=0;
+ const target=t=>{const n=t.closest('#nav a[data-r]');if(n)return {el:n,j:'nav',kunci:a=>a.dataset.r,sib:()=>$$('#nav a[data-r]')};
+  const a=t.closest('[data-ta]');if(!a)return null;const j=a.dataset.ta.split(':')[0];
+  return {el:a,j,kunci:x=>x.dataset.ta.slice(j.length+1),sib:()=>[...a.parentElement.children].filter(x=>x.dataset&&x.dataset.ta&&x.dataset.ta.startsWith(j+':'))}};
+ const batal=()=>{clearTimeout(tm);tm=0};
+ const angkat=()=>{const s=sr;if(!s)return;s.on=1;const r=s.t.el.getBoundingClientRect();s.gx=x0-r.left;s.gy=y0-r.top;s.t.el.classList.add('sret');document.body.classList.add('sreton');try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}};
+ addEventListener('pointerdown',e=>{if(e.button>0)return;const t=target(e.target);if(!t||t.sib().length<2)return;x0=e.clientX;y0=e.clientY;sr={t,on:0,id:e.pointerId};batal();tm=setTimeout(angkat,350)},true);
+ addEventListener('pointermove',e=>{if(!sr)return;if(!sr.on){if(Math.hypot(e.clientX-x0,e.clientY-y0)>8){batal();sr=null}return}
+  e.preventDefault();const el=sr.t.el;el.style.transform='';const pts=document.elementsFromPoint(e.clientX,e.clientY);
+  const atas=pts.map(p=>p.closest&&(sr.t.j=='nav'?p.closest('#nav a[data-r]'):p.closest('[data-ta]'))).find(p=>p&&p!==el&&sr.t.sib().includes(p));
+  if(atas){const r=atas.getBoundingClientRect(),datar=sr.t.j=='nav'||sr.t.j=='pin'||Math.abs(r.top-el.getBoundingClientRect().top)<4,
+   sesudah=datar?e.clientX>r.left+r.width/2:e.clientY>r.top+r.height/2;atas.parentElement.insertBefore(el,sesudah?atas.nextSibling:atas)}
+  const r=el.getBoundingClientRect();el.style.transform=`translate(${e.clientX-sr.gx-r.left}px,${e.clientY-sr.gy-r.top}px) scale(1.06)`},{capture:true,passive:false});
+ addEventListener('touchmove',e=>{if(sr&&sr.on)e.preventDefault()},{capture:true,passive:false});
+ const lepas=e=>{batal();if(!sr)return;const s=sr;sr=null;if(!s.on)return;e&&e.preventDefault&&e.preventDefault();
+  s.t.el.classList.remove('sret');s.t.el.style.transform='';document.body.classList.remove('sreton');
+  /* Klik setelah menyeret tidak membuka halaman */
+  addEventListener('click',function f(ev){ev.preventDefault();ev.stopPropagation();removeEventListener('click',f,true)},true);setTimeout(()=>{},0);
+  parent.postMessage({urut:{j:s.t.j,k:s.t.sib().map(s.t.kunci)}},location.origin)};
+ addEventListener('pointerup',lepas,true);addEventListener('pointercancel',lepas,true);
+ addEventListener('contextmenu',e=>{if(sr)e.preventDefault()},true)}
 else{tataAmbil(1);document.addEventListener('visibilitychange',()=>{if(!document.hidden)tataAmbil()})}
 
 /* ===== Statistik ringan (tanpa data pribadi): jumlah buka per fitur, perangkat aktif harian, kota, jenis aplikasi ===== */

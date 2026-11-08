@@ -1497,3 +1497,6 @@ html.tciut::view-transition-old(root){z-index:3}
 .izb .izt{border:0;background:transparent;color:var(--mut);font-weight:600}
 .izb .izt:active{background:var(--fill)}
 @media(max-width:420px){.izb{flex-direction:row}.izb .btn{padding:0 11px;font-size:13px}}
+/* Pratinjau admin: elemen yang sedang diseret (tekan lama lalu geser) */
+.sret{position:relative;z-index:50;transition:none!important;box-shadow:0 12px 28px rgba(0,0,0,.28);border-radius:14px;background:var(--card);opacity:.96;cursor:grabbing}
+body.sreton,body.sreton *{user-select:none!important;-webkit-user-select:none!important;touch-action:none!important}
