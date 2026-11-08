@@ -1660,3 +1660,4 @@ img.kzav{object-fit:cover;display:block}
 .kff{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;margin:4px 0 8px}.kff select{flex:1;min-width:160px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;font:inherit}
 .kbl~.kwarn,#kh.kwarn{color:#b45309;background:color-mix(in srgb,#f59e0b 12%,transparent);border-radius:10px;padding:10px 12px;text-align:left}
 [data-klayar] small{font-weight:400;opacity:.8}
+.kfwk{display:block;margin:-4px 0 8px;font-size:12.5px}
