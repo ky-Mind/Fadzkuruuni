@@ -14,7 +14,7 @@ async function kelasMesh(id,admin,nama,onUbah){await fbInit();if(!FBD)throw 'fir
  const level=st=>{try{const a=AC.createAnalyser();a.fftSize=512;AC.createMediaStreamSource(st).connect(a);const d=new Uint8Array(a.fftSize);return ()=>{a.getByteTimeDomainData(d);let m=0;for(const v of d)m=Math.max(m,Math.abs(v-128));return m}}catch(e){return ()=>0}};
  const putar=(k,st)=>{let el=S_.audio.get(k);if(!el){el=document.createElement('audio');el.autoplay=true;el.playsInline=true;el.className='kaud';document.body.append(el);S_.audio.set(k,el)}el.srcObject=st;el.play().catch(()=>{room.canPlaybackAudio=false;ubah()})};
  /* Peserta lokal (meniru LiveKit) */
- const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:'',foto:(typeof S!='undefined'&&S.foto)||'',kamera:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
+ const lokal={identity:pid,name:nama,attributes:{peran:admin?'ustaz':'jamaah',tangan:'',foto:(window.fotoProfil&&fotoProfil())||'',kamera:''},permissions:{canPublish:admin},isSpeaking:false,isMicrophoneEnabled:false,
   async setAttributes(a){Object.assign(lokal.attributes,a);await tulisSaya();ubah()},
   async setCameraEnabled(on){if(on&&!S_.cam)S_.cam=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});
    if(!on&&S_.cam){S_.cam.getTracks().forEach(t=>t.stop());S_.cam=null}const tr=S_.cam?S_.cam.getVideoTracks()[0]:null;S_.pc.forEach(p=>p.vtx&&p.vtx.sender.replaceTrack(tr).catch(()=>{}));lokal.isCameraEnabled=!!on;lokal.attributes.kamera=on?'1':'';tulisSaya().catch(()=>{});ubah()},

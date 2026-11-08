@@ -37,7 +37,7 @@ const tataSetelan=()=>{const G=SETGROUPS,urut=TATA.setelan;let L=G;if(Array.isAr
 const tataNavR=()=>TATA.nav;
 
 /* Menu bawah/samping dibangun dari TATA.nav */
-function tataNav(){const n=$('#nav');if(!n)return;$$('a[data-r]',n).forEach(a=>a.remove());n.insertAdjacentHTML('beforeend',TATA.nav.map(r=>`<a href="#/${r}" data-r="${r}" data-tip="${esc(tNama(r))}">${r=='pengaturan'&&S.foto?`<img class="ava navava" src="${S.foto}" alt="">`:ic(tIkon(r))}<span>${esc(tNama(r))}</span></a>`).join(''));const a=location.hash.slice(2).split('/')[0];$$('a[data-r]',n).forEach(l=>l.classList.toggle('on',l.dataset.r==a))}
+function tataNav(){const n=$('#nav');if(!n)return;$$('a[data-r]',n).forEach(a=>a.remove());n.insertAdjacentHTML('beforeend',TATA.nav.map(r=>`<a href="#/${r}" data-r="${r}" data-tip="${esc(tNama(r))}">${r=='pengaturan'&&window.fotoProfil&&fotoProfil()?`<img class="ava navava" src="${esc(fotoProfil())}" alt="" referrerpolicy="no-referrer">`:ic(tIkon(r))}<span>${esc(tNama(r))}</span></a>`).join(''));const a=location.hash.slice(2).split('/')[0];$$('a[data-r]',n).forEach(l=>l.classList.toggle('on',l.dataset.r==a))}
 
 /* Tampilan bawaan dari admin: hanya untuk pengguna baru (pengaturan yang belum pernah disimpan di perangkat) */
 const TSU=(()=>{if(TPRATINJAU)return [];try{return Object.keys(JSON.parse(localStorage.fz||'{}'))}catch(e){return []}})();

@@ -50,7 +50,7 @@ const kHash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;re
 const kBoleh=p=>{if(!p)return false;if((p.attributes||{}).peran=='ustaz')return true;const m=p.permissions;if(!m||!m.canPublish)return false;const s=m.canPublishSources;return !s||!s.length||s.some(x=>x==2||x=='microphone'||x=='MICROPHONE')};
 /* Video tiap orang: pengajar → panggung besar (KR.video); jamaah → kotaknya (KR.vid) */
 function kSetVid(p,st){if(!KR||!p)return;const self=p===KR.room.localParticipant;if((p.attributes||{}).peran=='ustaz'){KR.video=st||null;KR.videoLokal=!!(st&&self)}else{KR.vid=KR.vid||new Map();st?KR.vid.set(p.identity,st):KR.vid.delete(p.identity)}}
-const kAva=(p,z)=>{const f=(p.attributes||{}).foto;if(f&&/^data:image\/(jpeg|png|webp);base64,/.test(f))return `<img class="ava kzav" src="${f}" alt="" style="width:${z}px;height:${z}px">`;const h=kHash(p.identity)%360;return `<span class="ava kzav" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.42)}px;background:hsl(${h} 42% 86%);color:hsl(${h} 45% 28%)">${esc(((p.name||'J').trim()[0]||'J').toUpperCase())}</span>`};
+const kAva=(p,z)=>{const f=(p.attributes||{}).foto;if(f&&(/^data:image\/(jpeg|png|webp);base64,/.test(f)||/^https:\/\/[\w.-]+\.(googleusercontent|fbcdn|facebook)\.(com|net)\//.test(f)))return `<img class="ava kzav" src="${esc(f)}" alt="" referrerpolicy="no-referrer" style="width:${z}px;height:${z}px">`;const h=kHash(p.identity)%360;return `<span class="ava kzav" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.42)}px;background:hsl(${h} 42% 86%);color:hsl(${h} 45% 28%)">${esc(((p.name||'J').trim()[0]||'J').toUpperCase())}</span>`};
 function kelasGambar(){const st=$('#kzs'),g=$('#kzg');if(!st||!g||!KR)return;const R=KR.room,saya=R.localParticipant,semua=[saya,...R.remoteParticipants.values()];
  const ust=semua.find(p=>(p.attributes||{}).peran=='ustaz'),jm=semua.filter(p=>p!==ust),nm=p=>p===saya?(p.name||'Kamu')+' (Kamu)':(p.name||'Jamaah');
  if(!ust&&KR.video&&!KR.admin)KR.video=null;/* pengajar keluar → jangan tampilkan gambar terakhirnya */
@@ -77,11 +77,15 @@ function kelasInfo(){const R=KR&&KR.room;if(!R)return;const semua=[R.localPartic
  kelasGambar();kelasPil()}
 
 async function kelasToken(id,aksi,lain){let idToken=null;try{if(typeof FBU!='undefined'&&FBU)idToken=await FBU.getIdToken()}catch(e){}
- const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({aksi,kelas:id,idToken,nama:S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah'},lain||{}))});
+ const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({aksi,kelas:id,idToken,nama:kNama()},lain||{}))});
  const j=await r.json().catch(()=>({}));if(!r.ok)throw j.galat||('http-'+r.status);return j}
 const KGAL={'belum-siap':'Server suara kelas belum disiapkan oleh pengelola aplikasi.','belum-mulai':'Kelas ini belum dimulai. Tunggu sampai pengajar memulai kelas.','kelas-tidak-ada':'Kelas tidak ditemukan.'};
 
+const kAkun=async()=>{await fbInit();if(!window.firebase||!firebase.auth)return null;return new Promise(ok=>{const u=firebase.auth().onAuthStateChanged(x=>{u();ok(x)})})};
+const kNama=()=>(S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah').slice(0,40);
 async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelasPasangTimer()}
+ /* Ikut kelas wajib masuk akun: nama & foto profil di kelas diambil dari akun */
+ if(!await kAkun()){const i=$('#kinfo');if(i)i.innerHTML=`<div class="kperingat">${ic('user',18)}<span><b>Masuk dulu untuk ikut kelas.</b> Nama dan foto profil dari akunmu akan tampil di kelas.</span></div><a class="btn" href="#/pengaturan/akun">Masuk dengan Google atau Email</a>`;const sa=$('#kzsa');if(sa)sa.innerHTML=`<div class="kzw">${ic('user',28)}<span>Masuk akun untuk bergabung</span></div>`;return}
  /* Dibuka langsung lewat tautan: muat data kelas dulu (status, jenis kelas) */
  if(!(KELAS||[]).some(x=>x.id==id))await kelasAmbil();
  if(KR)await kelasKeluar(1);const i=$('#kinfo');
@@ -98,14 +102,14 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelas
    .on(L.RoomEvent.ParticipantPermissionsChanged,(prev,p)=>{if(p===R.localParticipant&&!KR.admin){if(kBoleh(p)&&!kBoleh({permissions:prev})){toast('Kamu diizinkan bicara. Tekan Aktifkan mikrofon.');R.localParticipant.setAttributes({tangan:''}).catch(()=>{})}}ub()})
    .on(L.RoomEvent.AudioPlaybackStatusChanged,()=>{KR.diam=!R.canPlaybackAudio;ub()})
    .on(L.RoomEvent.Disconnected,()=>kelasPutus(R));
-  await R.connect(t.url,t.token);try{await R.startAudio()}catch(e){}KR.diam=!R.canPlaybackAudio;if(S.foto)R.localParticipant.setAttributes({foto:S.foto}).catch(()=>{});
+  await R.connect(t.url,t.token);try{await R.startAudio()}catch(e){}KR.diam=!R.canPlaybackAudio;if(fotoProfil())R.localParticipant.setAttributes({foto:fotoProfil()}).catch(()=>{});
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();kelasChat(id);if(KR.admin&&((KELAS||[]).find(x=>x.id==id)||{}).rekam)kelasRekamMulai()}
  catch(e){KR=null;console.warn('kelas',e);if(!paksaLK&&e!='belum-mulai'&&e!='kelas-tidak-ada'){try{KR&&KR.room&&KR.room.disconnect()}catch(x){}KR=null;return kelasMasukMesh(id,true)}if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 function kelasPutus(R){if(KR&&KR.room===R){if(KREC)kelasRekamStop();if(KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;kelasPil();const s=$('#klst');if(s)s.textContent='';const x=$('#kinfo');if(x)x.innerHTML='<p class="mut">Kelas sudah berakhir atau sambungan terputus.</p><a class="btn s" href="#/kelas">Kembali ke daftar kelas</a>';const c=$('#kctl');if(c)c.innerHTML='';const a=$('#kadm');if(a)a.innerHTML=''}}
 /* Kelas kecil tanpa LiveKit (js/pages/kelas-mesh.js) */
 async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(x=>x.id==id)||{},admin=kAdmin();
  try{if(k.status!='live'&&!admin)throw 'belum-mulai';let R=null;
-  R=await kelasMesh(id,admin,S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah',()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}});
+  R=await kelasMesh(id,admin,kNama(),()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}});
   R.onDisconnected=()=>kelasPutus(R);KR={id,room:R,admin,diam:!R.canPlaybackAudio,mode:'mesh',judul:k.judul||'Kelas online'};R.onVideo=st=>{if(KR&&KR.room===R&&!admin){KR.video=st;KR.videoLokal=false;kelasInfo()}};
   R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
   const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
@@ -114,7 +118,8 @@ async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(
   if(!dariLK&&e!='belum-mulai'&&KSIAP!==false)return kelasMasuk(id,true);
   if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(e&&e.code=='permission-denied'?'Kelas kecil belum aktif: aturan Firestore terbaru belum dipublish oleh pengelola.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 let KTM=0;function kelasPasangTimer(){clearInterval(KTM);KTM=setInterval(()=>{if(!KR||!$('#kzs'))return clearInterval(KTM);kelasGambar()},500)}
-async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.room;if(KR&&KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;clearInterval(KTM);$$('audio.kaud').forEach(a=>a.parentNode.removeChild(a));if(r)try{await r.disconnect()}catch(e){}kelasPil();if(!diam&&/^#\/kelas\//.test(location.hash))location.hash='#/kelas'}
+async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.room;try{const lp=r&&r.localParticipant;if(lp){if(lp.setCameraEnabled&&KR.camOn)await lp.setCameraEnabled(false);if(lp.setMicrophoneEnabled&&lp.isMicrophoneEnabled)await lp.setMicrophoneEnabled(false)}}catch(e){}
+ $$('#kzv,.kzt video').forEach(v=>{const s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(t=>{if(t.readyState=='live'&&KR&&KR.videoLokal)t.stop()});v.srcObject=null});if(KR&&KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;clearInterval(KTM);$$('audio.kaud').forEach(a=>a.parentNode.removeChild(a));if(r)try{await r.disconnect()}catch(e){}kelasPil();if(!diam&&/^#\/kelas\//.test(location.hash))location.hash='#/kelas'}
 
 /* Pil "Live" melayang saat kelas berjalan dan pengguna membuka halaman lain */
 function kelasPil(){const p=$('#klmini');if(p)p.hidden=true}
@@ -122,13 +127,22 @@ function kelasPil(){const p=$('#klmini');if(p)p.hidden=true}
    - menekan panah kembali / tombol kembali HP / pindah ke halaman lain
    - aplikasi ditutup
    - aplikasi ditinggalkan (layar lain / layar mati) lebih dari 30 detik */
-addEventListener('hashchange',()=>{if(KR&&!location.hash.startsWith('#/kelas/'+KR.id))kelasKeluar(1)});
+let KIZIN=0,KTANYA=0;
+const kTanyaKeluar=tujuan=>{if(KTANYA)return;KTANYA=1;konfirmasi('Keluar dari kelas?','Mikrofon dan kamera akan dimatikan dan kamu keluar dari kelas ini.','Keluar',async()=>{KTANYA=0;KIZIN=1;await kelasKeluar(1);
+  /* Lembar konfirmasi menutup dirinya lewat history.back(); tunggu selesai, lalu ganti entri riwayat (bukan menambah) agar tombol kembali tidak membawa masuk kelas lagi */
+  await new Promise(ok=>{const t=setTimeout(ok,600);addEventListener('popstate',()=>{clearTimeout(t);setTimeout(ok,30)},{once:true})});
+  history.replaceState(null,'',tujuan||'#/kelas');route();setTimeout(()=>KIZIN=0,300)});
+ /* Batal: lembar konfirmasi tertutup tanpa memilih Keluar */const iv=setInterval(()=>{if(!document.querySelector('.back-d.tgh')){clearInterval(iv);KTANYA=0}},300)};
+/* Menekan tautan lain (panah kembali, menu) selama di kelas: tanya dulu */
+document.addEventListener('click',e=>{if(!KR)return;const a=e.target.closest('a[href^="#"]');if(!a)return;const h=a.getAttribute('href');if(h.startsWith('#/kelas/'+KR.id))return;e.preventDefault();e.stopPropagation();kTanyaKeluar(h)},true);
+/* Tombol kembali HP / riwayat: kembalikan ke kelas lalu tanya */
+addEventListener('hashchange',()=>{if(!KR||KIZIN||location.hash.startsWith('#/kelas/'+KR.id))return;const tujuan=location.hash;history.replaceState(null,'','#/kelas/'+KR.id);route();kTanyaKeluar(tujuan)});
 addEventListener('pagehide',()=>{if(KR)kelasKeluar(1)});
 let KSEMB=0;document.addEventListener('visibilitychange',()=>{clearTimeout(KSEMB);if(document.hidden&&KR){const id=KR.id;KSEMB=setTimeout(async()=>{if(!document.hidden||!KR)return;await kelasKeluar(1);
   const x=$('#kinfo');if(x&&location.hash=='#/kelas/'+id){x.innerHTML=`<p class="mut">Kamu keluar dari kelas karena aplikasi ditinggalkan.</p><button class="btn s" data-kulang="${id}">Masuk lagi</button>`;const c=$('#kctl');if(c)c.innerHTML=''}},30000)}});
 
 document.addEventListener('click',async e=>{const t=e.target;
- if(t.closest('[data-kkeluar]'))return kelasKeluar();
+ if(t.closest('[data-kkeluar]'))return kTanyaKeluar('#/kelas');
  if(t.closest('[data-kaudio]')&&KR){try{await KR.room.startAudio()}catch(x){}KR.diam=!KR.room.canPlaybackAudio;return kelasInfo()}
  if(t.closest('[data-ktangan]')&&KR){const on=(KR.room.localParticipant.attributes||{}).tangan=='1';try{await KR.room.localParticipant.setAttributes({tangan:on?'':'1'});toast(on?'Tangan diturunkan':'Tangan diangkat. Tunggu pengajar mengizinkan.')}catch(x){toast('Gagal. Coba lagi.')}return kelasInfo()}
  if(t.closest('[data-kcam]')&&KR){const R=KR.room,lp=R.localParticipant,on=!KR.camOn;try{await lp.setCameraEnabled(on);KR.camOn=on;
@@ -196,7 +210,7 @@ async function kelasChat(id){await fbInit();if(!FBD||!KR||KR.id!=id)return;try{i
  KR.chatUnsub=FBD.collection('kelas').doc(id).collection('chat').orderBy('t').limitToLast(60).onSnapshot(q=>{const e=$('#kcl');if(!e)return;const saya=KR&&KR.room.localParticipant.identity;
   e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${esc(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{})}catch(x){}}
 document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.preventDefault();const i=$('#kci'),teks=(i.value||'').trim();if(!teks||!KR)return;i.value='';
- try{await FBD.collection('kelas').doc(KR.id).collection('chat').add({nama:(S.nm||(typeof FBU!='undefined'&&FBU&&FBU.displayName)||'Jamaah').slice(0,40),teks:teks.slice(0,500),t:Date.now(),pid:KR.room.localParticipant.identity})}
+ try{await FBD.collection('kelas').doc(KR.id).collection('chat').add({nama:kNama(),teks:teks.slice(0,500),t:Date.now(),pid:KR.room.localParticipant.identity})}
  catch(x){i.value=teks;toast(x&&x.code=='permission-denied'?'Pesan belum aktif: aturan Firestore terbaru belum dipublish.':'Pesan gagal dikirim')}});
 
 /* ---------- Daftar kelas langsung diperbarui + pemberitahuan kelas baru / dimulai / segera dimulai ---------- */
