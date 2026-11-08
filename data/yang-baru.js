@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.34':['Di layar lebar (tablet, laptop), bilah atas halaman baca kini mentok ke tepi kiri-kanan dan batang gulir ada di tepi layar; isi tetap di tengah'],
  '2.9.33':['Al-Qur\'an lebih bersih: bilah pemutar dan tombol surah dihapus. Putar audio lewat ketuk ayat; selama berbunyi muncul kapsul kecil untuk jeda/hentikan. Unduh audio surah ada di Pengaturan Al-Qur\'an','Pengaturan Al-Qur\'an memburamkan latar dengan sama di mode Kartu dan Mushaf','Kelas online: bisa ganti kamera depan atau belakang','Notifikasi kelas punya pilihan suara: bawaan HP, bel, lonceng, getar saja, atau suara sendiri (berkas dari HP atau rekam)','Baris sumber di akhir bacaan diganti himbauan kecil untuk melapor bila ada kesalahan teks'],
  '2.9.32':['Semua video tutorial (Pengaturan › Tentang & Bantuan › Video tutorial) kini bersuara: tiap langkah dibacakan, versi HP dan desktop'],
  '2.9.31':['Admin kini punya kategori akses: semua akses, pengajar Kelas online, laporan & donasi, tampilan aplikasi, atau peta & statistik'],
