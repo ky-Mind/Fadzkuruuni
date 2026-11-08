@@ -68,6 +68,8 @@ async function kelasToken(id,aksi,lain){let idToken=null;try{if(typeof FBU!='und
 const KGAL={'belum-siap':'Server suara kelas belum disiapkan oleh pengelola aplikasi.','belum-mulai':'Kelas ini belum dimulai. Tunggu sampai pengajar memulai kelas.','kelas-tidak-ada':'Kelas tidak ditemukan.'};
 
 async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();return kelasPasangTimer()}
+ /* Dibuka langsung lewat tautan: muat data kelas dulu (status, jenis kelas) */
+ if(!(KELAS||[]).some(x=>x.id==id))await kelasAmbil();
  if(KR)await kelasKeluar(1);const i=$('#kinfo');
  if(!navigator.onLine){if(i)i.innerHTML='<p class="mut">Kelas online butuh internet.</p>';return}
  const kk=(KELAS||[]).find(x=>x.id==id)||{};
