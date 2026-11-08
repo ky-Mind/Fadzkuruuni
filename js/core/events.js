@@ -167,7 +167,11 @@ addEventListener('touchmove',e=>{if(!pon)return;const d=e.touches[0].clientY-py,
 addEventListener('touchend',()=>{if(!pon)return;pon=0;
  if(pt>PTB)ptrMuat();else{ptrSet(0,1);ptr.classList.remove('siap')}},{passive:true});
 /* Muat ulang dengan tampilan tarik-untuk-memuat (dipakai juga saat menu bawah yang aktif dipencet lagi) */
-function ptrMuat(){ptr.classList.add('siap','muter');$('small',ptr).textContent='Memuat…';ptrSet(PTH+18,1);setTimeout(()=>location.reload(),700)}
+function ptrMuat(){if(ptrMuat.on)return;ptrMuat.on=1;ptr.classList.add('siap','muter');$('small',ptr).textContent='Memuat…';ptrSet(PTH+18,1);
+ /* Muat ulang lembut (seperti Instagram): ambil pengaturan tampilan terbaru & cek versi baru, lalu gambar ulang halaman di tempat — tanpa memuat ulang seluruh aplikasi, jadi tidak ada layar putih */
+ const sw='serviceWorker'in navigator?navigator.serviceWorker.getRegistration().then(g=>g&&g.update()).catch(()=>{}):0;
+ Promise.all([Promise.resolve(typeof tataAmbil=='function'&&tataAmbil(1)).catch(()=>{}),sw,new Promise(r=>setTimeout(r,650))]).then(()=>{
+  const v=$('#view'),y=v.scrollTop;route();v.scrollTop=y;ptrSet(0,1);setTimeout(()=>{ptr.classList.remove('siap','muter');$('small',ptr).textContent='Tarik untuk memuat ulang';ptrMuat.on=0},340)})}
 /* Menu bawah seperti Instagram: pindah halaman langsung tanpa animasi keluar-masuk.
    Memencet menu yang sedang aktif: bila halaman sedang digulir, kembali ke atas; bila sudah di atas, hanya Beranda yang dimuat ulang. */
 document.addEventListener('click',e=>{const a=e.target.closest('#nav a[data-r]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
