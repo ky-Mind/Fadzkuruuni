@@ -1152,7 +1152,7 @@ section.tb{display:contents}
 @media (pointer:fine){.hfoto .pt div:not(.n){-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 @media (max-width:640px){.hfoto .big{font-size:42px}.hfoto .mut2{font-size:16px}}
 /* HP: tombol kembali dan baris atas Beranda agak ke dalam, tidak menempel di pojok layar */
-@media (max-width:640px){.bar>.bk:first-child,.rh>.bk:first-child{margin-left:8px}.top{padding-left:10px;padding-right:10px}}
+@media (max-width:640px){.top{padding-left:10px;padding-right:10px}}
 /* Halaman Tentang: kepala dengan logo, paragraf terbaca, daftar isi aplikasi berbutir, data pondok berbaris */
 .tab1{color:var(--ink);font-size:14px;line-height:1.65}
 .tkep{display:flex;align-items:center;gap:12px;margin-bottom:10px}
@@ -1407,3 +1407,24 @@ html.tciut::view-transition-old(root){z-index:3}
 /* Menu bawah seperti Instagram: saat dipencet hanya warna yang berubah (tanpa kotak, tanpa mengecil) */
 #nav a{-webkit-tap-highlight-color:transparent;outline:0}
 @media(max-width:899px){#nav a:active,#nav a:focus{background:transparent;transform:none}}
+/* Tombol kembali seperti Instagram: panah polos tanpa lingkaran, area ketuk tetap lega, sejajar tepi isi */
+.bk{width:44px;height:44px;margin-left:-10px;background:transparent!important;color:var(--ink)!important;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.bk .ic{width:24px;height:24px;stroke-width:2}
+.bk:active{background:var(--fill)!important}
+.ktb .bar .bk{width:40px;height:40px}
+/* Pengaturan seperti Instagram */
+.setcari{display:flex;align-items:center;gap:8px;margin:4px 0 6px;padding:0 12px;height:42px;border-radius:10px;background:var(--fill);color:var(--mut)}
+.setcari input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;outline:0}
+.setg{border-bottom:8px solid var(--fill)}
+.setg:last-of-type{border-bottom:0}
+.setg h3{margin:16px 0 4px;font-size:14px;font-weight:600;color:var(--mut)}
+.setg .list>.row{border-bottom:0;background:transparent;min-height:56px}
+.setg .row .si{background:transparent;width:28px;height:28px;color:var(--ink)}
+.setg .row .si .ic{width:24px;height:24px}
+.setg .row .t{font-size:16px}
+.setg .row .t small{font-size:13px;line-height:1.35}
+.setkosong{margin:16px}
+@media(max-width:899px){
+ .phal>.setcari{margin-left:16px;margin-right:16px}
+ .phal .setg h3{margin-left:16px;margin-right:16px}
+}
