@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.21",
- "body": "Pembaruan Fadzkuruuni 2.6.21 (isi web 2.9.55)\n\n- Layar pembuka aplikasi dengan slogan Majelis: \"Berdzikir untuk berfikir, bertadabur untuk bersyukur.\"\n- Kelas online ala Google Meet: layar penuh memperbesar seluruh kelas, dengan video pengajar, deretan wajah peserta (bisa disembunyikan), dan kitab di samping\n- Tombol Kitab di pojok video kelas: pilih kitab, balik halaman dengan tombol, nomor halaman, atau geser\n- Berbagi layar dari HP tidak terputus saat pindah aplikasi; tombol Berhenti di pil \"Berbagi layar\"\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.21",
+ "tag_name": "v2.6.22",
+ "body": "Pembaruan Fadzkuruuni 2.6.22 (isi web 2.9.56)\n\n- Kitab di kelas online mengikuti pengajar: halaman yang dibuka pengajar otomatis tampil di layar jamaah\n- Jamaah boleh membalik sendiri, lalu ketuk \"Ikuti pengajar\" untuk kembali ke halaman pengajar\n- Termasuk semua pembaruan 2.6.21: layar pembuka berslogan, kelas ala Google Meet dengan kitab di samping\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.22",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.21/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.22/fadzkuruuni.apk"
   }
  ]
 }
