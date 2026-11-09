@@ -1,0 +1,17 @@
+{
+ "id": "arbain-nawawi",
+ "judul": "Al-Arba'in An-Nawawiyah",
+ "arab": "الأربعون النووية",
+ "pengarang": "Imam Yahya bin Syaraf An-Nawawi",
+ "ket": "42 hadits pilihan · Imam An-Nawawi",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 55,
+   "pola": "kitab/arbain-nawawi/hal/j1-{n}.webp",
+   "pdf": "kitab/arbain-nawawi/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.7406
+}

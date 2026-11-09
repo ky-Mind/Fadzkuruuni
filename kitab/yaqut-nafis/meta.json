@@ -1,0 +1,17 @@
+{
+ "id": "yaqut-nafis",
+ "judul": "Syarh Al-Yaqut An-Nafis",
+ "arab": "شرح الياقوت النفيس في مذهب ابن إدريس",
+ "pengarang": "Syekh Muhammad bin Ahmad bin Umar Asy-Syathiri",
+ "ket": "Fikih Syafi'i · Syekh Muhammad Asy-Syathiri",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 977,
+   "pola": "kitab/yaqut-nafis/hal/j1-{n}.webp",
+   "pdf": "kitab/yaqut-nafis/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.7071
+}

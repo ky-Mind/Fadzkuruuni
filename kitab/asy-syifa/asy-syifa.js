@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "asy-syifa", "judul": "Asy-Syifa bi Ta'rifi Huquqil Mushthafa", "arab": "الشفا بتعريف حقوق المصطفى", "pengarang": "Al-Qadhi 'Iyadh bin Musa Al-Yahshubi", "ket": "Kedudukan & hak-hak Nabi ﷺ · Al-Qadhi 'Iyadh", "juzTotal": 1, "juz": [{"no": 1, "halaman": 952, "pola": "kitab/asy-syifa/hal/j1-{n}.webp", "pdf": "kitab/asy-syifa/pdf/juz-1.pdf"}], "rasio": 0.6477});

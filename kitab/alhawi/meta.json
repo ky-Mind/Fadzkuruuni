@@ -2,7 +2,7 @@
  "id": "alhawi",
  "judul": "Al-Hawi fi Khulashatish Sharf wan Nahw",
  "arab": "الحاوي في خلاصة الصرف والنحو",
- "pengarang": "Pondok Pesantren Fadzkuruuni",
+ "pengarang": "Abuya Mahbubillah, pimpinan Ponpes Fadzkuruuni",
  "ket": "Ringkasan ilmu sharaf dan nahwu (Arab, dengan keterangan Sunda dan Indonesia)",
  "juzTotal": 3,
  "juz": [
@@ -17,7 +17,13 @@
    "halaman": 20,
    "pola": "kitab/alhawi/hal/j2-{n}.webp",
    "pdf": "kitab/alhawi/pdf/juz-2.pdf"
+  },
+  {
+   "no": 3,
+   "halaman": 13,
+   "pola": "kitab/alhawi/hal/j3-{n}.webp",
+   "pdf": "kitab/alhawi/pdf/juz-3.pdf"
   }
  ],
- "rasio": 0.7606
+ "rasio": 0.7072
 }

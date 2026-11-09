@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "amaliyah", "judul": "Amaliyah Majelis Fadzkuruuni", "arab": "الضياء اللامع · ما في الوجود", "pengarang": "Maulid Adh-Dhiya'ul Lami' karya Habib Umar bin Hafidz · edisi Majelis Fadzkuruuni", "ket": "Bacaan majelis: Maulid Adh-Dhiya'ul Lami', Ma fil Wujud, Mahallul Qiyam", "juzTotal": 1, "juz": [{"no": 1, "halaman": 16, "pola": "kitab/amaliyah/hal/j1-{n}.webp", "pdf": "kitab/amaliyah/pdf/juz-1.pdf"}], "rasio": 0.7079});
