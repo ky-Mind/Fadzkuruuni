@@ -1869,3 +1869,44 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .ktuts{text-align:center}.ktuts .ktuti{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:var(--g);color:var(--on)}
 .ktuts .ktuti .ic{color:var(--on)}.ktuts b{display:block;font-size:18px}.ktuts p{margin:6px 0 16px}.ktuts .act .btn{flex:1}
 .klkt{display:flex;align-items:center;gap:6px;margin:6px 0 2px;font-size:13.5px;color:var(--ink)}.klkt .ic{color:var(--g)}
+
+/* ---------- Kelas layar penuh ala Google Meet: bilah kontrol, pembatas geser, panel pesan, kamera kecil saat berbagi layar ---------- */
+.kzbar2{display:none}
+.kz:fullscreen .kzbar2{display:flex;flex:none;justify-content:center;flex-wrap:wrap;gap:8px;padding:2px 0 4px}
+.kzb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:60px;height:56px;padding:4px 8px;border:0;border-radius:16px;background:#2a302c;color:#e8ece9;font:inherit;cursor:pointer}
+.kzb .ic{color:#e8ece9}.kzb small{font-size:10.5px;line-height:1.1;white-space:nowrap;opacity:.85}
+.kzb:hover{background:#353c37}.kzb.on{background:#cfe9dc;color:#0f3b2a}.kzb.on .ic{color:#0f3b2a}
+.kzb.mati{background:#5c2b29}.kzb.mati .ic{color:#ffd9d6}.kzb.merah{background:#c5221f;color:#fff}.kzb.merah .ic{color:#fff}
+@media (max-width:640px),(max-height:520px){.kzb{min-width:44px;height:44px;border-radius:50%;padding:0}.kzb small{display:none}.kz:fullscreen .kzbar2{gap:6px}}
+.kzsplit{display:none}
+.kz:fullscreen.dgkitab:not(.kitabkecil) .kzsplit{display:flex;flex:0 0 12px;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;background:#0d0f0e;outline:none}
+.kzsplit i{display:block;width:4px;height:48px;border-radius:2px;background:#4a524d;transition:background .15s,height .15s}
+.kzsplit:hover i,.kzsplit:focus-visible i,.kzsplit.seret i{background:#7fd1a8;height:72px}
+.kz:fullscreen .kzk{flex:0 0 var(--kzkw,42%)!important}
+.kz:fullscreen .kzk.kecil{flex:none!important}
+.kzpc{display:none}
+.kz:fullscreen .kzpc:not([hidden]){display:flex;flex-direction:column;flex:0 0 min(320px,34%);min-width:0;background:#161917;border-left:1px solid #2c312e;color:#e8ece9}
+.kzpch{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 14px;border-bottom:1px solid #2c312e}
+.kz:fullscreen .kzpc .kcl{flex:1;min-height:0;max-height:none;margin:0;border:0;border-radius:0;background:transparent;overflow:auto}
+.kz:fullscreen .kzpc .kcm{color:#e8ece9}.kz:fullscreen .kzpc .kcm small{color:#9aa59f}
+.kz:fullscreen .kzpc .kcf{padding:8px;margin:0;border-top:1px solid #2c312e}
+.kz:fullscreen .kzpc .kcf .in{background:#232825;color:#e8ece9;border-color:#2c312e}
+.kzpip{position:absolute;right:10px;bottom:10px;z-index:3;width:24%;max-width:240px;min-width:96px;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 4px 14px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.7)}
+.kzpip[hidden]{display:none}.kzpip video{width:100%;height:100%;object-fit:cover}.kzpip video.cermin{transform:scaleX(-1)}
+.kzpip span{position:absolute;left:6px;bottom:4px;font-size:11px;color:#fff;text-shadow:0 1px 3px #000}
+.kpintas dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:12px 0 16px;align-items:center}.kpintas dd{margin:0}
+.kpintas kbd{display:inline-block;min-width:24px;padding:2px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--fill);font:600 12.5px/1.4 system-ui,sans-serif;text-align:center}
+.kz:fullscreen .back-d{position:absolute}
+@media (orientation:portrait){
+ .kz:fullscreen .kzk{flex:0 0 var(--kzkh,48%)!important}
+ .kz:fullscreen.dgkitab:not(.kitabkecil) .kzsplit{flex:0 0 14px;cursor:row-resize}.kzsplit i{width:48px;height:4px}
+ .kzsplit:hover i,.kzsplit:focus-visible i,.kzsplit.seret i{width:72px;height:4px}
+ .kz:fullscreen .kzpc:not([hidden]){position:absolute;left:0;right:0;bottom:0;height:55%;z-index:6;border-left:0;border-top:1px solid #2c312e;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.5)}
+}
+.kz:fullscreen .back-d .sheet{color:var(--ink)}
+.kz:fullscreen.dgpesan.dgkitab:not(.kitabkecil) .kzk{flex-basis:min(var(--kzkw,42%),40%)!important}
+/* HP mendatar (layar pendek): panel pesan melayang di kanan agar video & kitab tidak terhimpit */
+@media (orientation:landscape) and (max-height:520px){
+ .kz:fullscreen .kzpc:not([hidden]){position:absolute;top:0;right:0;bottom:0;width:min(340px,46%);z-index:6;box-shadow:-8px 0 24px rgba(0,0,0,.5)}
+ .kz:fullscreen .kzg{height:72px}.kz:fullscreen .kzt{flex-basis:110px}
+}

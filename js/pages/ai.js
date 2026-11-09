@@ -6,7 +6,7 @@
    Riwayat chat disimpan di perangkat (localStorage.fzai), model offline yang terpasang di localStorage.fzaim. */
 const AIM={kecil:{id:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',nama:'Ringan',ukuran:'±300 MB',ket:'Cocok untuk HP biasa; jawaban lebih sederhana'},besar:{id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',nama:'Lebih pintar',ukuran:'±900 MB',ket:'Butuh HP dengan RAM 6 GB ke atas'}};
 const WEBLLM='https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm';
-const AI_SISTEM=`Kamu adalah Fadz AI, asisten tanya-jawab ibadah di aplikasi Pondok Pesantren Fadzkuruuni. Jawab singkat dalam bahasa Indonesia yang santun. Pegang manhaj Ahlussunnah wal Jama'ah dan mazhab Syafi'i. Jangan mengarang dalil atau nomor hadis; bila tidak yakin, katakan terus terang dan sarankan bertanya kepada ustadz. Utamakan "Isi aplikasi yang terkait" bila ada. Bila ditanya siapa pembuat atau pengembang aplikasi, jawab bahwa aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni, tanpa menyebut nama orang. Pengguna sering salah ketik atau kurang huruf (mis. sholt, yasn, wudlu); tebak maksud terdekat dan jawab dengan tepat tanpa membahas ejaannya.`;
+const AI_SISTEM=`Kamu adalah Fadz AI, asisten tanya-jawab ibadah di aplikasi Pondok Pesantren Fadzkuruuni. Jawab singkat dalam bahasa Indonesia yang santun. Pegang manhaj Ahlussunnah wal Jama'ah dan mazhab Syafi'i. Jangan mengarang dalil atau nomor hadis; bila tidak yakin, katakan terus terang dan sarankan bertanya kepada ustadz. Utamakan "Isi aplikasi yang terkait" bila ada; untuk pertanyaan cara memakai aplikasi, jelaskan langkahnya dengan nama menu yang tepat, lalu ajak pengguna mengetuk tombol di bawah jawaban untuk membukanya. Bila ditanya siapa pembuat atau pengembang aplikasi, jawab bahwa aplikasi ini dikembangkan oleh KyMind bersama tim Fadzkuruuni, tanpa menyebut nama orang. Pengguna sering salah ketik atau kurang huruf (mis. sholt, yasn, wudlu); tebak maksud terdekat dan jawab dengan tepat tanpa membahas ejaannya.`;
 const AI_SARAN=['Doa sebelum tidur','Bacaan setelah salat fardu','Cara menghitung zakat emas','Keutamaan membaca Surah Yasin','Apa arti Ar-Rahman?','Kapan waktu salat Duha?'];
 const AI_FITUR=[['Jadwal salat & pengingat adzan','waktu salat subuh zuhur asar magrib isya imsak pengingat adzan notifikasi','#/jadwal'],['Arah kiblat','kiblat kompas arah','#/kiblat'],['Kalkulator zakat','zakat mal emas perak penghasilan perdagangan fitrah nisab hitung','#/zakat/emas'],['Zakat & sedekah','infak sedekah zakat kurban','#/zakat'],['Kalkulator waris','waris faraid pembagian harta warisan','#/waris'],['Tasbih digital','tasbih hitung dzikir zikir','#/tasbih'],['Kalender Hijriah','kalender tanggal hijriah bulan islam','#/kalender'],['Unduh untuk offline','unduh offline tanpa internet download simpan','#/pengaturan/offline'],['Laporkan masalah','bug salah tulis laporan error','#/lapor'],['Tahlil & Yasin','tahlil yasin arwah','#/tahlil']];
 
@@ -19,7 +19,7 @@ const aiTerpasang=()=>{try{return localStorage.fzaim||''}catch(e){return ''}};
 let AIE=null,AIL=null,AIX=null,AISIBUK=0,AIUNDUH=null;
 
 /* Indeks pencarian isi aplikasi (dibuat sekali saat dibutuhkan) */
-function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k)=>X.push({j,t:String(t||'').replace(/<[^>]+>/g,' '),h,k});
+function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k,kh)=>X.push({j,t:String(t||'').replace(/<[^>]+>/g,' '),h,k,kh});
  WD.forEach((g,i)=>g.forEach((x,j)=>tam(x[0],x[2],`#/bacaan/w/${i}/${j}`,'Wirid')));
  DD.forEach((g,i)=>g.forEach((x,j)=>tam(x[0],x[2],`#/bacaan/d/${i}/${j}`,'Doa')));
  TH.forEach(x=>tam(x[0],x[2],x[3]||'#/tahlil','Tahlil'));
@@ -29,9 +29,31 @@ function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k)=>X.push({j,t:Stri
  MAULID_DAFTAR.forEach(m=>tam(m.judul,'maulid shalawat sholawat',m.rute||(m.berkas?'#/maulid/'+m.id:'#/maulid'),m.majelis=='sholawat'?'Sholawat':'Maulid'));
  (typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).forEach(k=>tam(k.judul,k.ket||'kitab',k.berkas?'#/kitab/'+k.id:'#/kitab','Kitab'));
  /* Bab-bab kitab dari daftar isi (data/kitab-indeks.js): jawaban bisa menunjuk kitab & halaman yang membahas suatu topik */
- if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=(KITAB_DAFTAR||[]).find(x=>x.id==id);if(k)E.forEach(e=>tam(e[1]+' — '+k.judul+' hal. '+e[4],e[0]+' '+e[2],`#/kitab/${id}/${e[3]}`,'Kitab'))});
+ if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=(KITAB_DAFTAR||[]).find(x=>x.id==id);if(k)E.forEach(e=>tam(e[1]+' — '+k.judul+' hal. '+e[4],e[0]+' '+e[2],`#/kitab/${id}/${e[3]}`,'Kitab',`${id}|${e[3]}|${e[4]}`))});
  AI_FITUR.forEach(f=>tam(f[0],f[1],f[2],'Fitur'));
+ /* Cara memakai aplikasi: semua fitur & alurnya (data/ai-panduan.js), dan langkah-langkah tiap video tutorial */
+ if(typeof AI_PANDUAN!='undefined')AI_PANDUAN.forEach(x=>{tam(x[0],x[1]+' cara pakai buka dimana letak '+x[2],x[3],'Panduan aplikasi');X[X.length-1].c=x[2]});
+ if(typeof TUTOR!='undefined')TUTOR.forEach(x=>tam('Video tutorial: '+x.judul,'video tutorial cara '+x.ket+' Langkah: '+x.langkah.map(l=>l[0]).join('; '),'#/tutorial/'+x.id,'Video tutorial'));
  return AIX=X}
+/* ---------- Penunjuk langsung: nomor surah/ayat/juz, hadis bernomor, Asmaul Husna ke-n, halaman kitab ----------
+   Pertanyaan seperti "surat ke-52 apa?", "QS 36:9", "juz 30", "hadis bukhari nomor 5", "asmaul husna ke 7",
+   "fathul qarib halaman 12" dijawab dengan isi yang pasti dan tombol untuk langsung membukanya. */
+const aiPadat=s=>aiNorm(s).replace(/\b(al|an|ar|as|at|ad|adz|az|asy|ash|ath|ali)\b/g,'').replace(/[^a-z0-9]/g,'');
+function aiSurahNama(q){const Q=aiPadat(q);let b=-1,bl=0;(typeof NAMA!='undefined'?NAMA:[]).forEach((n,i)=>{const k=aiPadat(n);if(k.length>=3&&Q.includes(k)&&k.length>bl){b=i;bl=k.length}});return b}
+function aiLangsung(q){const H=[],n=aiNorm(q).replace(/\bjuz\s*amma\b/,'juz 30'),ada=typeof NAMA!='undefined';
+ const surah=(i,a)=>{if(!ada||i<0||i>=114)return;a=a&&a<=AYAT[i]?a:0;H.push({j:`Surah ${NAMA[i]}${a?' ayat '+a:''} (surah ke-${i+1})`,t:`Surah ke-${i+1} dalam Al-Qur'an adalah ${NAMA[i]} (${ARTI[i]}), ${AYAT[i]} ayat.${a?' Ayat yang diminta: '+a+'.':''}`,h:'#/quran/'+(i+1)+(a>1?'/'+a:''),k:"Al-Qur'an"})};
+ let m=n.match(/\b(?:qs|surah|surat|sura)\s*(?:ke\s*|nomor\s*|no\s*)?(\d{1,3})(?:\s*(?:ayat|ayah|:)?\s*(\d{1,3}))?/)||n.match(/\b(\d{1,3})\s*:\s*(\d{1,3})\b/);
+ if(!m&&/\d/.test(n)){const qs=q.match(/(\d{1,3})\s*:\s*(\d{1,3})/);if(qs)m=[0,qs[1],qs[2]]}
+ if(m&&+m[1]>=1&&+m[1]<=114)surah(+m[1]-1,+m[2]||0);
+ else{const i=/\b(surah|surat|qs|ayat|ayah)\b/.test(n)?aiSurahNama(q):-1;if(i>=0){const a=n.match(/\bayat\s*(?:ke\s*)?(\d{1,3})/);surah(i,a?+a[1]:0)}}
+ const jz=n.match(/\bjuz\s*(?:ke\s*)?(\d{1,2})\b/);if(jz&&!/kitab|hal/.test(n)&&typeof JUZ!='undefined'&&JUZ[+jz[1]-1]){const J=JUZ[+jz[1]-1];H.push({j:`Juz ${jz[1]} Al-Qur'an`,t:`Juz ${jz[1]} dimulai dari Surah ${NAMA[J[0]-1]} ayat ${J[1]}.`,h:`#/quran/${J[0]}/${J[1]}`,k:"Al-Qur'an"})}
+ const as=n.match(/\basma(?:ul)?\s*husna\s*(?:ke\s*|nomor\s*|no\s*)?(\d{1,2})\b/);if(as&&typeof ASMA!='undefined'&&ASMA[+as[1]-1]){const a=ASMA[+as[1]-1];H.push({j:`Asmaul Husna ke-${as[1]}: ${a[1]}`,t:`${a[1]} (${a[0]}) artinya ${a[2]}.`,h:'#/asma/'+as[1],k:'Asmaul Husna'})}
+ const hd=n.match(/\b(?:hadits|hadis|hadist)\s*(?:riwayat\s*|imam\s*|hr\s*)?([a-z ]+?)\s*(?:nomor|no|ke)?\s*(\d{1,4})\b/);
+ if(hd&&typeof HADIS_KITAB!='undefined'){const nm=aiPadat(hd[1]),k=HADIS_KITAB.find(x=>{const a=aiPadat(x.nama),b=aiPadat(x.id);return nm&&(nm.includes(a)||a.includes(nm)||nm.includes(b)||(b.length>3&&nm.includes(b.slice(0,5))))});
+  if(k){const x=k.h.find(y=>y[0]==+hd[2]);H.push(x?{j:`Hadis ${k.nama} nomor ${hd[2]}`,t:String(x.slice(1).join(' ')).slice(0,400),h:`#/hadits/${k.id}/${hd[2]}`,k:'Hadis'}:{j:`Hadis ${k.nama}`,t:`Aplikasi memuat hadis pilihan ${k.nama} nomor 1 sampai ${k.h.length}; nomor ${hd[2]} belum tersedia.`,h:`#/hadits/${k.id}`,k:'Hadis'})}}
+ const hl=n.match(/\b(?:halaman|hal|page)\s*(\d{1,4})\b/);if(hl&&typeof KITAB_DAFTAR!='undefined'){const Q=aiPadat(q);let k=null,bl=0;KITAB_DAFTAR.filter(x=>x.berkas).forEach(x=>{const a=aiPadat(x.judul);[a,a.slice(0,10)].forEach(c=>{if(c.length>=6&&Q.includes(c)&&c.length>bl){k=x;bl=c.length}})});
+  if(k){const jj=(n.match(/\bjuz\s*(\d)/)||[])[1]||1;H.push({j:`${k.judul} halaman ${hl[1]}`,t:`Membuka kitab ${k.judul}${jj>1?' juz '+jj:''} langsung di halaman ${hl[1]}.`,h:`#/kitab/${k.id}/${jj}`,k:'Kitab',kh:`${k.id}|${jj}|${hl[1]}`})}}
+ H.forEach(x=>x.l=1);return H}
 const aiNorm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9؀-ۿ ]+/g,' ');
 const AI_STOP=new Set('apa yang dan di ke dari untuk dengan itu ini ada bagaimana cara gimana tolong saya aku kamu bisa adalah atau juga pada dalam tentang mohon minta tahu jelaskan kapan mana siapa kenapa mengapa berapa boleh tidak'.split(' '));
 /* Skor: kata yang cocok di judul bernilai 3, di isi 1, dikali bobot kelangkaan kata (kata umum seperti "doa" bernilai kecil) */
@@ -43,13 +65,15 @@ const aiKoreksi=w=>{if(!AIKOSA){AIKOSA=new Set('salat sholat shalat subuh zuhur 
  if(w.length<4||AIKOSA.has(w))return w;let b=w,bd=w.length>6?2:1;for(const k of AIKOSA){const d=jarak(w,k);if(d<=bd&&(d<bd||b==w)){b=k;bd=d}}return b};
 function aiCari(q,n=4){const T=aiNorm(q).split(/\s+/).filter(w=>w.length>2&&!AI_STOP.has(w)).map(aiKoreksi);if(!T.length)return [];
  const X=aiIndeks().map(x=>[x,aiNorm(x.j),aiNorm(x.t)]),N=X.length,W=T.map(w=>Math.log((N+1)/(1+X.filter(a=>a[1].includes(w)||a[2].includes(w)).length)));
- return X.map(([x,j,t])=>{let s=0;T.forEach((w,i)=>{if(j.includes(w))s+=3*W[i];else if(t.includes(w))s+=W[i]});return [s,x]}).filter(a=>a[0]>0.5).sort((a,b)=>b[0]-a[0]).slice(0,n).map(a=>a[1])}
+ /* Pertanyaan cara memakai aplikasi ("cara ganti tema", "gimana buka kitab di kelas"): panduan & video tutorial diutamakan */
+ const app=/\b(cara|gimana|bagaimana|dimana|letak|fitur|pengaturan|setting|setelan|aplikasi|menu|tombol|ganti|ubah|atur|pakai|menggunakan|nyalakan|matikan|aktifkan|update|perbarui)\b/.test(aiNorm(q));
+ return X.map(([x,j,t])=>{let s=0;T.forEach((w,i)=>{if(j.includes(w))s+=3*W[i];else if(t.includes(w))s+=W[i]});if(app&&/Panduan|tutorial|Fitur/.test(x.k))s*=2.5;return [s,x]}).filter(a=>a[0]>0.5).sort((a,b)=>b[0]-a[0]).slice(0,n).map(a=>a[1])}
 
 /* Teks jawaban: tebal, daftar, dan baris baru (tanpa HTML dari luar) */
 const aiMd=s=>esc(s).replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<i>$2</i>').replace(/^\s*&gt;\s?/gm,'').replace(/^\s*-{3,}\s*$/gm,'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*•]\s+(.+)$/gm,'<span class="aili">$1</span>').replace(/\n/g,'<br>');
 const AI_MODE={online:'Dijawab AI online',lokal:'Dijawab AI offline di perangkat',cari:'Mode offline: hasil dari isi aplikasi'};
 /* Gelembung chat; di bawahnya tombol Salin (dan Edit untuk pesan pengguna) */
-const aiGelembung=(m,i)=>m.role=='user'?`<div class="aim u" data-i="${i}"><div>${esc(m.content).replace(/\n/g,'<br>')}</div><span class="aiak"><button type="button" data-aied="${i}">${ic('edit',14)} Edit</button><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button></span></div>`:`<div class="aim a" data-i="${i}"><div>${aiMd(m.content)}${m.hits&&m.hits.length?`<div class="aih">${m.hits.map(h=>`<a class="chip2" href="${h[1]}">${esc(h[0])}</a>`).join('')}</div>`:''}${m.mode?`<small class="aimd">${AI_MODE[m.mode]||''}</small>`:''}</div>${i!=null?`<span class="aiak"><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button><span data-aittsw="${i}">${aiTtsBtn(i)}</span></span>`:''}</div>`;
+const aiGelembung=(m,i)=>m.role=='user'?`<div class="aim u" data-i="${i}"><div>${esc(m.content).replace(/\n/g,'<br>')}</div><span class="aiak"><button type="button" data-aied="${i}">${ic('edit',14)} Edit</button><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button></span></div>`:`<div class="aim a" data-i="${i}"><div>${aiMd(m.content)}${m.hits&&m.hits.length?`<div class="aih">${m.hits.map(h=>`<a class="chip2" href="${h[1]}"${h[2]?` data-kh="${esc(h[2])}"`:''}>${ic('next',13)} ${esc(h[0])}</a>`).join('')}</div>`:''}${m.mode?`<small class="aimd">${AI_MODE[m.mode]||''}</small>`:''}</div>${i!=null?`<span class="aiak"><button type="button" data-aicp="${i}">${ic('copy',14)} Salin</button><span data-aittsw="${i}">${aiTtsBtn(i)}</span></span>`:''}</div>`;
 
 /* Profil singkat untuk AI online: nama, lokasi, tanggal, jadwal salat hari ini, dan isi yang tersedia */
 function aiProfil(){const d=new Date(),T=waktu(d,S.loc),L=[];
@@ -74,7 +98,9 @@ async function aiMesin(prog){if(AIE)return AIE;if(!navigator.gpu)throw {gpu:1};A
 async function aiLokal(L,konteks,tulis){const e=await aiMesin(p=>tulis('Menyiapkan AI offline… '+Math.round((p.progress||0)*100)+'%'));
  const s=await e.chat.completions.create({stream:true,temperature:.4,max_tokens:400,messages:[{role:'system',content:AI_SISTEM+(konteks?'\n\nIsi aplikasi yang terkait:\n'+konteks:'')},...L.slice(-6).map(m=>({role:m.role,content:m.content}))]});
  let t='';for await(const c of s){const d=c.choices[0]?.delta?.content;if(d){t+=d;tulis(t)}}if(!t)throw 0;return t}
-const aiJawabCari=hits=>hits.length?'Saat ini AI online tidak tersedia, jadi berikut isi aplikasi yang paling sesuai dengan pertanyaanmu. Ketuk untuk membukanya.':'Saat ini AI online tidak tersedia dan tidak ditemukan isi aplikasi yang cocok. Coba kata kunci lain (mis. "doa tidur", "zakat emas"), atau unduh AI offline saat ada internet.';
+/* Mode tanpa AI: jawaban langsung dari isi yang pasti (nomor surah/hadis/dll.) atau langkah panduan fitur, lalu tombol buka */
+const aiJawabCari=hits=>{const h=hits[0];if(h&&h.l)return h.t+' Ketuk tombol di bawah untuk membukanya.';if(h&&h.c)return h.j+': '+h.c+' Ketuk tombol di bawah untuk membukanya.';return aiJawabCari0(hits)};
+const aiJawabCari0=hits=>hits.length?'Saat ini AI online tidak tersedia, jadi berikut isi aplikasi yang paling sesuai dengan pertanyaanmu. Ketuk untuk membukanya.':'Saat ini AI online tidak tersedia dan tidak ditemukan isi aplikasi yang cocok. Coba kata kunci lain (mis. "doa tidur", "zakat emas"), atau unduh AI offline saat ada internet.';
 
 function aiStatus(e=$('#aist')){if(!e)return;const off=!navigator.onLine,m=aiTerpasang();
  e.innerHTML=`<span class="aidot ${off?'off':''}"></span><span>${off?(m?'Offline · AI di perangkat ('+AIM[m].nama+')':'Offline · cari di isi aplikasi'):'Online'}</span><button type="button" class="sb" data-aioff>${ic('down',14)} ${AIUNDUH?'Mengunduh '+AIUNDUH+'%':m?'AI offline: terpasang':'Unduh AI offline'}</button>`}
@@ -252,7 +278,7 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    const keDev=kym?4:tanyaDev?S.aidev:0,NAMA_DEV='Baiklah, karena kamu terus memaksa: pengembangku adalah Muhammad Hilmi Azkia Rahman. Sudah, jangan tanya lagi.';
    const eskTeks=kym?'KyMind is Muhammad Hilmi Azkia Rahman.':keDev>=4?NAMA_DEV:keDev?ESK[keDev-1]:'';
    if(keDev>=4&&S.aidev){S.aidev=0;save()}
-   const hits=sapa?[]:aiCari(t),konteks=hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,300)}`).join('\n');
+   const hits=sapa?[]:(()=>{const A=aiLangsung(t),B=aiCari(t,5).filter(x=>!A.some(a=>a.h==x.h));return A.concat(B).slice(0,5)})(),konteks=hits.length?hits.map(h=>`- ${h.k}: ${h.j}. ${h.t.slice(0,h.k=='Panduan aplikasi'?700:300)}`).join('\n')+'\n(Di bawah jawabanmu otomatis tampil tombol untuk membuka isi di atas di aplikasi.)':'';
    c.insertAdjacentHTML('beforeend','<div class="aim a"><div class="aiw"><i></i><i></i><i></i></div></div>');const b=c.lastElementChild.firstElementChild;ikut=1;turun(1);
    /* Teks digambar paling sering sekali per bingkai layar agar tetap mulus saat jawaban mengalir cepat */
    let bk=0,isi='';const tulis=s=>{isi=s;if(bk)return;bk=requestAnimationFrame(()=>{bk=0;b.className='';b.innerHTML=aiMd(isi);if(ikut)turun()})};let teks='',mode='online';
@@ -260,7 +286,7 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    catch(er){if(er&&er.galat=='belum-dipasang')toast('AI online belum diaktifkan pengelola aplikasi');else if(er&&er.kode==429)toast('AI online sedang ramai, memakai mode offline');
     try{if(!aiTerpasang())throw 0;mode='lokal';teks=await aiLokal(L,konteks,tulis)}catch(e2){mode='cari';teks=aiJawabCari(hits)}}
    const dev=keDev>=4;if(eskTeks)L[L.length-1][dev?'dev':'esk']=1;
-   L.push({role:'assistant',content:teks,mode:eskTeks?'online':mode,hits:eskTeks?[]:hits.map(h=>[h.j,h.h]),...(eskTeks?{[dev?'dev':'esk']:1}:{})});aiSimpan(L);
+   L.push({role:'assistant',content:teks,mode:eskTeks?'online':mode,hits:eskTeks?[]:hits.map(h=>h.kh?[h.j,h.h,h.kh]:[h.j,h.h]),...(eskTeks?{[dev?'dev':'esk']:1}:{})});aiSimpan(L);
    if($('#aic')){b.parentElement.outerHTML=aiGelembung(L[L.length-1],L.length-1);if(ikut)turun(1);if(lewatSuara)aiBicara(teks,L.length-1)}AISIBUK=0};
   $('[data-aihapus]').onclick=()=>konfirmasi('Hapus riwayat chat?','Semua percakapan di perangkat ini akan dihapus.','Hapus',()=>{L.length=0;aiSimpan(L);if(S.aidev){S.aidev=0;save()}gambar()})}});
 

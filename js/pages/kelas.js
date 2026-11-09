@@ -49,7 +49,7 @@ P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls">'+(KEL
  const k=(KELAS||[]).find(x=>x.id==id)||{id,judul:'Kelas online'},vid=k.yt||(k.status=='selesai'&&ytId(k.rekaman));
  if(vid)return {html:head(esc(k.judul||'Kelas online'),'#/kelas',k.status=='live'?'<span class="klv kll">● Live</span>':'')+`<div class="kvid"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0" title="${esc(k.judul||'Video kelas')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
   <div class="kinfo"><b>${esc(k.judul||'')}</b>${k.pengajar?`<br><small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}<p><a class="sb" href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">${ic('share',16)} Buka di YouTube</a></p></div>`,init(){if(KR&&KR.id!=id)kelasKeluar(1)}};
- return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz" id="kz"><div class="kzm"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><div class="kzbar"><button type="button" class="kzfs kzorang on" data-kzorang aria-label="Tampilkan atau sembunyikan peserta" title="Peserta">${ic('users',18)}</button><button type="button" class="kzfs kzfk" data-kzkitab aria-label="Buka kitab" title="Kitab">${ic('book',18)}<span>Kitab</span></button><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div></div><div class="kzg" id="kzg"></div></div><aside class="kzk" id="kzk" hidden></aside></div><div id="kzkaj"></div>
+ return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz" id="kz" style="${kUkuranGaya()}"><div class="kzm"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div class="kzpip" id="kzpip" hidden><video autoplay playsinline muted></video><span></span></div><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><div class="kzbar"><button type="button" class="kzfs kzorang on" data-kzorang aria-label="Tampilkan atau sembunyikan peserta" title="Peserta">${ic('users',18)}</button><button type="button" class="kzfs kzfk" data-kzkitab aria-label="Buka kitab" title="Kitab">${ic('book',18)}<span>Kitab</span></button><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div></div><div class="kzg" id="kzg"></div><div class="kzbar2" id="kzbar2"></div></div><div class="kzsplit" id="kzsplit" role="separator" tabindex="0" aria-label="Geser untuk mengatur ukuran kitab dan video (panah kiri/kanan)" title="Geser untuk mengatur ukuran"><i></i></div><aside class="kzk" id="kzk" hidden></aside><aside class="kzpc" id="kzpc" hidden><div class="kzpch"><b>Pesan</b><button type="button" class="kzkx" data-kzpesan aria-label="Tutup pesan">✕</button></div></aside></div><div id="kzkaj"></div>
   <div id="kinfo" class="kinfo"><p class="mut">Menyambungkan ke kelas…</p></div><div id="kctl" class="kctl"></div>
   <div class="kchat"><h2>Pesan</h2><div id="kcl" class="kcl"><p class="mut">Belum ada pesan.</p></div><form id="kcf" class="kcf" autocomplete="off"><input class="in" id="kci" maxlength="500" placeholder="Tulis pesan untuk kelas…" enterkeyhint="send"><button class="btn" type="submit" aria-label="Kirim">${ic('send',18)}</button></form></div><div id="kadm"></div>`,
   init(){KZID=id;kKitabAjak();kTutorAjak(id)}}};
@@ -91,6 +91,9 @@ function kelasGambar(){const st=$('#kzs'),g=$('#kzg');if(!st||!g||!KR)return;con
  const fokus=semua.find(p=>p.identity===KR.pin)||semua.find(p=>kLayar(p))||ust;
  /* Panggung besar */
  const v=$('#kzv'),vs=fokus?kStream(fokus):null,lay=!!(fokus&&kLayar(fokus));if(v.srcObject!==vs){v.srcObject=vs;if(vs)v.play().catch(()=>{})}v.hidden=!vs;v.classList.toggle('cermin',!!(vs&&fokus===saya&&!lay));v.classList.toggle('layar',lay);
+ /* Sedang berbagi layar sambil kamera menyala: kamera tetap terlihat sebagai gambar kecil di pojok (seperti Google Meet) */
+ const pip=$('#kzpip');if(pip){const cs=lay&&fokus?((KR.vid&&KR.vid.get(fokus.identity))||((fokus.attributes||{}).peran=='ustaz'?KR.video:null)):null,pv=pip.querySelector('video');
+  if(pv.srcObject!==cs){pv.srcObject=cs;if(cs)pv.play().catch(()=>{})}pip.hidden=!cs;pv.classList.toggle('cermin',!!(cs&&fokus===saya));const pn=cs?esc(nm(fokus)):'';if(pip.lastChild.innerHTML!==pn)pip.lastChild.innerHTML=pn}
  const sa=$('#kzsa'),isi=vs?'':(fokus?kAva(fokus,104):`<div class="kzw">${ic('siar',28)}<span>Menunggu pengajar masuk…</span></div>`);const sk=(fokus?fokus.identity+'|'+((fokus.attributes||{}).foto||'').length:'')+(vs?'v':'');if(sa.dataset.k!==sk){sa.innerHTML=isi;sa.dataset.k=sk}
  $('#kzsn').innerHTML=fokus?`${fokus.isSpeaking?ic('speaker',15):''}<span>${esc(nm(fokus))}</span><small>${lay?'Berbagi layar':(fokus.attributes||{}).peran=='ustaz'?'Pengajar':''}${KR.pin?' · disorot':''}</small>`:'';
  st.classList.toggle('bicara',!!(fokus&&fokus.isSpeaking));st.dataset.kpin=KR.pin?'':'';st.title=KR.pin?'Ketuk untuk kembali':'';
@@ -98,7 +101,7 @@ function kelasGambar(){const st=$('#kzs'),g=$('#kzg');if(!st||!g||!KR)return;con
  const ada=new Set();semua.filter(p=>p!==fokus).forEach(p=>{const id='kzt'+kHash(p.identity);ada.add(id);let t=document.getElementById(id);
   if(!t){t=document.createElement('button');t.type='button';t.id=id;t.className='kzt';t.innerHTML='<video autoplay playsinline muted hidden></video><span class="kza"></span><span class="kzn"></span>';g.append(t)}
   t.dataset.kpin=p.identity;
-  const vs=kStream(p),vv=t.querySelector('video');if(vv.srcObject!==vs){vv.srcObject=vs;if(vs)vv.play().catch(()=>{})}vv.hidden=!vs;vv.classList.toggle('cermin',p===saya&&!kLayar(p));vv.classList.toggle('layar',kLayar(p));
+  const vs=kLayar(p)&&KR.mode!='mesh'?((KR.vid&&KR.vid.get(p.identity))||kStream(p)):kStream(p),vv=t.querySelector('video');if(vv.srcObject!==vs){vv.srcObject=vs;if(vs)vv.play().catch(()=>{})}vv.hidden=!vs;vv.classList.toggle('cermin',p===saya&&!kLayar(p));vv.classList.toggle('layar',kLayar(p));
   const a=t.querySelector('.kza');a.hidden=!!vs;const ak=(p.name||'')+'|'+((p.attributes||{}).foto||'').length;if(a.dataset.k!==ak){a.innerHTML=kAva(p,46);a.dataset.k=ak}
   t.classList.toggle('bicara',!!p.isSpeaking);t.classList.toggle('vid',!!vs);
   const n=`${(p.attributes||{}).tangan=='1'?`<span class="kzh">${ic('tangan',13)}</span>`:''}${kBoleh(p)?ic('mic',13):''}${esc(nm(p))}${(p.attributes||{}).peran=='ustaz'?' · Pengajar':''}`;const ne=t.querySelector('.kzn');if(ne.innerHTML!==n)ne.innerHTML=n});
@@ -111,7 +114,50 @@ function kelasInfo(){const R=KR&&KR.room;if(!R)return;const semua=[R.localPartic
   +(KR.admin||boleh?`<button class="btn${mic?' s':''}" data-kmic>${ic('mic',18)} ${mic?'Matikan mikrofon':'Aktifkan mikrofon'}</button>`:`<button class="btn s" data-ktangan>${ic('tangan',18)} ${tangan?'Turunkan tangan':'Angkat tangan'}</button>`)+`<button class="btn s" data-kcam>${ic('camera',18)} ${KR.camOn?'Matikan kamera':'Nyalakan kamera'}</button>`+(KR.camOn&&KR.camBanyak?`<button class="btn s" data-kflip>${ic('camera',18)} ${kHadap()=='user'?'Pakai kamera belakang':'Pakai kamera depan'}</button>`:'')+(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?`<button class="btn s${KR.layarOn?' kon':''}" data-klayar>${ic('panel',18)} ${KR.layarOn?'Hentikan berbagi layar'+(kLayarSuara()?' <small>· dengan suara</small>':' <small>· tanpa suara</small>'):'Bagikan layar'}</button>`:'')+`<button class="btn s kkel" data-kkeluar>Keluar</button>`+(KR.admin?`<button class="btn s kkel" data-kakhirr>Akhiri kelas</button>`:'')+(KR.admin?`<button class="btn s krb" data-krec>${KREC?'<span class="krec">● Merekam</span> Hentikan & simpan':ic('mic',18)+' Rekam kelas'}</button>`:'');
  const a=$('#kadm');if(a&&KR.admin){const L=[...R.remoteParticipants.values()],T=L.filter(p=>(p.attributes||{}).tangan=='1'||kBoleh(p));
   a.innerHTML=`<h2>Jamaah yang angkat tangan</h2>`+(T.length?`<div class="list">${T.map(p=>`<div class="srw"><span class="si">${ic(kBoleh(p)?'mic':'tangan',18)}</span><span class="t">${esc(p.name||'Jamaah')}<br><small class="mut">${kBoleh(p)?'Boleh bicara':'Ingin bertanya'}</small></span><button class="btn s" data-kizin="${esc(p.identity)}" data-boleh="${kBoleh(p)?0:1}">${kBoleh(p)?'Bisukan':'Izinkan bicara'}</button></div>`).join('')}</div>`:'<p class="mut">Belum ada. Jamaah yang menekan "Angkat tangan" muncul di sini.</p>')}
- kelasGambar();kelasPil()}
+ kelasGambar();kelasPil();kBarPenuh()}
+/* Bilah kontrol di bawah video saat layar penuh, seperti Google Meet: mikrofon / angkat tangan, kamera, bagikan layar, pesan, kitab, peserta, keluar.
+   Tombolnya memakai data-* yang sama dengan tombol di bawah kelas, jadi perilakunya sama persis. */
+function kBarPenuh(){const b=$('#kzbar2');if(!b||!KR)return;const R=KR.room,saya=R.localParticipant,boleh=kBoleh(saya),mic=saya.isMicrophoneEnabled,tangan=(saya.attributes||{}).tangan=='1',kk=$('#kzk'),pc=$('#kzpc');
+ const t=(at,ikon,label,on,cls,kunci)=>`<button type="button" class="kzb${on?' on':''}${cls?' '+cls:''}" ${at} title="${label}${kunci?' ('+kunci+')':''}" aria-label="${label}">${ic(ikon,20)}<small>${label}</small></button>`;
+ const h=(KR.admin||boleh?t('data-kmic','mic',mic?'Mikrofon nyala':'Mikrofon mati',mic,mic?'':'mati','M'):t('data-ktangan','tangan',tangan?'Turunkan tangan':'Angkat tangan',tangan,'','H'))
+  +t('data-kcam','camera',KR.camOn?'Kamera nyala':'Kamera mati',KR.camOn,KR.camOn?'':'mati','V')
+  +(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?t('data-klayar','panel',KR.layarOn?'Hentikan berbagi':'Bagikan layar',KR.layarOn,'','S'):'')
+  +t('data-kzpesan','send','Pesan',pc&&!pc.hidden,'','C')+t('data-kzkitab','book','Kitab',kk&&!kk.hidden,'','K')
+  +t('data-kzorang','users','Peserta',!$('#kz.tanpaorang'),'','P')+t('data-kzfs','full','Keluar layar penuh',false,'','F')+t('data-kkeluar','keluar','Keluar kelas',false,'merah');
+ if(b.dataset.h!==h){b.innerHTML=h;b.dataset.h=h}}
+/* Panel pesan di layar penuh: daftar pesan & kolom tulis kelas dipindah ke samping video, dikembalikan saat keluar layar penuh */
+function kPesanTampil(on){const pc=$('#kzpc'),c=$('.kchat');if(!pc||!c)return;on=on==null?pc.hidden:on;
+ if(on&&!kVideoPenuh())return kPesanBiasa();
+ pc.hidden=!on;$('#kz').classList.toggle('dgpesan',on);const isi=$('#kcl'),f=$('#kcf');
+ if(on){pc.append(isi,f);isi.scrollTop=isi.scrollHeight;setTimeout(()=>{if(!('ontouchstart'in window))$('#kci')?.focus()},50)}else{c.append(isi,f)}kBarPenuh()}
+/* Di layar biasa tombol Pesan menggulir ke kolom pesan */
+function kPesanBiasa(){const i=$('#kci');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>i.focus(),300)}}
+/* Ukuran kitab vs video di layar penuh (persen), diingat: S.kzkw (mendatar, lebar kitab) & S.kzkh (tegak, tinggi kitab) */
+const kUkuranGaya=()=>`--kzkw:${S.kzkw||42}%;--kzkh:${S.kzkh||48}%`;
+const kTegak=()=>matchMedia('(orientation:portrait)').matches;
+function kUkuran(v,simpan){const z=$('#kz');if(!z)return;v=Math.max(20,Math.min(62,Math.round(v)));const k=kTegak()?'kzkh':'kzkw';z.style.setProperty('--'+k,v+'%');if(simpan){S[k]=v;save()}}
+{let seret=null;
+ document.addEventListener('pointerdown',e=>{const sp=e.target.closest&&e.target.closest('#kzsplit');if(!sp)return;e.preventDefault();sp.setPointerCapture(e.pointerId);seret={id:e.pointerId};sp.classList.add('seret')});
+ document.addEventListener('pointermove',e=>{if(!seret||e.pointerId!==seret.id)return;const z=$('#kz'),k=$('#kzk');if(!z||!k)return;const r=z.getBoundingClientRect(),pc=$('#kzpc'),lebarPc=pc&&!pc.hidden&&!kTegak()?pc.offsetWidth:0;
+  kUkuran(kTegak()?(r.bottom-e.clientY)/r.height*100:(r.right-lebarPc-e.clientX)/r.width*100)});
+ const lepas=e=>{if(!seret||e.pointerId!==seret.id)return;seret=null;const sp=$('#kzsplit');if(sp)sp.classList.remove('seret');const z=$('#kz');if(z){const k=kTegak()?'kzkh':'kzkw';S[k]=parseInt(z.style.getPropertyValue('--'+k))||S[k];save()}};
+ document.addEventListener('pointerup',lepas);document.addEventListener('pointercancel',lepas);
+ /* Ketuk dua kali pembatas = kembali ke ukuran bawaan */
+ document.addEventListener('dblclick',e=>{if(e.target.closest&&e.target.closest('#kzsplit'))kUkuran(kTegak()?48:42,1)})}
+/* ---------- Tombol pintas keyboard di kelas (komputer) ----------
+   M mikrofon · H angkat tangan · V kamera · S bagikan layar · C pesan · K kitab · P peserta · F layar penuh
+   [ / ] kecilkan / besarkan kitab · ← / → balik halaman kitab (← = berikutnya, seperti kitab Arab) · ? daftar tombol */
+const KPINTAS=[['M','Mikrofon nyala/mati'],['H','Angkat / turunkan tangan'],['V','Kamera nyala/mati'],['S','Bagikan layar'],['C','Pesan'],['K','Buka/tutup kitab'],['P','Tampilkan peserta'],['F','Layar penuh'],['[  ]','Atur ukuran kitab'],['←  →','Balik halaman kitab'],['?','Daftar tombol ini']];
+addEventListener('keydown',e=>{if(!KR||!$('#kz')||e.altKey||e.ctrlKey||e.metaKey||e.target.closest?.('input,textarea,select,[contenteditable]'))return;
+ const tekan=s=>{const b=$('#kzbar2 '+s)||$('#kctl '+s)||$(s);if(b){e.preventDefault();b.click()}};
+ if(e.target.closest?.('#kzsplit')&&(e.key=='ArrowLeft'||e.key=='ArrowRight'||e.key=='ArrowUp'||e.key=='ArrowDown')){e.preventDefault();const k=kTegak()?'kzkh':'kzkw',v=S[k]||(kTegak()?48:42),plus=e.key=='ArrowLeft'||e.key=='ArrowUp';return kUkuran(v+(plus?4:-4),1)}
+ const k=e.key.length==1?e.key.toLowerCase():e.key;
+ if(k=='m')return tekan('[data-kmic]');if(k=='h')return tekan('[data-ktangan]');if(k=='v')return tekan('[data-kcam]');if(k=='s')return tekan('[data-klayar]');
+ if(k=='c'){e.preventDefault();return kPesanTampil()}if(k=='k'){e.preventDefault();return kKitabTampil()}if(k=='f')return tekan('[data-kzfs]');
+ if(k=='p'){e.preventDefault();const z=$('#kz');z.classList.toggle('tanpaorang');return kBarPenuh()}
+ if(k=='['||k==']'){e.preventDefault();const kk=kTegak()?'kzkh':'kzkw';return kUkuran((S[kk]||(kTegak()?48:42))+(k==']'?6:-6),1)}
+ if((k=='ArrowLeft'||k=='ArrowRight')&&$('#kzk')&&!$('#kzk').hidden){e.preventDefault();const c=S.kzk||{};return kKitab({n:(c.n||1)+(k=='ArrowLeft'?1:-1)})}
+ if(k=='?'){e.preventDefault();const d=document.createElement('div');d.className='back-d tgh';d.innerHTML=`<div class="sheet kpintas" role="dialog" aria-label="Tombol pintas kelas"><b>Tombol pintas keyboard</b><dl>${KPINTAS.map(([a,b])=>`<dt>${a.split('  ').map(x=>`<kbd>${x}</kbd>`).join(' ')}</dt><dd>${b}</dd>`).join('')}</dl><button class="btn" style="width:100%" data-x>Tutup</button></div>`;(kVideoPenuh()?$('#kz'):document.body).append(d);d.onclick=x=>{if(x.target==d||x.target.closest('[data-x]'))d.remove()}}});
 
 async function kelasToken(id,aksi,lain){let idToken=null;try{if(typeof FBU!='undefined'&&FBU)idToken=await FBU.getIdToken()}catch(e){}
  const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({aksi,kelas:id,idToken,nama:kNama()},lain||{}))});
@@ -198,8 +244,11 @@ const kVideoPenuh=()=>{const f=document.fullscreenElement||document.webkitFullsc
 function kMiring(on){const A=window.FadzAndroid;if(A&&A.layarMiring){try{A.layarMiring(!!on)}catch(e){}return}
  const o=screen.orientation;if(!o)return;if(on)o.lock&&o.lock('landscape').catch(()=>{});else o.unlock&&o.unlock()}
 let KMIRING=false;
-const kPenuhUbah=()=>{const on=kVideoPenuh();if(on==KMIRING)return;KMIRING=on;kMiring(on);const b=$('[data-kzfs]');if(b)b.classList.toggle('on',on)};
+const kPenuhUbah=()=>{const on=kVideoPenuh();if(!on&&$('#kzpc')&&!$('#kzpc').hidden)kPesanTampil(false);kBarPenuh();if(on==KMIRING)return;KMIRING=on;kMiring(on);const b=$('.kzbar [data-kzfs]');if(b)b.classList.toggle('on',on)};
 document.addEventListener('fullscreenchange',kPenuhUbah);
+/* Di layar penuh hanya isi elemen layar penuh yang terlihat: lembar konfirmasi & toast ikut dipindah ke dalamnya */
+new MutationObserver(L=>{const f=document.fullscreenElement;if(!f||!f.classList.contains('kz'))return;L.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType==1&&n.parentNode===document.body&&n.classList.contains('back-d'))f.append(n)}))}).observe(document.body,{childList:true});
+document.addEventListener('fullscreenchange',()=>{const f=document.fullscreenElement,t=$('#toast');if(!t)return;if(f&&f.classList.contains('kz'))f.append(t);else if(t.parentNode!==document.body)document.body.append(t)});
 /* ---------- Kitab di samping video kelas (seperti berbagi dokumen di Zoom/Meet) ----------
    Jamaah memilih kitab sendiri lalu membalik halaman; pilihan terakhir diingat (S.kzk = {id, j, n}).
    Di layar penuh panel berada di kanan video; di layar biasa di bawah video. */
@@ -245,11 +294,11 @@ async function kKitab(ubah,dariPengajar){if(ubah&&!dariPengajar&&KPENG&&!kPengaj
  kKitabIkutTombol();if(j)kKitabKirim(c);
  /* Halaman berikutnya dimuat lebih dulu agar membalik terasa cepat */
  if(j&&n<j.halaman){const im=new Image();im.src=pgUrl(j,n+1)}}
-function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));
+function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));setTimeout(kBarPenuh,0);
  if(on){el.classList.remove('kecil');z.classList.remove('kitabkecil');$$('.kzhint').forEach(h=>h.remove())}
  if(on)kKitab(KPENG&&KIKUT&&!kPengajarKitab()&&KPENG.id&&!KBEBAS?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:null,1);else if(kPengajarKitab())kKitabKirim(null,1);kKitabAjak()}
 /* Kecilkan panel kitab: tinggal judul & nomor halaman (tetap mengikuti pengajar); ketuk lagi untuk membesarkan */
-function kKitabKecil(on){const el=$('#kzk'),z=$('#kz');if(!el||el.hidden)return;on=on==null?!el.classList.contains('kecil'):on;el.classList.toggle('kecil',on);if(z)z.classList.toggle('kitabkecil',on);
+function kKitabKecil(on){const el=$('#kzk'),z=$('#kz');if(!el||el.hidden)return;on=on==null?!el.classList.contains('kecil'):on;el.classList.toggle('kecil',on);if(z)z.classList.toggle('kitabkecil',on);kBarPenuh();
  const b=el.querySelector('[data-kzkecil]');if(b){b.innerHTML=ic(on?'besar':'kecil',16);b.title=on?'Besarkan':'Kecilkan';b.setAttribute('aria-label',on?'Besarkan kitab':'Kecilkan kitab')}}
 document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
  if(t.closest('[data-kzkitab]')){e.preventDefault();return kKitabTampil()}
@@ -258,7 +307,8 @@ document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
  if(t.closest('[data-kzklain]')){KBEBAS=true;KIKUT=false;return kKitab()}
  if(t.closest('[data-kzkkelas]')){KBEBAS=false;KIKUT=true;return kKitab(KPENG&&KPENG.id?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:{id:kKitabKelas(),j:0,n:1},1)}
  if(t.closest('[data-kzkikut]')){if(kPengajarKitab())return toast('Halaman kitab yang kamu buka ikut tampil di layar jamaah');KIKUT=!KIKUT;if(KIKUT&&KPENG&&KPENG.id)return kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1);return kKitabIkutTombol()}
- if(t.closest('[data-kzorang]')){const z=$('#kz');if(z){z.classList.toggle('tanpaorang');t.closest('[data-kzorang]').classList.toggle('on',!z.classList.contains('tanpaorang'))}return}
+ if(t.closest('[data-kzorang]')){const z=$('#kz');if(z){z.classList.toggle('tanpaorang');$$('[data-kzorang]').forEach(b=>b.classList.toggle('on',!z.classList.contains('tanpaorang')));kBarPenuh()}return}
+ if(t.closest('[data-kzpesan]')){e.preventDefault();return kPesanTampil()}
  const nb=t.closest('[data-kzkn]');if(nb&&!nb.disabled){const c=S.kzk||{};return kKitab({n:(c.n||1)+(+nb.dataset.kzkn)})}});
 document.addEventListener('change',e=>{const t=e.target;if(!t.matches)return;
  if(t.matches('[data-kzksel]'))return kKitab({id:t.value,j:0,n:1});
