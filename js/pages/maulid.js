@@ -4,19 +4,25 @@ const maulidAmbil=async id=>{const d=MAULID_DAFTAR.find(x=>x.id==id);if(!d||!d.b
 MAULID_DAFTAR.filter(m=>m.berkas).forEach(m=>paket('maulid:'+m.id,{judul:m.judul,kat:'maulid',urls:async()=>[m.berkas],berkas:m.pdf?async()=>[{url:m.pdf,nama:m.judul.replace(/'/g,'')+'.pdf'}]:null}));
 const maulidIsi=(m,k)=>{const B=m.bagian,b=B[k];return b.isi.map(x=>`<div class="ay2"><span class="n">${x.no}</span><div class="ar2" style="font-size:${S.fs}px">${esc(x.ar)}</div>${x.lt?`<p class="lt">${esc(x.lt)}</p>`:''}${x.id?`<p class="tr mut">${esc(x.id)}</p>`:''}</div>`).join('')+KOREKSI+pnav(k>0&&(B[k-1].jeda?['#/jeda/'+m.id+'/'+(k-1),'Sholawat']:['#/maulid/'+m.id+'/'+(k-1),B[k-1].judul]),k<B.length-1&&(b.jeda?['#/jeda/'+m.id+'/'+k,'Sholawat sebelum '+B[k+1].judul.replace(/:.*/,'')]:['#/maulid/'+m.id+'/'+(k+1),B[k+1].judul]))};
 /* Jeda sholawat (Amaliyah): setelah bagian ber-"jeda", jamaah memilih satu sholawat, membacanya, lalu lanjut ke bagian berikutnya.
-   Sementara memakai daftar Sholawat Fadzkuruuni (masih kosong) + Sholawat Umum dari Wirid › Sholawat. JEDA = bagian tujuan selanjutnya. */
+   Sementara memakai daftar Sholawat Fadzkuruuni (masih kosong) + Sholawat Umum dari Wirid › Sholawat. JEDA = bagian tujuan selanjutnya.
+   Pembuat halaman harus murni (tanpa efek samping): dipakai juga untuk pratinjau geser. */
 let JEDA=null;
-const jedaLanjut=(J=JEDA)=>J?`<a class="btn jlanjut" href="#/maulid/${J.id}/${J.k}">${ic('next',18)} Lanjut ke ${esc(J.judul)}</a>`:'';
-P.jeda=(id,k)=>{k=+k;const d=MAULID_DAFTAR.find(x=>x.id==id),m=MAULID_ISI[id];
- if(!d||!m||!m.bagian[k+1]){setTimeout(()=>{location.hash='#/maulid/'+id},0);return {html:head('Sholawat','#/maulid/'+id)}}
- /* JEDA baru diisi di init: halaman ini juga dibuat untuk pratinjau geser tanpa benar-benar dibuka */
- const J={id,k:k+1,judul:m.bagian[k+1].judul},SU=items('w',1).filter(x=>x.j>=0);
- return {html:head('Sholawat','#/maulid/'+id+'/'+k,RS)+`<div class="card jeda"><b>Selesai ${esc(m.bagian[k].judul.replace(/:.*/,''))}</b><p class="mut" style="margin:4px 0 10px">Pilih sholawat yang dibaca bersama, lalu lanjut ke ${esc(J.judul)}.</p>${jedaLanjut(J)}</div>
-<h2>Sholawat Fadzkuruuni</h2>${majelisDaftar(KITAB_MAJELIS('sholawat'),'Sholawat Fadzkuruuni segera hadir. Sementara, pilih dari Sholawat Umum di bawah.')}
-<h2>Sholawat Umum <small class="mut">(sementara)</small></h2>${list(SU,(x,i)=>`<a class="row" href="#/bacaan/w/1/${x.j}"><span class="num">${i+1}</span><span class="t">${esc(x.n)}</span>${ic('next',18)}</a>`)}`,init(){JEDA=J}}};
-/* Saat membaca sholawat dari halaman jeda: tombol lanjut ke bagian maulid berikutnya */
-{const B=P.bacaan;P.bacaan=(t,i,j)=>{const p=B(t,i,j);if(JEDA&&t=='w'&&+i==1&&p&&p.html)p.html=p.html.replace(KOREKSI,`<div class="card jeda">${jedaLanjut()}<a class="btn s jpilih" href="#/jeda/${JEDA.id}/${JEDA.k-1}">Pilih sholawat lain</a></div>`+KOREKSI);return p}}
-/* Jeda selesai setelah masuk bagian tujuan atau keluar dari Maulid */
+const jedaSingkat=j=>j.replace(/:.*/,'');
+const jedaBar=(J,ganti)=>`<div class="jd-bar${ganti?' dua':''}">${ganti?`<a class="btn s" href="#/jeda/${J.id}/${J.k-1}">${ic('heart',16)}<span>Ganti sholawat</span></a>`:''}<a class="btn jd-go" href="#/maulid/${J.id}/${J.k}"><span>Lanjut ke ${esc(jedaSingkat(J.judul))}</span>${ic('next',18)}</a></div>`;
+const jedaIsi=(id,k,m)=>{const J={id,k:k+1,judul:m.bagian[k+1].judul},SU=items('w',1).filter(x=>x.j>=0),FZ=KITAB_MAJELIS('sholawat'),a=jedaSingkat(m.bagian[k].judul),b=jedaSingkat(J.judul);
+ return `<section class="jd-hero"><ol class="jd-step"><li class="ok">${ic('check',14)}${esc(a)}</li><i class="jd-ar">${ic('next',14)}</i><li class="on">${ic('heart',14)}Sholawat</li><i class="jd-ar">${ic('next',14)}</i><li>${esc(b)}</li></ol>
+<h2>Waktunya bersholawat</h2><p>Pilih satu sholawat untuk dibaca bersama, lalu lanjut ke <b>${esc(J.judul)}</b>.</p></section>
+<div class="jd-sec"><b>Sholawat Fadzkuruuni</b>${FZ.length?'':'<span class="jd-pill">Segera hadir</span>'}</div>${FZ.length?majelisDaftar(FZ):''}
+<div class="jd-sec"><b>Sholawat Umum</b><span class="jd-pill">Sementara</span></div>
+<div class="jd-grid">${SU.map(x=>`<a class="jd-c" href="#/bacaan/w/1/${x.j}"><span class="si">${ic('heart',16)}</span><span>${esc(x.n)}</span></a>`).join('')}</div>
+${pnav(['#/maulid/'+id+'/'+k,m.bagian[k].judul],['#/maulid/'+id+'/'+(k+1),J.judul])}${jedaBar(J)}`};
+P.jeda=(id,k)=>{k=+k;const m=MAULID_ISI[id],ok=m&&m.bagian[k+1];
+ return {html:head('Sholawat','#/maulid/'+id+'/'+k,RS)+`<div id="jd">${ok?jedaIsi(id,k,m):'<p class="mut">Memuat…</p>'}</div>`,
+  async init(){let mm=m;if(!ok){try{mm=await maulidAmbil(id)}catch(e){}if(!mm||!mm.bagian[k+1]){location.replace('#/maulid/'+id);return}const el=$('#jd');if(el)el.innerHTML=jedaIsi(id,k,mm)}
+   JEDA={id,k:k+1,judul:mm.bagian[k+1].judul}}}};
+PRATINJAU.jeda=(id,k)=>{const m=MAULID_ISI[id];if(!m||!m.bagian[+k+1])return null;return head('Sholawat','#/maulid/'+id+'/'+k,RS)+`<div id="jd">${jedaIsi(id,+k,m)}</div>`};
+/* Saat membaca sholawat dari halaman jeda: bilah bawah Ganti sholawat | Lanjut ke bagian berikutnya */
+{const B=P.bacaan;P.bacaan=(t,i,j)=>{const p=B(t,i,j);if(JEDA&&t=='w'&&+i==1&&p&&p.html)p.html+=jedaBar(JEDA,1);return p}}
 addEventListener('hashchange',()=>{if(JEDA&&!/^#\/(jeda|bacaan\/w\/1)\//.test(location.hash))JEDA=null});
 function maulidBaca(el,m,k){const B=m.bagian,b=B[k];if(!b){el.innerHTML='<div class="card mut">Bagian tidak ditemukan.</div>';return}$('#view h1').textContent=b.judul;
  el.innerHTML=maulidIsi(m,k)}

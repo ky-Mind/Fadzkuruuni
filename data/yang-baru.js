@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.49':['Halaman Sholawat di Amaliyah tampil baru: penanda langkah (Bagian I → Sholawat → Bagian II), pilihan sholawat berbentuk kartu, dan tombol Lanjut yang selalu terlihat di bawah','Geser kiri-kanan antara bagian maulid dan halaman Sholawat kini mulus'],
  '2.9.48':['Amaliyah: setelah Bagian I, II, III, dan IV ada halaman Sholawat. Pilih sholawat yang dibaca, lalu tekan Lanjut ke bagian berikutnya (sementara memakai daftar Sholawat Umum)'],
  '2.9.47':['Maulid › Fadzkuruuni: Qasidah Ma fil Wujud dan Amaliyah Majelis Fadzkuruuni kini berupa teks per bait (Arab, Latin, terjemah) seperti maulid Umum, bisa diperbesar hurufnya dan disimpan offline','Amaliyah lengkap: Ya Rabbi Shalli, Inna Fatahna, Maulid Adh-Dhiya\'ul Lami\' bagian I–IV, Mahallul Qiyam, An-Nabi Ya Man Hadhar, Qad Kafani, Ma fil Wujud, dan Doa'],
  '2.9.46':['Kelas online: kamera dan suara pengajar kini tetap tersambung dari jauh dan di jaringan seluler (video tidak lagi berhenti setelah HP pindah aplikasi atau layar mati)','Kelas online: bila sinyal putus sebentar, kelas menyambung ulang otomatis; ada juga tombol Sambungkan lagi'],
