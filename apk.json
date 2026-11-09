@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.22",
- "body": "Pembaruan Fadzkuruuni 2.6.22 (isi web 2.9.56)\n\n- Kitab di kelas online mengikuti pengajar: halaman yang dibuka pengajar otomatis tampil di layar jamaah\n- Jamaah boleh membalik sendiri, lalu ketuk \"Ikuti pengajar\" untuk kembali ke halaman pengajar\n- Termasuk semua pembaruan 2.6.21: layar pembuka berslogan, kelas ala Google Meet dengan kitab di samping\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.22",
+ "tag_name": "v2.6.23",
+ "body": "Pembaruan Fadzkuruuni 2.6.23 (isi web 2.9.57)\n\n- Kelas online: halaman kitab dan video/layar yang dibagikan bisa diperbesar dengan mencubit dua jari, digeser saat diperbesar, ketuk dua kali untuk memperbesar/kembali normal\n- Termasuk: kitab mengikuti halaman pengajar, kelas ala Google Meet, layar pembuka berslogan\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.23",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.22/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.23/fadzkuruuni.apk"
   }
  ]
 }
