@@ -10,11 +10,24 @@
 <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <script>/* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */try{var z=JSON.parse(localStorage.fz||'{}'),t=z.theme=='blue'?'blue':z.theme=='dark'||(z.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.background={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t]}catch(e){}</script>
+<style>/* Layar pembuka: tampil seketika selagi skrip aplikasi dimuat (menggantikan layar gelap kosong), ditutup router.js */
+#pembuka{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;text-align:center;background:#fff;color:#24584a;transition:opacity .45s ease}
+[data-theme=dark] #pembuka{background:#121413;color:#cfe0d7}[data-theme=blue] #pembuka{background:#eef4fb;color:#1d4f7a}
+#pembuka.tutup{opacity:0;pointer-events:none}
+#pembuka img{width:118px;height:118px;object-fit:contain;animation:pbM .7s ease both}
+#pembuka .pbh{display:flex;align-items:center;gap:10px;margin:26px 0 14px;opacity:.55;animation:pbM .7s .15s ease both}
+#pembuka .pbh i{display:block;width:54px;height:1px;background:currentColor}#pembuka .pbh b{display:block;width:7px;height:7px;transform:rotate(45deg);border:1px solid currentColor}
+#pembuka p{margin:0;font:italic 400 21px/1.55 Georgia,"Times New Roman",serif;letter-spacing:.2px;animation:pbM .8s .3s ease both}
+#pembuka p span{display:block}
+#pembuka small{margin-top:18px;font:600 11px/1 system-ui,sans-serif;letter-spacing:.32em;opacity:.6;animation:pbM .8s .55s ease both}
+@keyframes pbM{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#pembuka *{animation:none!important}}</style>
 <link rel="stylesheet" href="css/app.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New&display=swap">
 </head>
 <body>
+<div id="pembuka" aria-hidden="true"><img src="img/logo.png" alt=""><div class="pbh"><i></i><b></b><i></i></div><p><span>Berdzikir untuk berfikir,</span><span>bertadabur untuk bersyukur.</span></p><small>MAJELIS FADZKURUUNI</small></div>
 <div id="app">
   <nav id="nav" aria-label="Menu utama">
     <div class="nb">
