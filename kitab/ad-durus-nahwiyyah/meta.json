@@ -1,0 +1,17 @@
+{
+ "id": "ad-durus-nahwiyyah",
+ "judul": "Ad-Durus An-Nahwiyyah",
+ "arab": "الدروس النحوية",
+ "pengarang": "Hifni Nashif, Muhammad Diyab, Mushthafa Thamum, dkk.",
+ "ket": "Nahwu bertingkat dengan latihan · Hifni Nashif dkk.",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 415,
+   "pola": "kitab/ad-durus-nahwiyyah/hal/j1-{n}.webp",
+   "pdf": "kitab/ad-durus-nahwiyyah/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.7071
+}

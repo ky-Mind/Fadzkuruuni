@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "kasyful-muruthiyyah", "judul": "Kasyful Muruthiyyah", "arab": "كشف المروطية عن ستور الآجرومية", "pengarang": "Syekh Muhammad Nawawi Al-Bantani Al-Jawi", "ket": "Syarah Al-Ajurumiyah (nahwu) · Syekh Nawawi Al-Bantani", "juzTotal": 1, "juz": [{"no": 1, "halaman": 201, "pola": "kitab/kasyful-muruthiyyah/hal/j1-{n}.webp", "pdf": "kitab/kasyful-muruthiyyah/pdf/juz-1.pdf"}], "rasio": 0.6733});

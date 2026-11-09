@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "mutammimah-ajurumiyah", "judul": "Mutammimah Al-Ajurumiyah", "arab": "متممة الآجرومية", "pengarang": "Syekh Muhammad bin Muhammad Al-Haththab Ar-Ru'aini", "ket": "Nahwu lanjutan Al-Ajurumiyah · Syekh Al-Haththab Ar-Ru'aini", "juzTotal": 1, "juz": [{"no": 1, "halaman": 135, "pola": "kitab/mutammimah-ajurumiyah/hal/j1-{n}.webp", "pdf": "kitab/mutammimah-ajurumiyah/pdf/juz-1.pdf"}], "rasio": 0.7068});

@@ -1,0 +1,2 @@
+/* Dibuat otomatis oleh buat_halaman.py dari meta.json. Ubah judul/keterangan di meta.json lalu jalankan ulang. */
+registerKitab({"id": "ikhtisar-faraidh", "judul": "Ikhtisar Ilmu Faraidh", "arab": "علم الفرائض", "pengarang": "Majelis Fadzkuruuni", "ket": "Dasar-dasar ilmu faraidh (waris) · Majelis Fadzkuruuni", "juzTotal": 1, "juz": [{"no": 1, "halaman": 25, "pola": "kitab/ikhtisar-faraidh/hal/j1-{n}.webp", "pdf": "kitab/ikhtisar-faraidh/pdf/juz-1.pdf"}], "rasio": 0.7045});

@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.45':['Al-Hawi kini lengkap sampai Juz 3, dengan keterangan karya Abuya Mahbubillah, pimpinan Ponpes Fadzkuruuni','Kitab Karya Pondok baru: Ikhtisar Ilmu Faraidh','Maulid: Amaliyah Majelis Fadzkuruuni (Adh-Dhiya\'ul Lami\', Ma fil Wujud, Mahallul Qiyam); Ratib Al-Haddad memakai edisi terbaru','Kitab Umum baru: Al-Arba\'in An-Nawawiyah, Mutammimah Al-Ajurumiyah, Kasyful Muruthiyyah, Ad-Durus An-Nahwiyyah, Syarh Qathrun Nada, Kasyifatus Saja, Syarh Al-Yaqut An-Nafis, dan Asy-Syifa'],
  '2.9.44':['Video tutorial widget kini memakai rekaman layar HP Android asli: memasang widget Jadwal Salat lengkap dari Subuh sampai Isya, termasuk Duha'],
  '2.9.43':['Perbaikan: widget layar utama langsung terisi jadwal saat aplikasi dibuka (sebelumnya baru terisi setelah keluar-masuk aplikasi)'],
  '2.9.42':['Kotak Duha di Beranda dan widget kini tampil sama jelasnya dengan waktu salat lain','Video tutorial widget khusus untuk HP (tidak tampil di pilihan Desktop, karena widget hanya ada di Android)'],

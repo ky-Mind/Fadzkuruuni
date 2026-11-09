@@ -1,0 +1,17 @@
+{
+ "id": "kasyifatus-saja",
+ "judul": "Kasyifatus Saja",
+ "arab": "كاشفة السجا شرح سفينة النجا",
+ "pengarang": "Syekh Muhammad Nawawi Al-Bantani",
+ "ket": "Syarah Safinatun Najah (fikih) · Syekh Nawawi Al-Bantani",
+ "juzTotal": 1,
+ "juz": [
+  {
+   "no": 1,
+   "halaman": 575,
+   "pola": "kitab/kasyifatus-saja/hal/j1-{n}.webp",
+   "pdf": "kitab/kasyifatus-saja/pdf/juz-1.pdf"
+  }
+ ],
+ "rasio": 0.6781
+}
