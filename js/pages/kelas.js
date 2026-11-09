@@ -28,9 +28,9 @@ const kAdmin=()=>typeof adminBisa=='function'&&adminBisa('kelas');
 function kelasKartu(k){const live=k.status=='live',sel=k.status=='selesai',adm=kAdmin();
  return `<div class="kls${live?' live':''}">${live?`<div class="klt"><span class="klv">● Sedang live</span>${KR&&KR.id==k.id?'<small class="mut">Kamu sedang di kelas ini</small>':''}</div>`:`<small class="mut">${sel?'Selesai · ':''}${esc(kJam(k.mulai))}</small>`}
   ${k.yt?`<a class="kyt" href="#/kelas/${k.id}" aria-label="Tonton ${esc(k.judul||'video')}"><img src="${ytGambar(k.yt)}" alt="" loading="lazy"><span class="kyp">${ic('play',26)}</span>${live?'<span class="klv kytl">● LIVE</span>':''}</a>`:''}
-  <b>${esc(k.judul||'Kelas')}</b>${k.pengajar?`<small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}
+  <b>${esc(k.judul||'Kelas')}</b>${k.pengajar?`<small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}${kKitabJudul(k.kitabKelas)?`<span class="klkt">${ic('book',15)} Kitab: <b>${esc(kKitabJudul(k.kitabKelas))}</b></span>`:''}
   <div class="kla">${live?`<a class="btn" href="#/kelas/${k.id}">${ic(k.yt?'play':'siar',18)} ${k.yt?'Tonton live':'Masuk dan dengarkan'}</a>`:''}${sel&&k.rekaman?(ytId(k.rekaman)?`<a class="sb" href="#/kelas/${k.id}">${ic('play',16)} Putar rekaman</a>`:`<a class="sb" href="${esc(k.rekaman)}" target="_blank" rel="noopener">${ic('play',16)} Putar rekaman</a>`):''}${adm&&!sel?`<button class="sb" data-kytset="${k.id}">${k.yt?'Ubah':'Tempel'} link YouTube</button>`:''}
-  ${adm&&!sel?(live?`<button class="sb" data-kakhir="${k.id}">Akhiri kelas</button>`:`<button class="sb pri" data-kmulai="${k.id}">Mulai kelas</button>`):''}${adm&&sel?`<button class="sb" data-ktaut="${k.id}">${k.rekaman?'Ubah':'Isi'} tautan rekaman</button>`:''}${adm?`<button class="sb" data-ktgl="${k.id}">Ubah tanggal</button><button class="sb dng" data-khapus="${k.id}">Hapus</button>`:''}</div>${!k.yt&&k.mode=='mesh'&&!sel?'<small class="mut">Kelas kecil (maks. ±10 jamaah).</small>':''}${k.rekam&&!sel?'<small class="mut">Kelas ini direkam.</small>':''}</div>`}
+  ${adm&&!sel?(live?`<button class="sb" data-kakhir="${k.id}">Akhiri kelas</button>`:`<button class="sb pri" data-kmulai="${k.id}">Mulai kelas</button>`):''}${adm&&sel?`<button class="sb" data-ktaut="${k.id}">${k.rekaman?'Ubah':'Isi'} tautan rekaman</button>`:''}${adm&&!sel&&!k.yt?`<button class="sb" data-kkitabset="${k.id}">${ic('book',14)} ${k.kitabKelas?'Ganti':'Atur'} kitab</button>`:''}${adm?`<button class="sb" data-ktgl="${k.id}">Ubah tanggal</button><button class="sb dng" data-khapus="${k.id}">Hapus</button>`:''}</div>${!k.yt&&k.mode=='mesh'&&!sel?'<small class="mut">Kelas kecil (maks. ±10 jamaah).</small>':''}${k.rekam&&!sel?'<small class="mut">Kelas ini direkam.</small>':''}</div>`}
 function kelasDaftar(){const e=$('#kls');if(e)e.innerHTML=kelasDaftarHtml()}
 function kelasDaftarHtml(){const L=(KELAS||[]).slice(),now=Date.now();
  const live=L.filter(k=>k.status=='live'),akan=L.filter(k=>k.status!='live'&&k.status!='selesai').sort((a,b)=>(a.mulai||0)-(b.mulai||0)),sel=L.filter(k=>k.status=='selesai').sort((a,b)=>(b.mulai||0)-(a.mulai||0)).slice(0,20);
@@ -49,10 +49,25 @@ P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls">'+(KEL
  const k=(KELAS||[]).find(x=>x.id==id)||{id,judul:'Kelas online'},vid=k.yt||(k.status=='selesai'&&ytId(k.rekaman));
  if(vid)return {html:head(esc(k.judul||'Kelas online'),'#/kelas',k.status=='live'?'<span class="klv kll">● Live</span>':'')+`<div class="kvid"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0" title="${esc(k.judul||'Video kelas')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
   <div class="kinfo"><b>${esc(k.judul||'')}</b>${k.pengajar?`<br><small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}<p><a class="sb" href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">${ic('share',16)} Buka di YouTube</a></p></div>`,init(){if(KR&&KR.id!=id)kelasKeluar(1)}};
- return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz" id="kz"><div class="kzm"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><div class="kzbar"><button type="button" class="kzfs kzorang on" data-kzorang aria-label="Tampilkan atau sembunyikan peserta" title="Peserta">${ic('users',18)}</button><button type="button" class="kzfs" data-kzkitab aria-label="Buka kitab di samping" title="Kitab">${ic('book',18)}</button><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div></div><div class="kzg" id="kzg"></div></div><aside class="kzk" id="kzk" hidden></aside></div>
+ return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz" id="kz"><div class="kzm"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><div class="kzbar"><button type="button" class="kzfs kzorang on" data-kzorang aria-label="Tampilkan atau sembunyikan peserta" title="Peserta">${ic('users',18)}</button><button type="button" class="kzfs kzfk" data-kzkitab aria-label="Buka kitab" title="Kitab">${ic('book',18)}<span>Kitab</span></button><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div></div><div class="kzg" id="kzg"></div></div><aside class="kzk" id="kzk" hidden></aside></div><div id="kzkaj"></div>
   <div id="kinfo" class="kinfo"><p class="mut">Menyambungkan ke kelas…</p></div><div id="kctl" class="kctl"></div>
   <div class="kchat"><h2>Pesan</h2><div id="kcl" class="kcl"><p class="mut">Belum ada pesan.</p></div><form id="kcf" class="kcf" autocomplete="off"><input class="in" id="kci" maxlength="500" placeholder="Tulis pesan untuk kelas…" enterkeyhint="send"><button class="btn" type="submit" aria-label="Kirim">${ic('send',18)}</button></form></div><div id="kadm"></div>`,
-  init(){kelasMasuk(id)}}};
+  init(){KZID=id;kKitabAjak();kTutorAjak(id)}}};
+
+/* ---------- Ajakan menonton video tutorial kelas sebelum masuk ----------
+   Muncul sekali untuk tiap kelas baru (S.ktutK = kelas yang sudah ditawari), bisa dimatikan di Pengaturan › Kelas online.
+   "Tonton dulu" membuka video tutorial kelas; tombol di bawah videonya membawa kembali ke kelas ini. */
+let TUT_KE=null;
+const kTutorAda=()=>typeof TUTOR!='undefined'&&TUTOR.some(t=>t.id=='kelas');
+function kTutorAjak(id){const kelasMasuk=x=>{window.kelasMasuk(x);setTimeout(kKitabPetunjuk,900)};if(KR&&KR.id==id)return kelasMasuk(id);const sudah=S.ktutK||[];
+ if(S.ktutOff||!kTutorAda()||sudah.includes(id))return kelasMasuk(id);
+ const tandai=()=>{S.ktutK=[id,...(S.ktutK||[]).filter(x=>x!=id)].slice(0,40);save()};
+ const masuk=()=>{tandai();tutup();kelasMasuk(id)},tonton=()=>{tandai();tutup();TUT_KE=['#/kelas/'+id,'Masuk ke kelas sekarang'];location.hash='#/tutorial/kelas'};
+ const i=$('#kinfo');if(i)i.innerHTML=`<div class="ktut">${ic('play',20)}<span><b>Baru ikut kelas online?</b> Tonton tutorial singkat agar tahu letak tombol kitab, mikrofon, dan layar penuh.</span></div><div class="act"><button class="btn s" data-ktutmasuk>Sudah paham, masuk</button><button class="btn" data-ktuttonton>${ic('play',16)} Tonton dulu</button></div>`;
+ const e=document.createElement('div');e.className='back-d tgh';e.innerHTML=`<div class="sheet ktuts" role="alertdialog" aria-label="Tonton tutorial kelas"><span class="ktuti">${ic('play',26)}</span><b>Tonton tutorial dulu?</b><p class="mut">Video singkat cara ikut kelas online: membuka kitab, mengikuti halaman pengajar, angkat tangan, dan layar penuh. Supaya tidak bingung di dalam kelas.</p><div class="act"><button class="btn s" data-ktutmasuk>Sudah paham</button><button class="btn" data-ktuttonton>${ic('play',16)} Tonton dulu</button></div></div>`;
+ const tutup=()=>e.remove();document.body.append(e);
+ e.onclick=x=>{if(x.target==e)tutup()};
+ [e,i].forEach(w=>{if(!w)return;w.querySelectorAll('[data-ktutmasuk]').forEach(b=>b.onclick=masuk);w.querySelectorAll('[data-ktuttonton]').forEach(b=>b.onclick=tonton)})}
 
 /* ---------- Tampilan seperti Zoom: pengajar besar di atas (kamera bila menyala), jamaah kotak kecil di bawah ---------- */
 const kHash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h};
@@ -189,11 +204,23 @@ document.addEventListener('fullscreenchange',kPenuhUbah);
    Jamaah memilih kitab sendiri lalu membalik halaman; pilihan terakhir diingat (S.kzk = {id, j, n}).
    Di layar penuh panel berada di kanan video; di layar biasa di bawah video. */
 const kKitabList=()=>(typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).filter(k=>k.berkas);
+const kKitabJudul=id=>{const k=id&&kKitabList().find(x=>x.id==id);return k?k.judul:''};
+/* Kitab kelas: dipilih pengajar saat membuat kelas (field kitabKelas) atau dari dalam kelas.
+   Bila ada, jamaah yang menekan tombol Kitab langsung dibukakan kitab itu, tanpa memilih.
+   "Kitab lain" = jamaah membaca kitab pilihannya sendiri (KBEBAS), bisa kembali ke kitab kelas kapan saja. */
+let KZID=null,KBEBAS=false;
+const kKitabKelas=()=>{const k=(KELAS||[]).find(x=>x.id==(KR?KR.id:KZID))||{};return kKitabJudul(k.kitabKelas)?k.kitabKelas:''};
+/* Ajakan di bawah panggung: menunjukkan letak kitab (judul kitab kelas bila sudah ditentukan pengajar) */
+function kKitabAjak(){const e=$('#kzkaj');if(!e)return;const buka=!$('#kzk')||!$('#kzk').hidden,kk=kKitabKelas();
+ e.innerHTML=buka?'':`<button type="button" class="kzkaj" data-kzkitab>${ic('book',20)}<span><b>${kk?'Kitab kelas ini: '+esc(kKitabJudul(kk)):'Buka kitab sambil mendengarkan'}</b><small>${kk?'Ketuk untuk membuka, halaman mengikuti pengajar':'Pilih kitab dari aplikasi, tampil di samping video'}</small></span>${ic('next',18)}</button>`;
+}
+/* Petunjuk singkat di tombol Kitab pada panggung (3 kali pertama masuk kelas) */
+function kKitabPetunjuk(){const n=S.kzpetunjuk||0,st=$('#kzs'),el=$('#kzk');if(!st||(el&&!el.hidden)||n>=3||st.querySelector('.kzhint'))return;S.kzpetunjuk=n+1;save();const h=document.createElement('div');h.className='kzhint';h.innerHTML='Kitab ada di sini';st.append(h);setTimeout(()=>h.remove(),7000)}
 /* KIKUT: jamaah mengikuti halaman pengajar (bawaan ya; berhenti bila jamaah membalik sendiri). KPENG: posisi terakhir dari pengajar */
 let KIKUT=true,KPENG=null,KKIRIM=0;
 const kPengajarKitab=()=>!!(KR&&KR.admin);
 function kKitabDariPengajar(k){KPENG=k&&k.id?k:null;if(kPengajarKitab())return;const el=$('#kzk');
- if(KPENG&&KIKUT){const c=S.kzk||{};if(el&&!el.hidden){if(c.id!=KPENG.id||c.j!=KPENG.j||c.n!=KPENG.n)kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1)}
+ if(KPENG&&KIKUT){const c=S.kzk||{};if(el&&!el.hidden){if(!KBEBAS&&(c.id!=KPENG.id||c.j!=KPENG.j||c.n!=KPENG.n))kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1)}
   else{S.kzk={id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1};if(!KPENG.tutup&&el&&!$('#kz.dgkitab')&&!KPENG.diberitahu){KPENG.diberitahu=1;toast('Pengajar membuka kitab. Ketuk tombol Kitab di pojok video untuk mengikuti.')}}}
  else if(el&&!el.hidden)kKitabIkutTombol()}
 /* Tombol di kepala panel: pengajar = "Dibagikan ke jamaah"; jamaah = "Mengikuti pengajar" / "Ikuti pengajar" */
@@ -201,21 +228,35 @@ function kKitabIkutTombol(){const b=$('#kzkikut');if(!b)return;if(kPengajarKitab
  b.hidden=!KPENG;b.className='kzki'+(KIKUT?' on':'');b.innerHTML=KIKUT?`${ic('check',14)}<span>Mengikuti pengajar</span>`:`${ic('users',14)}<span>Ikuti pengajar</span>`;b.title=KIKUT?'Halaman mengikuti pengajar. Membalik sendiri akan berhenti mengikuti.':'Kembali ke halaman yang dibuka pengajar'}
 /* Pengajar: kirim posisi kitab ke dokumen kelas (dijeda sebentar agar membalik cepat tidak memenuhi kuota tulis) */
 function kKitabKirim(c,tutup){if(!kPengajarKitab()||typeof FBD=='undefined'||!FBD)return;clearTimeout(KKIRIM);const id=KR.id;
- KKIRIM=setTimeout(()=>{FBD.collection('kelas').doc(id).update({kitab:tutup?{tutup:1,t:Date.now()}:{id:c.id,j:c.j||0,n:c.n||1,t:Date.now()}}).catch(()=>{})},tutup?0:500)}
+ KKIRIM=setTimeout(()=>{const u={kitab:tutup?{tutup:1,t:Date.now()}:{id:c.id,j:c.j||0,n:c.n||1,t:Date.now()}};if(!tutup&&c.id!=kKitabKelas()){u.kitabKelas=c.id;const k=(KELAS||[]).find(x=>x.id==id);if(k)k.kitabKelas=c.id}
+  FBD.collection('kelas').doc(id).update(u).catch(()=>{})},tutup?0:500)}
 async function kKitab(ubah,dariPengajar){if(ubah&&!dariPengajar&&KPENG&&!kPengajarKitab())KIKUT=false;const el=$('#kzk');if(!el)return;const L=kKitabList();if(!L.length){el.innerHTML='<p class="mut">Kitab belum tersedia.</p>';return}
+ const kk=kKitabKelas(),kunci=kk&&!kPengajarKitab()&&!KBEBAS;
  const c=S.kzk=Object.assign({id:L[0].id,j:0,n:1},S.kzk||{},ubah||{});if(!L.some(k=>k.id==c.id))Object.assign(c,{id:L[0].id,j:0,n:1});
+ /* Jamaah di kelas yang kitabnya sudah ditentukan: selalu kitab kelas (halaman terakhir tetap diingat bila kitabnya sama) */
+ if(kunci&&c.id!=kk&&!(dariPengajar&&ubah&&ubah.id))Object.assign(c,{id:kk,j:0,n:1});
  let k=null;try{k=await kitabAmbil(c.id)}catch(e){}
  const J=k&&k.juz||[],j=J[c.j]||J[0];if(j&&!J[c.j])c.j=0;const n=j?Math.min(Math.max(1,c.n),j.halaman):1;c.n=n;save();
- el.innerHTML=`<div class="kzkh"><select class="in" data-kzksel aria-label="Pilih kitab">${L.map(x=>`<option value="${x.id}"${x.id==c.id?' selected':''}>${esc(x.judul)}</option>`).join('')}</select>${J.length>1?`<select class="in kzkj" data-kzkjuz aria-label="Pilih juz">${J.map((x,i)=>`<option value="${i}"${i==c.j?' selected':''}>Juz ${x.no}</option>`).join('')}</select>`:''}<button type="button" class="kzki" id="kzkikut" data-kzkikut hidden></button><button type="button" class="kzkx" data-kzkitab aria-label="Tutup kitab" title="Tutup kitab">✕</button></div>
+ const pilih=kunci?`<button type="button" class="kzkt" data-kzkbesar title="Kitab kelas ini"><span class="kzkt1">${ic('book',16)}<b>${esc(kKitabJudul(c.id))}</b></span><small class="kzkhal">Kitab kelas · hal. ${n}/${j?j.halaman:1}</small></button>`
+  :`<select class="in" data-kzksel aria-label="Pilih kitab">${L.map(x=>`<option value="${x.id}"${x.id==c.id?' selected':''}>${esc(x.judul)}${x.id==kk?' (kitab kelas)':''}</option>`).join('')}</select>`;
+ el.innerHTML=`<div class="kzkh">${pilih}${J.length>1?`<select class="in kzkj" data-kzkjuz aria-label="Pilih juz">${J.map((x,i)=>`<option value="${i}"${i==c.j?' selected':''}>Juz ${x.no}</option>`).join('')}</select>`:''}<button type="button" class="kzki" id="kzkikut" data-kzkikut hidden></button><button type="button" class="kzkx kzkmin" data-kzkecil aria-label="Kecilkan kitab" title="Kecilkan">${ic(el.classList.contains('kecil')?'besar':'kecil',16)}</button><button type="button" class="kzkx" data-kzkitab aria-label="Tutup kitab" title="Tutup kitab">✕</button></div>
  <div class="kzkb" data-kzkgeser>${j?`<img src="${pgUrl(j,n)}" alt="${esc(k.judul)} halaman ${n}" decoding="async">`:'<p class="mut">Kitab ini belum bisa dimuat. Periksa internet.</p>'}</div>
- <div class="kzkf"><button type="button" class="btn s" data-kzkn="-1" ${n<=1?'disabled':''} aria-label="Halaman sebelumnya">${ic('back',16)}</button><label class="kzkp"><input class="in" type="number" inputmode="numeric" min="1" max="${j?j.halaman:1}" value="${n}" data-kzkhal aria-label="Nomor halaman"><span>/ ${j?j.halaman:1}</span></label><button type="button" class="btn s" data-kzkn="1" ${j&&n>=j.halaman?'disabled':''} aria-label="Halaman berikutnya">${ic('next',16)}</button></div>`;
+ <div class="kzkf"><button type="button" class="btn s" data-kzkn="-1" ${n<=1?'disabled':''} aria-label="Halaman sebelumnya">${ic('back',16)}</button><label class="kzkp"><input class="in" type="number" inputmode="numeric" min="1" max="${j?j.halaman:1}" value="${n}" data-kzkhal aria-label="Nomor halaman"><span>/ ${j?j.halaman:1}</span></label><button type="button" class="btn s" data-kzkn="1" ${j&&n>=j.halaman?'disabled':''} aria-label="Halaman berikutnya">${ic('next',16)}</button></div>${kk&&!kPengajarKitab()?`<div class="kzklain">${KBEBAS?`<button type="button" class="sb" data-kzkkelas>${ic('book',14)} Kembali ke kitab kelas</button>`:`<button type="button" class="sb" data-kzklain>Baca kitab lain sendiri</button>`}</div>`:''}`;
  kKitabIkutTombol();if(j)kKitabKirim(c);
  /* Halaman berikutnya dimuat lebih dulu agar membalik terasa cepat */
  if(j&&n<j.halaman){const im=new Image();im.src=pgUrl(j,n+1)}}
 function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));
- if(on)kKitab(KPENG&&KIKUT&&!kPengajarKitab()&&KPENG.id?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:null,1);else if(kPengajarKitab())kKitabKirim(null,1)}
+ if(on){el.classList.remove('kecil');z.classList.remove('kitabkecil');$$('.kzhint').forEach(h=>h.remove())}
+ if(on)kKitab(KPENG&&KIKUT&&!kPengajarKitab()&&KPENG.id&&!KBEBAS?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:null,1);else if(kPengajarKitab())kKitabKirim(null,1);kKitabAjak()}
+/* Kecilkan panel kitab: tinggal judul & nomor halaman (tetap mengikuti pengajar); ketuk lagi untuk membesarkan */
+function kKitabKecil(on){const el=$('#kzk'),z=$('#kz');if(!el||el.hidden)return;on=on==null?!el.classList.contains('kecil'):on;el.classList.toggle('kecil',on);if(z)z.classList.toggle('kitabkecil',on);
+ const b=el.querySelector('[data-kzkecil]');if(b){b.innerHTML=ic(on?'besar':'kecil',16);b.title=on?'Besarkan':'Kecilkan';b.setAttribute('aria-label',on?'Besarkan kitab':'Kecilkan kitab')}}
 document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
  if(t.closest('[data-kzkitab]')){e.preventDefault();return kKitabTampil()}
+ if(t.closest('[data-kzkecil]')){e.preventDefault();return kKitabKecil()}
+ if(t.closest('[data-kzkbesar]')){const el=$('#kzk');if(el&&el.classList.contains('kecil'))kKitabKecil(false);return}
+ if(t.closest('[data-kzklain]')){KBEBAS=true;KIKUT=false;return kKitab()}
+ if(t.closest('[data-kzkkelas]')){KBEBAS=false;KIKUT=true;return kKitab(KPENG&&KPENG.id?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:{id:kKitabKelas(),j:0,n:1},1)}
  if(t.closest('[data-kzkikut]')){if(kPengajarKitab())return toast('Halaman kitab yang kamu buka ikut tampil di layar jamaah');KIKUT=!KIKUT;if(KIKUT&&KPENG&&KPENG.id)return kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1);return kKitabIkutTombol()}
  if(t.closest('[data-kzorang]')){const z=$('#kz');if(z){z.classList.toggle('tanpaorang');t.closest('[data-kzorang]').classList.toggle('on',!z.classList.contains('tanpaorang'))}return}
  const nb=t.closest('[data-kzkn]');if(nb&&!nb.disabled){const c=S.kzk||{};return kKitab({n:(c.n||1)+(+nb.dataset.kzkn)})}});
@@ -287,10 +328,14 @@ document.addEventListener('click',async e=>{const t=e.target;
  /* Admin: buat / mulai / akhiri / hapus kelas (Firestore lewat SDK, aturan: hanya admin) */
  if(t.closest('[data-krec]')&&KR)return KREC?kelasRekamStop():kelasRekamMulai();
  if(t.closest('[data-kakhirr]')&&KR&&KR.admin){const id=KR.id;return konfirmasi('Akhiri kelas?','Semua jamaah otomatis keluar dari kelas ini. Rekaman (bila ada) disimpan.','Akhiri',async()=>{try{await FBD.collection('kelas').doc(id).update({status:'selesai'})}catch(x){return toast('Gagal mengakhiri kelas')}await kelasKeluar(1);history.replaceState(null,'','#/kelas');route();toast('Kelas diakhiri')})}
- if(!t.closest('[data-kbuat],[data-kmulai],[data-kakhir],[data-khapus],[data-ktaut],[data-kytset],[data-ktgl]'))return;
+ if(!t.closest('[data-kbuat],[data-kmulai],[data-kakhir],[data-khapus],[data-ktaut],[data-kytset],[data-ktgl],[data-kkitabset]'))return;
  await fbInit();if(!FBD||!kAdmin())return toast('Khusus admin. Masuk dengan akun admin.');const col=FBD.collection('kelas');
  const segar=async()=>{await kelasAmbil();kelasDaftar()};
  const m=t.closest('[data-kmulai]');if(m){try{await col.doc(m.dataset.kmulai).update({status:'live',mulai:Date.now()});kelasSiarkan(m.dataset.kmulai,'mulai');await segar();location.hash='#/kelas/'+m.dataset.kmulai}catch(x){toast('Gagal memulai kelas')}return}
+ const kt=t.closest('[data-kkitabset]');if(kt){const k=(KELAS||[]).find(x=>x.id==kt.dataset.kkitabset)||{},e=document.createElement('div');e.className='back-d';
+  e.innerHTML=`<div class="sheet kfm" role="dialog" aria-label="Kitab kelas"><b>Kitab yang dikaji</b><p class="mut">${esc(k.judul||'Kelas')}. Jamaah yang menekan tombol Kitab langsung dibukakan kitab ini.</p><select class="in" id="kkts">${kKitabPilihan(k.kitabKelas||'')}</select><div class="act"><button class="sb pri" id="kktv">Simpan</button><button class="sb" id="kktb">Batal</button></div></div>`;
+  document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='kktb')tutup()};
+  $('#kktv').onclick=async()=>{const v=$('#kkts').value;try{await col.doc(kt.dataset.kkitabset).update({kitabKelas:v});tutup();await segar();toast(v?'Kitab kelas: '+kKitabJudul(v):'Kitab kelas dikosongkan')}catch(x){toast('Gagal menyimpan')}};return}
  const tg=t.closest('[data-ktgl]');if(tg){const k=(KELAS||[]).find(x=>x.id==tg.dataset.ktgl)||{},d=new Date(k.mulai||Date.now()),v=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16),e=document.createElement('div');e.className='back-d';
   e.innerHTML=`<div class="sheet kfm" role="dialog" aria-label="Ubah tanggal"><b>Ubah tanggal</b><p class="mut">${esc(k.judul||'Kelas')}</p><input class="in" id="ktg" type="datetime-local" value="${v}"><div class="act"><button class="sb pri" id="ktgs">Simpan</button><button class="sb" id="ktgb">Batal</button></div></div>`;
   document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='ktgb')tutup()};
@@ -308,15 +353,17 @@ document.addEventListener('click',async e=>{const t=e.target;
   $('#kys').onclick=async()=>{const v=$('#kyu').value.trim(),id=ytId(v);if(v&&!id)return toast('Link YouTube tidak dikenali');try{await col.doc(yy.dataset.kytset).update({yt:id});tutup();await segar();toast(id?'Link YouTube disimpan':'Link YouTube dihapus')}catch(x){toast('Gagal menyimpan')}};return}
  if(t.closest('[data-kbuat]'))kelasForm(col,segar)});
 
+const kKitabPilihan=v=>`<option value="">Bebas (jamaah memilih sendiri)</option>`+kKitabList().map(x=>`<option value="${x.id}"${x.id==v?' selected':''}>${esc(x.judul)}</option>`).join('');
 function kelasForm(col,segar){const e=document.createElement('div');e.className='back-d';const d=new Date(Date.now()+3600e3);d.setMinutes(0,0,0);const lok=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
  e.innerHTML=`<div class="sheet kfm" role="dialog" aria-label="Buat kelas"><b>Buat kelas</b><label>Link YouTube: live streaming atau video lama (opsional)</label><input class="in" id="kfy" type="url" inputmode="url" placeholder="Tempel link YouTube di sini"><div id="kfyp" class="kfyp" hidden></div><label>Judul</label><input class="in" id="kfj" maxlength="80" placeholder="Ngaji Aqidatul Awam">
   <label>Pengajar</label><input class="in" id="kfp" maxlength="60" placeholder="Ustaz pondok"><label>Waktu mulai</label><input class="in" id="kfw" type="datetime-local" value="${lok}"><small class="mut kfwk" id="kfwk" hidden>Untuk video lama, isi tanggal aslinya (boleh tanggal yang sudah lewat). Video tampil di "Sudah selesai" sesuai tanggal ini.</small>
   <label>Keterangan (opsional)</label><input class="in" id="kfk" maxlength="160" placeholder="Bait 12–20">
+  <label>Kitab yang dikaji (opsional)</label><select class="in" id="kfkt">${kKitabPilihan('')}</select><small class="mut">Jamaah yang menekan tombol Kitab langsung dibukakan kitab ini, tanpa memilih.</small>
   <label>Jenis kelas suara</label><select class="in" id="kfm"><option value="mesh"${KSIAP===false?' selected':''}>Kelas kecil (sampai ±10 jamaah, tanpa LiveKit)</option><option value="livekit"${KSIAP===false?'':' selected'}>Kelas besar (LiveKit, puluhan–ratusan jamaah)</option></select>
   <label class="kcek"><input type="checkbox" id="kfr"> Rekam kelas (video layar/kamera + semua suara, disimpan di perangkat pengajar: folder Download/Fadzkuruuni)</label><label class="kff" id="kffw" hidden>Format rekaman <select id="kff">${Object.entries(REKAM_FMT).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label><div class="act"><button class="sb pri" id="kfv" hidden>Simpan sebagai video</button><button class="sb pri" id="kfs">Simpan jadwal</button><button class="sb" id="kfl">Langsung mulai</button><button class="sb" id="kfb">Batal</button></div></div>`;
  document.body.append(e);const tutup=()=>e.parentNode&&e.parentNode.removeChild(e);e.onclick=x=>{if(x.target==e||x.target.id=='kfb')tutup()};
  const simpan=async live=>{const j=$('#kfj').value.trim();if(!j)return toast('Isi judul kelas');const w=new Date($('#kfw').value).getTime()||Date.now();
-  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,rekamFmt:$('#kff').value,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});kelasSiarkan(r.id,live?'mulai':'baru');tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
+  try{const r=await col.add({judul:j,pengajar:$('#kfp').value.trim(),ket:$('#kfk').value.trim(),kitabKelas:$('#kfkt').value,mulai:live?Date.now():w,status:live?'live':'jadwal',rekam:$('#kfr').checked,rekamFmt:$('#kff').value,mode:$('#kfm').value,yt:ytId($('#kfy').value),oleh:(FBU&&FBU.email)||'',dibuat:Date.now()});kelasSiarkan(r.id,live?'mulai':'baru');tutup();await segar();if(live)location.hash='#/kelas/'+r.id;else toast('Jadwal kelas disimpan')}catch(x){toast('Gagal menyimpan. Pastikan aturan Firestore terbaru sudah dipublish.')}};
  $('#kfs').onclick=()=>simpan(0);$('#kfl').onclick=()=>simpan(1);
  /* Video YouTube yang sudah ada (mis. rekaman pengajian lama): langsung jadi kelas "Sudah selesai" dengan tanggal bebas, bisa diputar ulang jamaah */
  $('#kfv').onclick=async()=>{const id=ytId($('#kfy').value),j=$('#kfj').value.trim();if(!id)return toast('Tempel link YouTube dulu');if(!j)return toast('Isi judul');const w=new Date($('#kfw').value).getTime();if(!w)return toast('Isi tanggal video');
@@ -404,7 +451,7 @@ async function kelasChat(id){await fbInit();if(!FBD||!KR||KR.id!=id)return;try{i
  KR.chatUnsub=FBD.collection('kelas').doc(id).collection('chat').orderBy('t').limitToLast(60).onSnapshot(q=>{const e=$('#kcl');if(!e)return;const saya=KR&&KR.room.localParticipant.identity;
   e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${kTautan(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{});
  /* Kitab yang sedang dibuka pengajar: jamaah yang memilih "Ikuti pengajar" otomatis pindah ke halaman yang sama */
- const uChat=KR.chatUnsub,uKitab=FBD.collection('kelas').doc(id).onSnapshot(d=>{const k=(d.data()||{}).kitab;if(KR&&KR.id==id)kKitabDariPengajar(k)},()=>{});
+ const uChat=KR.chatUnsub,uKitab=FBD.collection('kelas').doc(id).onSnapshot(d=>{const x=d.data()||{},k=x.kitab,kl=(KELAS||[]).find(y=>y.id==id);if(kl&&kl.kitabKelas!=x.kitabKelas){kl.kitabKelas=x.kitabKelas||'';kKitabAjak();const el=$('#kzk');if(el&&!el.hidden&&!KBEBAS&&!kPengajarKitab())kKitab()}if(KR&&KR.id==id)kKitabDariPengajar(k)},()=>{});
  KR.chatUnsub=()=>{try{uChat()}catch(e){}try{uKitab()}catch(e){}}}catch(x){}}
 document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.preventDefault();const i=$('#kci'),teks=(i.value||'').trim();if(!teks||!KR)return;i.value='';
  try{await FBD.collection('kelas').doc(KR.id).collection('chat').add({nama:kNama(),teks:teks.slice(0,500),t:Date.now(),pid:KR.room.localParticipant.identity})}
