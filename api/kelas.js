@@ -16,13 +16,25 @@ async function jwt(payload, rahasia) {
 export default async function handler(req) {
   if (req.method != 'POST') return jawab({ galat: 'metode' }, 405);
   /* Spasi / baris baru yang ikut tersalin dibuang */
-  const KEY = String(process.env.LIVEKIT_API_KEY || '').trim(), RHS = String(process.env.LIVEKIT_API_SECRET || '').trim();
+  /* Tanda kutip yang ikut tersalin dari dashboard juga dibuang */
+  const bersih = v => String(v || '').trim().replace(/^["']+|["']+$/g, '').trim();
+  const KEY = bersih(process.env.LIVEKIT_API_KEY), RHS = bersih(process.env.LIVEKIT_API_SECRET);
   /* Alamat project LiveKit boleh ditulis tanpa wss:// (seperti di dashboard LiveKit) */
-  let URL_ = String(process.env.LIVEKIT_URL || '').trim().replace(/\/+$/, '');
+  let URL_ = bersih(process.env.LIVEKIT_URL).replace(/\/+$/, '');
   if (URL_ && !/^wss?:\/\//.test(URL_)) URL_ = 'wss://' + URL_.replace(/^https?:\/\//, '');
   if (!URL_ || !KEY || !RHS) return jawab({ galat: 'belum-siap' }, 503);
   let b; try { b = await req.json(); } catch (e) { return jawab({ galat: 'isi' }, 400); }
-  if (b.aksi == 'cek') return jawab({ siap: true });
+  if (b.aksi == 'cek') {
+    /* Uji kunci: panggil RoomService.ListRooms dengan token server. 401 = API key / secret tidak cocok dengan project LiveKit di LIVEKIT_URL */
+    let kunci = null, host = '';
+    try {
+      host = new URL(URL_.replace(/^ws/, 'http')).host;
+      const t = await jwt({ iss: KEY, sub: 'cek', nbf: Math.floor(Date.now() / 1000) - 10, exp: Math.floor(Date.now() / 1000) + 60, video: { roomList: true } }, RHS);
+      const r = await fetch(URL_.replace(/^ws/, 'http') + '/twirp/livekit.RoomService/ListRooms', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + t }, body: '{}' });
+      kunci = r.ok ? 'cocok' : 'ditolak-' + r.status;
+    } catch (e) { kunci = 'tidak-terhubung'; }
+    return jawab({ siap: true, kunci, host, key: KEY.slice(0, 4) + '…' + KEY.length, secret: RHS.length });
+  }
   const id = String(b.kelas || ''); if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return jawab({ galat: 'kelas' }, 400);
   const kr = await fetch(FS + '/kelas/' + id); if (!kr.ok) return jawab({ galat: 'kelas-tidak-ada' }, 404);
   const status = (await kr.json()).fields?.status?.stringValue || 'jadwal';
