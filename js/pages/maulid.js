@@ -9,11 +9,11 @@ const maulidIsi=(m,k)=>{const B=m.bagian,b=B[k];return b.isi.map(x=>`<div class=
 let JEDA=null;
 const jedaSingkat=j=>j.replace(/:.*/,'');
 const jedaBar=(J,ganti)=>`<div class="jd-bar${ganti?' dua':''}">${ganti?`<a class="btn s" href="#/jeda/${J.id}/${J.k-1}">${ic('heart',16)}<span>Ganti sholawat</span></a>`:''}<a class="btn jd-go" href="#/maulid/${J.id}/${J.k}"><span>Lanjut ke ${esc(jedaSingkat(J.judul))}</span>${ic('next',18)}</a></div>`;
-const jedaIsi=(id,k,m)=>{const J={id,k:k+1,judul:m.bagian[k+1].judul},SU=items('w',1).filter(x=>x.j>=0),FZ=KITAB_MAJELIS('sholawat'),a=jedaSingkat(m.bagian[k].judul),b=jedaSingkat(J.judul);
+const jedaIsi=(id,k,m)=>{const J={id,k:k+1,judul:m.bagian[k+1].judul},SU=items('w',1).filter(x=>x.j>=0),FZ=KITAB_MAJELIS('sholawat').concat(SHOLAWAT_FZ()),a=jedaSingkat(m.bagian[k].judul),b=jedaSingkat(J.judul);
  return `<section class="jd-hero"><ol class="jd-step"><li class="ok">${ic('check',14)}${esc(a)}</li><i class="jd-ar">${ic('next',14)}</i><li class="on">${ic('heart',14)}Sholawat</li><i class="jd-ar">${ic('next',14)}</i><li>${esc(b)}</li></ol>
 <h2>Waktunya bersholawat</h2><p>Pilih satu sholawat untuk dibaca bersama, lalu lanjut ke <b>${esc(J.judul)}</b>.</p></section>
-<div class="jd-sec"><b>Sholawat Fadzkuruuni</b>${FZ.length?'':'<span class="jd-pill">Segera hadir</span>'}</div>${FZ.length?majelisDaftar(FZ):''}
-<div class="jd-sec"><b>Sholawat Umum</b><span class="jd-pill">Sementara</span></div>
+<div class="jd-sec"><b>Sholawat Fadzkuruuni</b>${FZ.length?'':'<span class="jd-pill">Segera hadir</span>'}</div>${FZ.length?`<div class="jd-grid fz">${FZ.map(x=>`<a class="jd-c" href="${x.rute||'#/kitab/'+x.id}"><span class="si">${ic('heart',16)}</span><span>${esc(x.judul)}</span></a>`).join('')}</div>`:''}
+<div class="jd-sec"><b>Sholawat Umum</b></div>
 <div class="jd-grid">${SU.map(x=>`<a class="jd-c" href="#/bacaan/w/1/${x.j}"><span class="si">${ic('heart',16)}</span><span>${esc(x.n)}</span></a>`).join('')}</div>
 ${pnav(['#/maulid/'+id+'/'+k,m.bagian[k].judul],['#/maulid/'+id+'/'+(k+1),J.judul])}${jedaBar(J)}`};
 P.jeda=(id,k)=>{k=+k;const m=MAULID_ISI[id],ok=m&&m.bagian[k+1];
@@ -23,7 +23,12 @@ P.jeda=(id,k)=>{k=+k;const m=MAULID_ISI[id],ok=m&&m.bagian[k+1];
 PRATINJAU.jeda=(id,k)=>{const m=MAULID_ISI[id];if(!m||!m.bagian[+k+1])return null;return head('Sholawat','#/maulid/'+id+'/'+k,RS)+`<div id="jd">${jedaIsi(id,+k,m)}</div>`};
 /* Saat membaca sholawat dari halaman jeda: bilah bawah Ganti sholawat | Lanjut ke bagian berikutnya */
 {const B=P.bacaan;P.bacaan=(t,i,j)=>{const p=B(t,i,j);if(JEDA&&t=='w'&&+i==1&&p&&p.html)p.html+=jedaBar(JEDA,1);return p}}
-addEventListener('hashchange',()=>{if(JEDA&&!/^#\/(jeda|bacaan\/w\/1)\//.test(location.hash))JEDA=null});
+/* Sholawat Majelis Fadzkuruuni (data/sholawat/<id>.js, format maulid satu bagian): #/shf/<id> */
+P.shf=id=>{const d=MAULID_DAFTAR.find(x=>x.id==id&&x.majelis=='sholawat');if(!d)return P.baca('w',1);const m=MAULID_ISI[id],J=JEDA;
+ const isi=mm=>maulidIsi(mm,0)+(J?jedaBar(J,1):'');
+ return {html:head(d.judul,J?`#/jeda/${J.id}/${J.k-1}`:'#/baca/w/1',RS)+`<div id="md">${m?isi(m):'<p class="mut">Memuat…</p>'}</div>`,
+  async init(){if(m)return;let mm=null;try{mm=await maulidAmbil(id)}catch(e){}const el=$('#md');if(!el)return;el.innerHTML=mm?isi(mm):'<div class="card mut">Sholawat ini belum bisa dimuat. Periksa koneksi lalu coba lagi.</div>'}}};
+addEventListener('hashchange',()=>{if(JEDA&&!/^#\/(jeda|shf|bacaan\/w\/1)\//.test(location.hash))JEDA=null});
 function maulidBaca(el,m,k){const B=m.bagian,b=B[k];if(!b){el.innerHTML='<div class="card mut">Bagian tidak ditemukan.</div>';return}$('#view h1').textContent=b.judul;
  el.innerHTML=maulidIsi(m,k)}
 /* Pratinjau bagian sebelah saat digeser (isi maulid sudah termuat karena bagian ini sedang dibaca) */

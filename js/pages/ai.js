@@ -26,7 +26,7 @@ function aiIndeks(){if(AIX)return AIX;const X=[],tam=(j,t,h,k)=>X.push({j,t:Stri
  ASMA.forEach((a,i)=>tam(a[1]+' ('+a[2]+')',(ASMX[i]||'').split('|').slice(1).join(' '),'#/asma/'+(i+1),'Asmaul Husna'));
  HADITS.forEach(h=>tam(String(h[1]).slice(0,70),h[1]+' '+(h[2]||''),'#/hadits','Hadis'));
  NAMA.forEach((n,i)=>tam('Surah '+n,ARTI[i]+' · '+AYAT[i]+' ayat','#/quran/'+(i+1),"Al-Qur'an"));
- MAULID_DAFTAR.forEach(m=>tam(m.judul,'maulid shalawat sholawat',m.berkas?'#/maulid/'+m.id:'#/maulid','Maulid'));
+ MAULID_DAFTAR.forEach(m=>tam(m.judul,'maulid shalawat sholawat',m.rute||(m.berkas?'#/maulid/'+m.id:'#/maulid'),m.majelis=='sholawat'?'Sholawat':'Maulid'));
  (typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).forEach(k=>tam(k.judul,k.ket||'kitab',k.berkas?'#/kitab/'+k.id:'#/kitab','Kitab'));
  /* Bab-bab kitab dari daftar isi (data/kitab-indeks.js): jawaban bisa menunjuk kitab & halaman yang membahas suatu topik */
  if(typeof KITAB_INDEKS!='undefined')Object.entries(KITAB_INDEKS).forEach(([id,E])=>{const k=(KITAB_DAFTAR||[]).find(x=>x.id==id);if(k)E.forEach(e=>tam(e[1]+' — '+k.judul+' hal. '+e[4],e[0]+' '+e[2],`#/kitab/${id}/${e[3]}`,'Kitab'))});

@@ -6,7 +6,7 @@ const cariNorm=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u03
 const cariIndeks=()=>{if(CARIX)return CARIX;const L=[],tb=(n,h,j,kw,kh)=>L.push([n,h,j,cariNorm(n+' '+(kw||'')),kh]);
  NAMA.forEach((n,i)=>tb(n+' · '+ARTI[i],'#/quran/'+(i+1),'Surah'));
  [['w',WN,WD,'Wirid'],['d',MENU.doa,DD,'Doa']].forEach(([t,N,D,j])=>N.forEach((n,i)=>{const isi=D[i]||[];const as=t=='w'&&i==2;tb(n,as?'#/asma':isi.length?`#/baca/${t}/${i}`:null,j);isi.forEach((x,k)=>x&&x[0]&&tb(x[0],`#/bacaan/${t}/${i}/${k}`,j+' · '+n))}));
- MAULID_DAFTAR.forEach(m=>tb(m.judul,m.berkas?'#/maulid/'+m.id:null,'Maulid'));
+ MAULID_DAFTAR.forEach(m=>tb(m.judul,m.rute||(m.berkas?'#/maulid/'+m.id:null),m.majelis=='sholawat'?'Sholawat · Majelis Fadzkuruuni':'Maulid'));
  KITAB_DAFTAR.forEach(k=>tb(k.judul,k.teks?'#/maulid/'+k.teks:k.berkas?'#/kitab/'+k.id:null,k.di?(k.di=='wirid'?'Wirid':'Maulid')+' · Majelis Fadzkuruuni':k.kelompok=='pondok'?'Kitab · Karya Pondok Fadzkuruuni':'Kitab'));
  ASMA.forEach(a=>tb(a[1]+' · '+a[2],'#/asma/'+a[0],'Asmaul Husna'));
  /* Isi kitab: bab/fasal dari daftar isi (data/kitab-indeks.js), mis. "puasa" → Fathul Qarib, Kitab Puasa, hal. 120 */

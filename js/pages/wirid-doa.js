@@ -10,7 +10,7 @@ const catList=(t,N)=>list(N,(n,i)=>{const L=items(t,i),as=t=='w'&&i==2,href=as?'
 P.baca=(t,i)=>{const N=t=='w'?WN:MENU.doa;if(!N[i])return P.wirid();const L=items(t,i),sh=t=='w'&&i==1;return {html:head(N[i],t=='w'?'#/wirid':'#/doa')+(sh?'<!--sh-->':'')+(L.length?list(L,(x,k)=>`<a class="row" href="${x.j>=0?`#/bacaan/${t}/${i}/${x.j}`:`#/segera/${encodeURIComponent(x.n)}`}"><span class="num">${k+1}</span><span class="t">${x.n}<br><small>${x.j>=0?'Ketuk untuk membaca':'Segera hadir'}</small></span>${ic('next',18)}</a>`):'<div class="card mut">Segera hadir.</div>')}};
 /* Menu Sholawat (Semua Menu › Ibadah): daftar sholawat dari Wirid › Sholawat */
 /* Wirid › Sholawat: bilah Fadzkuruuni | Umum */
-{const B=P.baca;P.baca=(t,i)=>{const p=B(t,i);const k=p.html.indexOf('<!--sh-->');if(k<0)return p;p.html=p.html.slice(0,k)+pisahBar('sholawat',majelisDaftar(KITAB_MAJELIS('sholawat'),'Sholawat Fadzkuruuni segera hadir.'),p.html.slice(k+9));return p}}
+{const B=P.baca;P.baca=(t,i)=>{const p=B(t,i);const k=p.html.indexOf('<!--sh-->');if(k<0)return p;p.html=p.html.slice(0,k)+pisahBar('sholawat',majelisDaftar(KITAB_MAJELIS('sholawat').concat(SHOLAWAT_FZ()),'Sholawat Fadzkuruuni segera hadir.'),p.html.slice(k+9));return p}}
 P.sholawat=()=>{const p=P.baca('w',1);p.html=p.html.replace(/href="#\/wirid"/,'href="#/menu"');return p};
 /* Bacaan sebelumnya / berikutnya dalam daftar yang sama (urutan seperti daftarnya): bisa digeser kiri-kanan seperti Maulid */
 const bacaanNav=(t,i,j)=>{const L=items(t,i).filter(x=>x.j>=0),k=L.findIndex(x=>x.j==+j),D=(t=='w'?WD:DD)[i]||[],a=L[k-1],b=L[k+1];if(k<0)return '';

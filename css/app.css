@@ -1791,3 +1791,4 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .pnav:has(+.jd-bar){gap:8px}
 .pnav:has(+.jd-bar) a{min-height:50px;padding:8px 12px}
 .pnav:has(+.jd-bar) [data-nx]{background:var(--card);border-color:var(--line);color:var(--ink)}
+.jd-grid.fz .jd-c{border-color:color-mix(in srgb,var(--g) 35%,var(--line));background:color-mix(in srgb,var(--g) 6%,var(--card))}
