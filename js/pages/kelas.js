@@ -465,12 +465,20 @@ function kRekamJenis(f){const ok=t=>{try{return MediaRecorder.isTypeSupported(t)
  const t=(f!='webm'&&cari(['video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1,mp4a','video/mp4;codecs=avc1,opus','video/mp4;codecs=avc3,mp4a']))||cari(['video/webm;codecs=vp8,opus','video/webm;codecs=vp9,opus','video/webm']);
  return t&&{mime:t,ext:/mp4/.test(t)?'mp4':'webm',video:true}}
 /* Gambar rekaman: panggung kelas digambar ke kanvas 15 kali per detik (pewaktu di worker agar tetap jalan saat pengajar membuka tab/aplikasi lain) */
+/* Halaman kitab untuk rekaman: gambar dimuat ulang dengan crossOrigin agar kanvas rekaman tidak "tercemar" (GitHub Pages mengizinkan CORS) */
+const KRKITAB={src:'',img:null};
+function kRekamKitab(){const el=$('#kzk');if(!KR||!KR.admin||!el||el.hidden||el.classList.contains('kecil'))return null;const im=el.querySelector('.kzkb img');if(!im||!im.src)return null;
+ if(KRKITAB.src!==im.src){KRKITAB.src=im.src;const i=new Image();i.crossOrigin='anonymous';i.src=im.src;KRKITAB.img=i}const c=S.kzk||{};return {img:KRKITAB.img,label:(kKitabJudul(c.id)||'Kitab')+' · hal. '+(c.n||1)}}
 function kRekamKanvas(){const W=window.ANDROID?854:1280,H=window.ANDROID?480:720,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),v=document.createElement('video');v.muted=true;v.playsInline=true;
  const teks=(t,y,z,w)=>{g.font=`${w||600} ${z}px Georgia,serif`;g.fillStyle='#fff';g.textAlign='center';g.fillText(t,W/2,y,W-80)};
  const gambar=()=>{if(!KR)return;const R=KR.room,semua=[R.localParticipant,...R.remoteParticipants.values()],ust=semua.find(p=>(p.attributes||{}).peran=='ustaz'),f=semua.find(p=>kLayar(p))||ust,st=f?kStream(f):null;
   if(v.srcObject!==st){v.srcObject=st;if(st)v.play().catch(()=>{})}g.fillStyle='#111';g.fillRect(0,0,W,H);
-  if(st&&v.videoWidth){const s=Math.min(W/v.videoWidth,H/v.videoHeight),w=v.videoWidth*s,h=v.videoHeight*s;g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}
-  else{teks(KR.judul||'Kelas online',H/2-10,Math.round(H/14));teks(f?(f.name||'Pengajar'):'Fadzkuruuni',H/2+Math.round(H/12),Math.round(H/24),400)}
+  /* Kitab yang sedang ditampilkan pengajar (panel kitab terbuka, tidak dikecilkan) ikut terekam di sisi kanan; kitab pribadi jamaah tidak, karena rekaman dibuat di perangkat pengajar */
+  const ki=kRekamKitab(),VW=ki?Math.round(W*.56):W;
+  if(st&&v.videoWidth){const s=Math.min(VW/v.videoWidth,H/v.videoHeight),w=v.videoWidth*s,h=v.videoHeight*s;g.drawImage(v,(VW-w)/2,(H-h)/2,w,h)}
+  else{const tk=(t,y,z,w)=>{g.font=`${w||600} ${z}px Georgia,serif`;g.fillStyle='#fff';g.textAlign='center';g.fillText(t,VW/2,y,VW-60)};tk(KR.judul||'Kelas online',H/2-10,Math.round(H/14));tk(f?(f.name||'Pengajar'):'Fadzkuruuni',H/2+Math.round(H/12),Math.round(H/24),400)}
+  if(ki){const x0=VW,KW=W-VW;g.fillStyle='#fff';g.fillRect(x0,0,KW,H);if(ki.img.complete&&ki.img.naturalWidth){const s=Math.min((KW-16)/ki.img.naturalWidth,(H-44)/ki.img.naturalHeight),w=ki.img.naturalWidth*s,h=ki.img.naturalHeight*s;g.drawImage(ki.img,x0+(KW-w)/2,8+(H-44-h)/2,w,h)}
+   g.fillStyle='#14513a';g.fillRect(x0,H-30,KW,30);g.font=`600 ${Math.round(H/48)}px sans-serif`;g.fillStyle='#fff';g.textAlign='center';g.fillText(ki.label,x0+KW/2,H-10,KW-16)}
   g.font=`600 ${Math.round(H/40)}px sans-serif`;g.textAlign='left';g.fillStyle='rgba(0,0,0,.45)';const lb='● '+(KR.judul||'Kelas online').slice(0,60),lw=g.measureText(lb).width;g.fillRect(12,H-18-H/40-10,lw+20,H/40+16);g.fillStyle='#fff';g.fillText(lb,22,H-24)};
  const wk=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),66)'],{type:'text/javascript'})));wk.onmessage=gambar;gambar();
  return {track:c.captureStream(15).getVideoTracks()[0],stop(){wk.terminate();v.srcObject=null}}}

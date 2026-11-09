@@ -1910,3 +1910,24 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
  .kz:fullscreen .kzpc:not([hidden]){position:absolute;top:0;right:0;bottom:0;width:min(340px,46%);z-index:6;box-shadow:-8px 0 24px rgba(0,0,0,.5)}
  .kz:fullscreen .kzg{height:72px}.kz:fullscreen .kzt{flex-basis:110px}
 }
+
+/* Pemutar murottal global (js/core/pemutar.js) */
+.qmini.pm{gap:4px;padding:5px 6px}
+.qmini.pm .pmt{display:flex;flex-direction:column;min-width:0;max-width:52vw;padding:0 4px;color:inherit;text-decoration:none;line-height:1.2}
+.qmini.pm .pmt b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qmini.pm .pmt small{font-size:10.5px;font-weight:400;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qmini.pm .ib2{display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.pmlb b{display:block;font-size:17px}.pmlb p{margin:6px 0 12px}
+.pmc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.pml{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;font-size:13.5px;color:var(--mut)}
+
+/* Petunjuk tombol mikrofon Fadz AI */
+.aimh{position:absolute;right:8px;bottom:calc(100% + 10px);z-index:5;display:flex;gap:8px;align-items:flex-start;max-width:min(320px,calc(100vw - 32px));padding:10px 12px;border-radius:14px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.aimh[hidden]{display:none}.aimh .ic{flex:none;margin-top:2px;color:var(--bg)}
+.aimh::after{content:"";position:absolute;right:18px;top:100%;border:7px solid transparent;border-top-color:var(--ink)}
+
+/* Kontrol video tutorial: mundur/maju 10 detik, kecepatan */
+.tutk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
+.tutk>button,.tutsp button{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.tutsp{display:inline-flex;gap:4px;margin-left:auto}.tutsp button{padding:0 8px}.tutsp button.on{background:var(--g);border-color:var(--g);color:var(--on)}
+.qmini.pm .pmsp{width:auto!important;min-width:34px;padding:0 4px;font-size:11.5px;font-weight:700}
