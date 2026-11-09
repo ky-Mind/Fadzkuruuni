@@ -1809,7 +1809,7 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .kzkh select{flex:1;min-width:0;height:36px;padding:0 8px;font-size:14px}
 .kzkh .kzkj{flex:0 0 auto;width:auto}
 .kzkx{flex:none;width:36px;height:36px;border:0;border-radius:10px;background:var(--fill);color:var(--ink);font-size:16px;cursor:pointer}
-.kzkb{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;background:#fff;touch-action:pan-y pinch-zoom}
+.kzkb{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;background:#fff;touch-action:pan-y}
 .kzkb img{display:block;width:100%;height:auto;max-width:720px}
 .kz:not(:fullscreen) .kzkb{max-height:70vh}
 .kzkf{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--line)}
@@ -1840,3 +1840,7 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .kzki.on{background:var(--g);border-color:var(--g);color:var(--on)}
 .kz:fullscreen .kzki:not(.on){border-color:#2c312e;color:#e8ece9}
 @media (max-width:520px){.kzki span{display:none}.kzki{padding:0 10px}}
+/* Cubit-perbesar di kelas: saat diperbesar, sentuhan dipakai untuk menggeser gambar, bukan menggulir halaman */
+.kzkb,#kzs{touch-action:pan-y}
+.kzkb.kzum2,#kzs.kzum2{touch-action:none;overflow:hidden}
+.kzkb img,#kzs video{will-change:transform}
