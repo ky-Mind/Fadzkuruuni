@@ -204,7 +204,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:0 0 3px}
 .row .t small{display:block;margin-top:2px;line-height:1.4}
 .row .ar{font:24px var(--ar)}
 .row .num{flex:none;margin:0}
-.row svg:last-child{color:var(--mut)}
+.row>svg:last-child{color:var(--mut)}
 .row.nx{background:var(--gs)}
 .row:active,.srw:active{background:var(--gs)}
 
