@@ -35,6 +35,8 @@ function barLekat(){BLY=0;const h=$('#view > .rh')||$('#view > .bar [data-rs]')?
  v.addEventListener('scroll',()=>{const h=$('#view > .lekat');if(!h)return;const y=v.scrollTop,d=y-BLY;h.classList.toggle('lyg',y>4);if(Math.abs(d)>6){if(Date.now()-BLU<400)h.classList.toggle('smb',d>0&&y>140&&!h.contains(document.activeElement));else if(d<0)h.classList.remove('smb');BLY=y}},{passive:true})}
 addEventListener('hashchange',route);
 tataNav();route();
+/* Aplikasi Android: halaman sudah tampil → tutup layar pembuka (logo + slogan) setelah gambar pertama */
+requestAnimationFrame(()=>requestAnimationFrame(()=>{try{window.FadzAndroid&&FadzAndroid.halamanSiap&&FadzAndroid.halamanSiap()}catch(e){}}));
 if('serviceWorker'in navigator&&!TPRATINJAU)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 /* Saat aplikasi dibuka lagi dari latar belakang, cek versi baru; bila ada, halaman dimuat ulang otomatis (lihat controllerchange) */
 if('serviceWorker'in navigator&&!TPRATINJAU)document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')navigator.serviceWorker.getRegistration().then(g=>g&&g.update()).catch(()=>{})});
