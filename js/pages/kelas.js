@@ -49,7 +49,7 @@ P.kelas=id=>{if(!id)return {html:head('Kelas online','#/')+'<div id="kls">'+(KEL
  const k=(KELAS||[]).find(x=>x.id==id)||{id,judul:'Kelas online'},vid=k.yt||(k.status=='selesai'&&ytId(k.rekaman));
  if(vid)return {html:head(esc(k.judul||'Kelas online'),'#/kelas',k.status=='live'?'<span class="klv kll">● Live</span>':'')+`<div class="kvid"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&playsinline=1&rel=0" title="${esc(k.judul||'Video kelas')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
   <div class="kinfo"><b>${esc(k.judul||'')}</b>${k.pengajar?`<br><small class="mut">${esc(k.pengajar)}</small>`:''}${k.ket?`<p>${esc(k.ket)}</p>`:''}<p><a class="sb" href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">${ic('share',16)} Buka di YouTube</a></p></div>`,init(){if(KR&&KR.id!=id)kelasKeluar(1)}};
- return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div><div class="kzg" id="kzg"></div></div>
+ return {html:head(esc(k.judul||'Kelas online'),'#/kelas',`<span class="klv kll" id="klst">${KR&&KR.id==id?'● Live':''}</span>`)+`<div class="kz" id="kz"><div class="kzm"><div class="kzs" id="kzs"><video id="kzv" autoplay playsinline muted hidden></video><div id="kzsa" class="kzsa"><div class="kzw">${ic('siar',28)}<span>Menyambungkan…</span></div></div><div class="kzsn" id="kzsn"></div><div class="kzbar"><button type="button" class="kzfs kzorang on" data-kzorang aria-label="Tampilkan atau sembunyikan peserta" title="Peserta">${ic('users',18)}</button><button type="button" class="kzfs" data-kzkitab aria-label="Buka kitab di samping" title="Kitab">${ic('book',18)}</button><button type="button" class="kzfs" data-kzfs aria-label="Layar penuh" title="Layar penuh">${ic('full',18)}</button></div></div><div class="kzg" id="kzg"></div></div><aside class="kzk" id="kzk" hidden></aside></div>
   <div id="kinfo" class="kinfo"><p class="mut">Menyambungkan ke kelas…</p></div><div id="kctl" class="kctl"></div>
   <div class="kchat"><h2>Pesan</h2><div id="kcl" class="kcl"><p class="mut">Belum ada pesan.</p></div><form id="kcf" class="kcf" autocomplete="off"><input class="in" id="kci" maxlength="500" placeholder="Tulis pesan untuk kelas…" enterkeyhint="send"><button class="btn" type="submit" aria-label="Kirim">${ic('send',18)}</button></form></div><div id="kadm"></div>`,
   init(){kelasMasuk(id)}}};
@@ -179,13 +179,38 @@ let KSEMB=0;document.addEventListener('visibilitychange',()=>{clearTimeout(KSEMB
    Video kelas yang dibuat layar penuh (tombol di pojok video live, atau tombol layar penuh pemutar YouTube)
    diputar ke posisi mendatar (landscape) dan kembali tegak saat keluar.
    Aplikasi Android memakai jembatan layarMiring (Activity dikunci tegak); peramban memakai screen.orientation.lock. */
-const kVideoPenuh=()=>{const f=document.fullscreenElement||document.webkitFullscreenElement;return !!(f&&f.closest&&f.closest('.kvid,.kzs'))};
+const kVideoPenuh=()=>{const f=document.fullscreenElement||document.webkitFullscreenElement;return !!(f&&f.closest&&f.closest('.kvid,.kz'))};
 function kMiring(on){const A=window.FadzAndroid;if(A&&A.layarMiring){try{A.layarMiring(!!on)}catch(e){}return}
  const o=screen.orientation;if(!o)return;if(on)o.lock&&o.lock('landscape').catch(()=>{});else o.unlock&&o.unlock()}
 let KMIRING=false;
 const kPenuhUbah=()=>{const on=kVideoPenuh();if(on==KMIRING)return;KMIRING=on;kMiring(on);const b=$('[data-kzfs]');if(b)b.classList.toggle('on',on)};
-document.addEventListener('fullscreenchange',kPenuhUbah);document.addEventListener('webkitfullscreenchange',kPenuhUbah);
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-kzfs]');if(!b)return;const z=b.closest('.kzs'),f=document.fullscreenElement||document.webkitFullscreenElement;
+document.addEventListener('fullscreenchange',kPenuhUbah);
+/* ---------- Kitab di samping video kelas (seperti berbagi dokumen di Zoom/Meet) ----------
+   Jamaah memilih kitab sendiri lalu membalik halaman; pilihan terakhir diingat (S.kzk = {id, j, n}).
+   Di layar penuh panel berada di kanan video; di layar biasa di bawah video. */
+const kKitabList=()=>(typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).filter(k=>k.berkas);
+async function kKitab(ubah){const el=$('#kzk');if(!el)return;const L=kKitabList();if(!L.length){el.innerHTML='<p class="mut">Kitab belum tersedia.</p>';return}
+ const c=S.kzk=Object.assign({id:L[0].id,j:0,n:1},S.kzk||{},ubah||{});if(!L.some(k=>k.id==c.id))Object.assign(c,{id:L[0].id,j:0,n:1});
+ let k=null;try{k=await kitabAmbil(c.id)}catch(e){}
+ const J=k&&k.juz||[],j=J[c.j]||J[0];if(j&&!J[c.j])c.j=0;const n=j?Math.min(Math.max(1,c.n),j.halaman):1;c.n=n;save();
+ el.innerHTML=`<div class="kzkh"><select class="in" data-kzksel aria-label="Pilih kitab">${L.map(x=>`<option value="${x.id}"${x.id==c.id?' selected':''}>${esc(x.judul)}</option>`).join('')}</select>${J.length>1?`<select class="in kzkj" data-kzkjuz aria-label="Pilih juz">${J.map((x,i)=>`<option value="${i}"${i==c.j?' selected':''}>Juz ${x.no}</option>`).join('')}</select>`:''}<button type="button" class="kzkx" data-kzkitab aria-label="Tutup kitab" title="Tutup kitab">✕</button></div>
+ <div class="kzkb" data-kzkgeser>${j?`<img src="${pgUrl(j,n)}" alt="${esc(k.judul)} halaman ${n}" decoding="async">`:'<p class="mut">Kitab ini belum bisa dimuat. Periksa internet.</p>'}</div>
+ <div class="kzkf"><button type="button" class="btn s" data-kzkn="-1" ${n<=1?'disabled':''} aria-label="Halaman sebelumnya">${ic('back',16)}</button><label class="kzkp"><input class="in" type="number" inputmode="numeric" min="1" max="${j?j.halaman:1}" value="${n}" data-kzkhal aria-label="Nomor halaman"><span>/ ${j?j.halaman:1}</span></label><button type="button" class="btn s" data-kzkn="1" ${j&&n>=j.halaman?'disabled':''} aria-label="Halaman berikutnya">${ic('next',16)}</button></div>`;
+ /* Halaman berikutnya dimuat lebih dulu agar membalik terasa cepat */
+ if(j&&n<j.halaman){const im=new Image();im.src=pgUrl(j,n+1)}}
+function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));if(on)kKitab()}
+document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
+ if(t.closest('[data-kzkitab]')){e.preventDefault();return kKitabTampil()}
+ if(t.closest('[data-kzorang]')){const z=$('#kz');if(z){z.classList.toggle('tanpaorang');t.closest('[data-kzorang]').classList.toggle('on',!z.classList.contains('tanpaorang'))}return}
+ const nb=t.closest('[data-kzkn]');if(nb&&!nb.disabled){const c=S.kzk||{};return kKitab({n:(c.n||1)+(+nb.dataset.kzkn)})}});
+document.addEventListener('change',e=>{const t=e.target;if(!t.matches)return;
+ if(t.matches('[data-kzksel]'))return kKitab({id:t.value,j:0,n:1});
+ if(t.matches('[data-kzkjuz]'))return kKitab({j:+t.value,n:1});
+ if(t.matches('[data-kzkhal]'))return kKitab({n:+t.value||1})});
+/* Geser kiri/kanan pada halaman kitab = balik halaman (kitab Arab: geser ke kanan = halaman berikutnya) */
+{let x0=null;document.addEventListener('touchstart',e=>{x0=e.target.closest&&e.target.closest('[data-kzkgeser]')?e.touches[0].clientX:null},{passive:true});
+ document.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<50)return;const c=S.kzk||{};kKitab({n:(c.n||1)+(dx>0?1:-1)})},{passive:true})}document.addEventListener('webkitfullscreenchange',kPenuhUbah);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-kzfs]');if(!b)return;const z=b.closest('.kz')||b.closest('.kzs'),f=document.fullscreenElement||document.webkitFullscreenElement;
  if(f)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
  else (z.requestFullscreen||z.webkitRequestFullscreen||(()=>Promise.reject())).call(z,{navigationUI:'hide'}).catch(()=>toast('Layar penuh tidak didukung di perangkat ini'))});
 document.addEventListener('click',async e=>{const t=e.target;
@@ -207,7 +232,7 @@ document.addEventListener('click',async e=>{const t=e.target;
   return kelasInfo()}
  /* Ketuk kotak peserta = sorot di panggung besar; ketuk panggung = kembali */
  const pin=t.closest('.kzt[data-kpin]');if(pin&&KR){KR.pin=pin.dataset.kpin;return kelasInfo()}
- if(t.closest('#kzs')&&KR&&KR.pin){KR.pin=null;return kelasInfo()}
+ if(t.closest('#kzs')&&!t.closest('.kzbar')&&KR&&KR.pin){KR.pin=null;return kelasInfo()}
  if(t.closest('[data-kmic]')&&KR){const lp=KR.room.localParticipant;const on=!lp.isMicrophoneEnabled;try{await lp.setMicrophoneEnabled(on);/* LiveKit: lepas jalur mikrofon sepenuhnya saat dimatikan (perangkat mikrofon tidak lagi dipakai) */if(!on&&KR.room.mode!='mesh'){const pub=lp.getTrackPublication&&lp.getTrackPublication(LivekitClient.Track.Source.Microphone);if(pub&&pub.track)try{await lp.unpublishTrack(pub.track,true)}catch(e){}}toast(on?'Mikrofon aktif':'Mikrofon dimatikan')}catch(x){toast('Mikrofon belum diizinkan. Izinkan mikrofon di pengaturan HP.')}return kelasInfo()}
  const iz=t.closest('[data-kizin]');if(iz&&KR){iz.disabled=true;try{if(KR.room.mode=='mesh')await KR.room.izin(iz.dataset.kizin,iz.dataset.boleh=='1');else await kelasToken(KR.id,'izin',{identity:iz.dataset.kizin,boleh:iz.dataset.boleh=='1'})}catch(x){toast('Gagal mengubah izin bicara')}return}
  const ul=t.closest('[data-kulang]');if(ul)return kelasMasuk(ul.dataset.kulang);

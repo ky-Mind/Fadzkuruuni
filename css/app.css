@@ -1794,3 +1794,43 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .jd-grid.fz .jd-c{border-color:color-mix(in srgb,var(--g) 35%,var(--line));background:color-mix(in srgb,var(--g) 6%,var(--card))}
 #klmini>a{display:flex;align-items:center;gap:8px;flex:1;min-width:0;color:inherit;text-decoration:none}
 #klmini [data-klhenti]{flex:none;display:flex;align-items:center;gap:4px;height:32px;padding:0 12px;border:0;border-radius:999px;background:#c5221f;color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ---------- Kelas online: bilah tombol panggung, panel kitab, layar penuh ala Meet (js/pages/kelas.js) ---------- */
+.kzbar{position:absolute;top:8px;right:8px;z-index:3;display:flex;gap:6px}
+.kzbar .kzfs{position:static}
+.kzbar .kzfs.on{background:rgba(255,255,255,.9);color:#111}
+.kzbar .kzfs.on .ic{color:#111}
+/* Tombol peserta hanya berguna di layar penuh (di layar biasa peserta selalu tampil di bawah) */
+.kz:not(:fullscreen) .kzorang{display:none}
+/* Panel kitab (layar biasa: di bawah video) */
+.kzk{display:flex;flex-direction:column;margin-top:10px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.kzk[hidden]{display:none}
+.kzkh{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.kzkh select{flex:1;min-width:0;height:36px;padding:0 8px;font-size:14px}
+.kzkh .kzkj{flex:0 0 auto;width:auto}
+.kzkx{flex:none;width:36px;height:36px;border:0;border-radius:10px;background:var(--fill);color:var(--ink);font-size:16px;cursor:pointer}
+.kzkb{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;background:#fff;touch-action:pan-y pinch-zoom}
+.kzkb img{display:block;width:100%;height:auto;max-width:720px}
+.kz:not(:fullscreen) .kzkb{max-height:70vh}
+.kzkf{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--line)}
+.kzkf .btn{display:flex;align-items:center;justify-content:center;width:44px;height:36px;padding:0}
+.kzkf .btn[disabled]{opacity:.4}
+.kzkp{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mut)}
+.kzkp input{width:64px;height:34px;padding:0 6px;text-align:center}
+/* Layar penuh: video besar + strip wajah peserta di bawah + kitab di kanan, seperti Google Meet */
+.kz:fullscreen{display:flex;gap:0;margin:0;width:100%;height:100%;background:#0d0f0e;color:#e8ece9}
+.kz:fullscreen .kzm{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding:8px}
+.kz:fullscreen .kzs{flex:1;min-height:0;aspect-ratio:auto;border-radius:12px;background:#000}
+.kz:fullscreen .kzs video{object-fit:contain}
+.kz:fullscreen .kzg{display:flex;flex:none;gap:8px;margin:0;height:112px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.kz:fullscreen .kzg:empty{display:none}
+.kz:fullscreen.tanpaorang .kzg{display:none}
+.kz:fullscreen .kzt{flex:0 0 168px;min-height:0;height:100%;background:#1f2421;color:#e8ece9}
+.kz:fullscreen .kzt .kzn .ic{color:#c9d1cc}
+.kz:fullscreen .kzk{flex:0 0 min(42%,560px);margin:0;border:0;border-left:1px solid #2c312e;border-radius:0;background:#161917;color:#e8ece9}
+.kz:fullscreen .kzkh,.kz:fullscreen .kzkf{border-color:#2c312e}
+.kz:fullscreen .kzkh select,.kz:fullscreen .kzkp input{background:#232825;color:#e8ece9;border-color:#2c312e}
+.kz:fullscreen .kzkx{background:#232825;color:#e8ece9}
+.kz:fullscreen .kzkp{color:#aab4ae}
+/* HP tegak dalam layar penuh: kitab di bawah video, bukan di samping */
+@media (orientation:portrait){.kz:fullscreen{flex-direction:column}.kz:fullscreen .kzk{flex:0 0 48%;border-left:0;border-top:1px solid #2c312e}.kz:fullscreen .kzg{height:96px}.kz:fullscreen .kzt{flex-basis:132px}}
