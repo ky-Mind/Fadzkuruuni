@@ -37,6 +37,8 @@ addEventListener('hashchange',route);
 tataNav();route();
 /* Aplikasi Android: halaman sudah tampil → tutup layar pembuka (logo + slogan) setelah gambar pertama */
 requestAnimationFrame(()=>requestAnimationFrame(()=>{try{window.FadzAndroid&&FadzAndroid.halamanSiap&&FadzAndroid.halamanSiap()}catch(e){}}));
+/* Layar pembuka web (index.html): tampil minimal ±1,4 detik agar slogan sempat terbaca, lalu memudar */
+{const pb=document.getElementById('pembuka');if(pb)setTimeout(()=>{pb.classList.add('tutup');setTimeout(()=>pb.remove(),500)},Math.max(0,1400-performance.now()))}
 if('serviceWorker'in navigator&&!TPRATINJAU)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 /* Saat aplikasi dibuka lagi dari latar belakang, cek versi baru; bila ada, halaman dimuat ulang otomatis (lihat controllerchange) */
 if('serviceWorker'in navigator&&!TPRATINJAU)document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')navigator.serviceWorker.getRegistration().then(g=>g&&g.update()).catch(()=>{})});

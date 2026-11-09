@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.58':['Layar pembuka berslogan "Berdzikir untuk berfikir, bertadabur untuk bersyukur." kini tampil saat aplikasi dimuat, menggantikan layar gelap kosong'],
  '2.9.57':['Kelas online: halaman kitab dan video/layar yang dibagikan bisa diperbesar dengan mencubit dua jari, digeser saat diperbesar, dan ketuk dua kali untuk memperbesar atau kembali normal'],
  '2.9.56':['Kitab di kelas online kini mengikuti pengajar: halaman yang dibuka pengajar otomatis tampil di layar jamaah','Jamaah boleh membalik sendiri (berhenti mengikuti), lalu ketuk Ikuti pengajar untuk kembali ke halaman pengajar'],
  '2.9.55':['Kelas online ala Google Meet: tombol layar penuh kini memperbesar seluruh kelas, dengan video pengajar, deretan wajah peserta di bawah (bisa disembunyikan), dan kitab di samping','Tombol Kitab di pojok video: pilih kitab, balik halaman dengan tombol atau geser, dan pilihan terakhir diingat','Aplikasi Android 2.6.21: layar pembuka dengan slogan "Berdzikir untuk berfikir, bertadabur untuk bersyukur."'],
