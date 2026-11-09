@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.24",
- "body": "Pembaruan Fadzkuruuni 2.6.24 (isi web 2.9.59)\n\n- Layar pembuka berslogan langsung tampil saat aplikasi dibuka, tanpa layar hitam\n- Bilah atas dan bawah mengikuti tema (gelap/terang/biru), tidak putih lagi saat membuka aplikasi\n- Kelas online: pengajar menentukan kitab yang dikaji; jamaah langsung dibukakan kitab itu\n- Tombol Kitab berlabel dengan petunjuk, panel kitab bisa dikecilkan\n- Ajakan menonton video tutorial \"Cara ikut kelas online\" saat masuk kelas baru\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.24",
+ "tag_name": "v2.6.25",
+ "body": "Pembaruan Fadzkuruuni 2.6.25 (isi web 2.9.61)\n\n- Murottal tetap berbunyi di latar belakang (layar mati / aplikasi ditutup ke latar) dengan notifikasi media: sebelumnya, jeda/putar, berikutnya, hentikan\n- Putar terus lintas surah sampai surah pilihan, akhir juz, atau akhir Al-Qur'an\n- Fadz AI: tombol mikrofon menghentikan suara AI, petunjuk tahan / geser ke atas untuk merekam lama\n- Moto layar pembuka diperbaiki: \"Berfikir untuk berdzikir, bertadabur untuk bersyukur.\"\n- Kelas online layar penuh ala Google Meet, Fadz AI paham semua fitur aplikasi\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.25",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.24/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.25/fadzkuruuni.apk"
   }
  ]
 }
