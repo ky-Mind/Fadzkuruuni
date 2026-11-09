@@ -7,7 +7,9 @@
 /* Pustaka LiveKit disimpan di aplikasi sendiri (CDN kadang diblokir operator seluler); CDN hanya cadangan */
 const LKJS='js/lib/livekit-client-2.15.7.umd.js',LKJS_CDN='https://cdn.jsdelivr.net/npm/livekit-client@2.15.7/dist/livekit-client.umd.js';
 const lkMuat=()=>ldjs(LKJS).catch(()=>ldjs(LKJS_CDN));
-let KELAS=null,KR=null,KSIAP=null;const KULANG={};
+let KELAS=null,KR=null,KSIAP=null;
+/* Rincian teknis galat (nama + pesan) agar penyebab gagal masuk kelas bisa dilaporkan */
+const kGalatRinci=e=>{if(!e||typeof e=='string')return '';const t=[e.name,e.message].filter(Boolean).join(': ').slice(0,160);return t?`<br><small class="mut" style="opacity:.8">Rincian: ${esc(t)}</small>`:''};const KULANG={};
 async function kelasCekServer(){try{const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"cek"}'});KSIAP=r.ok}catch(e){KSIAP=null}return KSIAP}
 const fsNilai=v=>v==null?null:'stringValue' in v?v.stringValue:'integerValue' in v?+v.integerValue:'doubleValue' in v?+v.doubleValue:'booleanValue' in v?v.booleanValue:null;
 async function kelasAmbil(){try{const r=await fetch(FSURL+'/kelas?pageSize=100',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();
@@ -124,7 +126,7 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id
    .on(L.RoomEvent.Disconnected,a=>kelasPutus(R,a));
   await R.connect(t.url,t.token);try{await R.startAudio()}catch(e){}KR.diam=!R.canPlaybackAudio;if(fotoProfil())R.localParticipant.setAttributes({foto:fotoProfil()}).catch(()=>{});
   KULANG[id]=0;const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();kelasChat(id);if(KR.admin&&((KELAS||[]).find(x=>x.id==id)||{}).rekam)kelasRekamMulai()}
- catch(e){KR=null;console.warn('kelas',e);if(!paksaLK&&kk.mode!='livekit'&&e!='belum-mulai'&&e!='kelas-tidak-ada'){try{KR&&KR.room&&KR.room.disconnect()}catch(x){}KR=null;return kelasMasukMesh(id,true)}if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
+ catch(e){KR=null;console.warn('kelas',e);if(!paksaLK&&kk.mode!='livekit'&&e!='belum-mulai'&&e!='kelas-tidak-ada'){try{KR&&KR.room&&KR.room.disconnect()}catch(x){}KR=null;return kelasMasukMesh(id,true)}if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}${kGalatRinci(e)}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 function kelasPutus(R,alasan){if(KR&&KR.room===R){const kid=KR.id,ulang=alasan!=null&&![1,2,4,5,10].includes(alasan)&&(KULANG[kid]||0)<3&&location.hash=='#/kelas/'+kid;if(KREC)kelasRekamStop();if(KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;kelasPil();const s=$('#klst');if(s)s.textContent='';const x=$('#kinfo');const c=$('#kctl');if(c)c.innerHTML='';const a=$('#kadm');if(a)a.innerHTML='';
   /* Sinyal HP berganti / internet putus sebentar: sambungkan lagi otomatis (maks. 3 kali) */
   if(ulang){KULANG[kid]=(KULANG[kid]||0)+1;if(x)x.innerHTML='<p class="mut">Sambungan terputus, menyambung ulang…</p>';setTimeout(()=>{if(!KR&&location.hash=='#/kelas/'+kid)kelasMasuk(kid)},1500*KULANG[kid]);return}
@@ -139,7 +141,7 @@ async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(
  catch(e){KR=null;console.warn('kelas kecil',e);
   /* Kelas kecil gagal (mis. aturan Firestore belum dipublish) → coba lewat LiveKit bila servernya siap */
   if(!dariLK&&e!='belum-mulai'&&KSIAP!==false)return kelasMasuk(id,true);
-  if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(e&&e.code=='permission-denied'?'Kelas kecil belum aktif: aturan Firestore terbaru belum dipublish oleh pengelola.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
+  if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(e&&e.code=='permission-denied'?'Kelas kecil belum aktif: aturan Firestore terbaru belum dipublish oleh pengelola.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}${kGalatRinci(e)}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
 let KTM=0;function kelasPasangTimer(){clearInterval(KTM);KTM=setInterval(()=>{if(!KR||!$('#kzs'))return clearInterval(KTM);kelasGambar()},500)}
 async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.room;try{const lp=r&&r.localParticipant;if(lp){if(lp.setCameraEnabled&&KR.camOn)await lp.setCameraEnabled(false);if(lp.setMicrophoneEnabled&&lp.isMicrophoneEnabled)await lp.setMicrophoneEnabled(false)}}catch(e){}
  $$('#kzv,.kzt video').forEach(v=>{const s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(t=>{if(t.readyState=='live'&&KR&&KR.videoLokal)t.stop()});v.srcObject=null});if(KR&&KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;clearInterval(KTM);$$('audio.kaud').forEach(a=>a.parentNode.removeChild(a));if(r)try{await r.disconnect()}catch(e){}kelasPil();if(!diam&&/^#\/kelas\//.test(location.hash))location.hash='#/kelas'}
