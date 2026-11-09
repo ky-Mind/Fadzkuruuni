@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.19",
- "body": "Pembaruan Fadzkuruuni 2.6.19 (isi web 2.9.44)\n\n- Perbaikan: widget layar utama langsung terisi jadwal saat aplikasi dibuka\n- Video tutorial widget memakai rekaman layar HP Android asli\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.19",
+ "tag_name": "v2.6.20",
+ "body": "Pembaruan Fadzkuruuni 2.6.20 (isi web 2.9.54)\n\n- Kelas online: berbagi layar dari HP tidak lagi terputus saat pengajar pindah ke aplikasi lain\n- Pil \"Berbagi layar\" punya tombol merah Berhenti, dan langsung hilang setelah berbagi layar dihentikan (termasuk dari notifikasi)\n- Kelas online: kamera & suara jarak jauh tersambung lewat LiveKit, sambung ulang otomatis, rincian galat bila gagal masuk\n- Sholawat Fadzkuruuni: Ya Imamar Rusli Ya Sanadi, Ya Rabbi Antal Hadi, Birasulillah wal Badawi\n- Amaliyah & Ma fil Wujud jadi teks per bait, dengan halaman Sholawat di antara bagian maulid\n- Kitab baru, Al-Hawi Juz 3 (karya Abuya Mahbubillah), ikon dalam lingkaran kini putih\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.20",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.19/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.20/fadzkuruuni.apk"
   }
  ]
 }
