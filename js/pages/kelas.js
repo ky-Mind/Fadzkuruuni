@@ -118,7 +118,7 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id
   KR={id,room:R,admin:!!t.admin,diam:false,judul:((KELAS||[]).find(x=>x.id==id)||{}).judul||'Kelas online'};const ub=()=>KR&&KR.room===R&&kelasInfo();
   R.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind=='video'){const st=new MediaStream([tr.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(p,st):kSetVid(p,st);return ub()}if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
    .on(L.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='video'&&pub.track){const st=new MediaStream([pub.track.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(R.localParticipant,st):kSetVid(R.localParticipant,st);ub()}})
-   .on(L.RoomEvent.LocalTrackUnpublished,pub=>{if(pub.source==L.Track.Source.ScreenShare){kSetLayar(R.localParticipant,null);KR.layarOn=false;ub()}})
+   .on(L.RoomEvent.LocalTrackUnpublished,pub=>{if(pub.source==L.Track.Source.ScreenShare){kSetLayar(R.localParticipant,null);KR.layarOn=false;ub();kelasPil()}})
    .on(L.RoomEvent.TrackUnsubscribed,(tr,pub,p)=>{if(tr.kind=='video'){pub.source==L.Track.Source.ScreenShare?kSetLayar(p,null):kSetVid(p,null);ub()}tr.detach().forEach(el=>el.parentNode&&el.parentNode.removeChild(el))})
    .on(L.RoomEvent.ParticipantConnected,ub).on(L.RoomEvent.ParticipantDisconnected,ub).on(L.RoomEvent.ActiveSpeakersChanged,ub).on(L.RoomEvent.ParticipantAttributesChanged,ub)
    .on(L.RoomEvent.LocalTrackPublished,ub).on(L.RoomEvent.LocalTrackUnpublished,ub).on(L.RoomEvent.TrackMuted,(pub,p)=>{if(pub.kind=='video'&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,null);ub()}).on(L.RoomEvent.TrackUnmuted,(pub,p)=>{if(pub.kind=='video'&&pub.track&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,new MediaStream([pub.track.mediaStreamTrack]));ub()})
@@ -150,7 +150,12 @@ async function kelasKeluar(diam){if(KREC)await kelasRekamStop();const r=KR&&KR.r
 /* Pil "Live" melayang saat kelas berjalan dan pengguna membuka halaman lain */
 function kelasPil(){let p=$('#klmini');const di=KR&&location.hash.startsWith('#/kelas/'+KR.id);
  if(!KR||!KR.layarOn||di){if(p)p.hidden=true;return}
- if(!p){p=document.createElement('a');p.id='klmini';document.body.append(p)}p.href='#/kelas/'+KR.id;p.hidden=false;p.innerHTML=`<span class="klv">● Berbagi layar</span><span class="t">${esc(KR.judul)} · Kembali ke kelas</span>${ic('next',16)}`}
+ if(!p){p=document.createElement('div');p.id='klmini';document.body.append(p)}p.hidden=false;p.innerHTML=`<a href="#/kelas/${KR.id}"><span class="klv">● Berbagi layar</span><span class="t">${esc(KR.judul)} · Kembali ke kelas</span></a><button type="button" data-klhenti>${ic('stop',14)}Berhenti</button>`}
+/* Hentikan berbagi layar dari mana saja (pil, notifikasi Android, tombol di kelas) dan bersihkan tampilan */
+async function kLayarHenti(){if(!KR||!KR.layarOn)return kelasPil();const R=KR.room,lp=R.localParticipant;
+ try{if(R.mode=='mesh'){await lp.setScreenShare(false)}else await lp.setScreenShareEnabled(false)}catch(e){}
+ if(KR){KR.layarOn=false;kSetLayar(lp,null);kelasInfo()}kelasPil();toast('Berbagi layar dihentikan')}
+document.addEventListener('click',e=>{if(e.target.closest('[data-klhenti]')){e.preventDefault();kLayarHenti()}});
 addEventListener('hashchange',()=>setTimeout(kelasPil,30));
 /* Keluar otomatis dari kelas (pengajar maupun jamaah):
    - menekan panah kembali / tombol kembali HP / pindah ke halaman lain
@@ -272,7 +277,7 @@ function kLayarAndroid(w,h,adaSuara){const G=window.MediaStreamTrackGenerator;le
  /* Halaman menghentikan jalur (Hentikan berbagi layar / keluar kelas) → hentikan tangkapan native */
  [vt,at].forEach(t=>{if(!t)return;const s=t.stop.bind(t);t.stop=()=>{s();henti()}});
  /* Dihentikan dari notifikasi / sistem → beri tahu kelas seperti saat berbagi layar di komputer dihentikan */
- window.fzLayarSelesai=()=>{if(!hidup)return;hidup=false;wk.terminate();[vt,at].forEach(t=>{if(t)try{t.dispatchEvent(new Event('ended'))}catch(e){}})};
+ window.fzLayarSelesai=()=>{if(!hidup)return;hidup=false;wk.terminate();[vt,at].forEach(t=>{if(t)try{t.dispatchEvent(new Event('ended'))}catch(e){}});setTimeout(()=>{if(typeof kLayarHenti=='function')kLayarHenti()},300)};
  return new MediaStream([vt,at].filter(Boolean))}
 if(window.ANDROID&&window.FadzAndroid&&FadzAndroid.layarMulai&&navigator.mediaDevices&&!navigator.mediaDevices.getDisplayMedia){
  navigator.mediaDevices.getDisplayMedia=()=>new Promise((ok,gagal)=>{window.fzLayarSiap=(y,w,h,s)=>{window.fzLayarSiap=null;if(!y)return gagal(new DOMException('Ditolak','NotAllowedError'));try{const st=kLayarAndroid(w,h,!!s);st.fzAndroidSuara=!!s;ok(st)}catch(e){try{FadzAndroid.layarHenti()}catch(x){}gagal(e)}};FadzAndroid.layarMulai()})}
