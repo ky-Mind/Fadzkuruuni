@@ -224,8 +224,40 @@ document.addEventListener('change',e=>{const t=e.target;if(!t.matches)return;
  if(t.matches('[data-kzkjuz]'))return kKitab({j:+t.value,n:1});
  if(t.matches('[data-kzkhal]'))return kKitab({n:+t.value||1})});
 /* Geser kiri/kanan pada halaman kitab = balik halaman (kitab Arab: geser ke kanan = halaman berikutnya) */
-{let x0=null;document.addEventListener('touchstart',e=>{x0=e.target.closest&&e.target.closest('[data-kzkgeser]')?e.touches[0].clientX:null},{passive:true});
- document.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<50)return;const c=S.kzk||{};kKitab({n:(c.n||1)+(dx>0?1:-1)})},{passive:true})}document.addEventListener('webkitfullscreenchange',kPenuhUbah);
+/* ---------- Cubit untuk memperbesar: halaman kitab di panel kelas, dan video/layar di panggung ----------
+   Dua jari = perbesar/perkecil (1–5×) dengan titik di antara jari tetap di tempat; satu jari = geser saat diperbesar;
+   ketuk dua kali = perbesar 2,5× di titik itu / kembali normal. Roda tetikus + Ctrl di komputer. */
+const KCUBIT=new WeakMap();
+const kCubitWadah=t=>t&&t.closest&&(t.closest('.kzkb')||(!t.closest('.kzbar')&&t.closest('#kzs')));
+const kCubitSasaran=w=>w.classList.contains('kzkb')?w.querySelector('img'):w.querySelector('video:not([hidden])');
+function kCubitSt(w){let z=KCUBIT.get(w);const el=kCubitSasaran(w);if(!z||z.el!==el){z={el,s:1,x:0,y:0};KCUBIT.set(w,z)}return z}
+function kCubitTerap(w,z,halus){const el=z.el;if(!el)return;const r=w.getBoundingClientRect(),mx=r.width*(z.s-1)/2,my=r.height*(z.s-1)/2;
+ if(z.s<=1.01){z.s=1;z.x=z.y=0}else{z.x=Math.max(-mx,Math.min(mx,z.x));z.y=Math.max(-my,Math.min(my,z.y))}
+ el.style.transition=halus?'transform .2s ease':'';el.style.transformOrigin='50% 50%';
+ el.style.transform=z.s>1?`translate(${z.x}px,${z.y}px) scale(${z.s})`+(el.classList.contains('cermin')?' scaleX(-1)':''):'';w.classList.toggle('kzum2',z.s>1)}
+/* Perbesar ke skala s1 dengan titik layar (px,py) tetap di bawah jari */
+function kCubitKe(w,z,s1,px,py){const r=w.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;s1=Math.max(1,Math.min(5,s1));
+ const ux=(px-cx-z.x)/z.s,uy=(py-cy-z.y)/z.s;z.x=px-cx-ux*s1;z.y=py-cy-uy*s1;z.s=s1}
+const kCubitReset=w=>{const z=w&&KCUBIT.get(w);if(z){z.s=1;z.x=z.y=0;kCubitTerap(w,z,1)}};
+{let a=null,tap={t:0,x:0,y:0};const d2=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY),m2=t=>({x:(t[0].clientX+t[1].clientX)/2,y:(t[0].clientY+t[1].clientY)/2});
+ document.addEventListener('touchstart',e=>{const w=kCubitWadah(e.target);if(!w)return a=null;const z=kCubitSt(w);if(!z.el)return a=null;
+  if(e.touches.length==2){const m=m2(e.touches);a={w,z,d:d2(e.touches),s:z.s,x:z.x,y:z.y,m}}
+  else if(e.touches.length==1){const t=e.touches[0];a={w,z,p:{x:t.clientX,y:t.clientY},x:z.x,y:z.y}}},{passive:true});
+ document.addEventListener('touchmove',e=>{if(!a)return;const {w,z}=a;
+  if(e.touches.length==2&&a.d){e.preventDefault();const m=m2(e.touches);z.s=a.s;z.x=a.x;z.y=a.y;kCubitKe(w,z,a.s*d2(e.touches)/a.d,a.m.x,a.m.y);z.x+=m.x-a.m.x;z.y+=m.y-a.m.y;kCubitTerap(w,z)}
+  else if(e.touches.length==1&&a.p&&z.s>1){e.preventDefault();const t=e.touches[0];z.x=a.x+t.clientX-a.p.x;z.y=a.y+t.clientY-a.p.y;kCubitTerap(w,z)}},{passive:false});
+ document.addEventListener('touchend',e=>{if(!a)return;const {w,z}=a;
+  /* Satu jari tersisa setelah mencubit → lanjut geser dari posisi sekarang */
+  if(e.touches.length==1){const t=e.touches[0];a={w,z,p:{x:t.clientX,y:t.clientY},x:z.x,y:z.y};return}
+  if(e.touches.length)return;const ct=e.changedTouches[0],now=Date.now(),diam=a.p&&Math.hypot(ct.clientX-a.p.x,ct.clientY-a.p.y)<10;
+  if(diam&&now-tap.t<320&&Math.hypot(ct.clientX-tap.x,ct.clientY-tap.y)<40){tap.t=0;if(z.s>1)kCubitReset(w);else{kCubitKe(w,z,2.5,ct.clientX,ct.clientY);kCubitTerap(w,z,1)}w.dataset.ketuk2=now}
+  else if(diam)tap={t:now,x:ct.clientX,y:ct.clientY};
+  kCubitTerap(w,z);a=null},{passive:true});
+ /* Komputer: Ctrl + roda tetikus, klik dua kali */
+ document.addEventListener('wheel',e=>{if(!e.ctrlKey)return;const w=kCubitWadah(e.target);if(!w)return;const z=kCubitSt(w);if(!z.el)return;e.preventDefault();kCubitKe(w,z,z.s*Math.exp(-e.deltaY/300),e.clientX,e.clientY);kCubitTerap(w,z)},{passive:false});
+ document.addEventListener('dblclick',e=>{const w=kCubitWadah(e.target);if(!w||Date.now()-(+w.dataset.ketuk2||0)<600)return;const z=kCubitSt(w);if(!z.el)return;if(z.s>1)kCubitReset(w);else{kCubitKe(w,z,2.5,e.clientX,e.clientY);kCubitTerap(w,z,1)}})}
+{let x0=null;document.addEventListener('touchstart',e=>{const w=e.target.closest&&e.target.closest('[data-kzkgeser]'),z=w&&KCUBIT.get(w);x0=w&&e.touches.length==1&&!(z&&z.s>1)?e.touches[0].clientX:null},{passive:true});
+ document.addEventListener('touchend',e=>{if(x0==null||e.touches.length)return x0=e.touches.length?null:x0;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<50)return;const c=S.kzk||{};kKitab({n:(c.n||1)+(dx>0?1:-1)})},{passive:true})}document.addEventListener('webkitfullscreenchange',kPenuhUbah);
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-kzfs]');if(!b)return;const z=b.closest('.kz')||b.closest('.kzs'),f=document.fullscreenElement||document.webkitFullscreenElement;
  if(f)(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{});
  else (z.requestFullscreen||z.webkitRequestFullscreen||(()=>Promise.reject())).call(z,{navigationUI:'hide'}).catch(()=>toast('Layar penuh tidak didukung di perangkat ini'))});
