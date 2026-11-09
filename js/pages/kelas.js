@@ -4,8 +4,10 @@
    - Suara: LiveKit (server audio, kuat untuk ratusan pendengar). Token dari api/kelas.
      Admin (ustaz) bisa bicara; jamaah mendengar, bisa "Angkat tangan" lalu diizinkan bicara oleh admin.
    - Selama kelas berjalan, pengguna boleh membuka halaman lain (mis. kitab); ada pil "Live" untuk kembali. */
-const LKJS='https://cdn.jsdelivr.net/npm/livekit-client@2.15.7/dist/livekit-client.umd.js';
-let KELAS=null,KR=null,KSIAP=null;
+/* Pustaka LiveKit disimpan di aplikasi sendiri (CDN kadang diblokir operator seluler); CDN hanya cadangan */
+const LKJS='js/lib/livekit-client-2.15.7.umd.js',LKJS_CDN='https://cdn.jsdelivr.net/npm/livekit-client@2.15.7/dist/livekit-client.umd.js';
+const lkMuat=()=>ldjs(LKJS).catch(()=>ldjs(LKJS_CDN));
+let KELAS=null,KR=null,KSIAP=null;const KULANG={};
 async function kelasCekServer(){try{const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"cek"}'});KSIAP=r.ok}catch(e){KSIAP=null}return KSIAP}
 const fsNilai=v=>v==null?null:'stringValue' in v?v.stringValue:'integerValue' in v?+v.integerValue:'doubleValue' in v?+v.doubleValue:'booleanValue' in v?v.booleanValue:null;
 async function kelasAmbil(){try{const r=await fetch(FSURL+'/kelas?pageSize=100',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();
@@ -109,7 +111,7 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id
  if(!navigator.onLine){if(i)i.innerHTML='<p class="mut">Kelas online butuh internet.</p>';return}
  const kk=(KELAS||[]).find(x=>x.id==id)||{};
  if(!paksaLK&&(kk.mode=='mesh'||(kk.mode!='livekit'&&KSIAP===false)))return kelasMasukMesh(id);
- try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await ldjs(LKJS);const L=LivekitClient,R=new L.Room({adaptiveStream:true,dynacast:true,stopMicTrackOnMute:true});
+ try{let t;try{t=await kelasToken(id,'token')}catch(e){if(e=='belum-siap'){KSIAP=false;return kelasMasukMesh(id)}throw e}if(!window.LivekitClient)await lkMuat();const L=LivekitClient,R=new L.Room({adaptiveStream:false,dynacast:true,stopMicTrackOnMute:true});
   KR={id,room:R,admin:!!t.admin,diam:false,judul:((KELAS||[]).find(x=>x.id==id)||{}).judul||'Kelas online'};const ub=()=>KR&&KR.room===R&&kelasInfo();
   R.on(L.RoomEvent.TrackSubscribed,(tr,pub,p)=>{if(tr.kind=='video'){const st=new MediaStream([tr.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(p,st):kSetVid(p,st);return ub()}if(tr.kind=='audio'){const el=tr.attach();el.className='kaud';document.body.append(el);kelasRekamSambung(tr.mediaStreamTrack)}})
    .on(L.RoomEvent.LocalTrackPublished,pub=>{if(pub.kind=='video'&&pub.track){const st=new MediaStream([pub.track.mediaStreamTrack]);pub.source==L.Track.Source.ScreenShare?kSetLayar(R.localParticipant,st):kSetVid(R.localParticipant,st);ub()}})
@@ -119,18 +121,21 @@ async function kelasMasuk(id,paksaLK){if(KR&&KR.id==id){kelasInfo();kelasChat(id
    .on(L.RoomEvent.LocalTrackPublished,ub).on(L.RoomEvent.LocalTrackUnpublished,ub).on(L.RoomEvent.TrackMuted,(pub,p)=>{if(pub.kind=='video'&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,null);ub()}).on(L.RoomEvent.TrackUnmuted,(pub,p)=>{if(pub.kind=='video'&&pub.track&&p!==R.localParticipant)(pub.source==L.Track.Source.ScreenShare?kSetLayar:kSetVid)(p,new MediaStream([pub.track.mediaStreamTrack]));ub()})
    .on(L.RoomEvent.ParticipantPermissionsChanged,(prev,p)=>{if(p===R.localParticipant&&!KR.admin){if(kBoleh(p)&&!kBoleh({permissions:prev})){toast('Kamu diizinkan bicara. Tekan Aktifkan mikrofon.');R.localParticipant.setAttributes({tangan:''}).catch(()=>{})}}ub()})
    .on(L.RoomEvent.AudioPlaybackStatusChanged,()=>{KR.diam=!R.canPlaybackAudio;ub()})
-   .on(L.RoomEvent.Disconnected,()=>kelasPutus(R));
+   .on(L.RoomEvent.Disconnected,a=>kelasPutus(R,a));
   await R.connect(t.url,t.token);try{await R.startAudio()}catch(e){}KR.diam=!R.canPlaybackAudio;if(fotoProfil())R.localParticipant.setAttributes({foto:fotoProfil()}).catch(()=>{});
-  const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();kelasChat(id);if(KR.admin&&((KELAS||[]).find(x=>x.id==id)||{}).rekam)kelasRekamMulai()}
- catch(e){KR=null;console.warn('kelas',e);if(!paksaLK&&e!='belum-mulai'&&e!='kelas-tidak-ada'){try{KR&&KR.room&&KR.room.disconnect()}catch(x){}KR=null;return kelasMasukMesh(id,true)}if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
-function kelasPutus(R){if(KR&&KR.room===R){if(KREC)kelasRekamStop();if(KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;kelasPil();const s=$('#klst');if(s)s.textContent='';const x=$('#kinfo');if(x)x.innerHTML='<p class="mut">Kelas sudah berakhir atau sambungan terputus.</p><a class="btn s" href="#/kelas">Kembali ke daftar kelas</a>';const c=$('#kctl');if(c)c.innerHTML='';const a=$('#kadm');if(a)a.innerHTML=''}}
+  KULANG[id]=0;const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();kelasChat(id);if(KR.admin&&((KELAS||[]).find(x=>x.id==id)||{}).rekam)kelasRekamMulai()}
+ catch(e){KR=null;console.warn('kelas',e);if(!paksaLK&&kk.mode!='livekit'&&e!='belum-mulai'&&e!='kelas-tidak-ada'){try{KR&&KR.room&&KR.room.disconnect()}catch(x){}KR=null;return kelasMasukMesh(id,true)}if(i)i.innerHTML=`<p class="mut">${esc(KGAL[e]||(/^http-/.test(e)?'Server kelas tidak bisa dihubungi ('+e+'). Coba lagi sebentar.':'Tidak bisa masuk kelas. Periksa internet lalu coba lagi.'))}</p><button class="btn s" data-kulang="${id}">Coba lagi</button>`}}
+function kelasPutus(R,alasan){if(KR&&KR.room===R){const kid=KR.id,ulang=alasan!=null&&![1,2,4,5,10].includes(alasan)&&(KULANG[kid]||0)<3&&location.hash=='#/kelas/'+kid;if(KREC)kelasRekamStop();if(KR.chatUnsub)try{KR.chatUnsub()}catch(e){}KR=null;kelasPil();const s=$('#klst');if(s)s.textContent='';const x=$('#kinfo');const c=$('#kctl');if(c)c.innerHTML='';const a=$('#kadm');if(a)a.innerHTML='';
+  /* Sinyal HP berganti / internet putus sebentar: sambungkan lagi otomatis (maks. 3 kali) */
+  if(ulang){KULANG[kid]=(KULANG[kid]||0)+1;if(x)x.innerHTML='<p class="mut">Sambungan terputus, menyambung ulang…</p>';setTimeout(()=>{if(!KR&&location.hash=='#/kelas/'+kid)kelasMasuk(kid)},1500*KULANG[kid]);return}
+  if(x)x.innerHTML=`<p class="mut">Kelas sudah berakhir atau sambungan terputus.</p><button class="btn s" data-kulang="${kid}">Sambungkan lagi</button> <a class="btn s" href="#/kelas">Kembali ke daftar kelas</a>`}}
 /* Kelas kecil tanpa LiveKit (js/pages/kelas-mesh.js) */
 async function kelasMasukMesh(id,dariLK){const i=$('#kinfo'),k=(KELAS||[]).find(x=>x.id==id)||{},admin=kAdmin();
  try{if(k.status!='live'&&!admin)throw 'belum-mulai';let R=null;
   R=await kelasMesh(id,admin,kNama(),()=>{if(KR&&R&&KR.room===R){KR.diam=!R.canPlaybackAudio;kelasInfo()}},FBU&&FBU.uid);
   R.onDisconnected=()=>kelasPutus(R);KR={id,room:R,admin,diam:!R.canPlaybackAudio,mode:'mesh',judul:k.judul||'Kelas online'};R.onVideo=st=>{if(KR&&KR.room===R&&!admin){KR.video=st;KR.videoLokal=false;kelasInfo()}};
   R.onLayarSelesai=()=>{if(KR&&KR.room===R){KR.layarOn=false;kSetLayar(R.localParticipant,null);kelasInfo();kelasPil()}};R.onVideoJamaah=(j,st)=>{if(!KR||KR.room!==R)return;KR.vid=KR.vid||new Map();st?KR.vid.set(j,st):KR.vid.delete(j);kelasInfo()};kelasChat(id);
-  const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
+  KULANG[id]=0;const s=$('#klst');if(s)s.textContent='● Live';kelasInfo();kelasPasangTimer();if(admin&&k.rekam)kelasRekamMulai()}
  catch(e){KR=null;console.warn('kelas kecil',e);
   /* Kelas kecil gagal (mis. aturan Firestore belum dipublish) → coba lewat LiveKit bila servernya siap */
   if(!dariLK&&e!='belum-mulai'&&KSIAP!==false)return kelasMasuk(id,true);
