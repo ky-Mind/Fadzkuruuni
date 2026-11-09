@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.47':['Maulid › Fadzkuruuni: Qasidah Ma fil Wujud dan Amaliyah Majelis Fadzkuruuni kini berupa teks per bait (Arab, Latin, terjemah) seperti maulid Umum, bisa diperbesar hurufnya dan disimpan offline','Amaliyah lengkap: Ya Rabbi Shalli, Inna Fatahna, Maulid Adh-Dhiya\'ul Lami\' bagian I–IV, Mahallul Qiyam, An-Nabi Ya Man Hadhar, Qad Kafani, Ma fil Wujud, dan Doa'],
  '2.9.46':['Kelas online: kamera dan suara pengajar kini tetap tersambung dari jauh dan di jaringan seluler (video tidak lagi berhenti setelah HP pindah aplikasi atau layar mati)','Kelas online: bila sinyal putus sebentar, kelas menyambung ulang otomatis; ada juga tombol Sambungkan lagi'],
  '2.9.45':['Al-Hawi kini lengkap sampai Juz 3, dengan keterangan karya Abuya Mahbubillah, pimpinan Ponpes Fadzkuruuni','Kitab Karya Pondok baru: Ikhtisar Ilmu Faraidh','Maulid: Amaliyah Majelis Fadzkuruuni (Adh-Dhiya\'ul Lami\', Ma fil Wujud, Mahallul Qiyam); Ratib Al-Haddad memakai edisi terbaru','Kitab Umum baru: Al-Arba\'in An-Nawawiyah, Mutammimah Al-Ajurumiyah, Kasyful Muruthiyyah, Ad-Durus An-Nahwiyyah, Syarh Qathrun Nada, Kasyifatus Saja, Syarh Al-Yaqut An-Nafis, dan Asy-Syifa'],
  '2.9.44':['Video tutorial widget kini memakai rekaman layar HP Android asli: memasang widget Jadwal Salat lengkap dari Subuh sampai Isya, termasuk Duha'],

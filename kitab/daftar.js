@@ -9,9 +9,9 @@ const KITAB_ISI={};const registerKitab=k=>{KITAB_ISI[k.id]=k};
 const KITAB_DAFTAR=[
  {id:"alhawi",kelompok:"pondok",judul:"Al-Hawi fi Khulashatish Sharf wan Nahw",arab:"الحاوي في خلاصة الصرف والنحو",ket:"Ringkasan sharaf dan nahwu · Abuya Mahbubillah, pimpinan Ponpes Fadzkuruuni",berkas:"kitab/alhawi/alhawi.js"},
  {id:"aqidatul-awam-fadzkuruuni",kelompok:"pondok",judul:"Aqidatul Awam (Edisi Majelis Fadzkuruuni)",arab:"متن عقيدة العوام",ket:"Matan akidah 50, edisi Majelis Fadzkuruuni",berkas:"kitab/aqidatul-awam-fadzkuruuni/aqidatul-awam-fadzkuruuni.js"},
- {id:"ma-fil-wujud",kelompok:"pondok",di:"maulid",judul:"Qasidah Ma fil Wujud",arab:"ما في الوجود",ket:"Qasidah munajat dengan terjemah, dibaca di Majelis Fadzkuruuni",berkas:"kitab/ma-fil-wujud/ma-fil-wujud.js"},
+ {id:"ma-fil-wujud",kelompok:"pondok",di:"maulid",teks:"ma-fil-wujud/0",judul:"Qasidah Ma fil Wujud",arab:"ما في الوجود",ket:"Qasidah munajat dengan terjemah, dibaca di Majelis Fadzkuruuni",berkas:"kitab/ma-fil-wujud/ma-fil-wujud.js"},
  {id:"ratib-alhaddad",kelompok:"pondok",di:"wirid",judul:"Ratib Al-Haddad",arab:"راتب الحداد",ket:"Wirid harian Majelis Fadzkuruuni",berkas:"kitab/ratib-alhaddad/ratib-alhaddad.js"},
- {id:"amaliyah",kelompok:"pondok",di:"maulid",judul:"Amaliyah Majelis Fadzkuruuni",arab:"الضياء اللامع · ما في الوجود",ket:"Bacaan majelis: Maulid Adh-Dhiya'ul Lami', Ma fil Wujud, Mahallul Qiyam",berkas:"kitab/amaliyah/amaliyah.js"},
+ {id:"amaliyah",kelompok:"pondok",di:"maulid",teks:"amaliyah",judul:"Amaliyah Majelis Fadzkuruuni",arab:"الضياء اللامع · ما في الوجود",ket:"Bacaan majelis: Maulid Adh-Dhiya'ul Lami', Ma fil Wujud, Mahallul Qiyam",berkas:"kitab/amaliyah/amaliyah.js"},
  {id:"ikhtisar-faraidh",kelompok:"pondok",judul:"Ikhtisar Ilmu Faraidh",arab:"علم الفرائض",ket:"Dasar-dasar ilmu faraidh (waris) · Majelis Fadzkuruuni",berkas:"kitab/ikhtisar-faraidh/ikhtisar-faraidh.js"},
  //@@DAFTAR-BARU@@
  {id:'safinatun-najah',kelompok:'klasik',judul:'Safinatun Najah',arab:'سفينة النجاة',ket:'Fikih dasar ibadah · Syekh Salim bin Sumair Al-Hadrami',berkas:'kitab/safinatun-najah/safinatun-najah.js'},
