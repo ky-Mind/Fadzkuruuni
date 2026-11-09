@@ -189,18 +189,34 @@ document.addEventListener('fullscreenchange',kPenuhUbah);
    Jamaah memilih kitab sendiri lalu membalik halaman; pilihan terakhir diingat (S.kzk = {id, j, n}).
    Di layar penuh panel berada di kanan video; di layar biasa di bawah video. */
 const kKitabList=()=>(typeof KITAB_DAFTAR!='undefined'?KITAB_DAFTAR:[]).filter(k=>k.berkas);
-async function kKitab(ubah){const el=$('#kzk');if(!el)return;const L=kKitabList();if(!L.length){el.innerHTML='<p class="mut">Kitab belum tersedia.</p>';return}
+/* KIKUT: jamaah mengikuti halaman pengajar (bawaan ya; berhenti bila jamaah membalik sendiri). KPENG: posisi terakhir dari pengajar */
+let KIKUT=true,KPENG=null,KKIRIM=0;
+const kPengajarKitab=()=>!!(KR&&KR.admin);
+function kKitabDariPengajar(k){KPENG=k&&k.id?k:null;if(kPengajarKitab())return;const el=$('#kzk');
+ if(KPENG&&KIKUT){const c=S.kzk||{};if(el&&!el.hidden){if(c.id!=KPENG.id||c.j!=KPENG.j||c.n!=KPENG.n)kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1)}
+  else{S.kzk={id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1};if(!KPENG.tutup&&el&&!$('#kz.dgkitab')&&!KPENG.diberitahu){KPENG.diberitahu=1;toast('Pengajar membuka kitab. Ketuk tombol Kitab di pojok video untuk mengikuti.')}}}
+ else if(el&&!el.hidden)kKitabIkutTombol()}
+/* Tombol di kepala panel: pengajar = "Dibagikan ke jamaah"; jamaah = "Mengikuti pengajar" / "Ikuti pengajar" */
+function kKitabIkutTombol(){const b=$('#kzkikut');if(!b)return;if(kPengajarKitab()){b.hidden=false;b.className='kzki on';b.innerHTML=`${ic('share',14)}<span>Dibagikan</span>`;b.title='Halaman yang kamu buka ikut tampil di layar jamaah';return}
+ b.hidden=!KPENG;b.className='kzki'+(KIKUT?' on':'');b.innerHTML=KIKUT?`${ic('check',14)}<span>Mengikuti pengajar</span>`:`${ic('users',14)}<span>Ikuti pengajar</span>`;b.title=KIKUT?'Halaman mengikuti pengajar. Membalik sendiri akan berhenti mengikuti.':'Kembali ke halaman yang dibuka pengajar'}
+/* Pengajar: kirim posisi kitab ke dokumen kelas (dijeda sebentar agar membalik cepat tidak memenuhi kuota tulis) */
+function kKitabKirim(c,tutup){if(!kPengajarKitab()||typeof FBD=='undefined'||!FBD)return;clearTimeout(KKIRIM);const id=KR.id;
+ KKIRIM=setTimeout(()=>{FBD.collection('kelas').doc(id).update({kitab:tutup?{tutup:1,t:Date.now()}:{id:c.id,j:c.j||0,n:c.n||1,t:Date.now()}}).catch(()=>{})},tutup?0:500)}
+async function kKitab(ubah,dariPengajar){if(ubah&&!dariPengajar&&KPENG&&!kPengajarKitab())KIKUT=false;const el=$('#kzk');if(!el)return;const L=kKitabList();if(!L.length){el.innerHTML='<p class="mut">Kitab belum tersedia.</p>';return}
  const c=S.kzk=Object.assign({id:L[0].id,j:0,n:1},S.kzk||{},ubah||{});if(!L.some(k=>k.id==c.id))Object.assign(c,{id:L[0].id,j:0,n:1});
  let k=null;try{k=await kitabAmbil(c.id)}catch(e){}
  const J=k&&k.juz||[],j=J[c.j]||J[0];if(j&&!J[c.j])c.j=0;const n=j?Math.min(Math.max(1,c.n),j.halaman):1;c.n=n;save();
- el.innerHTML=`<div class="kzkh"><select class="in" data-kzksel aria-label="Pilih kitab">${L.map(x=>`<option value="${x.id}"${x.id==c.id?' selected':''}>${esc(x.judul)}</option>`).join('')}</select>${J.length>1?`<select class="in kzkj" data-kzkjuz aria-label="Pilih juz">${J.map((x,i)=>`<option value="${i}"${i==c.j?' selected':''}>Juz ${x.no}</option>`).join('')}</select>`:''}<button type="button" class="kzkx" data-kzkitab aria-label="Tutup kitab" title="Tutup kitab">✕</button></div>
+ el.innerHTML=`<div class="kzkh"><select class="in" data-kzksel aria-label="Pilih kitab">${L.map(x=>`<option value="${x.id}"${x.id==c.id?' selected':''}>${esc(x.judul)}</option>`).join('')}</select>${J.length>1?`<select class="in kzkj" data-kzkjuz aria-label="Pilih juz">${J.map((x,i)=>`<option value="${i}"${i==c.j?' selected':''}>Juz ${x.no}</option>`).join('')}</select>`:''}<button type="button" class="kzki" id="kzkikut" data-kzkikut hidden></button><button type="button" class="kzkx" data-kzkitab aria-label="Tutup kitab" title="Tutup kitab">✕</button></div>
  <div class="kzkb" data-kzkgeser>${j?`<img src="${pgUrl(j,n)}" alt="${esc(k.judul)} halaman ${n}" decoding="async">`:'<p class="mut">Kitab ini belum bisa dimuat. Periksa internet.</p>'}</div>
  <div class="kzkf"><button type="button" class="btn s" data-kzkn="-1" ${n<=1?'disabled':''} aria-label="Halaman sebelumnya">${ic('back',16)}</button><label class="kzkp"><input class="in" type="number" inputmode="numeric" min="1" max="${j?j.halaman:1}" value="${n}" data-kzkhal aria-label="Nomor halaman"><span>/ ${j?j.halaman:1}</span></label><button type="button" class="btn s" data-kzkn="1" ${j&&n>=j.halaman?'disabled':''} aria-label="Halaman berikutnya">${ic('next',16)}</button></div>`;
+ kKitabIkutTombol();if(j)kKitabKirim(c);
  /* Halaman berikutnya dimuat lebih dulu agar membalik terasa cepat */
  if(j&&n<j.halaman){const im=new Image();im.src=pgUrl(j,n+1)}}
-function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));if(on)kKitab()}
+function kKitabTampil(on){const el=$('#kzk'),z=$('#kz');if(!el||!z)return;on=on==null?el.hidden:on;el.hidden=!on;z.classList.toggle('dgkitab',on);$$('.kzbar [data-kzkitab]').forEach(b=>b.classList.toggle('on',on));
+ if(on)kKitab(KPENG&&KIKUT&&!kPengajarKitab()&&KPENG.id?{id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1}:null,1);else if(kPengajarKitab())kKitabKirim(null,1)}
 document.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
  if(t.closest('[data-kzkitab]')){e.preventDefault();return kKitabTampil()}
+ if(t.closest('[data-kzkikut]')){if(kPengajarKitab())return toast('Halaman kitab yang kamu buka ikut tampil di layar jamaah');KIKUT=!KIKUT;if(KIKUT&&KPENG&&KPENG.id)return kKitab({id:KPENG.id,j:KPENG.j||0,n:KPENG.n||1},1);return kKitabIkutTombol()}
  if(t.closest('[data-kzorang]')){const z=$('#kz');if(z){z.classList.toggle('tanpaorang');t.closest('[data-kzorang]').classList.toggle('on',!z.classList.contains('tanpaorang'))}return}
  const nb=t.closest('[data-kzkn]');if(nb&&!nb.disabled){const c=S.kzk||{};return kKitab({n:(c.n||1)+(+nb.dataset.kzkn)})}});
 document.addEventListener('change',e=>{const t=e.target;if(!t.matches)return;
@@ -354,7 +370,10 @@ const kTautan=t=>esc(t).replace(/(https?:\/\/|www\.)[^\s<]+[^\s<.,;:!?)'"]/gi,m=
 /* ---------- Pesan (chat) di kelas: Firestore kelas/{id}/chat, 60 pesan terakhir ---------- */
 async function kelasChat(id){await fbInit();if(!FBD||!KR||KR.id!=id)return;try{if(KR.chatUnsub)KR.chatUnsub();
  KR.chatUnsub=FBD.collection('kelas').doc(id).collection('chat').orderBy('t').limitToLast(60).onSnapshot(q=>{const e=$('#kcl');if(!e)return;const saya=KR&&KR.room.localParticipant.identity;
-  e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${kTautan(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{})}catch(x){}}
+  e.innerHTML=q.docs.length?q.docs.map(d=>{const m=d.data();return `<div class="kcm${m.pid==saya?' saya':''}"><b>${esc(m.nama||'Jamaah')}</b><span>${kTautan(m.teks||'')}</span><small>${new Date(m.t||0).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join(''):'<p class="mut">Belum ada pesan.</p>';e.scrollTop=e.scrollHeight},()=>{});
+ /* Kitab yang sedang dibuka pengajar: jamaah yang memilih "Ikuti pengajar" otomatis pindah ke halaman yang sama */
+ const uChat=KR.chatUnsub,uKitab=FBD.collection('kelas').doc(id).onSnapshot(d=>{const k=(d.data()||{}).kitab;if(KR&&KR.id==id)kKitabDariPengajar(k)},()=>{});
+ KR.chatUnsub=()=>{try{uChat()}catch(e){}try{uKitab()}catch(e){}}}catch(x){}}
 document.addEventListener('submit',async e=>{if(e.target.id!='kcf')return;e.preventDefault();const i=$('#kci'),teks=(i.value||'').trim();if(!teks||!KR)return;i.value='';
  try{await FBD.collection('kelas').doc(KR.id).collection('chat').add({nama:kNama(),teks:teks.slice(0,500),t:Date.now(),pid:KR.room.localParticipant.identity})}
  catch(x){i.value=teks;toast(x&&x.code=='permission-denied'?'Pesan belum aktif: aturan Firestore terbaru belum dipublish.':'Pesan gagal dikirim')}});

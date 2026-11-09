@@ -1834,3 +1834,9 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .kz:fullscreen .kzkp{color:#aab4ae}
 /* HP tegak dalam layar penuh: kitab di bawah video, bukan di samping */
 @media (orientation:portrait){.kz:fullscreen{flex-direction:column}.kz:fullscreen .kzk{flex:0 0 48%;border-left:0;border-top:1px solid #2c312e}.kz:fullscreen .kzg{height:96px}.kz:fullscreen .kzt{flex-basis:132px}}
+/* Tombol ikuti pengajar di kepala panel kitab kelas */
+.kzki{flex:none;display:flex;align-items:center;gap:4px;height:36px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.kzki[hidden]{display:none}
+.kzki.on{background:var(--g);border-color:var(--g);color:var(--on)}
+.kz:fullscreen .kzki:not(.on){border-color:#2c312e;color:#e8ece9}
+@media (max-width:520px){.kzki span{display:none}.kzki{padding:0 10px}}
