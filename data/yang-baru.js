@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU={
+ '2.9.52':['Sholawat Ya Imamar Rusli Ya Sanadi diperbarui sesuai naskah Majelis (10 bait: Qasaman bin najmi, Sayyidus sadat min Mudhar, Qamarun thabat sariratuh, dan seterusnya)','Kelas online: bila gagal masuk kelas, kini tampil rincian penyebabnya agar mudah dilaporkan'],
  '2.9.51':['Ikon di dalam lingkaran berwarna (Ratib, Maulid, Sholawat, Kitab, dan lainnya) kini tampil putih dan jelas, tidak lagi abu-abu gelap'],
  '2.9.50':['Sholawat Fadzkuruuni kini berisi 3 qasidah (Arab, Latin, terjemah): Ya Imamar Rusli Ya Sanadi, Ya Rabbi Antal Hadi, dan Birasulillah wal Badawi','Ketiganya juga muncul di halaman Sholawat antar bagian Amaliyah'],
  '2.9.49':['Halaman Sholawat di Amaliyah tampil baru: penanda langkah (Bagian I → Sholawat → Bagian II), pilihan sholawat berbentuk kartu, dan tombol Lanjut yang selalu terlihat di bawah','Geser kiri-kanan antara bagian maulid dan halaman Sholawat kini mulus'],
