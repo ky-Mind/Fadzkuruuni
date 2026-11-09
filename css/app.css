@@ -1763,3 +1763,8 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 /* Notifikasi singkat & pemberitahuan kelas selalu di lapisan paling depan, di atas lembar/dialog dan latar buramnya */
 #toast{z-index:100}
 #knotif{z-index:99}
+
+/* Jeda sholawat antar bagian Amaliyah (js/pages/maulid.js) */
+.jeda .btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.jeda .jpilih{margin-top:8px}
+.card.jeda{margin-bottom:14px}
