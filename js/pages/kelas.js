@@ -10,7 +10,8 @@ const lkMuat=()=>ldjs(LKJS).catch(()=>ldjs(LKJS_CDN));
 let KELAS=null,KR=null,KSIAP=null;
 /* Rincian teknis galat (nama + pesan) agar penyebab gagal masuk kelas bisa dilaporkan */
 const kGalatRinci=e=>{if(!e||typeof e=='string')return '';const t=[e.name,e.message].filter(Boolean).join(': ').slice(0,160);return t?`<br><small class="mut" style="opacity:.8">Rincian: ${esc(t)}</small>`:''};const KULANG={};
-async function kelasCekServer(){try{const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"cek"}'});KSIAP=r.ok}catch(e){KSIAP=null}return KSIAP}
+let KKUNCI=null;
+async function kelasCekServer(){try{const r=await fetch('api/kelas',{method:'POST',headers:{'content-type':'application/json'},body:'{"aksi":"cek"}'});KSIAP=r.ok;if(r.ok)KKUNCI=(await r.json().catch(()=>({}))).kunci||null}catch(e){KSIAP=null}return KSIAP}
 const fsNilai=v=>v==null?null:'stringValue' in v?v.stringValue:'integerValue' in v?+v.integerValue:'doubleValue' in v?+v.doubleValue:'booleanValue' in v?v.booleanValue:null;
 async function kelasAmbil(){try{const r=await fetch(FSURL+'/kelas?pageSize=100',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();
   KELAS=(j.documents||[]).map(d=>{const o={id:d.name.split('/').pop()};for(const [k,v] of Object.entries(d.fields||{}))o[k]=fsNilai(v);return o});try{localStorage.fzkelas=JSON.stringify(KELAS)}catch(e){}}
@@ -33,7 +34,7 @@ function kelasKartu(k){const live=k.status=='live',sel=k.status=='selesai',adm=k
 function kelasDaftar(){const e=$('#kls');if(e)e.innerHTML=kelasDaftarHtml()}
 function kelasDaftarHtml(){const L=(KELAS||[]).slice(),now=Date.now();
  const live=L.filter(k=>k.status=='live'),akan=L.filter(k=>k.status!='live'&&k.status!='selesai').sort((a,b)=>(a.mulai||0)-(b.mulai||0)),sel=L.filter(k=>k.status=='selesai').sort((a,b)=>(b.mulai||0)-(a.mulai||0)).slice(0,20);
- const peringat=kAdmin()?(KSIAP===false?`<div class="kperingat">${ic('info',18)}<span><b>Server suara belum disiapkan.</b> Isi LIVEKIT_URL, LIVEKIT_API_KEY, dan LIVEKIT_API_SECRET di Vercel (Settings › Environment Variables), lalu Redeploy. Sebelum itu, kelas besar otomatis berjalan sebagai kelas kecil (maks. ±10 jamaah).</span></div>`:'')
+ const peringat=kAdmin()?(KSIAP&&KKUNCI&&KKUNCI!='cocok'?`<div class="kperingat">${ic('info',18)}<span><b>Kunci LiveKit ditolak server (${esc(KKUNCI)}).</b> LIVEKIT_API_KEY / LIVEKIT_API_SECRET di Vercel tidak cocok dengan project LiveKit. Buat API key baru di LiveKit Cloud (Settings › API Keys), salin key dan secret-nya ke Vercel (Settings › Environment Variables), lalu Redeploy.</span></div>`:KSIAP===false?`<div class="kperingat">${ic('info',18)}<span><b>Server suara belum disiapkan.</b> Isi LIVEKIT_URL, LIVEKIT_API_KEY, dan LIVEKIT_API_SECRET di Vercel (Settings › Environment Variables), lalu Redeploy. Sebelum itu, kelas besar otomatis berjalan sebagai kelas kecil (maks. ±10 jamaah).</span></div>`:'')
   :'';
  return peringat+(kAdmin()?`<button class="btn kbuat" data-kbuat>${ic('plus',18)} Buat kelas</button>`:'')
   +(live.length?live.map(kelasKartu).join(''):`<div class="card mut kkosong">${ic('siar',22)}<span>Belum ada kelas yang sedang live. Jadwal kelas berikutnya ada di bawah.</span></div>`)
