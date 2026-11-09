@@ -4,9 +4,16 @@
    Berkas video dilayani GitHub Pages (seperti gambar kitab) agar tidak membebani deployment Vercel. */
 const TUT_ASAL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'':'https://ky-mind.github.io/Fadzkuruuni/';
 const TUTJ=[['hp','HP'],['desktop','Desktop / laptop']];
+/* Kecepatan video tutorial (diingat) dan geser maju/mundur 10 detik; bilah waktu video juga bisa digeser bebas */
+const TUTSPD=[0.75,1,1.25,1.5,2];
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tutg],[data-tutsp]');if(!b)return;const v=b.closest('.tutb')?.querySelector('video');if(!v)return;
+ if(b.dataset.tutg){v.currentTime=Math.max(0,Math.min((v.duration||1e9)-0.2,v.currentTime+ +b.dataset.tutg));return}
+ const sp=+b.dataset.tutsp;S.tutSpd=sp;save();v.playbackRate=sp;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b))});
+document.addEventListener('play',e=>{if(e.target.matches&&e.target.matches('.tutv video'))e.target.playbackRate=S.tutSpd||1},true);
 /* Bagian awal mengikuti perangkat: layar sentuh atau sempit → HP; pilihan terakhir diingat */
 const tutJenis=()=>S.tutj||(matchMedia('(pointer:coarse)').matches||innerWidth<760?'hp':'desktop');
 const tutIsi=(t,j)=>{const b=`${TUT_ASAL}video/tutorial/${t.id}-${j}`;return `<div class="tutv ${j}"><video controls playsinline preload="metadata" poster="${b}.jpg?v=${t.ver}" src="${b}.mp4?v=${t.ver}" aria-label="${esc(t.judul)}, video untuk ${j=='hp'?'HP':'desktop'}"></video></div>
+<div class="tutk" role="group" aria-label="Kontrol video"><button type="button" data-tutg="-10" aria-label="Mundur 10 detik">${ic('back',15)} 10 dtk</button><button type="button" data-tutg="10" aria-label="Maju 10 detik">10 dtk ${ic('next',15)}</button><span class="tutsp">${TUTSPD.map(v=>`<button type="button" data-tutsp="${v}"${v==(S.tutSpd||1)?' class="on"':''}>${String(v).replace('.',',')}×</button>`).join('')}</span></div>
 <details class="tutd"><summary>Langkah-langkah (${j=='hp'?'HP':'desktop'})</summary><ol class="tutl">${t.langkah.map(l=>`<li>${j=='desktop'&&l[1]?l[1]:l[0]}</li>`).join('')}</ol></details>
 ${(t.id=='kelas'&&typeof TUT_KE!='undefined'&&TUT_KE||t.ke)?`<a class="btn" href="${(t.id=='kelas'&&TUT_KE||t.ke)[0]}" style="display:block;text-align:center;margin-top:12px">${esc((t.id=='kelas'&&TUT_KE||t.ke)[1])}</a>`:''}`};
 P.tutorial=buka=>{const j=tutJenis(),L=typeof TUTOR!='undefined'?TUTOR:[];buka=L.some(t=>t.id==buka)?buka:'';return {html:head('Video tutorial','#/pengaturan/tentang')+`<p class="mut" style="margin:0 0 14px">Panduan singkat memakai aplikasi Fadzkuruuni. Pilih <b>HP</b> atau <b>Desktop / laptop</b> sesuai perangkat yang kamu pakai, karena letak tombolnya berbeda.</p>

@@ -25,25 +25,24 @@ NAMA.forEach((_,i)=>paket('audio:'+(i+1),{judul:'Audio '+NAMA[i],kat:'audio',sel
 /* Pembaca surah. Mode kartu dibagi per halaman (QPER ayat) dan bisa digeser ke samping; mode mushaf satu halaman penuh bergaris.
    Pindah halaman, surah, atau mode dilakukan di tempat (tanpa memuat ulang) dengan animasi geser, dan posisi ayat dipertahankan. */
 const QPER=12;
-const surah=(n,sc)=>{n=+n;if(!NAMA[n-1])return P.quran();return {html:`<div class="rh"><a class="bk" href="#/quran" aria-label="Daftar surah">${ic('panah',24)}</a><div class="rt"><b id="qt"></b><small id="qa"></small></div><div class="mseg" role="group" aria-label="Mode baca"><button type="button" data-md="0" aria-label="Mode kartu: ayat per kartu dengan terjemah">${ic('cards',16)}<span>Kartu</span></button><button type="button" data-md="1" aria-label="Mode mushaf: teks Arab bersambung">${ic('book',16)}<span>Mushaf</span></button></div><button class="ib" id="qs" aria-label="Pengaturan baca">${ic('sliders',20)}</button></div><audio id="au" preload="none"></audio><div class="qmini" id="qmini" hidden><button class="ib" id="pp" aria-label="Jeda">${ic('pause',18)}</button><span id="qmt"></span><button class="ib2" id="qstop" aria-label="Hentikan audio">×</button></div><div id="ay"><p class="mut">Memuat…</p></div><div class="snav" id="snav"></div>`,
+addEventListener('fzpemutar',()=>{if(window.QR&&QR.tandai&&$('#ay'))QR.tandai()});
+const surah=(n,sc)=>{n=+n;if(!NAMA[n-1])return P.quran();return {html:`<div class="rh"><a class="bk" href="#/quran" aria-label="Daftar surah">${ic('panah',24)}</a><div class="rt"><b id="qt"></b><small id="qa"></small></div><div class="mseg" role="group" aria-label="Mode baca"><button type="button" data-md="0" aria-label="Mode kartu: ayat per kartu dengan terjemah">${ic('cards',16)}<span>Kartu</span></button><button type="button" data-md="1" aria-label="Mode mushaf: teks Arab bersambung">${ic('book',16)}<span>Mushaf</span></button></div><button class="ib" id="qs" aria-label="Pengaturan baca">${ic('sliders',20)}</button></div><div id="ay"><p class="mut">Memuat…</p></div><div class="snav" id="snav"></div>`,
  init(){qReader(n,+sc||0)}}};
 function qReader(n,sc){const el=$('#ay'),R={n,A:null,p:0,busy:0};window.QR=R;$('#qs').onclick=qsheet;
  const pages=()=>S.full?1:Math.ceil(R.A.length/QPER);
  const segOn=()=>$$('.mseg button').forEach(b=>b.classList.toggle('on',(b.dataset.md=='1')==!!S.full));
- /* Pemutar: diputar dari menu ayat (ketuk ayat › Putar). Ayat yang dibaca disorot; selama berbunyi tampil kapsul kecil jeda/hentikan */
- const au=$('#au'),pl={n:0,i:0,L:[]};
- const kapsul=()=>{const m=$('#qmini');if(!m)return;const k=pl.satu?pl.satu:pl.i-(pl.L.length-AYAT[pl.n-1])+1;m.hidden=!pl.L.length;$('#qmt').textContent=pl.L.length?NAMA[pl.n-1]+(k>0?' · ayat '+k:''):''};
- const tandai=()=>{$$('#ay .qplay').forEach(x=>x.classList.remove('qplay'));if(!pl.L.length||pl.n!=R.n)return;const k=pl.satu?pl.satu-1:pl.i-(pl.L.length-AYAT[pl.n-1]);const t=k>=0&&$('#a'+(k+1));t&&t.classList.add('qplay')};
- const putar=i=>{pl.i=i;au.src=pl.L[i];au.play().catch(()=>{});tandai();kapsul()};
- const henti=()=>{au.pause();au.removeAttribute('src');pl.L=[];pl.i=0;pl.satu=0;tandai();kapsul()};
- R.dari=k=>{pl.n=R.n;pl.satu=0;pl.L=qAudList(R.n);putar(k-1+(pl.L.length-AYAT[R.n-1]))};
+ /* Pemutar global (js/core/pemutar.js): tetap berbunyi saat pindah halaman / aplikasi di latar. Ayat yang dibaca disorot di sini */
+ const tandai=()=>{$$('#ay .qplay').forEach(x=>x.classList.remove('qplay'));if(!pmAktif()||PM.n!=R.n)return;const k=pmAyat(),t=k>0&&$('#a'+k);if(!t)return;t.classList.add('qplay');
+  /* Ikuti ayat yang dibaca bila pengguna tidak sedang menggulir sendiri */
+  if(!document.hidden&&Date.now()-(R.gulir||0)>4000){const r=t.getBoundingClientRect();if(r.top<80||r.bottom>innerHeight-120){if(!S.full&&R.p!=Math.floor((k-1)/QPER)){R.p=Math.floor((k-1)/QPER);draw()}($('#a'+k)||t).scrollIntoView({block:'center',behavior:'smooth'})}}};
+ R.tandai=tandai;
+ R.dari=k=>pmQuran(R.n,k);
  /* Putar hanya satu ayat (berhenti setelah ayat itu selesai) */
- R.satu=k=>{const L=qAudList(R.n);pl.n=R.n;pl.satu=k;pl.L=[L[k-1+(L.length-AYAT[R.n-1])]];putar(0)};
- $('#pp').onclick=()=>au.paused?au.play().catch(()=>{}):au.pause();$('#qstop').onclick=henti;
- au.onplay=()=>{$('#pp').innerHTML=ic('pause',18);$('#pp').ariaLabel='Jeda'};au.onpause=()=>{$('#pp').innerHTML=ic('play',18);$('#pp').ariaLabel='Lanjutkan'};
- au.onended=()=>{pl.i+1<pl.L.length?putar(pl.i+1):henti()};
- au.onerror=()=>{if(!pl.L.length||!au.getAttribute('src'))return;if(navigator.onLine===false&&pl.i+1<pl.L.length)return putar(pl.i+1);toast('Audio ayat ini belum tersimpan dan internet tidak tersedia');henti()};
- const hdr=()=>{$('#qt').textContent=R.n+'. '+NAMA[R.n-1];$('#qa').textContent=ARTI[R.n-1]+' · '+AYAT[R.n-1]+' ayat';segOn();henti()};
+ R.satu=k=>pmQuran(R.n,k,{satu:1});
+ /* Putar terus lintas surah sampai titik pilihan {n,a} */
+ R.terus=(k,akhir)=>pmQuran(R.n,k,{akhir});
+ ['touchmove','wheel'].forEach(t=>$('#view').addEventListener(t,()=>R.gulir=Date.now(),{passive:true}));
+ const hdr=()=>{$('#qt').textContent=R.n+'. '+NAMA[R.n-1];$('#qa').textContent=ARTI[R.n-1]+' · '+AYAT[R.n-1]+' ayat';segOn();tandai()};
  const nav=()=>{const np=pages(),first=R.p<=0,last=R.p>=np-1,lbl=S.full||np<2?'':`Ayat ${R.p*QPER+1}–${Math.min(R.A.length,(R.p+1)*QPER)} dari ${R.A.length}`;
   $('#snav').innerHTML=`<button class="snb" data-qn="-1" aria-label="${first?'Surah sebelumnya':'Halaman sebelumnya'}" ${first&&R.n<=1?'disabled':''}>‹</button><small class="mut">${lbl||'Geser ke samping untuk pindah surah'}</small><button class="snb" data-qn="1" aria-label="${last?'Surah berikutnya':'Halaman berikutnya'}" ${last&&R.n>=114?'disabled':''}>›</button>`};
  const draw=()=>{drawAy(el,R.A,R.n,S.full?null:R.p);nav();tandai();const t=R.tuju&&$('#a'+R.tuju);t&&t.classList.add('aytuju')};
@@ -182,15 +181,28 @@ P.bookmark=()=>({html:head('Penanda ayat')+`<p class="mut">Penanda menyimpan aya
 const bsmSplit=(A,n)=>{const w=A.map(x=>x.a);let b='';if(n!=1&&w[0].startsWith('بِسْمِ')){w[0]=w[0].split(' ').slice(4).join(' ');b=`<div class="bsm" style="font-size:${Math.round(S.fs*.85)}px">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>`}return {b,w}};
 /* Menu ayat: tandai, putar dari ayat ini, salin (Arab + terjemah + rujukan), bagikan */
 function ayMenu(n,k){const x=window.QR&&QR.A&&QR.A[k-1];if(!x)return;const key=n+':'+k,ditandai=()=>(S.bm||[]).includes(key),teks=`${x.a}\n\n${x.t}\n\n(QS. ${NAMA[n-1]} [${n}]: ${k})`;
- const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n-1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div>${S.full?`${S.lt&&x.l?`<p class="lt am-lt">${x.l}</p>`:''}${S.tr!==false?`<p class="mut tr am-tr">${x.t}</p>`:''}`:''}<div class="am-l"><button data-am="bm">${ic('star',20)}<span>${ditandai()?'Hapus tanda ayat':'Tandai ayat'}</span></button><button data-am="tb">${ic('book',20)}<span>${S.tbaca&&S.tbaca.n==n&&S.tbaca.a==k?'Sudah ditandai terakhir dibaca':'Tandai sebagai terakhir dibaca'}</span></button><button data-am="play">${ic('play',20)}<span>Putar ayat ini saja</span></button><button data-am="dari">${ic('play',20)}<span>Putar dari ayat ini sampai akhir surah</span></button><button data-am="share">${ic('share',20)}<span>Bagikan</span></button></div></div>`;document.body.append(e);
+ const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n-1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div>${S.full?`${S.lt&&x.l?`<p class="lt am-lt">${x.l}</p>`:''}${S.tr!==false?`<p class="mut tr am-tr">${x.t}</p>`:''}`:''}<div class="am-l"><button data-am="bm">${ic('star',20)}<span>${ditandai()?'Hapus tanda ayat':'Tandai ayat'}</span></button><button data-am="tb">${ic('book',20)}<span>${S.tbaca&&S.tbaca.n==n&&S.tbaca.a==k?'Sudah ditandai terakhir dibaca':'Tandai sebagai terakhir dibaca'}</span></button><button data-am="play">${ic('play',20)}<span>Putar ayat ini saja</span></button><button data-am="dari">${ic('play',20)}<span>Putar dari ayat ini sampai akhir surah</span></button><button data-am="terus">${ic('play',20)}<span>Putar terus sampai surah…</span></button><button data-am="share">${ic('share',20)}<span>Bagikan</span></button></div></div>`;document.body.append(e);
  const salin=()=>(navigator.clipboard?navigator.clipboard.writeText(teks):Promise.reject()).then(()=>toast('Ayat disalin'),()=>toast('Tidak bisa menyalin di perangkat ini'));
  e.onclick=ev=>{if(ev.target==e||ev.target.closest('[data-x]'))return e.remove();const b=ev.target.closest('[data-am]');if(!b)return;const a=b.dataset.am;e.remove();
   if(a=='bm'){S.bm=S.bm||[];const i=S.bm.indexOf(key);i<0?S.bm.unshift(key):S.bm.splice(i,1);save();$$(`[data-bm="${key}"]`).forEach(s=>s.classList.toggle('on',i<0));toast(i<0?'Ayat ditandai':'Penanda dihapus')}
   else if(a=='play')window.QR&&QR.satu(k);
   else if(a=='dari')window.QR&&QR.dari(k);
+  else if(a=='terus')pmTerusLembar(n,k);
   else if(a=='tb'){S.tbaca={n,a:k,t:Date.now()};save();toast(`${NAMA[n-1]} ayat ${k} ditandai sebagai terakhir dibaca`)}
   else if(a=='copy')salin();
   else if(a=='share'){window.ANDROID?andPanggil('bagikan',teks):navigator.share?navigator.share({text:teks}).catch(()=>{}):salin()}}}
 /* Gambar ayat. Mode mushaf: semua ayat bersambung (bismillah di luar blok bergaris). Mode kartu: halaman p (QPER ayat); p null = semua. */
 const drawAy=(el,A,n,p)=>{const {b,w}=bsmSplit(A,n);if(S.full){el.innerHTML=`${b}<div class="mushaf" style="font-size:${S.fs}px">${w.map((t,i)=>`<span class="ayt" id="a${i+1}">${t}<span class="mk">${(i+1).toLocaleString('ar-EG')}</span></span>`).join(' ')}</div>`;return}
  const s=(p||0)*QPER,e=p==null?A.length:s+QPER;el.innerHTML=(s?'':b)+A.slice(s,e).map((x,j)=>{const i=s+j;return `<div class="ay" id="a${i+1}"><div class="ah"><span class="n">${i+1}</span><button class="bm ${(S.bm||[]).includes(n+':'+(i+1))?'on':''}" data-bm="${n}:${i+1}" aria-label="Penanda ayat">${ic('star',18)}</button></div><div class="ar" style="font-size:${S.fs}px">${w[i]}</div><p class="lt">${x.l}</p><p class="mut tr" style="margin:6px 0 0">${x.t}</p></div>`}).join('')};
+
+/* Lembar "Putar terus sampai…": dari ayat ini terus lintas surah sampai akhir surah pilihan, akhir juz, atau akhir Al-Qur'an */
+function pmTerusLembar(n,k){const juzKe=()=>{if(typeof JUZ=='undefined')return 0;let j=0;JUZ.forEach((x,i)=>{if(x[0]<n||(x[0]==n&&x[1]<=k))j=i});return j};
+ const ji=juzKe(),akhirJuz=ji+1<JUZ.length?(()=>{const [sn,sa]=JUZ[ji+1];return sa>1?{n:sn,a:sa-1}:{n:sn-1,a:AYAT[sn-2]}})():{n:114,a:6};
+ const pil=S.pmAkhir&&S.pmAkhir>=n?S.pmAkhir:Math.min(114,n+1);
+ const e=document.createElement('div');e.className='back-d';e.innerHTML=`<div class="sheet pmlb" role="dialog" aria-label="Putar terus"><b>Putar terus dari ${esc(NAMA[n-1])} ayat ${k}</b><p class="mut">Murottal berlanjut otomatis ke surah berikutnya, tetap berbunyi walau layar mati atau aplikasi ditutup ke latar.</p>
+  <div class="pmc"><button class="sb" data-pma="${n+1<=114?n+1:114}">Sampai surah berikutnya</button><button class="sb" data-pmj>Sampai akhir juz ${ji+1}</button><button class="sb" data-pma="114">Sampai akhir Al-Qur'an</button></div>
+  <label class="pml">Atau pilih sampai surah<select class="in" id="pmsel">${NAMA.map((x,i)=>i+1>=n?`<option value="${i+1}"${i+1==pil?' selected':''}>${i+1}. ${esc(x)}</option>`:'').join('')}</select></label>
+  <div class="act"><button class="btn s" data-x style="flex:1">Batal</button><button class="btn" data-pmy style="flex:1">${ic('play',16)} Putar</button></div></div>`;
+ document.body.append(e);const mulai=akhir=>{e.remove();S.pmAkhir=akhir.n;save();pmQuran(n,k,{akhir});toast('Diputar sampai '+NAMA[akhir.n-1]+(akhir.a!=AYAT[akhir.n-1]?' ayat '+akhir.a:''))};
+ e.onclick=x=>{if(x.target==e||x.target.closest('[data-x]'))return e.remove();const a=x.target.closest('[data-pma]');if(a){const m=+a.dataset.pma;return mulai({n:m,a:AYAT[m-1]})}
+  if(x.target.closest('[data-pmj]'))return mulai(akhirJuz);if(x.target.closest('[data-pmy]')){const m=+$('#pmsel').value;mulai({n:m,a:AYAT[m-1]})}}}

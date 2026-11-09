@@ -225,14 +225,19 @@ P.ai=()=>({html:`<div class="bar aibar"><span class="aiav">${ic('spark',20)}</sp
    try{sr.start();buzz(25)}catch(x){R=null;tampilan(0)}};
   /* Gestur tombol mikrofon */
   let g=null;
-  kb.addEventListener('pointerdown',e=>{if(q.value.trim()||!AIMIC||R)return;e.preventDefault();if(!AIREK){srMulai();return}
+  /* Petunjuk di atas tombol mikrofon: ketuk sebentar = rekaman terkunci; beri tahu cara tahan / geser ke atas */
+  const petunjuk=t=>{let h=$('#aimh');if(!h){h=document.createElement('div');h.id='aimh';h.className='aimh';kb.parentElement.append(h)}h.innerHTML=t;h.hidden=false;clearTimeout(h.t);h.t=setTimeout(()=>h.hidden=true,4500)};
+  kb.addEventListener('pointerdown',e=>{if(q.value.trim()||!AIMIC||R)return;e.preventDefault();
+   /* Suara AI yang sedang membacakan jawaban langsung berhenti saat mikrofon ditekan */
+   if(AITTS||(window.speechSynthesis&&speechSynthesis.speaking))aiStop();
+   if(!AIREK){srMulai();return}
    try{kb.setPointerCapture(e.pointerId)}catch(x){}g={x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};rekMulai('tahan')});
   kb.addEventListener('pointermove',e=>{if(!g||!R||R.mode!='tahan')return;const dx=Math.min(0,e.clientX-g.x),dy=Math.min(0,e.clientY-g.y);
    kb.style.transform=`translate(${Math.max(dx,-60)}px,${Math.max(dy,-120)}px) scale(1.15)`;rc.style.opacity=1+dx/260;lk.classList.toggle('dekat',dy<-70);
    /* Geser ke atas sejauh kira-kira 1,5 cm (sampai ke ikon gembok) untuk mengunci rekaman */
    if(dy<-120){g=null;rekKunci()}else if(dx<-110){g=null;rekBatal('Rekaman dibatalkan')}});
   const lepas=e=>{if(!g)return;const pendek=Date.now()-g.t<350;g=null;kb.style.transform='';if(!R||R.mode!='tahan')return;
-   if(e.type=='pointercancel'||pendek)rekKunci();else rekKirim()};
+   if(e.type=='pointercancel'||pendek){rekKunci();if(pendek&&(S.aimh||0)<6){S.aimh=(S.aimh||0)+1;save();petunjuk(`${ic('mic',14)}<span><b>Merekam.</b> Ketuk Kirim bila selesai. Lain kali bisa <b>tahan</b> tombol mikrofon untuk bicara lalu lepas, atau tahan lalu <b>geser ke atas</b> ke gembok untuk merekam lebih lama.</span>`)}}else rekKirim()};
   kb.addEventListener('pointerup',lepas);kb.addEventListener('pointercancel',lepas);
   kb.addEventListener('click',e=>{if(!q.value.trim()&&AIMIC)e.preventDefault()});
   kb.addEventListener('contextmenu',e=>e.preventDefault());
