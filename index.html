@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<script>/* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */try{var z=JSON.parse(localStorage.fz||'{}'),t=z.theme=='blue'?'blue':z.theme=='dark'||(z.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.background={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t]}catch(e){}</script>
+<script>/* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */try{var z=JSON.parse(localStorage.fz||'{}'),t=z.theme=='blue'?'blue':z.theme=='dark'||(z.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.background={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t];try{var w={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t];window.FadzAndroid&&FadzAndroid.warnaBar&&FadzAndroid.warnaBar(w,w)}catch(e){}}catch(e){}</script>
 <style>/* Layar pembuka: tampil seketika selagi skrip aplikasi dimuat (menggantikan layar gelap kosong), ditutup router.js */
 #pembuka{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;text-align:center;background:#fff;color:#24584a;transition:opacity .45s ease}
 [data-theme=dark] #pembuka{background:#121413;color:#cfe0d7}[data-theme=blue] #pembuka{background:#eef4fb;color:#1d4f7a}

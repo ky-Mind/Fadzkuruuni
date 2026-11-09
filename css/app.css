@@ -1844,3 +1844,28 @@ button.jnk{width:100%;padding:0;border:0;background:none;font:inherit;font-size:
 .kzkb,#kzs{touch-action:pan-y}
 .kzkb.kzum2,#kzs.kzum2{touch-action:none;overflow:hidden}
 .kzkb img,#kzs video{will-change:transform}
+
+/* Tombol Kitab berlabel di panggung, petunjuk letaknya, ajakan kitab di bawah video, panel kitab dikecilkan */
+.kzbar .kzfk{width:auto;gap:6px;padding:0 12px;background:#1f7a55;font:inherit;font-size:13px;font-weight:700}
+.kzbar .kzfk:hover{background:#18664a}.kzbar .kzfk.on{background:rgba(255,255,255,.92);color:#14513a}
+@media (max-width:360px){.kzbar .kzfk span{display:none}.kzbar .kzfk{padding:0;width:36px}}
+.kzhint{position:absolute;top:52px;right:52px;z-index:4;padding:7px 11px;border-radius:10px;background:#fff;color:#14513a;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:kzhint 1.2s ease-in-out infinite alternate;pointer-events:none}
+.kzhint::before{content:"";position:absolute;top:-6px;right:22px;border:6px solid transparent;border-top:0;border-bottom-color:#fff}
+@keyframes kzhint{to{transform:translateY(4px)}}
+.kzkaj{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;padding:12px 14px;border:1.5px dashed var(--g);border-radius:14px;background:color-mix(in srgb,var(--g) 9%,var(--card));color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.kzkaj>.ic:first-child{flex:none;color:var(--g)}.kzkaj span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.kzkaj small{color:var(--mut);font-size:12.5px}
+.kzkt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:2px 4px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.kzkt1{display:flex;align-items:center;gap:6px;max-width:100%}.kzkt1 b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.kzkt1 .ic{flex:none;color:var(--g)}
+.kzkhal{color:var(--mut);font-size:12px}
+.kzklain{display:flex;justify-content:center;padding:0 8px 8px}
+.kzk.kecil .kzkb,.kzk.kecil .kzkf,.kzk.kecil .kzklain{display:none}
+.kzk.kecil .kzkh{border-bottom:0}
+.kz:fullscreen .kzkhal{color:#aab4ae}.kz:fullscreen .kzkt1 .ic{color:#7fd1a8}
+/* Layar penuh + kitab dikecilkan: video memenuhi layar, kitab jadi kartu kecil melayang di pojok */
+.kz:fullscreen{position:relative}
+.kz:fullscreen .kzk.kecil{position:absolute;right:12px;bottom:12px;z-index:5;flex:none;width:min(340px,calc(100% - 24px));border:1px solid #2c312e;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+/* Ajakan tutorial kelas */
+.ktut{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--fill);margin-bottom:10px}.ktut>.ic{flex:none;color:var(--g)}
+.ktuts{text-align:center}.ktuts .ktuti{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:var(--g);color:var(--on)}
+.ktuts .ktuti .ic{color:var(--on)}.ktuts b{display:block;font-size:18px}.ktuts p{margin:6px 0 16px}.ktuts .act .btn{flex:1}
+.klkt{display:flex;align-items:center;gap:6px;margin:6px 0 2px;font-size:13.5px;color:var(--ink)}.klkt .ic{color:var(--g)}
