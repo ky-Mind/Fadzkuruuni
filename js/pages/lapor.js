@@ -144,7 +144,7 @@ P.lapor = () => {
 <label>Atas nama</label><div id="rakun"></div>
 <label>Nomor WhatsApp (opsional)</label><input class="in" id="rc" maxlength="40" inputmode="tel" placeholder="Bila ingin dihubungi lewat WhatsApp" value="${esc(D.kontak || '')}">
 <p class="mut" style="font-size:12px;margin:0 0 4px">Versi aplikasi dan jenis perangkat ikut terkirim untuk membantu mencari penyebab bug.</p>
-<button class="btn" id="rk" style="width:100%;margin-top:8px">Kirim laporan</button><p style="text-align:center;margin:12px 0 0"><a class="mut" style="font-size:13px;text-decoration:underline" href="#" id="rwa">Atau kirim lewat WhatsApp</a></p><p class="mut tkred">Laporan diterima tim pengembang <b>KyMind</b></p>`,
+<button class="btn" id="rk" style="width:100%;margin-top:8px">Kirim laporan</button><p style="text-align:center;margin:12px 0 0"><a class="mut" style="font-size:13px;text-decoration:underline" href="#" id="rwa">Atau kirim lewat WhatsApp</a></p><p class="mut tkred">Laporan diterima tim pengembang <a class="kym" href="kymind/"><b>KyMind</b></a></p>`,
     init() {
       let J = D.J || 'Bug',
         F = D.F || [],

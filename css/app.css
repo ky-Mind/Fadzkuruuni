@@ -5175,6 +5175,11 @@ section.tb {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
+/* Teks "KyMind" bisa diketuk: membuka halaman KyMind (kymind/) layar penuh, tampilannya tetap seperti teks */
+a.kym {
+  color: inherit;
+  text-decoration: none;
+}
 .tlb {
   display: flex;
   align-items: center;
