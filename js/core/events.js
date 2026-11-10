@@ -415,23 +415,21 @@ function vHtml(h) {
 }
 /* Jangan bajak geseran di isian, penggeser, lembar, kitab, kalender, carousel, atau daftar yang bisa digeser samping */
 function gsHalang(t) {
-  /* Deretan tombol yang bisa digeser samping */
-  {
-    const sc = t.closest('.act,.kla');
-    if (sc && sc.scrollWidth > sc.clientWidth + 1) return true;
-  }
   /* Pratinjau admin: elemen yang bisa diatur diseret, bukan menggeser halaman */
   if (typeof TPRATINJAU != 'undefined' && TPRATINJAU && t.closest('[data-ta]')) return true;
-  if (
-    t.closest(
-      'input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.car,.tsf'
-    )
-  )
-    return true;
-  for (let e = t; e && e.id != 'view'; e = e.parentElement)
-    if (e.scrollWidth > e.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(e).overflowX)) return true;
-  return false;
+  return !!t.closest(
+    'input,textarea,select,[contenteditable],[data-noswipe],.sheet,.back-d,#ftb,#ftp,.tdlap,.tdbar,.kmp,.kp,.cal,.tsf,.melayang'
+  );
 }
+/* Wadah yang bisa digulir ke samping di bawah jari (carousel, deretan tombol, tabel lebar). Wadah itu digulir lebih
+   dulu; begitu mentok di ujungnya, geseran ke arah yang sama memindah halaman/tab (dulu seluruh area wadah
+   menolak geser halaman, mis. kartu Kelas online, sehingga halaman terasa macet) */
+function gsWadah(t) {
+  for (let e = t; e && e.id != 'view'; e = e.parentElement)
+    if (e.scrollWidth > e.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(e).overflowX)) return e;
+  return null;
+}
+const gsMasihGulir = (w, arah) => w && (arah > 0 ? w.scrollLeft + w.clientWidth < w.scrollWidth - 1 : w.scrollLeft > 1);
 /* Isi tab sebelah: tab itu dipilih sebentar untuk mengambil isinya, lalu tab asli dan isinya (simpul yang sama,
    lengkap dengan isian) dikembalikan */
 let GSTAB = 0;
@@ -618,8 +616,16 @@ function gsTabHtml(nb) {
         peek.style.filter = `brightness(${0.8 + 0.2 * Math.min(1, px / w)})`;
       }
     } else if (peek) {
-      peek.style.transition = g.style.transition;
+      peek.style.transition = g.style.transition ? `${g.style.transition}` : 'none';
       peek.style.transform = `translate3d(${px + dir * w}px,0,0)`;
+      /* Batas antar halaman jelas (terutama di tema gelap, dua halaman berlatar sama terlihat menyatu seperti
+         halaman rusak): halaman yang datang diberi bayangan di tepinya, halaman yang pergi sedikit meredup.
+         Hanya bayangan statis dan opacity (murah untuk GPU HP kelas bawah). */
+      if (mode == 'hal') {
+        peek.style.boxShadow = `${dir > 0 ? -1 : 1}px 0 0 var(--line), ${dir > 0 ? -16 : 16}px 0 32px rgba(0,0,0,.42)`;
+        v.style.transition = tr ? `transform ${tr},opacity ${tr}` : 'none';
+        v.style.opacity = String(1 - 0.35 * Math.min(1, Math.abs(px) / w));
+      }
     }
   };
   const pulih = () => {
@@ -632,7 +638,7 @@ function gsTabHtml(nb) {
         g.classList.remove('gsj');
       }
     });
-    v.style.position = v.style.zIndex = v.style.background = v.style.overflowY = '';
+    v.style.position = v.style.zIndex = v.style.background = v.style.overflowY = v.style.opacity = '';
     buang();
     sibuk = false;
   };
@@ -698,6 +704,7 @@ function gsTabHtml(nb) {
   /* Halaman jadi lapisan GPU sendiri hanya selama digeser ke samping (cukup dipindah, tidak digambar ulang tiap frame).
     Jangan dipasang sejak disentuh: will-change:transform membuat elemen position:fixed di dalam #view (mis. pemutar audio
     Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
+  let gsW = null;
   const gsLapis = () => v.classList.add('gsj');
   v.addEventListener(
     'touchstart',
@@ -713,6 +720,7 @@ function gsTabHtml(nb) {
       if (sibuk || !gsHP() || e.touches.length != 1 || document.body.classList.contains('kfull') || gsHalang(e.target))
         return;
       const t = e.touches[0];
+      gsW = gsWadah(e.target);
       sx = t.clientX;
       sy = t.clientY;
       t0 = Date.now();
@@ -759,6 +767,8 @@ function gsTabHtml(nb) {
           }
         } else {
           lock = Math.abs(x) > Math.abs(y) * 1.6 && !(window.ptrTarik && ptrTarik()) ? 'h' : 'v';
+          /* Wadah samping di bawah jari masih bisa digulir ke arah ini: wadahnya yang bergulir, halaman diam */
+          if (lock == 'h' && gsMasihGulir(gsW, x < 0 ? 1 : -1)) lock = 'v';
           if (lock == 'h') {
             /* Halaman bertab: geser di isi tab = pindah tab; geser di bagian atas (judul, cari, tombol tab) = pindah
                halaman (mis. Al-Qur'an ↔ Beranda / Fadz AI) */
@@ -772,6 +782,10 @@ function gsTabHtml(nb) {
             el = mode == 'tab' ? ti : null;
             v.style.position = 'relative';
             v.style.overflowY = 'hidden';
+            /* Halaman jadi tumpukan tersendiri (z-index 0): isi yang punya z-index sendiri (mis. sambutan & kolom tanya Fadz AI)
+               tidak bisa muncul di atas pratinjau halaman sebelah (z-index 1). Terlihat di HP asli sebagai isi dua halaman
+               bertumpuk saat digeser. */
+            if (mode == 'hal') v.style.zIndex = '0';
             gsLapis();
             if (el) el.classList.add('gsj');
             pilihSebelah(x < 0 ? 1 : -1);

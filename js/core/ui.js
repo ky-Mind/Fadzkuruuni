@@ -220,3 +220,90 @@ function lebarIsi() {
   atur();
 }
 document.readyState == 'loading' ? document.addEventListener('DOMContentLoaded', lebarIsi) : lebarIsi();
+
+/* ---------- Bilah melayang yang bisa digeser (seperti tombol tasbih melayang) ----------
+   Dipakai bilah Mode admin (#tadm) dan pil "Berbagi layar" Kelas online (#klmini).
+   Tahan lalu geser ke mana saja; ketukan biasa tetap menekan tombolnya. Posisi diingat per perangkat di S[kunci]
+   (pojok kiri atas, koordinat layar) dan selalu dijaga di dalam layar. Memperhitungkan zoom tampilan HP (zmKini). */
+function seretMelayang(el, kunci) {
+  if (!el || el.dataset.seret) return;
+  el.dataset.seret = '1';
+  el.classList.add('melayang');
+  const taruh = (x, y) => {
+    const r = el.getBoundingClientRect(),
+      z = zmKini();
+    x = Math.min(Math.max(4, x), innerWidth - r.width - 4);
+    y = Math.min(Math.max(4, y), innerHeight - r.height - 4);
+    const l = el.offsetLeft + (x - r.left) / z,
+      t = el.offsetTop + (y - r.top) / z;
+    Object.assign(el.style, { left: l + 'px', top: t + 'px', right: 'auto', bottom: 'auto', transform: 'none' });
+  };
+  const pulihkan = () => {
+    const p = S[kunci];
+    if (p && el.isConnected && !el.hidden) taruh(p.x, p.y);
+  };
+  requestAnimationFrame(pulihkan);
+  setTimeout(pulihkan, 60);
+  addEventListener('resize', pulihkan);
+  let dg = null,
+    raf = 0;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.button > 0) return;
+    dg = {
+      id: e.pointerId,
+      sx: e.clientX,
+      sy: e.clientY,
+      x: e.clientX,
+      y: e.clientY,
+      r: el.getBoundingClientRect(),
+      moved: false,
+    };
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (!dg || dg.id !== e.pointerId) return;
+    dg.x = e.clientX;
+    dg.y = e.clientY;
+    if (!dg.moved) {
+      if (Math.hypot(dg.x - dg.sx, dg.y - dg.sy) < 8) return;
+      dg.moved = true;
+      el.classList.add('seret');
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch (x) {}
+    }
+    e.preventDefault();
+    if (!raf)
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (dg && dg.moved) taruh(dg.r.left + dg.x - dg.sx, dg.r.top + dg.y - dg.sy);
+      });
+  });
+  const lepas = (e) => {
+    if (!dg || dg.id !== e.pointerId) return;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    const w = dg;
+    dg = null;
+    el.classList.remove('seret');
+    if (!w.moved) return;
+    taruh(w.r.left + w.x - w.sx, w.r.top + w.y - w.sy);
+    const r = el.getBoundingClientRect();
+    S[kunci] = { x: Math.round(r.left), y: Math.round(r.top) };
+    save();
+    /* Ketukan yang menutup geseran tidak ikut menekan tombol di bawah jari */
+    el.dataset.baruSeret = '1';
+    setTimeout(() => delete el.dataset.baruSeret, 350);
+  };
+  el.addEventListener('pointerup', lepas);
+  el.addEventListener('pointercancel', lepas);
+  el.addEventListener(
+    'click',
+    (e) => {
+      if (el.dataset.baruSeret) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    },
+    true
+  );
+}

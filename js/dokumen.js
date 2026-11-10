@@ -61,3 +61,30 @@ document.querySelectorAll('[data-kembali]').forEach(function (a) {
     if (sel && sel.rangeCount && !sel.isCollapsed) sel.removeAllRanges();
   });
 })();
+
+/* Di aplikasi Android: bilah status & navigasi sewarna latar halaman dokumen (juga setelah tema diganti) */
+(function () {
+  var hex = function (c) {
+    var m = String(c).match(/\d+/g);
+    return m && m.length >= 3
+      ? '#' +
+          m
+            .slice(0, 3)
+            .map(function (x) {
+              return ('0' + (+x).toString(16)).slice(-2);
+            })
+            .join('')
+      : '';
+  };
+  var terap = function () {
+    try {
+      var w = hex(getComputedStyle(document.body).backgroundColor);
+      if (w && window.FadzAndroid && FadzAndroid.warnaBar) FadzAndroid.warnaBar(w, w);
+    } catch (e) {}
+  };
+  terap();
+  addEventListener('load', terap);
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('#tema')) setTimeout(terap, 50);
+  });
+})();

@@ -1,6 +1,11 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.65': [
+    'Geser halaman lebih jelas dan mulus di HP: halaman yang datang punya garis & bayangan di tepinya, halaman yang pergi sedikit meredup, jadi dua halaman tidak lagi terlihat menyatu',
+    'Deretan kartu dan tombol yang bisa digeser (mis. kartu di Beranda, tombol di kartu Kelas online) digulir dulu sampai ujung, lalu geseran berikutnya pindah halaman',
+    'Pil "Berbagi layar" saat kelas online bisa digeser ke mana saja agar tidak menutupi isi',
+  ],
   '2.9.64': [
     'Ajakan unduh aplikasi (web) dan tawaran pembaruan (aplikasi Android) hanya bisa ditutup lewat tombolnya: Nanti saja atau Unduh/Perbarui',
     'Geser halaman lebih mulus: halaman yang digeser sama persis dengan halaman aslinya saat bertukar, termasuk di Maulid, jeda sholawat, dan mode Mushaf',
@@ -21,7 +26,6 @@ const YANG_BARU = {
     'Lokasi otomatis: lokasi mengikuti GPS begitu aplikasi dibuka dan saat berpindah tempat; jadwal salat, kiblat, dan alarm adzan langsung ikut',
     'Ukuran tampilan bawaan disesuaikan dengan layar HP sejak pertama dipasang; mengganti ukuran tidak lagi membuat tulisan melompat atau tersendat',
     'Kebijakan Privasi dan Penghapusan Data tidak bisa disalin',
-    'Dashboard admin: geser kiri-kanan untuk pindah tab',
   ],
   '2.9.61': [
     'Murottal bisa diputar terus lintas surah: ketuk ayat › "Putar terus sampai surah…", lalu pilih sampai surah berikutnya, akhir juz, akhir Al-Qur\'an, atau surah pilihan',
@@ -147,9 +151,7 @@ const YANG_BARU = {
   '2.9.32': [
     'Semua video tutorial (Pengaturan › Tentang & Bantuan › Video tutorial) kini bersuara: tiap langkah dibacakan, versi HP dan desktop',
   ],
-  '2.9.31': [
-    'Admin kini punya kategori akses: semua akses, pengajar Kelas online, laporan & donasi, tampilan aplikasi, atau peta & statistik',
-  ],
+  '2.9.31': [],
   '2.9.30': [
     'Pembaruan aplikasi Android bisa langsung diunduh & dipasang dari dalam aplikasi (mulai versi 2.6.7), lengkap dengan persentase unduhan',
     'Notifikasi "Pembaruan Fadzkuruuni tersedia" muncul di HP; diketuk langsung membuka layar pembaruan',
