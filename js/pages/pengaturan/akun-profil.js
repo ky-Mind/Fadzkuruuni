@@ -19,37 +19,113 @@ window.avatarHtml = (px) => {
     ? `<img class="ava" src="${esc(f)}" referrerpolicy="no-referrer" alt="Foto profil" style="width:${px}px;height:${px}px">`
     : `<span class="ava avi" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.42)}px">${h ? esc(h) : ic('user', Math.round(px * 0.5))}</span>`;
 };
-const fotoKecil = (f) =>
+/* Foto calon dibaca dan diperkecil (sisi terpanjang maks. 900 px) agar ringan saat diatur ukuran & posisinya */
+const fotoBaca = (src) =>
   new Promise((ok, no) => {
-    const u = URL.createObjectURL(f),
+    const u = typeof src == 'string' ? src : URL.createObjectURL(src),
       im = new Image();
     im.onload = () => {
-      const s = Math.min(im.width, im.height),
+      const k = Math.min(1, 900 / Math.max(im.width, im.height)),
         c = document.createElement('canvas');
-      c.width = c.height = 192;
-      c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 192, 192);
-      URL.revokeObjectURL(u);
-      ok(c.toDataURL('image/jpeg', 0.82));
+      c.width = Math.round(im.width * k);
+      c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      if (typeof src != 'string') URL.revokeObjectURL(u);
+      ok({ u: c.toDataURL('image/jpeg', 0.9), w: c.width, h: c.height, z: 1, x: 0, y: 0 });
     };
     im.onerror = () => {
-      URL.revokeObjectURL(u);
+      if (typeof src != 'string') URL.revokeObjectURL(u);
       no();
     };
     im.src = u;
   });
+/* Atur foto: lingkaran pratinjau FPK px; foto bisa diperbesar (penggeser) dan digeser (seret) di dalamnya */
+const FPK = 168;
 let FOTOCALON = null;
+const fpDasar = (c) => FPK / Math.min(c.w, c.h);
+const fpBatas = (c) => {
+  const b = fpDasar(c) * c.z,
+    mx = (c.w * b - FPK) / 2,
+    my = (c.h * b - FPK) / 2;
+  c.x = Math.max(-mx, Math.min(mx, c.x));
+  c.y = Math.max(-my, Math.min(my, c.y));
+};
+const fpGaya = (c) => {
+  const b = fpDasar(c) * c.z;
+  return `width:${c.w * b}px;height:${c.h * b}px;transform:translate(calc(-50% + ${c.x}px),calc(-50% + ${c.y}px))`;
+};
+const fpGambar = () => {
+  const im = $('#fpc img');
+  if (im && FOTOCALON) im.style.cssText = fpGaya(FOTOCALON);
+};
+/* Hasil akhir: persegi 192 px JPEG sesuai yang terlihat di lingkaran */
+const fpHasil = (c) =>
+  new Promise((ok, no) => {
+    const im = new Image();
+    im.onload = () => {
+      const r = 192 / FPK,
+        b = fpDasar(c) * c.z,
+        W = c.w * b,
+        H = c.h * b,
+        cv = document.createElement('canvas');
+      cv.width = cv.height = 192;
+      const g = cv.getContext('2d');
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, 192, 192);
+      g.drawImage(im, (FPK / 2 + c.x - W / 2) * r, (FPK / 2 + c.y - H / 2) * r, W * r, H * r);
+      ok(cv.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = no;
+    im.src = c.u;
+  });
 document.addEventListener('change', async (x) => {
   if (x.target.id != 'fpi' || !x.target.files[0]) return;
   try {
-    FOTOCALON = await fotoKecil(x.target.files[0]);
+    FOTOCALON = await fotoBaca(x.target.files[0]);
     route();
   } catch (e) {
     toast('Foto tidak bisa dibaca. Coba foto lain.');
   }
 });
-document.addEventListener('click', (x) => {
+document.addEventListener('input', (x) => {
+  if (x.target.id != 'fpz' || !FOTOCALON) return;
+  FOTOCALON.z = parseFloat(x.target.value) || 1;
+  fpBatas(FOTOCALON);
+  fpGambar();
+});
+/* Seret foto di dalam lingkaran (jari atau tetikus) */
+document.addEventListener('pointerdown', (x) => {
+  const el = x.target.closest('#fpc');
+  if (!el || !FOTOCALON) return;
+  x.preventDefault();
+  const c = FOTOCALON,
+    k = el.getBoundingClientRect().width / el.offsetWidth || 1,
+    sx = x.clientX,
+    sy = x.clientY,
+    ox = c.x,
+    oy = c.y;
+  const gerak = (e) => {
+    c.x = ox + (e.clientX - sx) / k;
+    c.y = oy + (e.clientY - sy) / k;
+    fpBatas(c);
+    fpGambar();
+  };
+  const lepas = () => {
+    removeEventListener('pointermove', gerak);
+    removeEventListener('pointerup', lepas);
+    removeEventListener('pointercancel', lepas);
+  };
+  addEventListener('pointermove', gerak);
+  addEventListener('pointerup', lepas);
+  addEventListener('pointercancel', lepas);
+});
+document.addEventListener('click', async (x) => {
   if (x.target.closest('[data-fsimpan]') && FOTOCALON) {
-    S.foto = FOTOCALON;
+    try {
+      S.foto = await fpHasil(FOTOCALON);
+    } catch (e) {
+      return toast('Foto tidak bisa disimpan. Coba foto lain.');
+    }
     FOTOCALON = null;
     save();
     tataNav();
@@ -58,6 +134,13 @@ document.addEventListener('click', (x) => {
   } else if (x.target.closest('[data-fbatal]')) {
     FOTOCALON = null;
     route();
+  } else if (x.target.closest('[data-fatur]') && S.foto) {
+    try {
+      FOTOCALON = await fotoBaca(S.foto);
+      route();
+    } catch (e) {
+      toast('Foto tidak bisa dibuka');
+    }
   }
 });
 document.addEventListener('click', (x) => {
@@ -70,8 +153,11 @@ document.addEventListener('click', (x) => {
 });
 const FOTOBOX = () => {
   const c = FOTOCALON;
-  return `<h2>Foto profil</h2><div class="card"><div class="fpb">${c ? `<img class="ava" src="${c}" alt="Pratinjau foto profil" style="width:76px;height:76px">` : avatarHtml(76)}<div class="fpt">${c ? '<b>Pratinjau foto baru</b><small class="mut">Tekan Simpan foto agar dipakai di profil.</small>' : `<small class="mut">${S.foto ? 'Foto ini tampil di Pengaturan dan menu bawah.' : 'Belum ada foto. Pilih foto dari galeri HP.'}</small>`}</div></div>
- <div class="act">${c ? '<button class="sb pri" data-fsimpan>Simpan foto</button><button class="sb" data-fbatal>Batal</button>' : `<label class="sb pri">${ic('camera', 16)} ${S.foto ? 'Ganti foto' : 'Pilih foto'}<input type="file" accept="image/*" id="fpi" hidden></label>${S.foto ? '<button class="sb" data-fdel>Hapus foto</button>' : ''}`}</div></div>`;
+  if (c)
+    return `<h2>Foto profil</h2><div class="card"><div class="fped"><div class="fpc" id="fpc" data-noswipe style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"></div><small class="mut">Seret foto untuk mengatur posisi, geser penggeser untuk mengatur ukuran.</small><label class="fpzl" data-noswipe>${ic('search', 16)}<input type="range" id="fpz" min="1" max="4" step="0.01" value="${c.z}" aria-label="Ukuran foto"></label></div>
+ <div class="act"><button class="sb pri" data-fsimpan>Simpan foto</button><button class="sb" data-fbatal>Batal</button></div></div>`;
+  return `<h2>Foto profil</h2><div class="card"><div class="fpb">${avatarHtml(76)}<div class="fpt"><small class="mut">${S.foto ? 'Foto ini tampil di Pengaturan dan menu bawah.' : 'Belum ada foto. Pilih foto dari galeri HP.'}</small></div></div>
+ <div class="act"><label class="sb pri">${ic('camera', 16)} ${S.foto ? 'Ganti foto' : 'Pilih foto'}<input type="file" accept="image/*" id="fpi" hidden></label>${S.foto ? '<button class="sb" data-fatur>Atur ukuran</button><button class="sb" data-fdel>Hapus foto</button>' : ''}</div></div>`;
 };
 const NAMEBOX = () =>
   FOTOBOX() +

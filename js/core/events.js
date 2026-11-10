@@ -322,7 +322,7 @@ document.addEventListener('click', (e) => {
 function tujuanKembali() {
   const h = location.hash || '#/',
     [r, b] = h.slice(2).split('/');
-  if (tataNavR().includes(r) && !b) return '#/';
+  if (tataNavR().includes(r) && !b) return window.DARIMENU === r ? '#/menu' : '#/';
   const asal = RIW[RIW.length - 2];
   if (asal && asal != h) return asal;
   const bk = $('#view .bk')?.getAttribute('href');
@@ -708,7 +708,8 @@ function gsTabHtml(nb) {
   /* Halaman jadi lapisan GPU sendiri hanya selama digeser ke samping (cukup dipindah, tidak digambar ulang tiap frame).
     Jangan dipasang sejak disentuh: will-change:transform membuat elemen position:fixed di dalam #view (mis. pemutar audio
     Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
-  let gsW = null;
+  let gsW = null,
+    tepi = false;
   const gsLapis = () => v.classList.add('gsj');
   v.addEventListener(
     'touchstart',
@@ -740,7 +741,11 @@ function gsTabHtml(nb) {
       /* Tepi kiri di subhalaman: geser kembali.
          Halaman surah punya geser sendiri di seluruh halaman (halaman kartu / surah sebelah, lihat qReader di
          js/pages/quran.js), jadi geser halaman tidak dipakai di sana. */
-      if (t.clientX < 24 && document.body.classList.contains('subhal')) mode = 'back';
+      /* Halaman menu bawah yang dibuka dari Semua Menu (mis. Al-Qur'an, Fadz AI): geser di mana saja = kembali ke Semua
+         Menu, bukan ke halaman sebelah (Beranda / Fadz AI) */
+      const [ra, rb] = (location.hash || '#/').slice(2).split('/');
+      tepi = t.clientX < 24;
+      if ((tepi && document.body.classList.contains('subhal')) || (window.DARIMENU === ra && !rb)) mode = 'back';
       else if (v.querySelector(':scope > #ay')) sx = null;
     },
     { passive: true }
@@ -763,7 +768,7 @@ function gsTabHtml(nb) {
       if (lock === null) {
         if (Math.abs(x) < 12 && Math.abs(y) < 12) return;
         if (mode == 'back') {
-          lock = x > 0 && x > Math.abs(y) ? 'h' : 'v';
+          lock = x > 0 && x > Math.abs(y) * (tepi ? 1 : 1.6) ? 'h' : 'v';
           if (lock == 'h') {
             gsLapis();
             dir = -1;
@@ -1105,7 +1110,13 @@ document.addEventListener('click', (e) => {
 });
 
 /* Membuka halaman utama (Al-Qur'an, Fadz AI, Kelas, Pengaturan) dari Semua Menu: tandai agar menu bawah disembunyikan */
-window.DARIMENU = null;
+window.DARIMENU = (() => {
+  try {
+    return sessionStorage.fzDm || null;
+  } catch (e) {
+    return null;
+  }
+})();
 document.addEventListener(
   'click',
   (e) => {

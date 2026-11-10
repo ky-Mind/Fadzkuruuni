@@ -6,7 +6,21 @@ const gerakOff = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
 let RT = 0;
 /* Riwayat halaman di dalam aplikasi: tombol kembali (di aplikasi maupun tombol kembali HP) menuju halaman asal, mis.
    Kalkulator zakat → Semua Menu bila dibuka dari Semua Menu, → Beranda bila dibuka dari Beranda */
-const RIW = [];
+/* Disimpan di sessionStorage: setelah muat ulang, kembali/geser tetap menuju halaman asal yang sama (mis. Semua Menu) */
+const RIW = (() => {
+  try {
+    const r = JSON.parse(sessionStorage.fzRiw || '[]');
+    return Array.isArray(r) ? r : [];
+  } catch (e) {
+    return [];
+  }
+})();
+const riwSimpan = () => {
+  try {
+    sessionStorage.fzRiw = JSON.stringify(RIW);
+    sessionStorage.fzDm = window.DARIMENU || '';
+  } catch (e) {}
+};
 /* Sesi baca berurutan: semua halaman di dalamnya dianggap satu langkah, sehingga kembali (tombol ← maupun tombol kembali HP) langsung keluar
    ke halaman asal bacaan, bukan menelusuri bagian demi bagian. Maulid: #/maulid/<id>/<bagian>, #/jeda/<id>/<k>, dan sholawat yang dibuka dari jeda
    (#/bacaan/w/1/…, #/shf/…) selama jeda berlangsung. Bacaan lain (wirid, tahlil, kitab, hadis) memakai aturan halaman saudara di bawah. */
@@ -64,6 +78,10 @@ function route() {
       if (RIW.length > 60) RIW.shift();
     }
   }
+  /* Bagian yang dibuka dari Semua Menu tetap ditandai selama masih di bagian itu (mis. Al-Qur'an → surah → kembali
+     ke Al-Qur'an): panah kembali dan geser tetap menuju Semua Menu */
+  if (window.DARIMENU && a !== window.DARIMENU) window.DARIMENU = null;
+  riwSimpan();
   /* Arah (data-vt: fwd/back) dari navigasi bagian, geser, atau tombol kembali */
   const de = document.documentElement,
     arah = de.dataset.vt;
@@ -75,7 +93,6 @@ function route() {
       'full',
       !!S.full && a == 'quran' && !!b
     ); /* Halaman utama yang dibuka dari Semua Menu: tanpa menu bawah, panah kembali ke Semua Menu */
-    if (window.DARIMENU && (a !== DARIMENU || b)) window.DARIMENU = null;
     const dm = window.DARIMENU === a && !b;
     document.body.classList.toggle('subhal', !(tataNavR().includes(a) && !b) || dm);
     setSz();

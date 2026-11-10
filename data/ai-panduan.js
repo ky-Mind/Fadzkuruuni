@@ -8,7 +8,8 @@ const AI_PANDUAN = [
   [
     'Menu utama aplikasi',
     'menu navigasi bawah sidebar beranda letak fitur semua menu lainnya',
-    'Menu bawah (HP) atau samping (komputer): Beranda, Al-Qur\'an, Fadz AI, Kelas online, Pengaturan. Fitur lain ada di pintasan Beranda dan di "Lainnya" (Semua Menu): Ibadah (Al-Qur\'an, Wirid & Doa, Sholawat, Jadwal Salat, Kiblat, Tahlil & Yasin, Maulid, Tasbih, Asmaul Husna), Keuangan (Zakat & Sedekah, Kalkulator Zakat, Waris), Belajar (Fadz AI, Kelas online, Kitab Kuning, Hadits Nabi, Kata Mutiara), Lainnya (Kalender, Penanda, Pengaturan, Tentang). Urutan menu bawah & pintasan bisa diatur di Pengaturan › Beranda.',
+    'Menu bawah (HP) atau samping (komputer): Beranda, Al-Qur\'an, Fadz AI, Kelas online, Pengaturan. Fitur lain ada di pintasan Beranda dan di "Lainnya" (Semua Menu): Ibadah (Al-Qur\'an, Wirid & Doa, Sholawat, Jadwal Salat, Kiblat, Tahlil & Yasin, Maulid, Tasbih, Asmaul Husna), Keuangan (Zakat & Sedekah, Kalkulator Zakat, Waris), Belajar (Fadz AI, Kelas online, Kitab Kuning, Hadits Nabi, Kata Mutiara), Lainnya (Kalender, Penanda, Pengaturan, Tentang). Urutan menu bawah & pintasan bisa diatur di Pengaturan › Beranda. Halaman yang dibuka dari Semua Menu kembali (panah ← / geser kanan / tombol kembali HP) ke Semua Menu.',
+    'Foto profil (Pengaturan › Akun & Profil): Pilih/Ganti foto, lalu seret foto untuk mengatur posisi dan geser penggeser untuk mengatur ukuran, lalu Simpan foto. Foto yang sudah tersimpan bisa diatur lagi lewat tombol Atur ukuran.',
     '#/menu',
   ],
   [
