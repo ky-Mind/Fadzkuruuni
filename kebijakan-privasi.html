@@ -1,61 +1,185 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Kebijakan Privasi · Fadzkuruuni</title>
-<meta name="description" content="Data apa saja yang dipakai aplikasi Fadzkuruuni, untuk apa, dan cara menghapusnya.">
-<link rel="icon" href="img/favicon-48.png">
-<!-- kebijakan-privasi.html - Kebijakan privasi aplikasi Fadzkuruuni (web & Android). Ditautkan dari halaman Tentang
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Kebijakan Privasi · Fadzkuruuni</title>
+    <meta
+      name="description"
+      content="Data apa saja yang dipakai aplikasi Fadzkuruuni, untuk apa, dan cara menghapusnya."
+    />
+    <link rel="icon" href="img/favicon-48.png" />
+    <!-- kebijakan-privasi.html - Kebijakan privasi aplikasi Fadzkuruuni (web & Android). Ditautkan dari halaman Tentang
      dan dipakai sebagai URL Kebijakan Privasi di Facebook Developer & Google. Penghapusan data: hapus-data.html
      Tampilan: css/dokumen.css (tema mengikuti aplikasi / perangkat, bisa diganti lewat tombol di bilah atas). -->
-<script>/* Tema: pilihan di halaman ini > tema aplikasi > tema perangkat */try{var d=localStorage.fzdok,z=JSON.parse(localStorage.fz||'{}'),t=d||(z.theme=='blue'?'blue':z.theme=='dark'?'dark':z.theme=='light'?'light':(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}</script>
-<link rel="stylesheet" href="css/dokumen.css">
-</head>
-<body>
-<header class="dbar"><a class="dk" data-kembali href="./#/pengaturan/tentang" aria-label="Kembali ke aplikasi"><svg viewBox="0 0 24 24"><path d="M20 12H4M10.5 5.5 4 12l6.5 6.5"/></svg></a><span class="dj">Kebijakan Privasi</span><button type="button" id="tema" aria-label="Ganti tema terang / gelap"><svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 6.5 6.5 0 0 0 10 10z"/></svg></button></header>
-<main>
-<div class="dhead"><img src="img/icon-192.png" alt=""><div><h1>Kebijakan Privasi</h1><small>Fadzkuruuni · diperbarui 8 November 2026</small></div></div>
+    <script>
+      /* Tema: pilihan di halaman ini > tema aplikasi > tema perangkat */
+      try {
+        var d = localStorage.fzdok,
+          z = JSON.parse(localStorage.fz || '{}'),
+          t =
+            d ||
+            (z.theme == 'blue'
+              ? 'blue'
+              : z.theme == 'dark'
+                ? 'dark'
+                : z.theme == 'light'
+                  ? 'light'
+                  : matchMedia('(prefers-color-scheme:dark)').matches
+                    ? 'dark'
+                    : 'light');
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+      }
+    </script>
+    <link rel="stylesheet" href="css/dokumen.css" />
+  </head>
+  <body>
+    <header class="dbar">
+      <a class="dk" data-kembali href="./#/pengaturan/tentang" aria-label="Kembali ke aplikasi"
+        ><svg viewBox="0 0 24 24"><path d="M20 12H4M10.5 5.5 4 12l6.5 6.5" /></svg></a
+      ><span class="dj">Kebijakan Privasi</span
+      ><button type="button" id="tema" aria-label="Ganti tema terang / gelap">
+        <svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 6.5 6.5 0 0 0 10 10z" /></svg>
+      </button>
+    </header>
+    <main>
+      <div class="dhead">
+        <img src="img/icon-192.png" alt="" />
+        <div>
+          <h1>Kebijakan Privasi</h1>
+          <small>Fadzkuruuni · diperbarui 8 November 2026</small>
+        </div>
+      </div>
 
-<p class="lead">Fadzkuruuni dibuat oleh Pondok Pesantren Tahfidz Qur'an Fadzkuruuni (Majelis Fadzkuruuni) bersama KyMind, untuk menemani santri dan jamaah beribadah sehari-hari. Halaman ini menjelaskan data apa saja yang kami pakai, untuk apa, dan bagaimana kamu bisa menghapusnya. Berlaku untuk aplikasi Android maupun situsnya (fadzkuruuni.vercel.app dan fadzkuruuni.xianzing.my.id).</p>
+      <p class="lead">
+        Fadzkuruuni dibuat oleh Pondok Pesantren Tahfidz Qur'an Fadzkuruuni (Majelis Fadzkuruuni) bersama KyMind, untuk
+        menemani santri dan jamaah beribadah sehari-hari. Halaman ini menjelaskan data apa saja yang kami pakai, untuk
+        apa, dan bagaimana kamu bisa menghapusnya. Berlaku untuk aplikasi Android maupun situsnya
+        (fadzkuruuni.vercel.app dan fadzkuruuni.xianzing.my.id).
+      </p>
 
-<p>Hampir semua fitur bisa dipakai tanpa akun. Kami tidak memasang iklan, tidak menjual data, dan tidak membagikannya kepada siapa pun untuk keperluan pemasaran.</p>
+      <p>
+        Hampir semua fitur bisa dipakai tanpa akun. Kami tidak memasang iklan, tidak menjual data, dan tidak
+        membagikannya kepada siapa pun untuk keperluan pemasaran.
+      </p>
 
-<section class="sec" id="s1"><h2>Yang tersimpan di HP-mu saja</h2>
-<p>Pengaturan, penanda ayat, riwayat baca, hitungan tasbih, isi yang diunduh untuk dibaca tanpa internet, dan riwayat obrolan Fadz AI disimpan di perangkatmu sendiri. Lokasi juga hanya dipakai di HP untuk menghitung jadwal salat dan arah kiblat, dan tidak dikirim ke server kami.</p></section>
+      <section class="sec" id="s1">
+        <h2>Yang tersimpan di HP-mu saja</h2>
+        <p>
+          Pengaturan, penanda ayat, riwayat baca, hitungan tasbih, isi yang diunduh untuk dibaca tanpa internet, dan
+          riwayat obrolan Fadz AI disimpan di perangkatmu sendiri. Lokasi juga hanya dipakai di HP untuk menghitung
+          jadwal salat dan arah kiblat, dan tidak dikirim ke server kami.
+        </p>
+      </section>
 
-<section class="sec" id="s2"><h2>Kalau kamu masuk akun</h2>
-<p>Masuk akun tidak wajib. Kalau kamu masuk lewat Google, Facebook, atau email, kami hanya menerima nama, alamat email, dan foto profil (lewat Firebase Authentication milik Google). Kata sandi, daftar teman, dan unggahanmu tidak pernah kami terima.</p>
-<p>Setelah masuk, pengaturan, penanda, dan riwayat baca disalin ke Firebase Cloud Firestore supaya bisa dibuka di HP lain. Data itu hanya bisa dibaca oleh akunmu sendiri.</p></section>
+      <section class="sec" id="s2">
+        <h2>Kalau kamu masuk akun</h2>
+        <p>
+          Masuk akun tidak wajib. Kalau kamu masuk lewat Google, Facebook, atau email, kami hanya menerima nama, alamat
+          email, dan foto profil (lewat Firebase Authentication milik Google). Kata sandi, daftar teman, dan unggahanmu
+          tidak pernah kami terima.
+        </p>
+        <p>
+          Setelah masuk, pengaturan, penanda, dan riwayat baca disalin ke Firebase Cloud Firestore supaya bisa dibuka di
+          HP lain. Data itu hanya bisa dibaca oleh akunmu sendiri.
+        </p>
+      </section>
 
-<section class="sec" id="s3"><h2>Laporan masalah</h2>
-<p>Kalau kamu mengirim laporan, yang ikut tersimpan adalah isi laporan, foto yang kamu lampirkan, halaman yang dilaporkan, nama dan email akun, nomor WhatsApp (kalau diisi), versi aplikasi, serta ukuran layar dan jenis peramban. Laporan hanya dibaca admin Fadzkuruuni untuk memperbaiki aplikasi dan membalasmu.</p></section>
+      <section class="sec" id="s3">
+        <h2>Laporan masalah</h2>
+        <p>
+          Kalau kamu mengirim laporan, yang ikut tersimpan adalah isi laporan, foto yang kamu lampirkan, halaman yang
+          dilaporkan, nama dan email akun, nomor WhatsApp (kalau diisi), versi aplikasi, serta ukuran layar dan jenis
+          peramban. Laporan hanya dibaca admin Fadzkuruuni untuk memperbaiki aplikasi dan membalasmu.
+        </p>
+      </section>
 
-<section class="sec" id="s4"><h2>Fadz AI dan pesan suara</h2>
-<p>Pertanyaan untuk Fadz AI, bersama nama panggilan, kota, dan tanggal (supaya jawabannya pas), diteruskan ke layanan AI Groq. Pesan suara juga dikirim ke Groq untuk diubah menjadi tulisan. Kami tidak menyimpan pertanyaan maupun rekaman suaramu di server kami. Sebaiknya jangan menulis hal pribadi yang sensitif di Fadz AI.</p></section>
+      <section class="sec" id="s4">
+        <h2>Fadz AI dan pesan suara</h2>
+        <p>
+          Pertanyaan untuk Fadz AI, bersama nama panggilan, kota, dan tanggal (supaya jawabannya pas), diteruskan ke
+          layanan AI Groq. Pesan suara juga dikirim ke Groq untuk diubah menjadi tulisan. Kami tidak menyimpan
+          pertanyaan maupun rekaman suaramu di server kami. Sebaiknya jangan menulis hal pribadi yang sensitif di Fadz
+          AI.
+        </p>
+      </section>
 
-<section class="sec" id="s5"><h2>Statistik pemakaian</h2>
-<p>Supaya tahu fitur mana yang paling dipakai, aplikasi mengirim hitungan sederhana tanpa identitas: jumlah halaman yang dibuka per hari, fitur yang dibuka, kota jadwal salat, jenis aplikasi (web, terpasang, atau Android), merek dan model HP (misalnya Samsung SM-A055F), dan versi aplikasi. Tidak ada nama, email, atau ID perangkat di dalamnya. Kalau tidak mau, matikan di <b>Pengaturan › Tentang &amp; Bantuan › Bantu kembangkan aplikasi</b>.</p></section>
+      <section class="sec" id="s5">
+        <h2>Statistik pemakaian</h2>
+        <p>
+          Supaya tahu fitur mana yang paling dipakai, aplikasi mengirim hitungan sederhana tanpa identitas: jumlah
+          halaman yang dibuka per hari, fitur yang dibuka, kota jadwal salat, jenis aplikasi (web, terpasang, atau
+          Android), merek dan model HP (misalnya Samsung SM-A055F), dan versi aplikasi. Tidak ada nama, email, atau ID
+          perangkat di dalamnya. Kalau tidak mau, matikan di
+          <b>Pengaturan › Tentang &amp; Bantuan › Bantu kembangkan aplikasi</b>.
+        </p>
+      </section>
 
-<section class="sec" id="s6"><h2>Izin yang diminta</h2>
-<p>Notifikasi dan alarm dipakai untuk pengingat adzan dan kelas online. Lokasi untuk jadwal salat dan kiblat. Mikrofon hanya saat kamu merekam pesan suara atau ikut berbicara di kelas online. Kamera dan foto hanya saat kamu melampirkan foto di laporan atau menyalakan kamera di kelas online. Semua izin bisa dicabut kapan saja dari pengaturan HP.</p></section>
+      <section class="sec" id="s6">
+        <h2>Izin yang diminta</h2>
+        <p>
+          Notifikasi dan alarm dipakai untuk pengingat adzan dan kelas online. Lokasi untuk jadwal salat dan kiblat.
+          Mikrofon hanya saat kamu merekam pesan suara atau ikut berbicara di kelas online. Kamera dan foto hanya saat
+          kamu melampirkan foto di laporan atau menyalakan kamera di kelas online. Semua izin bisa dicabut kapan saja
+          dari pengaturan HP.
+        </p>
+      </section>
 
-<section class="sec" id="s7"><h2>Layanan lain yang kami pakai</h2>
-<p>Google Firebase (akun, penyimpanan data, hosting), Vercel (hosting situs), Groq (AI dan pengenal suara), Google dan Facebook (cara masuk akun), serta api.alquran.cloud dan everyayah.com (teks dan audio Al-Qur'an). Masing-masing punya kebijakan privasinya sendiri.</p></section>
+      <section class="sec" id="s7">
+        <h2>Layanan lain yang kami pakai</h2>
+        <p>
+          Google Firebase (akun, penyimpanan data, hosting), Vercel (hosting situs), Groq (AI dan pengenal suara),
+          Google dan Facebook (cara masuk akun), serta api.alquran.cloud dan everyayah.com (teks dan audio Al-Qur'an).
+          Masing-masing punya kebijakan privasinya sendiri.
+        </p>
+      </section>
 
-<section class="sec" id="s8"><h2>Menghapus data</h2>
-<p>Akun dan semua data cloud-mu bisa kamu hapus sendiri di <b>Pengaturan › Akun &amp; Profil › Hapus akun &amp; data</b>, atau minta kami yang menghapus. Caranya ada di halaman <a href="hapus-data.html">Penghapusan Data</a>. Data yang ada di HP ikut hilang kalau kamu menghapus data aplikasi atau mencopotnya.</p></section>
+      <section class="sec" id="s8">
+        <h2>Menghapus data</h2>
+        <p>
+          Akun dan semua data cloud-mu bisa kamu hapus sendiri di
+          <b>Pengaturan › Akun &amp; Profil › Hapus akun &amp; data</b>, atau minta kami yang menghapus. Caranya ada di
+          halaman <a href="hapus-data.html">Penghapusan Data</a>. Data yang ada di HP ikut hilang kalau kamu menghapus
+          data aplikasi atau mencopotnya.
+        </p>
+      </section>
 
-<section class="sec" id="s9"><h2>Anak-anak</h2>
-<p>Fadzkuruuni boleh dipakai santri dari segala usia. Kami tidak sengaja mengumpulkan data pribadi anak. Untuk anak di bawah 13 tahun, sebaiknya masuk akun dan mengirim laporan didampingi orang tua atau wali.</p></section>
+      <section class="sec" id="s9">
+        <h2>Anak-anak</h2>
+        <p>
+          Fadzkuruuni boleh dipakai santri dari segala usia. Kami tidak sengaja mengumpulkan data pribadi anak. Untuk
+          anak di bawah 13 tahun, sebaiknya masuk akun dan mengirim laporan didampingi orang tua atau wali.
+        </p>
+      </section>
 
-<section class="sec" id="s10"><h2>Perubahan dan pertanyaan</h2>
-<p>Halaman ini bisa kami perbarui sewaktu-waktu, dan tanggal di atas akan ikut berubah. Kalau ada yang ingin ditanyakan, silakan hubungi kami:</p>
-<div class="kontak"><a href="mailto:ponpesfadzkuruuni@gmail.com"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>ponpesfadzkuruuni@gmail.com</a><a class="s" href="https://wa.me/6289506138191"><svg viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>WhatsApp 0895-0613-8191</a></div>
-<p class="alamat">Ponpes Tahfidz Qur'an Fadzkuruuni, Kp. Cibuntu Kaler, Sukamaju, Kec. Kadudampit, Kab. Sukabumi, Jawa Barat 43153.</p></section>
+      <section class="sec" id="s10">
+        <h2>Perubahan dan pertanyaan</h2>
+        <p>
+          Halaman ini bisa kami perbarui sewaktu-waktu, dan tanggal di atas akan ikut berubah. Kalau ada yang ingin
+          ditanyakan, silakan hubungi kami:
+        </p>
+        <div class="kontak">
+          <a href="mailto:ponpesfadzkuruuni@gmail.com"
+            ><svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" /></svg
+            >ponpesfadzkuruuni@gmail.com</a
+          ><a class="s" href="https://wa.me/6289506138191"
+            ><svg viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z" /></svg>WhatsApp 0895-0613-8191</a
+          >
+        </div>
+        <p class="alamat">
+          Ponpes Tahfidz Qur'an Fadzkuruuni, Kp. Cibuntu Kaler, Sukamaju, Kec. Kadudampit, Kab. Sukabumi, Jawa Barat
+          43153.
+        </p>
+      </section>
 
-<p class="kaki"><a href="hapus-data.html">Penghapusan Data</a> · <a href="./" data-kembali>Kembali ke aplikasi</a></p>
-</main>
-<script src="js/dokumen.js"></script>
-</body>
+      <p class="kaki">
+        <a href="hapus-data.html">Penghapusan Data</a> · <a href="./" data-kembali>Kembali ke aplikasi</a>
+      </p>
+    </main>
+    <script src="js/dokumen.js"></script>
+  </body>
 </html>
