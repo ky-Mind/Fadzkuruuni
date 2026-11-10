@@ -1,6 +1,9 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.66': [
+    'Geser halaman beruntun dengan cepat (mis. Fadz AI → Kelas online) tidak lagi memperlihatkan halaman sebelumnya sekejap sebelum halaman tujuan tampil',
+  ],
   '2.9.65': [
     'Geser halaman lebih jelas dan mulus di HP: halaman yang datang punya garis & bayangan di tepinya, halaman yang pergi sedikit meredup, jadi dua halaman tidak lagi terlihat menyatu',
     'Deretan kartu dan tombol yang bisa digeser (mis. kartu di Beranda, tombol di kartu Kelas online) digulir dulu sampai ujung, lalu geseran berikutnya pindah halaman',
