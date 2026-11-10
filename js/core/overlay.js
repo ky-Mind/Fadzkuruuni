@@ -90,15 +90,16 @@ function konfirmasi(t, m, ya, fn) {
 }
 /* KyMind: teks "KyMind" (a.kym) membuka halaman kymind/ di lapisan yang menutup seluruh layar. Di peramban memakai layar
    penuh sungguhan (tab, bilah alamat, dan bookmark hilang); di aplikasi Android memakai mode imersif (bilah status &
-   navigasi hilang). Lapisan berkelas .back-d, jadi tombol kembali HP/peramban menutupnya seperti lembar lain
-   (fadzKembali & riwayat di atas). Tutup juga lewat tombol × di halaman KyMind atau Esc. */
-let KYM_BUKA = false,
-  KYM_FS = false;
+   navigasi hilang). Sesuai permintaan pemilik, tampilan ini "mengambil alih" layar: tidak ada tombol keluar, dan tombol
+   kembali HP/peramban tidak menutupnya (lapisan .back-d ber-data-wajib, lihat fadzKembali & riwayat di atas). Lapisan baru
+   tertutup saat halaman ke latar belakang: layar dimatikan (tombol daya), tombol Home, pindah aplikasi/tab. */
+let KYM_BUKA = false;
 function kymindBuka() {
   if ($('#kymL')) return;
   const d = document.createElement('div');
   d.className = 'back-d';
   d.id = 'kymL';
+  d.dataset.wajib = '1';
   d.innerHTML = '<iframe src="kymind/?tanam=1" title="KyMind" allow="fullscreen; autoplay"></iframe>';
   document.body.append(d);
   KYM_BUKA = true;
@@ -120,10 +121,10 @@ const kymindTutup = () => {
   const d = $('#kymL');
   d && d.remove();
 };
-/* Lapisan dilepas (×, Esc, tombol kembali): keluar layar penuh dan kembalikan bilah HP */
+/* Lapisan dilepas: keluar layar penuh dan kembalikan bilah HP */
 new MutationObserver(() => {
   if (!KYM_BUKA || $('#kymL')) return;
-  KYM_BUKA = KYM_FS = false;
+  KYM_BUKA = false;
   if (document.fullscreenElement || document.webkitFullscreenElement)
     (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
   if (window.ANDROID) {
@@ -131,15 +132,10 @@ new MutationObserver(() => {
     window.androidWarna && androidWarna();
   }
 }).observe(document.body, { childList: true });
-/* Esc di peramban keluar dari layar penuh: lapisan ikut ditutup */
-addEventListener('fullscreenchange', () => {
-  const fe = document.fullscreenElement;
-  if (fe && fe.id == 'kymL') KYM_FS = true;
-  else if (!fe && KYM_FS) kymindTutup();
-});
-addEventListener('message', (e) => {
-  if (e.origin == location.origin && e.data && e.data.kymind == 'tutup') kymindTutup();
-});
+/* Satu-satunya jalan keluar: halaman ke latar belakang. Peramban: visibilitychange; aplikasi Android: onPause memanggil
+   window.fadzLatar (APK 2.6.29 ke atas) */
+document.addEventListener('visibilitychange', () => document.hidden && KYM_BUKA && kymindTutup());
+window.fadzLatar = () => KYM_BUKA && kymindTutup();
 document.addEventListener(
   'click',
   (e) => {

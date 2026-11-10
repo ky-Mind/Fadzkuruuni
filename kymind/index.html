@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Halaman KyMind (djia.sys), dibuka dari teks "KyMind" di aplikasi. Sumber: kymind-sys/kia-site/index.html;
-     perubahan: kerangka dokumen + charset, tombol tutup, kalimat "bunuh diri" dibuang dari hujan teks. -->
+     perubahan: kerangka dokumen + charset, tanpa tombol keluar, kalimat "bunuh diri" dibuang dari hujan teks. -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -59,26 +59,16 @@ a:hover,a:focus-visible{background:var(--cyan);color:var(--void);outline:none}
 <div id="stage" aria-label="djia, abstract profile"></div>
 <div class="scan" aria-hidden="true"></div>
 <div class="noise" aria-hidden="true"></div>
-<a id="tutup" href="../" aria-label="Tutup, kembali ke aplikasi">× exit</a>
 <style>
-#tutup{position:fixed;z-index:60;top:max(12px,env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));
-  padding:6px 10px;border:1px solid var(--cyan);background:#040507cc;color:var(--cyan);font:400 15px/1 var(--f-term);letter-spacing:.06em}
-#tutup:hover,#tutup:focus-visible{background:var(--cyan);color:var(--void)}
 body.ringan .noise{display:none}
 body.ringan .it{mix-blend-mode:normal!important;filter:none!important}
 body.ringan #stage .it:nth-child(2n){display:none}
 </style>
 <script>
-/* Kembali ke aplikasi: bila dibuka dari aplikasi, mundur satu langkah (posisi halaman tetap); bila dibuka langsung, ke beranda */
+/* Tanpa tombol keluar (permintaan pemilik). Ditanam di aplikasi, lapisan tertutup saat halaman ke latar belakang. */
 var TANAM=/[?&]tanam=1/.test(location.search)&&window.parent!==window;
-function keluar(){if(TANAM){parent.postMessage({kymind:'tutup'},location.origin);return;}
- try{document.fullscreenElement&&document.exitFullscreen()}catch(x){}
- var dari=false;try{dari=!!document.referrer&&new URL(document.referrer).origin==location.origin&&history.length>1}catch(x){}
- if(dari)history.back();else location.href='../';}
-document.getElementById('tutup').addEventListener('click',function(e){e.preventDefault();keluar();});
-addEventListener('keydown',function(e){if(e.key==='Escape')keluar();});
 /* Dibuka langsung (bukan dari aplikasi): ketukan pertama membawa halaman ke layar penuh sungguhan */
-if(!TANAM)addEventListener('pointerdown',function f(e){if(e.target.closest&&e.target.closest('#tutup'))return;removeEventListener('pointerdown',f);
+if(!TANAM)addEventListener('pointerdown',function f(e){removeEventListener('pointerdown',f);
  var d=document.documentElement,q=d.requestFullscreen||d.webkitRequestFullscreen;try{var p=q&&q.call(d);p&&p.catch&&p.catch(function(){})}catch(x){}});
 /* Mode ringan otomatis untuk HP yang lambat: bila 2 detik pertama di bawah 40 fps, efek yang paling berat (noise
    bergerak, campuran warna, separuh potongan) dimatikan; di HP cepat tampilannya tetap penuh */
