@@ -257,8 +257,20 @@ const AI_PANDUAN = [
   [
     'Video tutorial',
     'video tutorial panduan cara pakai belajar bantuan',
-    "Pengaturan › Tentang & Bantuan › Video tutorial: panduan video untuk HP dan desktop (melaporkan bug, Al-Qur'an, jadwal salat, widget, kiblat, Fadz AI, wirid & doa, kitab, kelas online, tasbih, tampilan, offline, memperbarui aplikasi). Video bisa digeser bebas, mundur/maju 10 detik, dan diputar 0,75×–2×.",
+    "Pengaturan › Tentang & Bantuan › Video tutorial: panduan video untuk HP dan desktop (melaporkan bug, Al-Qur'an, jadwal salat, widget, kiblat, Fadz AI, wirid & doa, kitab, kelas online, tasbih, tampilan, offline, memperbarui aplikasi). Pemutarnya: bilah waktu yang bisa digeser, tombol mundur/maju 10 detik, putar/jeda, kecepatan 0,75×–2× (diingat), dan layar penuh.",
     '#/tutorial',
+  ],
+  [
+    'Memutar rekaman kelas',
+    'rekaman kelas putar ulang tonton ulang percepat geser kecepatan video kajian',
+    'Kelas online › kelas yang sudah selesai › Putar rekaman. Rekaman (YouTube, Google Drive, atau berkas video) diputar di dalam aplikasi dengan pemutar yang sama seperti video tutorial: geser bilah waktu ke bagian mana pun, mundur/maju 10 detik, kecepatan 0,75×–2×, dan layar penuh.',
+    '#/kelas',
+  ],
+  [
+    'Unduh atau perbarui aplikasi Android',
+    'unduh download pasang install apk aplikasi android perbarui update versi baru',
+    'Di web, ajakan unduh aplikasi Android muncul setiap kali situs dibuka (bisa juga lewat Pengaturan › Tentang & Bantuan). Di aplikasi Android, bila ada versi baru, lembar Pembaruan tersedia muncul setiap kali aplikasi dibuka sampai diperbarui: ketuk Perbarui sekarang lalu pilih Perbarui di layar pasang Android.',
+    '#/pengaturan/tentang',
   ],
   [
     'Laporkan bug',

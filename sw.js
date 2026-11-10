@@ -1,4 +1,4 @@
-const V = 'fz-v257',
+const V = 'fz-v258',
   A = [
     './',
     'index.html',
@@ -61,6 +61,7 @@ const V = 'fz-v257',
     'js/core/android.js',
     'js/core/overlay.js',
     'js/core/pemutar.js',
+    'js/core/pemutar-video.js',
     'js/core/unduh.js',
     'js/core/tata.js',
     'js/pages/kata-kata.js',
