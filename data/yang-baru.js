@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.70': ['Update'],
   '2.9.66': [
     'Geser halaman beruntun dengan cepat (mis. Fadz AI → Kelas online) tidak lagi memperlihatkan halaman sebelumnya sekejap sebelum halaman tujuan tampil',
   ],

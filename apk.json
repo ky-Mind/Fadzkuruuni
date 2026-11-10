@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.27",
- "body": "Pembaruan Fadzkuruuni 2.6.27 (isi web 2.9.65)\n\n- Geser halaman lebih jelas dan mulus: halaman yang datang punya garis & bayangan di tepinya, halaman yang pergi sedikit meredup\n- Deretan kartu dan tombol yang bisa digeser digulir dulu sampai ujung, lalu geseran berikutnya pindah halaman\n- Pil \"Berbagi layar\" saat kelas online bisa digeser ke mana saja\n- Bilah atas & bawah HP mengikuti warna halaman\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.27",
+ "tag_name": "v2.6.28",
+ "body": "Update",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.28",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.27/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.28/fadzkuruuni.apk"
   }
  ]
 }
