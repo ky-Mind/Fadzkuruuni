@@ -110,11 +110,17 @@ function route() {
     setTimeout(() => {
       if (tok == RT) vSiapkan();
     }, 300);
+    /* Isi yang dimuat belakangan oleh init (mis. bacaan Maulid): mode baca langsung diterapkan begitu isinya masuk */
+    if (ip && ip.then) ip.then(() => tok == RT && window.mbacaCek && mbacaCek()).catch(() => {});
     geser &&
       Promise.race([Promise.resolve(ip).catch(() => {}), new Promise((r) => setTimeout(r, 1500))]).then(() =>
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
-            if (tok == RT) document.dispatchEvent(new CustomEvent('fz-dipasang', { detail: location.hash || '#/' }));
+            if (tok != RT) return;
+            /* Mode baca (pilihan Kartu | Mushaf, tampilan mushaf) dipasang sekarang juga, bukan menunggu pengamat perubahan,
+               agar halaman asli sudah sama persis dengan pratinjau saat pratinjau dilepas */
+            window.mbacaCek && mbacaCek();
+            document.dispatchEvent(new CustomEvent('fz-dipasang', { detail: location.hash || '#/' }));
           })
         )
       );

@@ -625,10 +625,11 @@ function mbacaSet(on) {
   $$('[data-mb]').forEach((b) => b.classList.toggle('on', (b.dataset.mb == '1') == on));
   mushafBaca();
 }
-function mushafBaca() {
-  const v = $('#view');
-  if (!v || $('#ay')) return;
-  const on = S.mbaca == 'mushaf' && !!$('#view > .bar.lekat');
+/* v = halaman yang diolah: #view, atau lapisan pratinjau geser (.vpeek) agar pratinjau sama persis dengan halaman
+   aslinya */
+function mushafBaca(v = $('#view')) {
+  if (!v || v.querySelector('#ay')) return;
+  const on = S.mbaca == 'mushaf' && !!v.querySelector(':scope > .bar.lekat');
   if (!on) {
     $$('.mushaf.mbc', v).forEach((m) => m.remove());
     $$('.ay2.mbh', v).forEach((a) => a.classList.remove('mbh'));
@@ -671,6 +672,15 @@ function mbacaCek() {
     $$('[data-mb]', h).forEach((b) => (b.onclick = () => mbacaSet(b.dataset.mb == '1')));
   } else if (!ada && m) m.remove();
   if (ada) mushafBaca();
+}
+/* Pratinjau geser (.vpeek) diberi kepala dan mode baca yang sama dengan halaman asli (pilihan Kartu | Mushaf, tampilan
+   mushaf), supaya saat halaman asli menggantikan pratinjau tidak ada judul atau isi yang melompat */
+function mbacaPratinjau(root) {
+  const h = root && root.querySelector(':scope > .bar.lekat');
+  if (!h) return;
+  if (root.querySelector('.ay2') && !h.querySelector('.mseg'))
+    h.querySelector('[data-rs]')?.insertAdjacentHTML('beforebegin', mbacaUI());
+  mushafBaca(root);
 }
 /* Isi yang dimuat belakangan (mis. tab Yasin) ikut diperiksa: pilihan muncul/hilang dan dijadikan mushaf bila perlu */
 {

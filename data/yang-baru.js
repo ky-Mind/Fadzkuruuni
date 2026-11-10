@@ -1,6 +1,11 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.64': [
+    'Ajakan unduh aplikasi (web) dan tawaran pembaruan (aplikasi Android) hanya bisa ditutup lewat tombolnya: Nanti saja atau Unduh/Perbarui',
+    'Geser halaman lebih mulus: halaman yang digeser sama persis dengan halaman aslinya saat bertukar, termasuk di Maulid, jeda sholawat, dan mode Mushaf',
+    'Menu bawah langsung menandai halaman tujuan begitu jari dilepas',
+  ],
   '2.9.63': [
     'Video tutorial dan rekaman kelas punya pemutar baru: bilah waktu yang bisa digeser, mundur/maju 10 detik, kecepatan 0,75×–2×, dan layar penuh',
     'Rekaman kelas (YouTube, Google Drive, atau berkas video) diputar langsung di aplikasi dan bisa dipercepat atau digeser',

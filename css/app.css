@@ -5475,10 +5475,12 @@ section.tb {
   }
 }
 /* Keterbacaan teks: jarak baris lega untuk paragraf di semua halaman */
-#view p {
+/* :is(#view, .vpeek): pratinjau geser memakai aturan yang sama kuatnya dengan halaman asli (tidak ada teks yang
+   melompat saat bertukar) */
+:is(#view, .vpeek) p {
   line-height: 1.65;
 }
-#view .card > p + p {
+:is(#view, .vpeek) .card > p + p {
   margin-top: 8px;
 }
 /* Fadz AI: mikrofon belum siap (titik merah redup, belum berkedip) */
@@ -6147,7 +6149,7 @@ html.tciut::view-transition-old(root) {
   display: flex;
   flex-direction: column;
 }
-#view:has(> .tsf) .bar {
+:is(#view, .vpeek):has(> .tsf) .bar {
   flex: none;
 }
 .tsf {
