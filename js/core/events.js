@@ -504,6 +504,7 @@ function gsTabHtml(nb) {
       p.querySelector(':scope>.bar [data-rs]')?.closest('.bar') ||
       p.querySelector(':scope>.aibar');
     lk && lk.classList.add('lekat');
+    window.mbacaPratinjau && mbacaPratinjau(p);
     return p;
   };
   window.gsBangun = (t) => {
@@ -545,6 +546,7 @@ function gsTabHtml(nb) {
       peek.querySelector(':scope>.bar [data-rs]')?.closest('.bar') ||
       peek.querySelector(':scope>.aibar');
     lk && lk.classList.add('lekat');
+    window.mbacaPratinjau && mbacaPratinjau(peek);
     /* Fadz AI dibuka di pesan terbaru (bawah): pratinjaunya juga ditampilkan dari bawah */
     if (peek.querySelector('#aic .aim')) peek.scrollTop = peek.scrollHeight;
   };
@@ -721,10 +723,11 @@ function gsTabHtml(nb) {
       /* Jarak jari (piksel layar) diubah ke piksel CSS: di HP seluruh tampilan memakai zoom, isi harus tepat menempel
          di jari */
       k = v.getBoundingClientRect().width / v.offsetWidth || 1;
-      /* Tepi kiri di subhalaman: geser kembali */
+      /* Tepi kiri di subhalaman: geser kembali.
+         Halaman surah punya geser sendiri di seluruh halaman (halaman kartu / surah sebelah, lihat qReader di
+         js/pages/quran.js), jadi geser halaman tidak dipakai di sana. */
       if (t.clientX < 24 && document.body.classList.contains('subhal')) mode = 'back';
-      /* Halaman surah punya geser sendiri di seluruh halaman (halaman kartu / surah sebelah, lihat qReader di
-         js/pages/quran.js) */ else if (v.querySelector(':scope > #ay')) sx = null;
+      else if (v.querySelector(':scope > #ay')) sx = null;
     },
     { passive: true }
   );
@@ -834,6 +837,12 @@ function gsTabHtml(nb) {
     const kibas = Math.abs(vel) > GS_KIBAS && Math.sign(vel) == -dir;
     if (tj && (Math.abs(dx) > w * GS_BATAS || kibas)) {
       sibuk = true;
+      /* Menu bawah langsung menandai halaman tujuan saat jari dilepas, tidak menunggu halaman selesai dipasang */
+      if (mode != 'tab') {
+        const [ta, tb] = tj.slice(2).split('/');
+        if (tataNavR().includes(ta) && !tb)
+          $$('#nav a[data-r]').forEach((l) => l.classList.toggle('on', l.dataset.r == ta));
+      }
       meluncur(
         -dir * w,
         () => {

@@ -280,11 +280,13 @@ async function pembaruanCek(paksa) {
    <p class="mut" style="font-size:12.5px;margin:10px 0 12px">${apkLangsung() ? 'Ketuk Perbarui sekarang. Setelah unduhan selesai, layar pasang Android terbuka otomatis: pilih <b>Perbarui</b>.' : 'Ketuk Unduh pembaruan, lalu buka berkas <b>fadzkuruuni.apk</b> yang terunduh dan pilih <b>Perbarui</b>.'} Data dan pengaturanmu tetap aman.</p>
    ${apkTombol(baru, apk)}<button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-upn>Nanti saja</button></div>`;
     pembaruanCek.tampil = 1;
+    /* Hanya bisa ditutup lewat tombolnya: ketuk di luar lembar, tombol kembali HP, dan Esc hanya menggoyang lembar */
+    e.dataset.wajib = '1';
     /* Nanti saja = ditutup untuk sekarang; ditawarkan lagi setiap aplikasi dibuka / kembali dari latar belakang */
     document.body.append(e);
     e.onclick = (x) => {
-      if (x.target == e && apkPerbarui.jalan) return;
-      if (x.target == e || x.target.closest('[data-upn]')) {
+      if (x.target == e) return wajibGoyang(e);
+      if (x.target.closest('[data-upn]')) {
         pembaruanCek.nanti = 1;
         e.remove();
         pembaruanCek.buka = 0;
@@ -387,12 +389,15 @@ function apkAjakWeb() {
   <a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${UNDUH_APK}" rel="noopener" data-apkunduh>${ic('down', 16)} Unduh aplikasi Android</a>
   ${android ? '' : '<p class="mut" style="font-size:12.5px;margin:8px 0 0">Aplikasi ini untuk HP Android. Buka situs ini di HP Android untuk memasangnya.</p>'}
   <button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-apknanti>Nanti saja</button></div>`;
+    /* Hanya bisa ditutup lewat tombol Unduh atau Nanti saja */
+    e.dataset.wajib = '1';
     document.body.append(e);
     e.onclick = (x) => {
+      if (x.target == e) return wajibGoyang(e);
       if (x.target.closest('[data-apkunduh]')) {
         toast('Mengunduh fadzkuruuni.apk… Buka berkasnya setelah selesai, lalu pilih Pasang.');
         setTimeout(() => e.remove(), 300);
-      } else if (x.target == e || x.target.closest('[data-apknanti]')) e.remove();
+      } else if (x.target.closest('[data-apknanti]')) e.remove();
     };
   };
   setTimeout(tampil, 1500);
