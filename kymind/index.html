@@ -1,0 +1,201 @@
+<!doctype html>
+<!-- Halaman KyMind (djia.sys), dibuka dari teks "KyMind" di aplikasi. Sumber: kymind-sys/kia-site/index.html;
+     perubahan: kerangka dokumen + charset, tombol tutup, kalimat "bunuh diri" dibuang dari hujan teks. -->
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#040507">
+<link rel="icon" href="data:,">
+<title>djia.sys</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=IBM+Plex+Mono:wght@400;600&family=VT323&family=Rubik+Mono+One&family=Amiri&display=swap">
+<style>
+/* Layout: one screen, no scrolling, no buttons. Three layers fall forever: text rain on a canvas (lines from the book, the khutbah and words read off the photos), censored photos and photo shards, and profile fragments. Everything respawns with a new random size, angle, effect and blend. Single dark look on purpose. */
+:root{
+  --void:#040507;
+  --ink:#cdd6d2;
+  --dim:#4f5d63;
+  --cyan:#5ce1ff;
+  --rose:#ff3e88;
+  --amber:#ffb84d;
+  --f-huge:"Rubik Mono One", Impact, sans-serif;
+  --f-display:"Major Mono Display", "IBM Plex Mono", ui-monospace, monospace;
+  --f-body:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --f-term:"VT323", "IBM Plex Mono", ui-monospace, monospace;
+  --f-arab:"Amiri", "Noto Naskh Arabic", serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--void);color:var(--ink);font:13px/1.45 var(--f-body);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+canvas#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+#stage{position:fixed;inset:0;z-index:2;overflow:hidden}
+.scan{position:fixed;inset:0;z-index:50;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0 2px,#00000055 2px 3px)}
+.noise{position:fixed;inset:-50%;z-index:51;pointer-events:none;opacity:.08;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:nz .35s steps(3) infinite}
+@keyframes nz{0%{transform:translate(0,0)}33%{transform:translate(-3%,2%)}66%{transform:translate(2%,-3%)}}
+a{color:var(--cyan);text-decoration:none}
+a:hover,a:focus-visible{background:var(--cyan);color:var(--void);outline:none}
+
+.it{position:absolute;left:0;top:0;will-change:transform;max-width:min(340px,80vw)}
+.ph{width:var(--w);aspect-ratio:var(--ar);background:#0b1115;overflow:hidden;cursor:crosshair;max-width:80vw}
+.ph canvas{width:100%;height:100%;display:block}
+.fr{background:#040507d9;border:1px solid #1a272d;padding:7px 9px}
+.fr b{font:400 16px/1 var(--f-display);color:#eef7f4;display:block;margin-bottom:4px}
+.fr .c{color:var(--dim)}.fr .s{color:var(--amber)}.fr .k{color:var(--rose)}
+.fr.inv{background:var(--cyan);color:var(--void);border:0}.fr.inv a{color:var(--void);text-decoration:underline}.fr.inv b{color:var(--void)}
+.fr.red{background:var(--rose);color:#14020a;border:0}.fr.red b{color:#14020a}
+.fr.bare{background:none;border:0}
+.huge{font:400 var(--fs)/.85 var(--f-huge);color:transparent;-webkit-text-stroke:1px var(--c);white-space:nowrap;pointer-events:none;max-width:none}
+.nm{font:400 var(--fs)/.9 var(--f-display);color:#eef7f4;white-space:nowrap;pointer-events:none;max-width:none;filter:blur(var(--bl,0px));text-shadow:-3px 0 var(--rose),3px 0 var(--cyan)}
+.held{outline:1px dashed var(--amber);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.noise{animation:none}}
+</style>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+<div id="stage" aria-label="djia, abstract profile"></div>
+<div class="scan" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+<a id="tutup" href="../" aria-label="Tutup, kembali ke aplikasi">× exit</a>
+<style>
+#tutup{position:fixed;z-index:60;top:max(12px,env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));
+  padding:6px 10px;border:1px solid var(--cyan);background:#040507cc;color:var(--cyan);font:400 15px/1 var(--f-term);letter-spacing:.06em}
+#tutup:hover,#tutup:focus-visible{background:var(--cyan);color:var(--void)}
+body.ringan .noise{display:none}
+body.ringan .it{mix-blend-mode:normal!important;filter:none!important}
+body.ringan #stage .it:nth-child(2n){display:none}
+</style>
+<script>
+/* Kembali ke aplikasi: bila dibuka dari aplikasi, mundur satu langkah (posisi halaman tetap); bila dibuka langsung, ke beranda */
+document.getElementById('tutup').addEventListener('click',function(e){e.preventDefault();var dari=false;
+ try{dari=!!document.referrer&&new URL(document.referrer).origin==location.origin&&history.length>1}catch(x){}
+ if(dari)history.back();else location.href='../';});
+/* Mode ringan otomatis untuk HP yang lambat: bila 2 detik pertama di bawah 40 fps, efek yang paling berat (noise
+   bergerak, campuran warna, separuh potongan) dimatikan; di HP cepat tampilannya tetap penuh */
+(function(){var n=0,t0=0;function f(t){if(!t0)t0=t;n++;if(t-t0<2000)return requestAnimationFrame(f);
+ if(n/((t-t0)/1000)<40)document.body.classList.add('ringan');}
+ setTimeout(function(){requestAnimationFrame(f)},1200);})();
+/* Bilah HP (APK) ikut warna latar halaman ini */
+try{window.FadzAndroid&&FadzAndroid.warnaBar&&FadzAndroid.warnaBar('#040507','#040507')}catch(x){}
+</script>
+
+
+<!-- profile fragments: cloned into the falling stage by script -->
+<template id="frags">
+  <div class="fr"><b>whoami</b>aka <span class="s">djia</span> · <span class="s">ky-Mind</span> · <span class="s">K</span><br>web &amp; android dev<br>intern @ DevHunts <span class="c">// jul 2026</span></div>
+  <div class="fr inv"><b>~/projects</b><a href="https://fadzkuruuni.vercel.app" target="_blank" rel="noopener">fadzkuruuni</a> · <a href="https://agenda-hijriah.vercel.app" target="_blank" rel="noopener">kisah-lillah</a> · <a href="https://tubi-opal.vercel.app" target="_blank" rel="noopener">tubi</a> · vidia-medika · <a href="https://citizenesia-country.vercel.app" target="_blank" rel="noopener">citizenesia</a> · mova · <a href="https://wilson-lilac.vercel.app" target="_blank" rel="noopener">wilson</a></div>
+  <div class="fr red"><b>solusi jalur nabi</b>buku · alamia media · 2025 · 372 hal</div>
+  <div class="fr"><b>stack</b>js ts html css next.js firebase capacitor android three.js cloudflare php git</div>
+  <div class="fr bare"><span class="c">// human deps:</span> public speaking · khutbah · menulis · editing · mengajar</div>
+  <div class="fr"><b>history.log</b><span class="s">2026</span> devhunts<br><span class="s">2025</span> lulus · buku terbit · guru paud<br><span class="s">2024</span> freelance web<br><span class="s">2022</span> santri kreatif<br><span class="s">2021</span> star student<br><span class="s">2020</span> juara 1</div>
+  <div class="fr bare"><span class="c">// pernah:</span> sdn semeru 1 bogor · sdn lebaksiu kidul 01 · pesantren inggris assalam · el-alamia</div>
+  <div class="fr"><span class="c">$ cat jobs.txt</span><br>sekretaris · guru · media · psb<br><span class="c">// versi fb:</span> manager, security &amp; office boy</div>
+  <div class="fr inv"><b>ping</b><a href="https://www.instagram.com/xhipoxrit_71619/" target="_blank" rel="noopener">ig</a> · <a href="https://www.threads.com/@xhipoxrit_71619" target="_blank" rel="noopener">threads</a> · <a href="https://www.facebook.com/moch.r.71619/" target="_blank" rel="noopener">fb</a> · <a href="https://github.com/ky-Mind" target="_blank" rel="noopener">github</a> · <a href="https://www.linkedin.com/in/muhammadhilmiazkiarahman" target="_blank" rel="noopener">linkedin</a></div>
+  <div class="fr bare"><span class="k">ERR</span> identity.parse(): <span class="c">name corrupted at byte 0x4D</span></div>
+</template>
+
+<script>
+const TXT={"book": ["Kepemimpinan sebagai Khalifah Utsman diangkat sebagai Khalifah ketiga setelah wafatnya Umar bin Khattab.", "mengalihkan seruannya kepada seluruh penduduk Makkah.", "Dengan nada suara yang sopan dan santun, Nabi Muhammad Saw pun berkata kepada Abu Thalib, “Paman, demi Allah!", "Mukhtar Yahya (Jakarta: Jayamurni, 1973), him.", "Sebab, kami mengharapkan kebaikan dari bapak bayi tersebut.", "Apabila diteliti pendapat tersebut secara saksama, hal itu tidak mempunyai dasar sama sekali.", "Dia memastikan setiap rakyatnya, baik kaya maupun miskin, mendapatkan haknya.", "Islamic History: A Very Short Introduction.", "Pergilah, kalian bebas.’”", "menyeru kaumnya di tempat-tempat terbuka untuk menyembah Allah Swt dan mengesakan-Nya.", "Umar bin Khattab sangat tegas dalam memastikan kekayaan negara dikelola secara adil.", "Beirut: Dar al-Kutub al-‘Ilmiyyah, 2001.", "Salah satu contohnya adalah ketika seorang badui datang ke masjid dan buang air kecil di dalamnya.", "Dan untuk pertama kalinya orang mu’min melaksanakan shalat berjamaah di Baitullah dengan tenang.", "Ia sudah lanjut usia dan buta matanya.", "Translated by Muhammad Muhsin Khan.", "New York: Oxford University Press, 2011.", "Berdoa untuk Perlindungan dan Keteguhan Hati", "Suatu ketika, seorang pria datang kepada Nabi ﷺ meminta bantuan karena memiliki banyak utang.", "memberi teladan tentang bagaimana menjalin hubungan yang sehat dan saling mendukung.", "Namun, ketika tiba saatnya meletakkan kembali Hajar Aswad di tempatnya, perselisihan terjadi.", "Keamanan harta benda dan diri pribadi tidak mendapat jaminan.", "Memastikan kekayaan negara digunakan untuk kepentingan rakyat banyak.", "Pernah suatu hari Abdul Muthalib sedang duduk di hamparan kain di sisi Ka'bah.", "Sebab, sebagian besar ayat Al-quran ditafsirkan dan dijelaskan oleh hadits Rasulullah.", "Persahabatan mereka dimulai jauh sebelum Nabi menerima wahyu.", "New Delhi: Adabi Markazi, 1980.", "The Coming Anarchy: Shattering the Dreams of the Post Cold War.", "Usai pemakaman Ibundanya, Muhammad bersama Ummu Aiman meninggalkan kampung tersebut.", "Konflik internal dan antarbangsa sering terjadi karena perbedaan suku, agama, atau kepentingan politik.", "Maksudnya, sumpah untuk menjaga keutamaan dan memelihara kehormatan kota Makkah.", "Peran dalam Sejarah Islam Umar bin Khattab adalah sahabat Nabi Muhammad SAW.", "Allah tidak akan mengecewakan engkau.", "Memberikan Bantuan untuk Kepentingan Umum", "Utbah lantas terdiam dan bungkam mendengarkan bacaan Nabi Muhammad Saw.", "Diasuh dalam susuan alam yang bebas selama beberapa tahun lagi.", "Muhammad: His Life Based on the Earliest Sources.", "Muhammad bersama ibunya tinggal di Madinah kira-kira sebulan lamanya.", "Setelah mendengar penjelasan Waraqah, Nabi Muhammad Saw.", ": Abdul Muthalib: Syifa: Aminah", "Kaum Muslimin sekarang dapat bersikap lebih berani.", "Ayat pertama yang turun adalah 5 ayat dari surat Al-Alaq.", "Hampir segala cara dan upaya telah dilakukan oleh pihak kafır Quraisy.", "Meskipun Umar terluka parah, ia tetap memastikan proses penunjukan penggantinya berlangsung dengan baik.", "Sahih al-Bukhari dan Sahih Muslim.", "Menyelesaikan Konflik dengan Dialog dan Hikmah", "Kerendahan hati Nabi Muhammad ﷺ menjadi teladan bagi kita semua.", "Senang sekali kami berada di dekat Tuan, dengan harapan di sini takkan ada penganiayaan.”", "Bunda tercinta Aminah mengasuh dan mendidik Muhammad dengan penuh kasih sayang dan segenap perasaan cinta.", "Ada peristiwa yang mendorong Umar bin Khathab masuk Islam.", "\"Hai, orang yang berselimut!", "Lahore: Islamic Publications, 1980.", "Setelah ibunya meninggal dunia, Muhammad diasuh oleh Kakeknya tercinta.", "Pada tahun 9 H, Ummu Kultsum meninggal dunia di Madinah.", "dalam perjalanan pulang ke Madinah.", "Tetapi pada masa-masa terakhir Perang Fijar, Muhammad ikut melepaskan anak-anak panah ke arah musuh.", "Umar juga memerintahkan agar setiap orang mendapat makanan yang cukup.", "Untuk itu, Mereka mengangkat sumpah bersama.", "The Life of the Prophet Muhammad: A Historical and Analytical Study.", "London: Oxford University Press, 1953.", "Bahkan, banyak dari mereka yang menawarkan separuh kekayaannya demi sahabat barunya.", "Agak lama juga Umar tidak ditemui oleh Nabi Muhammad Saw.", "Kemudian, kami berangkat lagi mengendarai kedelai sambil menggendong bayi tersebut.", "Sebagai utusan sekaligus contoh besar bagi umat manusia, terkhusus Kaum Muslimin.", "dari kelahirannya sampai wafatnya.", "Jangan mudah putus asa karena penentangan.", "Salah satu sahabat terdekat beliau adalah Abu Bakar Ash-Shiddiq.", "Zainab, lahir pada waktu Muhammad berusia 30 tahun.", "Salah satu doanya adalah: “Ya Allah, ampunilah mereka, karena mereka tidak mengetahui.”", "Abbas Mahmud Aqqad, Keagungan Muhammad SAW: 190.", "Beberapa waktu setelah kelahiran Islam, Abu Lahab memerintahkan Atbah untuk menceraikan istrinya.", "Akibatnya, Ka’bah rusak berat.", "Setelah Perasaan Muhammad mulai tenang, Khadijah mengajak beliau pergi menjumpai Waragah di rumahnya.", "Suamiku berkata : “Boleh saja hal itu kamu lakukan, semoga Allah memberikan berkah pada dirinya untuk kita”.", "Kepada Raja, kedua utusan Quraisy itu berkata,", "Orang-orang asing menderita segala macam pemerasan secara terang-terangan.", "Beliau bersabda: “Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lain.”", "Di era modern, ketidakadilan hukum sering menjadi akar masalah dalam masyarakat.", "Tetapi kaum kerabatnya itu sama sekali tidak menggubris imbauan dan ajakan Nabi Muhammad Saw.", ": 17 Juli 656 M di Madinah", "Abdullah; lahir menjelang Muhammad diutus menjadi nabi.", "Pembagian kerja dilaksanakan oleh golongan-golongan kaum Quraisy itu sesuai kesepakatan bersama.", "Fokus pada Penilaian Allah, Bukan Manusia", "Abu Bakar dikenal sebagai orang yang selalu berpihak pada kebenaran, bahkan saat fitnah beredar.", "Pekerjaan rutin menggembala kambing ini membuahkan latihan dan didikan yang amat baik pada diri Muhammad.", "Karena pekerjaan ini memerlukan keuletan, kesabaran, ketenangan, dan keterampilan dalam bertindak.", "[Pengantar dan terjemahan oleh sejumlah penulis].", "Ketika sebagian kaum murtad dan menolak membayar zakat, Abu Bakar tetap tegas mempertahankan hukum Islam.", "Semua orang menginginkan Rasulullah Saw tinggal di kediaman mereka.", "Baik untuk kehidupan dunia atau akhirat.", "Ketika mengetahui bahwa kaum kafir Quraisy mengikuti, beliau dan sahabatnya bersembunyi di dalam gua Tsur.", "Sampai tubuhnya betul-betul kuat, tak mudah terkena penyakit.", "Ali selalu menekankan pentingnya persatuan umat, meskipun ada perbedaan pandangan.", "Sahih Bukhari: The Book of Prophetic Traditions.", "Berdoa agar Dimudahkan Nabi mengajarkan untuk selalu memohon kekuatan kepada Allah dalam menjalankan amanah.", "Tidak ada kata dan tidak ada pilihan lain selain Nabi Muhammad Saw.", "Selain dalam peristiwa besar, kedermawanan Nabi ﷺ juga terlihat dalam kehidupan sehari-hari.", "Yang dikemudian hari akan menyandang misi kenabian dan kerasulan.", "Mendengar ucapan Abu Thalib itu, Nabi Muhammad Saw mengira pamannya tidak bersedia lagi melindunginya.", "itu tidak muncul di hadapan mereka?", "Menghadapi situasi yang memprihatinkan ini, kaum Quraisy segera bertindak.", "Paparan berikut lebih difokuskan pada pembicaraan tentang istri-istri Nabi Muhammad Saw.", "Tetapi keadaan ini tidak berlangsung lama.", "Allah Swt memberikan hukum ‘khusus’ kepada Nabi Muhammad Saw.", "Perang Fijar berlangsung selama 4 tahun dan dipicu oleh sebab sebagai berikut.", "Sebelumnya, tidak sedikit laki-laki yang melamar Khadijah, tetapi Ia menolak semua lamaran mereka.", "Setelah sampai di Syria, Muhammad menjual komoditas dagang-nya.", "Urwah ar-Rahhal bin Utbah dari kabilah Hawazin.", "Misalnya, melalui mediasi atau forum diskusi terbuka untuk mencari solusi damai.", "Dan Aku diutus, juga menggembalakan kambing keluargaku di Ajyad.”", "Karena itu, mereka hendak membalas dendam terhadap keluarga Barradh, yaitu kabilah Kinanah.", "Dengan 10.000 pasukan muslim Makkah Mukarramah dapat ditaklukkan.", "Dengan tersenyum, Nu’aim mencoba mengalihkan niat Umar.", "Nabi mengajarkan untuk memohon perlindungan kepada Allah ketika menghadapi penghinaan.", "Sebab Muhammad adalah seorang pemuda yang miskin, tak berharta, tetapi luhur dan mulia akhlaknya.", "melakukan gerakan da'watul afrad, ajakan secara diam-diam kepada individu-individu untuk masuk Islam.", "Dan sungguh ia adalah nabi umat ini.", "Contoh: Sulit bangun subuh atau sering menunda-nunda shalat.", "Utsman bin Affan dikenal sebagai pemimpin yang kaya, tetapi sangat dermawan dan hidup sederhana.", "Konflik: Menghadapi Orang yang Menentang", "Umar dikenal sebagai pemimpin yang hidup sederhana dan selalu memprioritaskan kesejahteraan rakyat.", "Namun, sang istri bersikap arif dan bijaksana dan tidak sedikit pun membayangkan ke- khawatiran dan kecemasan.", "Pada saat itu Muhammad berusia 25 tahun, dan Khadijah berumur 40 tahun.", "Solusi: Prioritaskan pekerjaan dengan membuat jadwal, dan jangan tunggu mood untuk menyelesaikannya", "Sekiranya kamu bersikap keras lagi berhati kasar, tentulah mereka menjauhkan diri dari sekitarmu.\" (QS.", "Muhammad: His Life Based on the Earliest Sources.", "Menurut riwayat, Muhammad dikhitan pada umur 7 hari sebagaimana kebiasaan orang-orang Arab.", "Karena itu, mereka menolak Islam.", "Keutamaan Utsman bin Affan adalah sosok yang sangat dermawan.", "Syaqqul Qamar (membelah bulan)", "Ruqayyah; lahir pada waktu Muhammad berusia 33 tahun.", "“Dan (begitu pula) istrinya, pembawa kayu bakar.", "Oxford: Clarendon Press, 1964.", "Translated by Abdul Hamid Siddiqui.", "Nabi Musa diutus, Ia seorang penggembala kambing.", "Yang demikian selalu ia kenang, bahkan sampai masanya ia diangkat menjadi rasul dan hijrah ke Madinah.", "dari dua ibu; Halimah dan Wanita dari bani Sa’ad.", "Kesenjangan antara si kaya dan si miskin semakin lebar.", "Persahabatan Nabi Muhammad ﷺ dengan Sahabat-Sahabatnya", "Hal ini menyebabkan ketidakadilan, lemahnya ekonomi, dan hilangnya kepercayaan masyarakat terhadap pemimpin.", "Ia memperoleh laba dan keuntungan bisnis yang tidak sedikit.", "lalu mengubah pola gerakan dakwahnya.", "menikahi Zainab binti Jahash (40 tahun).", "Keutamaan Umar adalah simbol keadilan dalam Islam.", "Abu Thalib dan 3 hari setelahnya istri beliau meninggal dunia.", "Dia telah menjadikan manusia dari segumpal darah beku.", "Tak ada gunanya segala kekayaan dan usahanya itu.", "Nabi ﷺ selalu duduk di mana saja, tanpa membedakan tempat yang khusus untuk dirinya.", "London: Inner Traditions, 1983.", "\"Mereka yang datang ke negeri Paduka ini adalah budak-budak kami yang tidak punya malu.", "Barang dagangannya laku keras dan habis terjual.", "Dar Al-Salam Publications, 1997.", "Oleh sebab itu, agama Islam yang didakwahkan oleh Nabi Muhammad Saw.", "Wahyu tersebut merupakan momentum strategis yang sangat bersejarah bagi Nabi Muhammad Saw.", "Sungguh begitu, mereka menyembahnya juga tanpa menuntut pembuktian sifat-sifat ketuhanan mereka.", "Solusi dengan Cara Nabi Muhammad saw:", "Kepemimpinan yang Tegas namun Lembut", "Kedermawanan Nabi Muhammad ﷺ menjadi teladan luar biasa bagi kita semua.", "A Short History of the Saracens.", "Fatimah meninggal dunia di Madinah pada tahun 11 H, yaitu 6 bulan setelah Nabi Muhammad Saw.", "Konflik: Iri Hati atau Dengki", "Beliau merupakan salah seorang dari pelopor dibuatnya organisasi ini.", "“Selanjutnya disuruhnya kami melakukan shalat, zakat, dan puasa.", "Kepada Khadijahlah, Nabi Muhammad Saw.", "di Makkah dan Madinah akan dipaparkan dalam bab-bab selanjutnya.", "Ar-Rahhal adalah gelar bagi Urwah yang berarti seorang pelawat, banyak pengalaman, dan pengetahuan.", "Ia pada waktu itu dikelilingi oleh putra-putranya.", "Sebagaimana diuraikan dalam paparan sebelumnya, istri pertama Nabi Muhammad Saw."], "khutbah": ["اَلْأَحْياءِ مِنْهُمْ وَاْلاَمْوَاتِ.", "الحمد لله الذي جعل الإنسان خليفة من بني آدم،", "“Ya Allah, anugerahkanlah rezeki kepadaku dari kemurahan Ummu Ja’far,” ucap pengemis buta kedua.", "Dan ada pula yang meluncur jatuh karena takut kepada Allah.", "وَلَذِكْرُ اللهِ أَكْبَرْ", "يٰأَ يُّها الَّذِيْنَ آمَنُوْا صَلُّوْا عَلَيْهِ وَسَلِّمُوْا تَسْلِيْمًا.", "“Kemudian setelah itu hatimu menjadi keras sehingga (hatimu) seperti batu, bahkan lebih keras.", "Dan memberinya rizki dari arah yang tiada disangka-sangkanya.” [QS.", "من كان رأس ماله التقوى كِلَّتِ الألسن عن وصف رِبحِ دينه،", "Terjadilah transaksi di antara keduanya, kejadian serupa berlangsung selama 10 hari.", "Terkadang mereka anggap kesalahan itu tidak salah.", "فَيَا أَيُّهَا النَّاسُ أُوْصِيْكُمْ وَنَفْسِيْ بِتَقْوَى اللهِ فَقَدْ فَازَ الْمُتَّقُوْنَ.", "Dan Allah tidaklah lengah terhadap apa yang kamu kerjakan.”", "اَللَّهُمَّ صَلِّ عَلَى سَيِّدَنَا مُحَمَّدٍ وَعَلَى أَلِ سَيِّدَنَا مُحَمَّدٍ.", "اللهم لا تجعل الدنيا أكبر هَمِّنا و لا مبلغَ علمِنا.", "Sebagaimana Dikisahkan ada seorang wanita kaya yang dikenal pemurah, Ummu Ja’far namanya.", "Karena, yang dikejarnya itu adalah duniawi.", "اللهم اغفر لأمة سيدنا محمد مغفرةً عامّةً يارب العالمين.", "Marilah kita panjatkan puja serta puji syukur kepada Allah Swt.", "Hadirin Sidang Jumat Rahimakumullah...", "Padahal, dari batu-batu itu pasti ada sungai-sungai yang (airnya) memancar daripadanya.", "Tak peduli halal, tak peduli haram.", "berkata di dalam kitab Nashaihul Ibad karangan imam Muhammad Nawawi bin Umar Al-Jawi :", "Hadirin jumat As'adakumullah", "Setelah 10 hari, Ummu Ja’far kembali menemui pengemis kedua yang mengharapkan rezeki dari wanita kaya itu.", "الذي إمتلك القدرة البقاء بالتمام،", "“Ya Allah, anugerahkan rezeki kepadaku dari kemurahan-Mu,” ucap pengemis buta pertama.", "“Berikanlah uang itu kepadaku lalu ambillah roti dan ayam bakar ini untuk anak-anakmu,” ujar pengemis kedua.", "Selama itu menguntungkannya, pasti dia ambil, pasti dia terima.", "ومن كان راس ماله الدنيا كِلَّت الألسن عن وصْف خَسْرانِ دينه", "Singkat cerita, pengemis pertama pun akhirnya sepakat untuk ditukar.", "Saking banyaknya keburukan yang dia lakukan, dia kelu, tidak mampu untuk menyebutkannya satu-satu.", "اللهم فرّج عن أمة سيدِنا محمد فرجاً عاجلاً يارب العالمين.", "وَاَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَ", "اللهم ارحم أمة سيدنا محمد.", "Kepada pengemis pertama yang mengharap rezeki dari Allah, Ummu Ja’far memberinya uang 2 dinar.", "وَاشْكُرُوْهُ عَلىَ نِعَمِهِ يَزِدْكُمْ،", "وَاذْكُرُوا اللهَ اْلعَظِيْمَ يَذْكُرْكُمْ،", "أَقُوْلُ قَوْلِي هَذَا فَأسْتَغْفِرُ اللهَ العَظِيْمَ إِنَّهُ هُوَ الغَفُوْرُ الرَّحِيْم", "Orang-orang yang bertakwa akan selalu dilindungi oleh Allah Swt.", "رَبَّنَا آتِناَ فِى الدُّنْيَا حَسَنَةً وَفِى اْلآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ.", "Maka, في قلوبهم مرض tertutup hatinya, tertutup nuraninya.", "Karena, dia paham berbuat balik pasti akan ada balasannya.", "اللهم أصلح أمة سيدنا محمد.", "فَقَالَ اللهُ تَعَالَى: إِنَّ اللهَ وَمَلَائِكَتَهُ يُصَلُّوْنَ عَلَى النَّبِيِّ،", "والصلاة والسلام على سيد العرب والعجم،", "اللهم اغفر لأمة سَيِّدنَا مُحَمَّد.", "“Memangnya apa yang engkau berikan padaku?” kata pengemis itu menjawab dengan pertanyaan.", "Waspada, jika hal ini sudah terjadi pada diri kita, atau terjadi kepada Orang seperti ini.", "أَشْهَدُ أنْ لآ إلَهَ إِلَّا اللهُ وَحْدَهُ لا شريك لَهُ،", "الْحَمْدُ لِلَّهِ وَالْحَمْدُ لِلَّهِ ثُمَّ الْحَمْدُ لِلَّهِ.", "وَأَشْهَدُ أنَّ سَيِّدَنَا مُحَمَّدًا عَبْدُهُ وَرَسُوْلُهُ الَّذِيْ لَا نَبِيّ بعدَهُ.", "“Barangsiapa bertakwa kepada Allah niscaya Dia akan mengadakan baginya jalan keluar.", "Selanjutnya, ia juga meyakini bahwa takaran rezeki setiap orang tidak akan tertukar.", "Kedermawanan Ummu Ja’far masyhur di kalangan masyarakat, bahkan 2 pengemis buta pun mengetahui hal itu.", "Syeikh Sulaiman bin mahron Al-Kufi R.A.", "للهم عاف أمة سيدنا محمد اللهم احفظ أمة سيدنا محمد اللهم ارحم أمة سيدنا محمد رحمةً عامّةً با ربّ العالمين.", "وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا وَيَرْزُقْهُ مِنْ حَيْثُ لا يَحْتَسِبُ", "“100 dinar,” jawab Ummu Ja’far.", "سيدنا ومولانا محمد صلى الله عليه وسلم،"], "img": ["SOLUSI JALUR NABI", "PEKAN PERKENALAN KHUTBATUL ARSY", "PELITA · festa literasi alamia", "dengan cahaya literasi kita tebar inspirasi", "GRAND FINAL LANGUAGE COMPETITION", "STUDENTS OF EL-ALAMIA", "SERTIFIKAT", "PIAGAM PENGHARGAAN", "PENGHARGAAN · diberikan kepada", "SANTRI KREATIF", "PERINGKAT 2", "PERINGKAT 3", "STAR STUDENT JUNIOR HIGH SCHOOL", "JUARA 1", "JUARA 2", "CERTIFICATE OF APPRECIATION", "PONDOK PESANTREN EL-ALAMIA", "معهد العالمية للتربية الإسلامية", "ALAMIA MEDIA", "PUSH YOURSELF", "xianzing · Desember 07, 2024", "Kiaaa", "CEUK KOLOT", "VISI · MISI", "BAZAR BUKU"]};
+(()=>{
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const R=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.random()*a.length|0];
+let W=innerWidth,H=innerHeight;
+
+/* ---------- text rain (canvas) ---------- */
+const CODE=["P.quran=(b,c,d)=>({html:'',init(){}})","navigator.serviceWorker.register('sw.js')","onSnapshot(q,s=>render(s.docs))","new THREE.PerspectiveCamera(55,w/h,.1,800)","npx cap sync android","<?php echo $x; ?>","caches.open('fz-off')","git push origin main","0x6B 0x79 0x4D","segfault (core dumped)","while(hidup) belajar()","404: tidur not found","rm -rf /ragu","exit(0)"];
+const LINES=[...TXT.book,...TXT.khutbah,...TXT.img,...CODE];
+const GLYPH=[...new Set(LINES.join('').replace(/\s/g,''))];
+const cv=document.getElementById('rain'),cx=cv.getContext('2d');
+let cols=[],lines=[];
+function setup(){W=innerWidth;H=innerHeight;const d=Math.min(2,devicePixelRatio||1);cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ const cs=W<600?13:16;cols=Array.from({length:Math.ceil(W/cs)},(_,i)=>({x:i*cs,y:R(-H,H),v:R(1.5,6),cs,trail:R(8,28)|0}));
+ lines=Array.from({length:W<600?22:40},()=>newLine(R(-H*.1,H)));}
+function newLine(y){const t=pick(LINES);const arab=/[؀-ۿ]/.test(t);return{t,y:y??R(-200,-20),x:R(-W*.3,W*.8),v:R(6,18),s:pick([10,11,12,14,18,24,34,48]),a:R(.08,.6),r:Math.random()<.25?R(-1.6,1.6):0,arab,c:pick(['#cdd6d2','#cdd6d2','#5ce1ff','#ff3e88','#ffb84d']),flip:Math.random()<.1};}
+function frameRain(){cx.fillStyle='rgba(4,5,7,.32)';cx.fillRect(0,0,W,H);
+ for(const c of cols){cx.font=`${c.cs}px "VT323",monospace`;for(let k=0;k<3;k++){const yy=c.y-k*c.cs;cx.fillStyle=k?`rgba(92,225,255,${.35-k*.1})`:'#d9fbff';cx.fillText(pick(GLYPH),c.x,yy);}
+  c.y+=c.v*c.cs*1.4;if(c.y>H+c.trail*c.cs){c.y=R(-H*.5,0);c.v=R(1.5,6);}}
+ for(const l of lines){cx.save();cx.translate(l.x,l.y);cx.rotate(l.r);if(l.flip)cx.scale(-1,1);cx.globalAlpha=l.a;cx.fillStyle=l.c;
+  cx.font=l.arab?`${l.s*1.2}px "Amiri",serif`:`${l.s}px "IBM Plex Mono",monospace`;let t=l.t;if(Math.random()<.04)t=t.replace(/./g,ch=>Math.random()<.3?pick(GLYPH):ch);cx.fillText(t,0,0);cx.restore();
+  l.y+=l.v;if(l.y>H+60)Object.assign(l,newLine());}
+ cx.globalAlpha=1;}
+
+/* ---------- photo effects ---------- */
+const MODES=['ascii','dither','rgb','slice','thermal','mosaic','raw'];
+const BLENDS=['normal','screen','difference','lighten','luminosity','exclusion','hard-light'];
+const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+const cache=new Map();
+const load=s=>{if(!cache.has(s))cache.set(s,new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=s;}));return cache.get(s);};
+function drawSrc(im,w,h,crop){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ if(crop)x.drawImage(im,im.width*crop.x,im.height*crop.y,im.width*crop.w,im.height*crop.h,0,0,w,h);
+ else{const s=Math.max(w/im.width,h/im.height);x.drawImage(im,(w-im.width*s)/2,(h-im.height*s)/2,im.width*s,im.height*s);}return c;}
+function render(c,im,mode,crop){const w=c.width,h=c.height,x=c.getContext('2d');const src=drawSrc(im,w,h,crop);const d=src.getContext('2d').getImageData(0,0,w,h).data;const L=p=>(d[p]*.3+d[p+1]*.59+d[p+2]*.11)/255;
+ x.fillStyle='#040507';x.fillRect(0,0,w,h);
+ if(mode==='raw'){x.drawImage(src,0,0);x.globalCompositeOperation='color';x.fillStyle=pick(['#ff3e88','#5ce1ff','#3a3a3a']);x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';}
+ else if(mode==='ascii'){const s=Math.max(5,Math.round(w/28)),ch=" .:-=+*#%@";x.font=`${s}px "IBM Plex Mono",monospace`;x.textBaseline='top';for(let yy=0;yy<h;yy+=s)for(let xx=0;xx<w;xx+=s*.62){const l=L(((yy|0)*w+(xx|0))*4);x.fillStyle=l>.62?'#f1faf7':l>.35?'#5ce1ff':'#24505c';x.fillText(ch[Math.min(9,l*10|0)],xx,yy);}}
+ else if(mode==='dither'){const o=x.createImageData(w,h),q=o.data;for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const p=(yy*w+xx)*4;const on=L(p)>(BAYER[((yy>>1)%4)*4+((xx>>1)%4)]+.5)/16;q[p]=on?255:4;q[p+1]=on?62:5;q[p+2]=on?136:7;q[p+3]=255;}x.putImageData(o,0,0);}
+ else if(mode==='rgb'){const o=x.createImageData(w,h),q=o.data,s=Math.round(w*R(.02,.06));for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const p=(yy*w+xx)*4;q[p]=d[(yy*w+Math.min(w-1,xx+s))*4];q[p+1]=d[p+1]*.5;q[p+2]=d[(yy*w+Math.max(0,xx-s))*4+2];q[p+3]=255;}x.putImageData(o,0,0);}
+ else if(mode==='thermal'){const o=x.createImageData(w,h),q=o.data;for(let p=0;p<d.length;p+=4){const l=L(p);q[p]=Math.min(255,l*510);q[p+1]=Math.max(0,(l-.45)*510);q[p+2]=l<.5?(.5-l)*510:(l-.85)*1500;q[p+3]=255;}x.putImageData(o,0,0);}
+ else if(mode==='mosaic'){const s=Math.max(6,w/12|0);for(let yy=0;yy<h;yy+=s)for(let xx=0;xx<w;xx+=s){const p=((yy+s/2|0)*w+(xx+s/2|0))*4;if(p>=d.length)continue;x.fillStyle=`rgb(${d[p]},${d[p+1]},${d[p+2]})`;x.fillRect(xx,yy,s-1,s-1);}}
+ else{x.drawImage(src,0,0);x.globalCompositeOperation='color';x.fillStyle='#145c70';x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';for(let k=0;k<12;k++){const sy=R(0,h)|0,s2=R(3,h*.1)|0;x.drawImage(src,0,sy,w,s2,R(-w*.25,w*.25),sy,w,s2);if(Math.random()<.4){x.fillStyle=Math.random()<.5?'rgba(255,62,136,.4)':'rgba(92,225,255,.4)';x.fillRect(0,sy,w,s2);}}}}
+
+/* ---------- falling stage ---------- */
+const stage=document.getElementById('stage');
+const PH=["k00","k01","k02","k03","k04","k05","k06","k07","k08","k09","k10","k11","k12","k13","k14","k15","k16","k17","k18","k19","k20","k22","k23","buku","piagam"];
+const pieces=[];
+const mob=()=>W<700;
+function respawn(p,initial){const el=p.el;
+ if(p.kind==='ph'||p.kind==='shard'){
+  if(p.kind==='shard'){const hz=Math.random()<.6;el.style.setProperty('--ar',hz?`${R(3,8).toFixed(1)}/1`:`1/${R(3,6).toFixed(1)}`);el.style.setProperty('--w',(hz?R(W*.2,W*(mob()?.9:.5)):R(20,60))+'px');p.crop=hz?{x:0,y:R(0,.85),w:1,h:R(.05,.18)}:{x:R(0,.88),y:0,w:R(.04,.12),h:1};p.src=`img/${pick(PH)}.jpg`;}
+  else{el.style.setProperty('--ar',pick(['3/4','1/1','4/5','2/3','16/9','9/16']));el.style.setProperty('--w',R(mob()?70:100,mob()?200:330)+'px');}
+  el.style.mixBlendMode=pick(BLENDS);el.style.opacity=R(.55,1).toFixed(2);p.mode=pick(MODES);el.style.zIndex=10+R(0,20)|0;
+  requestAnimationFrame(()=>paint(p));}
+ else if(p.kind==='fr'){el.style.zIndex=40;}
+ else if(p.kind==='nm'){el.style.setProperty('--fs',R(mob()?28:40,mob()?60:120)+'px');el.style.setProperty('--bl',R(0,3).toFixed(1)+'px');el.style.zIndex=35;}
+ else{el.style.setProperty('--fs',R(mob()?70:120,mob()?160:340)+'px');el.style.setProperty('--c',pick(['#5ce1ff40','#ff3e8840','#ffb84d38','#cdd6d230']));el.style.zIndex=5;}
+ const w=el.offsetWidth||200,h=el.offsetHeight||100;
+ p.x=R(-w*.2,W-w*.8);p.y=initial?R(-h*.3,H-h*.4):R(-h-H*.4,-h);
+ p.v=p.kind==='fr'?R(12,26):p.kind==='huge'?R(4,9):R(18,42);p.vx=R(-.25,.25);
+ p.r=p.kind==='fr'?R(-8,8):p.kind==='huge'?pick([0,90,-90,R(-25,25)]):R(-28,28);p.vr=p.kind==='fr'?0:R(-.05,.05);p.h=h;}
+async function paint(p){const c=p.el.querySelector('canvas');if(!c)return;const k=Math.min(1.5,devicePixelRatio||1);c.width=Math.max(20,p.el.offsetWidth*k|0);c.height=Math.max(10,p.el.offsetHeight*k|0);
+ try{const im=await load(p.src);p.im=im;render(c,im,p.mode,p.crop);}catch(e){}}
+function add(kind,el,src){el.classList.add('it');stage.appendChild(el);const p={kind,el,src};pieces.push(p);return p;}
+
+/* name, deliberately unreadable: letters keep scrambling and never all settle */
+const NAME="muhammad hilmi azkia rahman";
+function mkName(){const el=document.createElement('div');el.className='nm';el.setAttribute('aria-hidden','true');el.textContent=NAME;add('nm',el);return el;}
+const nameEls=[mkName(),mkName(),mkName()];
+setInterval(()=>{if(RM)return;nameEls.forEach(el=>{el.textContent=[...NAME].map(c=>c===' '?pick([' ','_',' ']):(Math.random()<.55?pick(GLYPH.length?GLYPH:['#']):c)).join('');});},110);
+nameEls.forEach(el=>el.textContent=[...NAME].map(c=>c===' '?' ':(Math.random()<.55?'#':c)).join(''));
+
+["DJIA","KY-MIND","K.","ERR_0x4D","///"].forEach(t=>{const el=document.createElement('div');el.className='huge';el.textContent=t;el.setAttribute('aria-hidden','true');add('huge',el);});
+PH.forEach(f=>{const el=document.createElement('div');el.className='ph';el.innerHTML='<canvas></canvas>';el.setAttribute('aria-hidden','true');add('ph',el,`img/${f}.jpg`);});
+for(let i=0;i<(innerWidth<700?8:16);i++){const el=document.createElement('div');el.className='ph';el.innerHTML='<canvas></canvas>';el.setAttribute('aria-hidden','true');add('shard',el,'img/k00.jpg');}
+[...document.getElementById('frags').content.children].forEach(n=>add('fr',n.cloneNode(true)));
+
+/* hover or tap a piece to hold it still (so links can be clicked); tap a photo to re-corrupt it */
+let held=null;
+stage.addEventListener('pointerover',e=>{const it=e.target.closest('.it');if(it&&e.pointerType==='mouse'){held=it;it.classList.add('held');}});
+stage.addEventListener('pointerout',e=>{const it=e.target.closest('.it');if(it&&!it.contains(e.relatedTarget)){it.classList.remove('held');if(held===it)held=null;}});
+stage.addEventListener('click',e=>{const it=e.target.closest('.it');if(!it)return;const p=pieces.find(q=>q.el===it);
+ if(e.pointerType!=='mouse'&&!e.target.closest('a')){if(held&&held!==it)held.classList.remove('held');held=held===it?null:it;it.classList.toggle('held',held===it);}
+ if(p&&(p.kind==='ph'||p.kind==='shard')&&p.im){p.mode=pick(MODES);p.el.style.mixBlendMode=pick(BLENDS);render(p.el.querySelector('canvas'),p.im,p.mode,p.crop);}});
+
+/* random photo glitch-jumps */
+setInterval(()=>{if(RM)return;const ps=pieces.filter(p=>(p.kind==='ph'||p.kind==='shard')&&p.im&&p.el!==held);const p=pick(ps);if(!p)return;
+ p.x=R(-50,W-100);p.mode=pick(MODES);render(p.el.querySelector('canvas'),p.im,p.mode,p.crop);},250);
+
+function tick(){frameRain();
+ for(const p of pieces){if(p.el!==held&&!RM){p.y+=p.v;p.x+=p.vx;p.r+=p.vr;if(p.y>H+40)respawn(p,false);}
+  p.el.style.transform=`translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) rotate(${p.r.toFixed(1)}deg)`;}
+ if(!RM)requestAnimationFrame(tick);}
+
+function start(){setup();pieces.forEach(p=>respawn(p,true));tick();}
+let lw=W;addEventListener('resize',()=>{if(Math.abs(innerWidth-lw)<60&&Math.abs(innerHeight-H)<120)return;lw=innerWidth;setup();pieces.forEach(p=>respawn(p,true));});
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(start);
+})();
+</script>
+
+</html>
