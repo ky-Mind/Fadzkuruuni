@@ -1027,7 +1027,9 @@ function kelasPil() {
     document.body.append(p);
   }
   p.hidden = false;
-  p.innerHTML = `<a href="#/kelas/${KR.id}"><span class="klv">● Berbagi layar</span><span class="t">${esc(KR.judul)} · Kembali ke kelas</span></a><button type="button" data-klhenti>${ic('stop', 14)}Berhenti</button>`;
+  p.innerHTML = `<span class="tgrip" aria-hidden="true">${TIK.grip}</span><a href="#/kelas/${KR.id}"><span class="klv">● Berbagi layar</span><span class="t">${esc(KR.judul)} · Kembali ke kelas</span></a><button type="button" data-klhenti>${ic('stop', 14)}Berhenti</button>`;
+  /* Bisa digeser ke mana saja agar tidak menutupi isi (posisi diingat) */
+  seretMelayang(p, 'klminiPos');
 }
 /* Hentikan berbagi layar dari mana saja (pil, notifikasi Android, tombol di kelas) dan bersihkan tampilan */
 async function kLayarHenti() {

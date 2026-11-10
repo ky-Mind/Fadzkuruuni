@@ -139,7 +139,10 @@ function yangBaruCek() {
   const L = Object.keys(YANG_BARU)
       .filter((v) => verLebihBaru(v, lama) && !verLebihBaru(v, VER))
       .sort((a, b) => (verLebihBaru(a, b) ? -1 : 1)),
-    isi = L.flatMap((v) => YANG_BARU[v]).slice(0, 8);
+    /* Perubahan khusus admin (dashboard, mode admin, akses admin) tidak ditampilkan ke pengguna biasa */
+    isi = L.flatMap((v) => YANG_BARU[v])
+      .filter((x) => !/\badmin\b/i.test(x) || (typeof adminBisa == 'function' && adminBisa('semua')))
+      .slice(0, 8);
   if (!isi.length) return;
   const e = document.createElement('div');
   e.className = 'back-d';

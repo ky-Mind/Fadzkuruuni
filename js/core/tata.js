@@ -805,19 +805,51 @@ function tataAdminUI() {
   if (!TADMON) return;
   document.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="tadm" class="tadm${TADMON ? ' on' : ''}">${TADMON ? `<b>Mode admin</b><button type="button" data-tadm="simpan" class="pri">Terbitkan</button><button type="button" data-tadm="batal">Batal</button><a href="admin.html" target="_blank" rel="noopener">Dashboard</a>` : `<button type="button" data-tadm="mulai">${ic('sliders', 16)} Mode admin</button>`}</div>`
+    `<div id="tadm" class="tadm on" role="toolbar" aria-label="Mode admin"><span class="tgrip" aria-hidden="true">${TIK.grip}</span><b>Mode admin</b><button type="button" data-tadm="simpan" class="pri">Terbitkan</button><button type="button" data-tadm="batal">Batal</button><a href="admin.html" target="_blank" rel="noopener">Dashboard</a></div>`
   );
+  seretMelayang($('#tadm'), 'tadmPos');
 }
-/* Kendali naik/turun/sembunyikan dipasang pada elemen ber-data-ta="jenis:kunci" */
+/* Ikon kecil kendali Mode admin (garis, mengikuti warna teks) */
+const TIK = (() => {
+  const s = (d) =>
+    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  return {
+    naik: s('<path d="M6 15l6-6 6 6"/>'),
+    turun: s('<path d="M6 9l6 6 6-6"/>'),
+    kiri: s('<path d="M15 6l-6 6 6 6"/>'),
+    kanan: s('<path d="M9 6l6 6-6 6"/>'),
+    lihat: s('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+    sembunyi: s(
+      '<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/>'
+    ),
+    hapus: s('<path d="M6 6l12 12M18 6L6 18"/>'),
+    grip: '<svg width="14" height="18" viewBox="0 0 14 18" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="1.6"/><circle cx="10" cy="4" r="1.6"/><circle cx="4" cy="9" r="1.6"/><circle cx="10" cy="9" r="1.6"/><circle cx="4" cy="14" r="1.6"/><circle cx="10" cy="14" r="1.6"/></svg>',
+  };
+})();
+/* Kendali Mode admin pada elemen ber-data-ta="jenis:kunci":
+   - bagian Beranda: kepala bergaris putus-putus berisi nama bagian + tombol ikon naik / turun / sembunyikan
+   - pintasan & isi Semua Menu (kisi): tombol ikon kecil geser kiri / kanan / keluarkan di atas ikonnya, tanpa menutupi nama
+   - baris Pengaturan (daftar): naik / turun / sembunyikan di kanan baris */
 function tataAdminPasang() {
   if (!TADMON) return;
   $$('#view [data-ta]').forEach((el) => {
     if ($(':scope > .tak', el)) return;
     const [j, k] = el.dataset.ta.split(':'),
-      sembunyi = el.classList.contains('tah');
+      sembunyi = el.classList.contains('tah'),
+      kisi = !!el.closest('.grid'),
+      b = (aksi, ikon, label) =>
+        `<button type="button" data-tak="${aksi}" aria-label="${label}" title="${label}">${ikon}</button>`;
+    const urut = kisi
+      ? b('naik', TIK.kiri, 'Geser ke kiri') + b('turun', TIK.kanan, 'Geser ke kanan')
+      : b('naik', TIK.naik, 'Naikkan') + b('turun', TIK.turun, 'Turunkan');
+    const tampil =
+      j == 'beranda' || j == 'set'
+        ? b('lihat', sembunyi ? TIK.sembunyi : TIK.lihat, sembunyi ? 'Tampilkan' : 'Sembunyikan')
+        : b('hapus', TIK.hapus, 'Keluarkan dari daftar');
+    const nama = j == 'beranda' ? `<b class="tan">${esc(TBAG[k] || k)}${sembunyi ? ' · tersembunyi' : ''}</b>` : '';
     el.insertAdjacentHTML(
       'afterbegin',
-      `<span class="tak"><button type="button" data-tak="naik" aria-label="Naikkan">▲</button><button type="button" data-tak="turun" aria-label="Turunkan">▼</button>${j == 'beranda' || j == 'set' ? `<button type="button" data-tak="lihat" aria-label="${sembunyi ? 'Tampilkan' : 'Sembunyikan'}">${sembunyi ? 'Tampilkan' : 'Sembunyikan'}</button>` : `<button type="button" data-tak="hapus" aria-label="Keluarkan">Keluarkan</button>`}</span>`
+      `<span class="tak tak-${j == 'beranda' ? 'bag' : kisi ? 'kisi' : 'baris'}">${nama}<span class="takb">${urut}${tampil}</span></span>`
     );
   });
 }

@@ -58,6 +58,13 @@
         st.setProperty('--on', dk ? '#06140f' : '#fff');
         var m = document.querySelector('meta[name=theme-color]');
         m && m.setAttribute('content', dk ? '#121413' : t == 'biru' ? '#eef4fb' : '#ffffff');
+        /* Di aplikasi Android: bilah status (atas) sewarna kepala dashboard, bilah navigasi (bawah) sewarna latar halaman,
+           agar ujung atas & bawah menyatu dengan tampilan, tidak putih sendiri */
+        try {
+          var atas = dk ? '#181b1a' : t == 'biru' ? '#f7faff' : '#ffffff',
+            bawah = dk ? '#121413' : t == 'biru' ? '#eef4fb' : '#f6f7f6';
+          window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(atas, bawah);
+        } catch (e) {}
       }
       fzWarna();
       addEventListener('storage', function (e) {
@@ -2654,7 +2661,7 @@
       (function () {
         /* Isi yang sedang digeser tidak menimbulkan gulir samping (clip, bukan hidden, agar bilah atas tetap
            menempel) */
-        document.head.insertAdjacentHTML('beforeend', '<style>#root{overflow-x:clip}#isi{touch-action:pan-y}</style>');
+        document.head.insertAdjacentHTML('beforeend', '<style>#root{overflow-x:clip;touch-action:pan-y}</style>');
         const BATAS = 0.22;
         const KIBAS = 0.5;
         const EASE = 'cubic-bezier(.22,.8,.3,1)';
@@ -2677,16 +2684,23 @@
           const i = L.indexOf(tabKini());
           return i < 0 ? null : L[i + arah] || null;
         };
-        const halang = (t) => {
-          if (
-            t.closest('input,textarea,select,[contenteditable],canvas,iframe,.leaflet-container,[data-noswipe],.ls>.it')
-          )
-            return true;
-          for (let e = t; e && e.id != 'isi'; e = e.parentElement) {
-            if (e.scrollWidth > e.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(e).overflowX)) return true;
+        /* Tempat yang tidak boleh dipakai menggeser tab: isian, peta, pratinjau aplikasi, baris yang sedang diseret,
+           bilah atas (judul & deretan tab), dan dialog */
+        const halang = (t) =>
+          !!t.closest(
+            'input,textarea,select,[contenteditable],canvas,iframe,.leaflet-container,[data-noswipe],.ls>.it,#atas,.back-d,.sheet,dialog'
+          );
+        /* Wadah yang bisa digulir ke samping (tabel lebar, deretan tombol): digulir lebih dulu; begitu sudah mentok di
+           ujungnya, geseran berikutnya ke arah yang sama pindah tab */
+        const wadahSamping = (t) => {
+          for (let e = t; e && e != document.body; e = e.parentElement) {
+            if (e.scrollWidth > e.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(e).overflowX)) return e;
           }
-          return false;
+          return null;
         };
+        const masihBisaGulir = (w, arah) =>
+          w && (arah > 0 ? w.scrollLeft + w.clientWidth < w.scrollWidth - 1 : w.scrollLeft > 1);
+        let wadah = null;
         const geser = (px, ms) => {
           const el = isi();
           if (!el) return;
@@ -2699,7 +2713,9 @@
           (e) => {
             sx = null;
             const el = isi();
-            if (sibuk || !el || e.touches.length != 1 || !el.contains(e.target) || halang(e.target)) return;
+            /* Di mana saja di halaman dashboard (termasuk ruang kosong di bawah isi), kecuali tempat yang dihalangi */
+            if (sibuk || !el || !$('#atab') || e.touches.length != 1 || halang(e.target)) return;
+            wadah = wadahSamping(e.target);
             sx = e.touches[0].clientX;
             sy = e.touches[0].clientY;
             t0 = Date.now();
@@ -2719,6 +2735,8 @@
             if (kunci === null) {
               if (Math.abs(x) < 12 && Math.abs(y) < 12) return;
               kunci = Math.abs(x) > Math.abs(y) * 1.6 ? 'h' : 'v';
+              /* Wadah samping yang masih bisa digulir ke arah ini: biarkan wadahnya yang bergulir */
+              if (kunci == 'h' && masihBisaGulir(wadah, x < 0 ? 1 : -1)) kunci = 'v';
             }
             if (kunci != 'h') return;
             tujuan = sebelah(x < 0 ? 1 : -1);
