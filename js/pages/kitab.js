@@ -32,7 +32,12 @@ const kitabHub = () => {
       ? `<div class="list">${L.map((k) => `<a class="row" href="${k.berkas ? '#/kitab/' + k.id : '#/segera/' + encodeURIComponent(k.judul)}"><span class="si" style="width:46px;height:46px">${ic('lib', 22)}</span><span class="t"><b>${k.judul}</b>${k.arab ? `<br><span class="ar" style="font-size:18px">${k.arab}</span>` : ''}<br><small>${k.ket || ''}${k.berkas ? (dlSudah('kitab:' + k.id) ? ' · Tersimpan offline' : '') : ' · Segera hadir'}</small></span>${ic('next', 18)}</a>`).join('')}</div>`
       : '<div class="card mut">Segera hadir.</div>';
   });
-  return pisahBar('kitab', H[0], H[1]);
+  /* Teks kecil di bawah daftar (gaya sama dengan catatan kaki Tentang) menuju permainan Teka-Teki Kitab
+     (teka-teki.html, dibuat oleh teka-teki/bangun.py) */
+  return (
+    pisahBar('kitab', H[0], H[1]) +
+    `<p class="mut tkred"><a href="teka-teki.html">Sudah hafal isi kitabnya?<br><span>Uji ingatanmu di <b>Teka-Teki Kitab</b></span></a></p>`
+  );
 };
 function kitabDetail(el, k) {
   const kh = S.kh || {};

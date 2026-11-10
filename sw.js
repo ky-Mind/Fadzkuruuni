@@ -1,4 +1,4 @@
-const V = 'fz-v261',
+const V = 'fz-v262',
   A = [
     './',
     'index.html',
@@ -107,6 +107,7 @@ const V = 'fz-v261',
     'audio/kelas-lonceng.mp3',
     'kebijakan-privasi.html',
     'hapus-data.html',
+    'teka-teki.html',
     'css/dokumen.css',
     'js/dokumen.js',
   ];

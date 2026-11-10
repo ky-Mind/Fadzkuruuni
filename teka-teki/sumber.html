@@ -1,0 +1,3872 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Teka-Teki Kitab</title>
+    <meta name="theme-color" content="#ffffff" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cg fill=%22%2324584a%22%3E%3Crect x=%229%22 y=%222%22 width=%226%22 height=%226%22 rx=%221%22/%3E%3Crect x=%229%22 y=%229%22 width=%226%22 height=%226%22 rx=%221%22/%3E%3Crect x=%222%22 y=%229%22 width=%226%22 height=%226%22 rx=%221%22/%3E%3Crect x=%2216%22 y=%229%22 width=%226%22 height=%226%22 rx=%221%22/%3E%3Crect x=%229%22 y=%2216%22 width=%226%22 height=%226%22 rx=%221%22/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <script>
+      /* Sama dengan skrip awal aplikasi (index.html): tema dan ukuran tampilan dipasang sebelum gambar pertama, agar tidak
+         berkedip terang → gelap atau tulisan tiba-tiba membesar */
+      try {
+        const P0 = { ...JSON.parse(localStorage.fz || '{}'), ...JSON.parse(localStorage.fzTeka || '{}') };
+        const w = Math.min(screen.width || innerWidth, screen.height || innerHeight);
+        const uz = P0.uz || (w < 380 ? 'kecil' : w < 420 ? 'sedang' : 'besar');
+        const t = P0.theme || 'light';
+        document.documentElement.dataset.theme =
+          t == 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
+        document.documentElement.style.setProperty('--zm', { kecil: 0.86, sedang: 0.93, besar: 1 }[uz] || 0.86);
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- Gaya aplikasi Fadzkuruuni (css/app.css), disalin utuh saat dibangun (bangun.py) -->
+    <style>
+      /*APP_CSS*/
+    </style>
+    <style>
+      /* ---------- Tambahan khusus Teka-Teki Kitab. Semua ukuran, warna, dan gerak memakai nilai aplikasi. ---------- */
+      :root {
+        --ok: #2e7d4f;
+        --okbg: #e3f2e8;
+        --no: #b3412e;
+        --nobg: #f8e6e2;
+        --sel: #f3e3b3;
+        --selw: #fbf3dc;
+        --arz: 32px;
+      }
+      /* Tema tambahan (di luar empat tema aplikasi) */
+      [data-theme='sepia'] {
+        --bg: #f6efe2;
+        --card: #fbf6ec;
+        --fill: #efe5d3;
+        --ink: #3b2f22;
+        --bc: #000000;
+        --mut: #7a6a55;
+        --line: #e3d6bf;
+        --gs: #ece0c8;
+        --on: #fff;
+        --sel: #f0d9a8;
+        --selw: #f7ebcf;
+      }
+      [data-theme='pekat'] {
+        --bg: #000000;
+        --card: #0b0b0b;
+        --fill: #161616;
+        --ink: #f2f2f2;
+        --bc: #ffffff;
+        --mut: #9a9a9a;
+        --line: #232323;
+        --gs: #151515;
+        --on: #000000;
+        color-scheme: dark;
+      }
+      [data-theme='dark'],
+      [data-theme='pekat'] {
+        --ok: #7fcf9b;
+        --okbg: #17301f;
+        --no: #f0a191;
+        --nobg: #3a1f1a;
+        --sel: #5a4a1e;
+        --selw: #2e2816;
+      }
+      .bk[hidden],
+      .hal[hidden],
+      .atur[hidden],
+      .skor[hidden] {
+        display: none !important;
+      }
+      .skor {
+        font-size: 14px;
+        color: var(--mut);
+        font-weight: 600;
+      }
+      .atur {
+        flex: none;
+        width: 44px;
+        height: 44px;
+        margin-right: -10px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--ink);
+      }
+      .atur:active {
+        background: var(--fill);
+      }
+      .pmb {
+        margin: 0 0 16px;
+        font-size: 14px;
+      }
+
+      /* Gerak masuk / keluar halaman: keyframe dan waktu yang sama dengan #view.ent / #view.kel di aplikasi */
+      .hal.ent > * {
+        animation: entUp 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+        animation-delay: calc(var(--i, 0) * 45ms);
+      }
+      .hal.ent.entb > * {
+        animation-name: entBack;
+      }
+      .hal.kel,
+      .hal.kelb {
+        pointer-events: none;
+      }
+      .hal.kel > * {
+        animation: kelUp 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+        animation-delay: calc(var(--o, 0) * 24ms);
+      }
+      .hal.kelb > * {
+        animation: kelKanan 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+        animation-delay: calc(var(--o, 0) * 24ms);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hal.ent > *,
+        .hal.kel > *,
+        .hal.kelb > * {
+          animation: none;
+        }
+      }
+      /* Halaman sebelumnya di belakang saat digeser kembali (sama dengan mode 'back' geser di aplikasi) */
+      .vpeek {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: var(--bg);
+        pointer-events: none;
+      }
+      .vpeek > div {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 16px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left));
+      }
+
+      /* Beranda permainan */
+      .mode {
+        display: grid;
+        gap: 10px;
+      }
+      .kartu {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        width: 100%;
+        padding: 14px;
+        text-align: left;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--card);
+        color: var(--ink);
+        transition: transform 0.1s;
+      }
+      .kartu:active {
+        transform: scale(0.98);
+      }
+      .kartu .si {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+      }
+      .kartu b {
+        display: block;
+        font-size: 16px;
+      }
+      .kartu small {
+        color: var(--mut);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .sumber ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+        font-size: 14px;
+      }
+
+      /* Teka-teki silang */
+      .petunjuk {
+        position: sticky;
+        top: -16px;
+        z-index: 3;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 60px;
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: var(--g);
+        color: var(--on);
+      }
+      .petunjuk .pno {
+        font-weight: 700;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+      .petunjuk .ptx {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      .petunjuk .gnt {
+        flex: none;
+        padding: 4px 10px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        background: none;
+        color: inherit;
+        font-size: 13px;
+      }
+      .petunjuk .gnt[hidden] {
+        display: none;
+      }
+      #h-tts .act {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+      #h-tts .act > * {
+        flex: 0 0 auto;
+      }
+      .back-d.tgh .act .btn {
+        height: 42px;
+      }
+      .kisi {
+        display: grid;
+        gap: 2px;
+        width: 100%;
+        margin: 0 auto;
+        touch-action: manipulation;
+      }
+      .sel {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 4px;
+      }
+      .sel.isi {
+        background: var(--card);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 24%, transparent);
+        cursor: pointer;
+      }
+      .sel.isi.kata {
+        background: var(--selw);
+      }
+      .sel.isi.aktif {
+        background: var(--sel);
+        box-shadow: inset 0 0 0 2px var(--g);
+      }
+      .sel.isi.benar {
+        background: var(--okbg);
+      }
+      .sel.isi.salah {
+        background: var(--nobg);
+      }
+      .sel .sn {
+        position: absolute;
+        top: 1px;
+        left: 3px;
+        font-size: 9px;
+        line-height: 1;
+        color: var(--mut);
+        pointer-events: none;
+      }
+      .sel .sh {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: clamp(11px, 3.6vw, 19px);
+        pointer-events: none;
+      }
+      .sel.benar .sh {
+        color: var(--ok);
+      }
+      .sel.salah .sh {
+        color: var(--no);
+      }
+      #ketik {
+        position: fixed;
+        top: 50%;
+        left: -999px;
+        width: 10px;
+        height: 10px;
+        opacity: 0;
+        font-size: 16px;
+      }
+      .rayakan {
+        margin: 12px 0 0;
+        padding: 12px;
+        border-radius: 14px;
+        background: var(--okbg);
+        text-align: center;
+        font-weight: 600;
+      }
+      .rayakan[hidden] {
+        display: none;
+      }
+      .daftar {
+        display: grid;
+        gap: 4px 18px;
+      }
+      @media (min-width: 520px) {
+        .daftar {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .daftar ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .daftar li {
+        padding: 7px 8px;
+        border-radius: 10px;
+        font-size: 14px;
+        line-height: 1.35;
+        cursor: pointer;
+      }
+      .daftar li b {
+        margin-right: 4px;
+      }
+      .daftar li.on {
+        background: var(--gs);
+      }
+      .daftar li.selesai {
+        color: var(--mut);
+        text-decoration: line-through;
+      }
+      .daftar li small {
+        display: block;
+        color: var(--mut);
+        font-size: 12px;
+      }
+
+      /* Tebak kitab */
+      .prog {
+        height: 4px;
+        margin: 0 0 14px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: var(--fill);
+      }
+      .prog i {
+        display: block;
+        height: 100%;
+        background: var(--g);
+        transition: width 0.26s cubic-bezier(0.22, 0.8, 0.3, 1);
+      }
+      .soal {
+        padding: 20px 16px;
+        text-align: center;
+      }
+      .soal .lbl {
+        display: block;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .soal .tar {
+        margin: 10px 0 4px;
+        font-family: var(--ar);
+        font-size: var(--arz);
+        line-height: 1.7;
+        direction: rtl;
+      }
+      .soal .tid {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .pil {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .pil button {
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--ink);
+        text-align: left;
+        font-weight: 600;
+        transition:
+          transform 0.1s,
+          background-color 0.15s,
+          border-color 0.15s;
+      }
+      .pil button:not(:disabled):active {
+        transform: scale(0.98);
+      }
+      .pil button small {
+        display: block;
+        color: var(--mut);
+        font-size: 12px;
+        font-weight: 400;
+      }
+      .pil button.benar {
+        border-color: var(--ok);
+        background: var(--okbg);
+      }
+      .pil button.salah {
+        border-color: var(--no);
+        background: var(--nobg);
+      }
+      .pil .nk {
+        display: none;
+      }
+      .umpan {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+      .umpan.ok {
+        background: var(--okbg);
+      }
+      .umpan.no {
+        background: var(--nobg);
+      }
+      .akhir {
+        padding: 24px 8px;
+        text-align: center;
+      }
+      .akhir .besar {
+        font-size: 52px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: var(--g);
+      }
+
+      /* Petunjuk keyboard: hanya di perangkat ber-mouse (komputer) */
+      .kbdh {
+        display: none;
+        margin: 10px 0 0;
+        font-size: 13px;
+      }
+      kbd {
+        padding: 2px 6px;
+        border: 1px solid var(--line);
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        background: var(--card);
+        color: var(--ink);
+        font: 12px/1 var(--ui);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .kbdh {
+          display: block;
+        }
+        .pil .nk {
+          display: inline-grid;
+          place-items: center;
+          width: 22px;
+          height: 22px;
+          margin-right: 8px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          color: var(--mut);
+          font-size: 12px;
+          font-weight: 400;
+          vertical-align: 1px;
+        }
+        .kartu:hover,
+        .pil button:not(:disabled):hover,
+        .daftar li:hover,
+        .atur:hover {
+          background: var(--fill);
+        }
+      }
+
+      /* Pemilih tema: kartu kecil dengan contoh warna latar dan aksen */
+      .tmp {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .tmp button {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--ink);
+        font-size: 12.5px;
+        font-weight: 600;
+        text-align: left;
+      }
+      .tmp button.on {
+        border-color: var(--g);
+        box-shadow: inset 0 0 0 1px var(--g);
+      }
+      .tmp i {
+        position: relative;
+        display: block;
+        height: 34px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: var(--c1);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+      }
+      .tmp i::before,
+      .tmp i::after {
+        content: '';
+        position: absolute;
+        left: 7px;
+        height: 6px;
+        border-radius: 3px;
+      }
+      .tmp i::before {
+        top: 8px;
+        width: 55%;
+        background: var(--c2);
+      }
+      .tmp i::after {
+        top: 20px;
+        width: 30%;
+        background: var(--c3);
+      }
+      .tmp i.auto {
+        background: linear-gradient(135deg, #ffffff 50%, #121413 50%);
+      }
+      .lnk {
+        cursor: pointer;
+      }
+      .lnk:active {
+        background: var(--fill);
+      }
+
+      /* Sorotan TTS (pengaturan khusus Teka-Teki Silang) */
+      #h-tts[data-sorot='aksen'] {
+        --sel: color-mix(in srgb, var(--g) 32%, var(--card));
+        --selw: color-mix(in srgb, var(--g) 12%, var(--card));
+      }
+      #h-tts[data-sorot='biru'] {
+        --sel: color-mix(in srgb, #3b82f6 34%, var(--card));
+        --selw: color-mix(in srgb, #3b82f6 13%, var(--card));
+      }
+      #h-tts[data-sorot='hijau'] {
+        --sel: color-mix(in srgb, #22a06b 34%, var(--card));
+        --selw: color-mix(in srgb, #22a06b 13%, var(--card));
+      }
+      #h-tts[data-uk='kecil'] .kisi {
+        --selmaks: 34px;
+      }
+      #h-tts[data-uk='besar'] .kisi {
+        --selmaks: 50px;
+      }
+      /* Pola punggung kartu (pengaturan khusus Kartu Ingatan) */
+      .kin[data-pola='garis'] .blk {
+        background-image: repeating-linear-gradient(
+          45deg,
+          color-mix(in srgb, var(--on) 16%, transparent) 0 2px,
+          transparent 2px 9px
+        );
+        background-size: auto;
+      }
+      .kin[data-pola='kotak'] .blk {
+        background-image: linear-gradient(color-mix(in srgb, var(--on) 14%, transparent) 1px, transparent 1px),
+          linear-gradient(90deg, color-mix(in srgb, var(--on) 14%, transparent) 1px, transparent 1px);
+        background-size: 12px 12px;
+      }
+      .kin[data-pola='polos'] .blk {
+        background-image: none;
+      }
+
+      /* Susun Huruf */
+      .jwb {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        min-height: 52px;
+        margin: 14px 0;
+      }
+      .jwb span {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 46px;
+        border-bottom: 3px solid var(--line);
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .jwb span.isi {
+        border-color: var(--g);
+      }
+      .jwb.ok span {
+        border-color: var(--ok);
+        color: var(--ok);
+      }
+      .jwb.no span {
+        border-color: var(--no);
+        color: var(--no);
+      }
+      .ubin {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+      .ubin button {
+        width: 46px;
+        height: 50px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--gs);
+        color: var(--g);
+        font-size: 21px;
+        font-weight: 700;
+        transition:
+          transform 0.1s,
+          opacity 0.15s;
+      }
+      .ubin button:active {
+        transform: scale(0.94);
+      }
+      .ubin button:disabled {
+        opacity: 0.25;
+      }
+
+      /* Cari Kata */
+      .ckisi {
+        display: grid;
+        grid-template-columns: repeat(var(--n, 10), 1fr);
+        gap: 2px;
+        max-width: calc(var(--n, 10) * 44px);
+        margin: 0 auto;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .ck {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        border-radius: 6px;
+        background: var(--card);
+        box-shadow: inset 0 0 0 1px var(--line);
+        font-weight: 700;
+        font-size: clamp(12px, 3.9vw, 19px);
+        cursor: pointer;
+        transition: background-color 0.12s;
+      }
+      .ck.t {
+        background: color-mix(in srgb, hsl(var(--h) 72% 48%) 30%, var(--card));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, hsl(var(--h) 72% 48%) 55%, transparent);
+      }
+      .ck.jalur {
+        background: var(--sel);
+        box-shadow: inset 0 0 0 2px var(--g);
+      }
+      .ck.salah {
+        background: var(--nobg);
+      }
+      .ckl {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .ckl li {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: var(--fill);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .ckl.ptj li {
+        flex: 1 1 100%;
+        border-radius: 10px;
+        font-weight: 400;
+      }
+      .ckl li.ok {
+        background: color-mix(in srgb, hsl(var(--h) 72% 48%) 26%, var(--card));
+        text-decoration: line-through;
+        color: var(--mut);
+      }
+
+      /* Mana yang Beda */
+      .bdpil button .kt {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--mut);
+      }
+      .bdpil button .tar2 {
+        display: block;
+        font-family: var(--ar);
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1.6;
+        direction: rtl;
+        text-align: right;
+      }
+
+      /* Ingat Pola: kotak huruf hijaiyah yang menyala bergiliran */
+      .plk {
+        display: grid;
+        grid-template-columns: repeat(var(--k, 3), 1fr);
+        gap: 10px;
+        max-width: 420px;
+        margin: 0 auto;
+      }
+      .plk button {
+        aspect-ratio: 1;
+        border: 0;
+        border-radius: 18px;
+        background: color-mix(in srgb, hsl(var(--h) 65% 50%) 22%, var(--card));
+        color: color-mix(in srgb, hsl(var(--h) 65% 40%) 80%, var(--ink));
+        font-family: var(--ar);
+        font-size: 34px;
+        transition:
+          transform 0.12s,
+          background-color 0.12s,
+          box-shadow 0.12s;
+      }
+      .plk button.nyala {
+        background: hsl(var(--h) 70% 50%);
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 6px 22px color-mix(in srgb, hsl(var(--h) 70% 50%) 55%, transparent);
+      }
+      .plk.kunci button {
+        cursor: default;
+      }
+      .plinfo {
+        margin: 0 0 14px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      /* Kartu permainan di beranda */
+      .kartu .si {
+        flex: none;
+      }
+      .status {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 0 0 12px;
+        font-size: 14px;
+        color: var(--mut);
+      }
+      .status b {
+        color: var(--ink);
+      }
+      .hasil {
+        padding: 24px 8px 8px;
+        text-align: center;
+      }
+      .hasil .besar {
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: var(--g);
+      }
+      .hasil .rek {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--gs);
+        color: var(--g);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      /* Kartu Ingatan: kartu dibalik (gerak 0,32 s dengan kurva aplikasi) */
+      .kin {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(var(--kol, 3), 1fr);
+      }
+      .kk {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        padding: 0;
+        border: 0;
+        background: none;
+        perspective: 800px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .kk .dlm {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.3, 1);
+      }
+      .kk.buka .dlm,
+      .kk.pas .dlm {
+        transform: rotateY(180deg);
+      }
+      .kk .muka,
+      .kk .blk {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 8px;
+        border-radius: 12px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .kk .blk {
+        background: var(--g);
+        color: var(--on);
+        background-image: radial-gradient(color-mix(in srgb, var(--on) 14%, transparent) 1px, transparent 1.4px);
+        background-size: 10px 10px;
+      }
+      .kk .muka {
+        transform: rotateY(180deg);
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.3;
+        text-align: center;
+        overflow: hidden;
+      }
+      .kk .muka.ar {
+        font-family: var(--ar);
+        font-size: 17px;
+        line-height: 1.6;
+        direction: rtl;
+      }
+      .kk.pas .muka {
+        border-color: var(--ok);
+        background: var(--okbg);
+      }
+      .kk.salah .muka {
+        border-color: var(--no);
+        background: var(--nobg);
+      }
+      .kk:active:not(.buka):not(.pas) .dlm {
+        transform: scale(0.96);
+      }
+
+      /* Urutkan Bab */
+      .ulist {
+        display: grid;
+        gap: 8px;
+      }
+      .ulist button,
+      .uslot {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 48px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--ink);
+        text-align: left;
+        font-size: 14px;
+        line-height: 1.35;
+        transition:
+          transform 0.1s,
+          background-color 0.15s,
+          border-color 0.15s;
+      }
+      .ulist button:active {
+        transform: scale(0.98);
+      }
+      .uslot {
+        border-style: dashed;
+        color: var(--mut);
+      }
+      .ulist .no2 {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--gs);
+        color: var(--g);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .ulist button.benar {
+        border-color: var(--ok);
+        background: var(--okbg);
+      }
+      .ulist button.salah {
+        border-color: var(--no);
+        background: var(--nobg);
+      }
+      .ulist .asli {
+        margin-left: auto;
+        flex: none;
+        color: var(--mut);
+        font-size: 12px;
+      }
+
+      /* Cepat Tepat */
+      .waktu {
+        height: 6px;
+        margin: 0 0 14px;
+        overflow: hidden;
+        border-radius: 3px;
+        background: var(--fill);
+      }
+      .waktu i {
+        display: block;
+        height: 100%;
+        background: var(--g);
+        transform-origin: left;
+      }
+      .waktu.habis i {
+        background: var(--no);
+      }
+      .pernyataan {
+        min-height: 170px;
+        padding: 20px 16px;
+        border-radius: 14px;
+        text-align: center;
+        transition:
+          background-color 0.18s,
+          box-shadow 0.18s;
+      }
+      .pernyataan.ok {
+        background: var(--okbg);
+        box-shadow: inset 0 0 0 2px var(--ok);
+      }
+      .pernyataan.no {
+        background: var(--nobg);
+        box-shadow: inset 0 0 0 2px var(--no);
+      }
+      .pernyataan .tar {
+        margin: 4px 0;
+        font-family: var(--ar);
+        font-size: calc(var(--arz) * 0.85);
+        line-height: 1.7;
+        direction: rtl;
+      }
+      .pernyataan p {
+        margin: 6px 0 0;
+        font-size: 16px;
+      }
+      .bs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .bs button {
+        height: 56px;
+        border: 0;
+        border-radius: 14px;
+        font-size: 17px;
+        font-weight: 700;
+        transition: transform 0.1s;
+      }
+      .bs button:active {
+        transform: scale(0.97);
+      }
+      .bs .bsS {
+        background: var(--nobg);
+        color: var(--no);
+      }
+      .bs .bsB {
+        background: var(--okbg);
+        color: var(--ok);
+      }
+
+      /* Tablet ke atas */
+      @media (min-width: 640px) {
+        .mode {
+          grid-template-columns: 1fr 1fr;
+        }
+        .kartu {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .pil {
+          grid-template-columns: 1fr 1fr;
+        }
+        .kin {
+          --kol: 4 !important;
+        }
+      }
+      /* Desktop: TTS lebih lebar, kisi di kiri dan daftar petunjuk di kanan */
+      @media (min-width: 1000px) {
+        #view.lebar {
+          max-width: 1160px;
+          padding-left: 40px;
+          padding-right: 40px;
+        }
+        #h-tts:not([hidden]) {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 380px;
+          gap: 32px;
+          align-items: start;
+        }
+        .tts-kiri,
+        .daftar {
+          position: sticky;
+          top: 0;
+        }
+        .petunjuk {
+          position: static;
+        }
+        .kisi {
+          --selmaks: 46px;
+        }
+        .sel .sh {
+          font-size: 21px;
+        }
+        .sel .sn {
+          font-size: 11px;
+        }
+        .daftar {
+          grid-template-columns: 1fr;
+          max-height: calc(100vh - 110px);
+          overflow: auto;
+          padding: 12px;
+          border: 1px solid var(--line);
+          border-radius: 14px;
+        }
+        .soal .tar {
+          font-size: calc(var(--arz) * 1.2);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <main id="view" tabindex="-1">
+        <div class="bar">
+          <a class="bk" id="kembali" href="#" aria-label="Kembali" data-ic="panah"></a>
+          <h1 id="judul">Teka-Teki Kitab</h1>
+          <span class="skor" id="skor" hidden></span>
+          <button class="atur inf" id="infoBuka" aria-label="Info" title="Info" data-ic="info"></button>
+          <button class="atur gear" id="aturBuka" aria-label="Pengaturan" title="Pengaturan">
+            <svg
+              class="ic"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Beranda permainan -->
+        <section class="hal" id="h-awal">
+          <p class="mut pmb">Uji ingatanmu tentang isi kitab-kitab di Fadzkuruuni.</p>
+          <div class="mode">
+            <button class="kartu" data-main="tts">
+              <span class="si"
+                ><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="3" width="6" height="6" rx="1" />
+                  <rect x="9" y="3" width="6" height="6" rx="1" />
+                  <rect x="15" y="3" width="6" height="6" rx="1" />
+                  <rect x="9" y="9" width="6" height="6" rx="1" />
+                  <rect x="9" y="15" width="6" height="6" rx="1" /></svg
+              ></span>
+              <span
+                ><b>Teka-Teki Silang</b
+                ><small>Isi kotak dari petunjuk bab kitab. Setiap main, susunan kata baru.</small></span
+              >
+            </button>
+            <button class="kartu" data-main="tebak">
+              <span class="si"
+                ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                >
+                  <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" />
+                  <path d="M4 21V5" />
+                  <path d="M10 8.5a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6 1V12M12 15h.01" /></svg
+              ></span>
+              <span><b>Tebak Kitab</b><small>Satu judul bab, empat pilihan: bab ini ada di kitab mana?</small></span>
+            </button>
+            <button class="kartu" data-main="memori">
+              <span class="si" data-gi="memori"></span>
+              <span
+                ><b>Kartu Ingatan</b
+                ><small>Balik kartu dan pasangkan judul bab Arab dengan artinya. Melatih daya ingat.</small></span
+              >
+            </button>
+            <button class="kartu" data-main="urut">
+              <span class="si" data-gi="urut"></span>
+              <span
+                ><b>Urutkan Bab</b
+                ><small>Susun bab-bab yang diacak sesuai urutannya di kitab. Melatih logika dan urutan.</small></span
+              >
+            </button>
+            <button class="kartu" data-main="susun">
+              <span class="si" data-gi="susun"></span>
+              <span
+                ><b>Susun Huruf</b
+                ><small>Susun huruf acak menjadi jawaban dari petunjuk kitab. Melatih ketelitian.</small></span
+              >
+            </button>
+            <button class="kartu" data-main="cepat">
+              <span class="si" data-gi="cepat"></span>
+              <span
+                ><b>Cepat Tepat</b
+                ><small
+                  >Benar atau salah, secepat mungkin sebelum waktu habis. Melatih kecepatan dan fokus.</small
+                ></span
+              >
+            </button>
+            <button class="kartu" data-main="cari">
+              <span class="si" data-gi="cari"></span>
+              <span
+                ><b>Cari Kata</b
+                ><small>Temukan kata jawaban yang tersembunyi di kotak huruf. Melatih ketelitian mata.</small></span
+              >
+            </button>
+            <button class="kartu" data-main="beda">
+              <span class="si" data-gi="beda"></span>
+              <span
+                ><b>Mana yang Beda</b
+                ><small
+                  >Tiga bab dari kitab yang sama, satu dari kitab lain. Temukan yang beda. Melatih logika.</small
+                ></span
+              >
+            </button>
+            <button class="kartu" data-main="pola">
+              <span class="si" data-gi="pola"></span>
+              <span
+                ><b>Ingat Pola</b
+                ><small
+                  >Kotak huruf hijaiyah menyala bergiliran, ulangi urutannya. Makin lama makin panjang.</small
+                ></span
+              >
+            </button>
+          </div>
+        </section>
+
+        <!-- Teka-teki silang -->
+        <section class="hal" id="h-tts" hidden>
+          <div class="tts-kiri">
+            <div class="petunjuk">
+              <span class="pno" id="ptjNo"></span><span class="ptx" id="ptjTx"></span>
+              <button class="gnt" id="ganti" aria-label="Ganti arah">⇄</button>
+            </div>
+            <div class="kisi" id="kisi"></div>
+            <input
+              id="ketik"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              aria-label="Ketik huruf"
+            />
+            <div class="rayakan" id="rayakan" hidden>Masya Allah, semua kotak benar!</div>
+            <div class="act" style="margin-top: 14px">
+              <button class="btn" id="cek">Cek jawaban</button>
+              <button class="btn s" id="huruf">Bantu 1 huruf</button>
+              <button class="btn s" id="buka">Tampilkan jawaban</button>
+              <button class="btn s" id="baru">TTS baru</button>
+            </div>
+            <p class="mut kbdh">
+              Ketik langsung dengan keyboard. <kbd>←</kbd> <kbd>→</kbd> pindah kotak, <kbd>Tab</kbd> petunjuk
+              berikutnya, <kbd>Spasi</kbd> ganti arah.
+            </p>
+          </div>
+          <div class="daftar">
+            <div>
+              <h2>Mendatar</h2>
+              <ol id="lsD"></ol>
+            </div>
+            <div>
+              <h2>Menurun</h2>
+              <ol id="lsM"></ol>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tebak kitab -->
+        <section class="hal" id="h-tebak" hidden>
+          <div class="prog"><i id="progI"></i></div>
+          <div id="tbIsi"></div>
+          <p class="mut kbdh">
+            Tekan <kbd>1</kbd>–<kbd>4</kbd> untuk menjawab, <kbd>Enter</kbd> untuk soal berikutnya.
+          </p>
+        </section>
+
+        <!-- Pengaturan: isinya dibuat oleh aturGambar(), meniru Pengaturan › Tampilan & Bacaan di aplikasi -->
+        <section class="hal" id="h-atur" hidden></section>
+
+        <!-- Kartu Ingatan -->
+        <section class="hal" id="h-memori" hidden>
+          <div class="status"><span id="mmLangkah"></span><span id="mmWaktu"></span></div>
+          <div class="kin" id="kin"></div>
+          <div id="mmHasil"></div>
+        </section>
+
+        <!-- Urutkan Bab -->
+        <section class="hal" id="h-urut" hidden>
+          <div class="prog"><i id="urProg"></i></div>
+          <div id="urIsi"></div>
+        </section>
+
+        <!-- Cepat Tepat -->
+        <section class="hal" id="h-cepat" hidden>
+          <div class="waktu" id="ctWaktu"><i></i></div>
+          <div class="status"><span id="ctSisa"></span><span id="ctRentet"></span></div>
+          <div id="ctIsi"></div>
+          <p class="mut kbdh">Tekan <kbd>←</kbd> Salah, <kbd>→</kbd> Benar.</p>
+        </section>
+
+        <!-- Susun Huruf -->
+        <section class="hal" id="h-susun" hidden>
+          <div class="prog"><i id="shProg"></i></div>
+          <div id="shIsi"></div>
+          <p class="mut kbdh">Ketik hurufnya langsung, <kbd>Backspace</kbd> menghapus, <kbd>Enter</kbd> lanjut.</p>
+        </section>
+
+        <!-- Cari Kata -->
+        <section class="hal" id="h-cari" hidden>
+          <div class="status"><span id="ckTemu"></span><span id="ckWaktu"></span></div>
+          <div class="ckisi" id="ckisi"></div>
+          <ul class="ckl" id="ckl"></ul>
+          <div id="ckHasil"></div>
+        </section>
+
+        <!-- Mana yang Beda -->
+        <section class="hal" id="h-beda" hidden>
+          <div class="prog"><i id="bdProg"></i></div>
+          <div id="bdIsi"></div>
+          <p class="mut kbdh">Tekan <kbd>1</kbd>–<kbd>5</kbd> untuk memilih, <kbd>Enter</kbd> untuk soal berikutnya.</p>
+        </section>
+
+        <!-- Ingat Pola -->
+        <section class="hal" id="h-pola" hidden>
+          <p class="plinfo" id="plInfo"></p>
+          <div class="plk" id="plk"></div>
+          <div id="plHasil"></div>
+        </section>
+
+        <!-- Pengaturan khusus permainan -->
+        <section class="hal" id="h-aturg" hidden></section>
+
+        <!-- Info -->
+        <section class="hal" id="h-info" hidden></section>
+      </main>
+    </div>
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    </script>
+    <!-- Ikon aplikasi (js/core/icons.js), disalin saat dibangun -->
+    <script>
+      /*APP_ICONS*/
+    </script>
+    <script src="soal-tts.js"></script>
+    <script>
+      /* Data bab per kitab, dibuat dari data/kitab-indeks.js + kitab/daftar.js */
+      const KITAB = /*DATA*/ [];
+    </script>
+    <script>
+      const acak = (a) => {
+        a = a.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      };
+      const esc = (s) =>
+        String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      const namaKitab = (id) => (KITAB.find((k) => k.id == id) || {}).judul || id;
+      const V = $('#view');
+      $$('[data-ic]').forEach((e) => (e.innerHTML = ic(e.dataset.ic, e.classList.contains('atur') ? 22 : 24)));
+      /* Ikon permainan baru (garis 1,8 seperti ikon aplikasi) */
+      const GI = {
+        cari: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/><path d="M5 5l14 14" stroke-width="2.4"/>',
+        beda: '<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><rect x="15.5" y="14.5" width="5" height="5" rx="1"/>',
+        pola: '<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" fill="currentColor"/>',
+        memori:
+          '<rect x="3" y="4" width="8" height="11" rx="1.5"/><rect x="13" y="9" width="8" height="11" rx="1.5"/><path d="M7 8.5v2M17 13.5v2"/>',
+        urut: '<path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+        cepat: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4M19 5l1.5-1.5"/>',
+        susun:
+          '<rect x="2" y="7" width="6" height="8" rx="1.5"/><rect x="9" y="7" width="6" height="8" rx="1.5"/><rect x="16" y="7" width="6" height="8" rx="1.5"/><path d="M5 19h14"/>',
+      };
+      const gi = (n, z = 24) =>
+        `<svg class="ic" width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GI[n]}</svg>`;
+      $$('[data-gi]').forEach((e) => (e.innerHTML = gi(e.dataset.gi)));
+      /* Rekor terbaik tiap permainan (localStorage.fzTekaRekor) */
+      const REK = (() => {
+        try {
+          return JSON.parse(localStorage.fzTekaRekor || '{}');
+        } catch (e) {
+          return {};
+        }
+      })();
+      const rekor = (k, nilai, lebihBaik) => {
+        const lama = REK[k],
+          baru = lama == null || lebihBaik(nilai, lama);
+        if (baru) {
+          REK[k] = nilai;
+          try {
+            localStorage.fzTekaRekor = JSON.stringify(REK);
+          } catch (e) {}
+        }
+        return { baru: baru && lama != null, lama };
+      };
+      const mmss = (d) => `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
+      /* Sama dengan toast() aplikasi (js/core/state.js) */
+      const toast = (m, ms) => {
+        const t = $('#toast');
+        t.textContent = m;
+        t.classList.add('on');
+        clearTimeout(toast.t);
+        toast.t = setTimeout(() => t.classList.remove('on'), ms || 2200);
+      };
+      /* Sama dengan konfirmasi() aplikasi (js/core/overlay.js): dialog di tengah layar, Batal + tombol aksi. Seperti dialog
+         data-wajib aplikasi, hanya bisa ditutup lewat tombolnya: ketuk di luar (atau Esc) membuat dialog bergoyang. */
+      const wajibGoyang = (d) => {
+        const s = d.querySelector('.sheet');
+        s.classList.remove('goyang');
+        void s.offsetWidth;
+        s.classList.add('goyang');
+        navigator.vibrate && navigator.vibrate(30);
+      };
+      function konfirmasi(t, m, ya, fn) {
+        const e = document.createElement('div');
+        e.className = 'back-d tgh';
+        e.dataset.wajib = '';
+        e.innerHTML = `<div class="sheet" role="alertdialog" aria-label="${esc(t)}"><b>${esc(t)}</b><p class="mut" style="margin:6px 0 14px">${esc(m)}</p><div class="act"><button class="btn s" data-x style="flex:1">Batal</button><button class="btn" data-ya style="flex:1">${esc(ya)}</button></div></div>`;
+        /* Kolom ketik TTS dilepas dulu: keyboard HP tertutup dan ketikan tidak masuk ke kotak di belakang dialog */
+        document.activeElement && document.activeElement.blur && document.activeElement.blur();
+        document.body.append(e);
+        $('[data-ya]', e).focus({ preventScroll: true });
+        document.dispatchEvent(new CustomEvent('fz-dialog', { detail: true }));
+        const tutup = () => {
+          e.remove();
+          removeEventListener('keydown', kunci, true);
+          document.dispatchEvent(new CustomEvent('fz-dialog', { detail: false }));
+        };
+        const kunci = (x) => {
+          if (x.key == 'Tab') {
+            /* Fokus hanya berpindah di antara dua tombol dialog */
+            x.preventDefault();
+            ($('[data-x]', e) == document.activeElement ? $('[data-ya]', e) : $('[data-x]', e)).focus();
+          } else if (x.key == 'Enter' || x.key == ' ') {
+            x.preventDefault();
+            document.activeElement && document.activeElement.closest && document.activeElement.closest('.back-d') == e
+              ? document.activeElement.click()
+              : (tutup(), fn());
+          } else {
+            x.preventDefault();
+            if (x.key == 'Escape') wajibGoyang(e);
+          }
+          x.stopPropagation();
+        };
+        addEventListener('keydown', kunci, true);
+        e.onclick = (x) => {
+          if (x.target == e) wajibGoyang(e);
+          else if (x.target.closest('[data-x]')) tutup();
+          else if (x.target.closest('[data-ya]')) {
+            tutup();
+            fn();
+          }
+        };
+      }
+
+      /* ---------- Pengaturan ----------
+         Pilihan, nilai, dan tampilannya sama dengan Pengaturan › Tampilan & Bacaan di aplikasi (js/core/state.js dan
+         js/pages/pengaturan/tampilan.js), ditambah pengaturan permainan. Disimpan di localStorage.fzTeka; bila halaman ini
+         dibuka dari dalam aplikasi (satu domain), pilihan tampilan aplikasi (localStorage.fz) menjadi bawaannya. */
+      const ACC = {
+        hitam: ['Hitam', '#1c1f1e', '#3d4341', '#e6e9e7', '#ffffff'],
+        emerald: ['Hijau', '#24584a', '#3a7363', '#7fb5a2', '#9fcdbb'],
+        teal: ['Teal', '#0f5f63', '#2b7f83', '#7cc7cb', '#a6dadd'],
+        blue: ['Biru', '#24497d', '#3b68a6', '#8fb6e6', '#adcbf0'],
+        ungu: ['Ungu', '#563d7c', '#7257a0', '#b9a3df', '#cfbfec'],
+        marun: ['Marun', '#7a2633', '#9a3b4a', '#e59aa6', '#f0b8c1'],
+        coklat: ['Coklat', '#6b4423', '#8a5c34', '#d6aa7f', '#e6c4a2'],
+        emas: ['Emas', '#8a6512', '#a8801f', '#e2c068', '#ecd393'],
+        oranye: ['Oranye', '#a2481a', '#c0602c', '#f2a679', '#f6c0a0'],
+        merahmuda: ['Merah muda', '#a03366', '#bd4f80', '#efa0c4', '#f5bfd7'],
+        abu: ['Abu', '#3f4b55', '#5a6873', '#aebbc6', '#c7d1d9'],
+      };
+      const FAR = {
+        amiri: ['Amiri (bawaan)', "'Amiri',serif", 'Amiri'],
+        times: ['Times', "'Times New Roman',Times,serif", ''],
+        scheh: ['Scheherazade', "'Scheherazade New',serif", 'Scheherazade New'],
+        naskh: ['Noto Naskh', "'Noto Naskh Arabic',serif", 'Noto Naskh Arabic'],
+        lateef: ['Lateef', "'Lateef',serif", 'Lateef'],
+        markazi: ['Markazi', "'Markazi Text',serif", 'Markazi Text'],
+        kufi: ['Reem Kufi', "'Reem Kufi',sans-serif", 'Reem Kufi'],
+        cairo: ['Cairo', "'Cairo',sans-serif", 'Cairo'],
+        tajawal: ['Tajawal', "'Tajawal',sans-serif", 'Tajawal'],
+        harmattan: ['Harmattan', "'Harmattan',sans-serif", 'Harmattan'],
+      };
+      const FLT = {
+        times: ['Times (bawaan)', "'Times New Roman',Times,serif", ''],
+        sistem: ['Sistem', "system-ui,-apple-system,'Segoe UI',Roboto,sans-serif", ''],
+        inter: ['Inter', "'Inter',sans-serif", 'Inter'],
+        poppins: ['Poppins', "'Poppins',sans-serif", 'Poppins'],
+        jakarta: ['Plus Jakarta', "'Plus Jakarta Sans',sans-serif", 'Plus Jakarta Sans'],
+        nunito: ['Nunito', "'Nunito',sans-serif", 'Nunito'],
+        lora: ['Lora', "'Lora',serif", 'Lora'],
+        merri: ['Merriweather', "'Merriweather',serif", 'Merriweather'],
+        playfair: ['Playfair', "'Playfair Display',serif", 'Playfair Display'],
+        mono: ['Mono', "'JetBrains Mono',monospace", 'JetBrains Mono'],
+      };
+      const ZM = { kecil: 0.86, sedang: 0.93, besar: 1 };
+      const uzLayar = () => {
+        const w = Math.min(screen.width || innerWidth, screen.height || innerHeight);
+        return w < 380 ? 'kecil' : w < 420 ? 'sedang' : 'besar';
+      };
+      const BAWAAN = {
+        theme: 'light',
+        uz: uzLayar(),
+        ac: 'hitam',
+        lf: 'times',
+        af: 'amiri',
+        arz: 32,
+        kitab: [],
+        getar: true,
+        suara: true,
+        g: {},
+      };
+      /* Pengaturan khusus tiap permainan (dibuka dari tombol Pengaturan di dalam permainan) */
+      const GBAWAAN = {
+        tts: { jumlah: 13, ukuran: 'sedang', sorot: 'kuning', namaKitab: true, cekOto: false, lompat: true },
+        tebak: { jml: 10, pilihan: 4, arab: true, lanjutOto: false },
+        memori: { pasang: 6, pola: 'titik', tahan: 800, intip: false },
+        urut: { n: 5, putaran: 5, petunjuk: true },
+        susun: { jml: 8, hurufAwal: false, arti: true },
+        cepat: { durasi: 60, arab: true, minus: false },
+        cari: { ukuran: 10, jml: 7, diagonal: true, petunjuk: false },
+        beda: { jml: 10, pilihan: 4, arab: true },
+        pola: { kotak: 6, kecepatan: 'sedang', terbalik: false },
+      };
+      const P = (() => {
+        let app = {},
+          sendiri = {};
+        try {
+          app = JSON.parse(localStorage.fz || '{}');
+        } catch (e) {}
+        try {
+          sendiri = JSON.parse(localStorage.fzTeka || '{}');
+        } catch (e) {}
+        const dariApp = {};
+        ['theme', 'uz', 'ac', 'lf', 'af'].forEach((k) => app[k] != null && (dariApp[k] = app[k]));
+        const P = { ...BAWAAN, ...dariApp, ...sendiri };
+        /* Pindahan dari versi sebelumnya (pengaturan permainan dulu masih satu halaman) */
+        P.g = P.g || {};
+        const pindah = {
+          jml: ['tebak', 'jml'],
+          pasang: ['memori', 'pasang'],
+          urutN: ['urut', 'n'],
+          durasi: ['cepat', 'durasi'],
+          namaKitab: ['tts', 'namaKitab'],
+          cekOto: ['tts', 'cekOto'],
+        };
+        Object.entries(pindah).forEach(([k, [g, kk]]) => {
+          if (P[k] != null) {
+            P.g[g] = { ...(P.g[g] || {}), [kk]: P[k] };
+            delete P[k];
+          }
+        });
+        return P;
+      })();
+      /* Nilai pengaturan permainan g: bawaan + pilihan pengguna */
+      const Gc = (g) => ({ ...GBAWAAN[g], ...(P.g[g] || {}) });
+      const simpan = () => {
+        try {
+          localStorage.fzTeka = JSON.stringify(P);
+        } catch (e) {}
+      };
+      const kitabAktif = () => (P.kitab.length ? KITAB.filter((k) => P.kitab.includes(k.id)) : KITAB);
+      const fontMuat = (g) => {
+        if (!g) return;
+        const id = 'gf-' + g.replace(/\W/g, '');
+        if (document.getElementById(id)) return;
+        const l = document.createElement('link');
+        l.id = id;
+        l.rel = 'stylesheet';
+        l.href =
+          'https://fonts.googleapis.com/css2?family=' +
+          encodeURIComponent(g).replace(/%20/g, '+') +
+          ':wght@400;600;700&display=swap';
+        document.head.append(l);
+      };
+      const gelapMQ = matchMedia('(prefers-color-scheme: dark)');
+      /* Sama dengan theme() + accent() di aplikasi */
+      function terapkan() {
+        const r = document.documentElement,
+          t = P.theme == 'auto' ? (gelapMQ.matches ? 'dark' : 'light') : P.theme;
+        r.dataset.theme = t;
+        const a = t == 'blue' ? ACC.blue : ACC[P.ac] || ACC.hitam,
+          dk = t == 'dark' || t == 'pekat';
+        r.style.setProperty('--g', dk ? a[3] : a[1]);
+        r.style.setProperty('--g2', dk ? a[4] : a[2]);
+        if (t != 'blue' && ACC[P.ac] && P.ac != 'emerald')
+          r.style.setProperty('--gs', `color-mix(in srgb,var(--g) ${dk ? 16 : 11}%,var(--bg))`);
+        else r.style.removeProperty('--gs');
+        const fa = FAR[P.af] || FAR.amiri,
+          fl = FLT[P.lf] || FLT.times;
+        fontMuat(fa[2]);
+        fontMuat(fl[2]);
+        r.style.setProperty('--ar', fa[1]);
+        r.style.setProperty('--ui', fl[1]);
+        r.style.setProperty('--zm', String(ZM[P.uz] || ZM.kecil));
+        r.style.setProperty('--arz', P.arz + 'px');
+        const m = $('meta[name=theme-color]');
+        if (m)
+          m.setAttribute(
+            'content',
+            { dark: '#121413', pekat: '#000000', blue: '#eef4fb', sepia: '#f6efe2' }[t] || '#ffffff'
+          );
+      }
+      const hex = (c) => {
+        const m = String(c).match(/\d+/g);
+        return m
+          ? '#' +
+              m
+                .slice(0, 3)
+                .map((x) => (+x).toString(16).padStart(2, '0'))
+                .join('')
+          : '';
+      };
+      const warnaBar = () => {
+        try {
+          const w = hex(getComputedStyle(document.body).backgroundColor);
+          if (w && window.FadzAndroid && FadzAndroid.warnaBar) FadzAndroid.warnaBar(w, w);
+        } catch (e) {}
+      };
+      const terapkan0 = terapkan;
+      terapkan = () => (terapkan0(), warnaBar());
+      gelapMQ.addEventListener('change', () => P.theme == 'auto' && terapkan());
+      terapkan();
+
+      /* Pembantu tampilan, sama dengan js/core/ui.js */
+      const row = (i, t, sb, r) =>
+        `<div class="srw"><span class="si">${ic(i, 20)}</span><span class="t">${t}${sb ? `<br><small class="mut">${sb}</small>` : ''}</span>${r}</div>`;
+      const tg = (id, on) =>
+        `<label class="tg"><input type="checkbox" data-tg="${id}" ${on ? 'checked' : ''}><i></i></label>`;
+      const seg = (id, o, v) =>
+        `<div class="seg" data-seg="${id}">${o.map((x) => `<button type="button" data-v="${x[0]}" class="${x[0] == v ? 'on' : ''}">${x[1]}</button>`).join('')}</div>`;
+      const fontUI = (k, M, cth) =>
+        `<div class="fnl${k == 'af' ? ' ar' : ''}" data-fn="${k}">${Object.entries(M)
+          .map(
+            ([id, f]) =>
+              `<button type="button" data-v="${id}" class="${id == P[k] ? 'on' : ''}"><span style="font-family:${f[1].replace(/"/g, "'")}">${cth}</span><small>${f[0]}</small></button>`
+          )
+          .join('')}</div>`;
+
+      function aturGambar() {
+        const pakai = (id) => !P.kitab.length || P.kitab.includes(id);
+        Object.values(FLT)
+          .concat(Object.values(FAR))
+          .forEach((f) => fontMuat(f[2]));
+        const TEMA = [
+          ['auto', 'Perangkat', '', '', ''],
+          ['light', 'Terang', '#ffffff', '#1c1f1e', '#e5e7e5'],
+          ['dark', 'Gelap', '#121413', '#e6e9e7', '#2c312e'],
+          ['blue', 'Biru', '#eef4fb', '#24497d', '#d5e0ed'],
+          ['sepia', 'Sepia', '#f6efe2', '#6b4423', '#e3d6bf'],
+          ['pekat', 'Hitam pekat', '#000000', '#f2f2f2', '#232323'],
+        ];
+        $('#h-atur').innerHTML = `<h2>Tema</h2><div class="card"><div class="tmp" data-tema>${TEMA.map(
+          ([v, n, a, b, c]) =>
+            `<button type="button" data-v="${v}" class="${v == P.theme ? 'on' : ''}"><i class="${v == 'auto' ? 'auto' : ''}" style="--c1:${a};--c2:${b};--c3:${c}"></i>${n}</button>`
+        ).join(
+          ''
+        )}</div><small class="mut">Perangkat, Terang, Gelap, dan Biru sama dengan aplikasi. Sepia (hangat seperti kertas kitab) dan Hitam pekat (hemat baterai di layar AMOLED) khusus permainan ini.</small></div><h2>Ukuran tampilan</h2><div class="card">${seg(
+          'uz',
+          [
+            ['kecil', 'Kecil'],
+            ['sedang', 'Sedang'],
+            ['besar', 'Besar'],
+          ],
+          P.uz
+        )}<small class="mut">Besar-kecilnya seluruh tampilan di HP (tombol, menu, dan tulisan). Bawaannya disesuaikan dengan ukuran layar HP.</small></div><h2>Warna aksen</h2><div class="card"><div class="wtk acw">${Object.entries(
+          ACC
+        )
+          .map(
+            ([v, a]) =>
+              `<button type="button" data-ac="${v}" class="${v == P.ac ? 'on' : ''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check', 16)}</i><small>${a[0]}</small></button>`
+          )
+          .join(
+            ''
+          )}</div><small class="mut">Warna tombol, ikon, dan sorotan. Tema Biru selalu memakai aksen biru.</small></div>
+          <h2>Jenis huruf</h2><div class="card"><label>Huruf Latin (seluruh tampilan)</label>${fontUI('lf', FLT, 'Abc Fadzkuruuni')}<label style="margin-top:14px">Huruf Arab</label>${fontUI('af', FAR, 'بِسْمِ اللّٰهِ')}<small class="mut">Font selain bawaan diunduh dari Google Fonts saat pertama dipakai (perlu internet sekali).</small></div>
+          <h2>Ukuran teks Arab</h2><div class="list sg">${row('book', 'Judul bab (Tebak Kitab)', `<span id="arzV">${P.arz}</span> px`, `<input type="range" id="arz" min="22" max="48" value="${P.arz}" aria-label="Ukuran huruf Arab">`)}</div>
+          <div class="ukp" aria-label="Contoh ukuran teks"><small class="mut">Contoh</small><div class="ukp-ar" style="font-family:var(--ar);font-size:var(--arz);direction:rtl;text-align:center">فَصْلٌ فِي فَرَائِضِ الْوُضُوْءِ</div></div>
+          <h2>Umpan balik</h2><div class="list sg">${row('speaker', 'Efek suara', 'Bunyi pendek saat benar, salah, membalik kartu, dan selesai', tg('suara', P.suara))}${row('count', 'Getar', 'Getar ringan saat jawaban salah dan saat permainan selesai', tg('getar', P.getar))}</div>
+          <small class="mut" style="display:block;padding:8px 2px 0">Pengaturan khusus tiap permainan (jumlah soal, waktu, tampilan papan, dan lainnya) ada di tombol Pengaturan di dalam permainannya.</small>
+          <h2>Kitab yang dipakai</h2><div class="list sg">${KITAB.map((k) => row('book', esc(k.judul), esc(k.ket.split('·').pop().trim()), tg('k:' + k.id, pakai(k.id)))).join('')}</div>
+          <small class="mut" style="display:block;padding:8px 2px 0">Soal semua permainan hanya diambil dari kitab yang aktif. Minimal satu kitab.</small>
+          <div class="act" style="margin-top:16px"><button class="btn s" data-reset style="flex:1">Kembalikan ke bawaan</button></div>`;
+      }
+      const atur = $('#h-atur');
+      atur.addEventListener('click', (e) => {
+        const t = e.target,
+          sb = t.closest('[data-seg] button'),
+          fn = t.closest('[data-fn] button'),
+          ac = t.closest('[data-ac]');
+        if (sb) {
+          const k = sb.parentNode.dataset.seg;
+          P[k] = sb.dataset.v;
+          $$('button', sb.parentNode).forEach((x) => x.classList.toggle('on', x == sb));
+        } else if (t.closest('[data-tema] button')) {
+          const b = t.closest('[data-tema] button');
+          P.theme = b.dataset.v;
+          $$('[data-tema] button', atur).forEach((x) => x.classList.toggle('on', x == b));
+        } else if (fn) {
+          P[fn.parentNode.dataset.fn] = fn.dataset.v;
+          $$('button', fn.parentNode).forEach((x) => x.classList.toggle('on', x == fn));
+        } else if (ac) {
+          P.ac = ac.dataset.ac;
+          $$('[data-ac]', atur).forEach((x) => x.classList.toggle('on', x == ac));
+        } else if (t.closest('[data-reset]'))
+          return konfirmasi(
+            'Kembalikan ke bawaan?',
+            'Pengaturan umum (tampilan, umpan balik, kitab) dikembalikan seperti semula. Pengaturan tiap permainan tidak berubah.',
+            'Kembalikan',
+            () => {
+              Object.assign(P, BAWAAN, { kitab: [], g: P.g });
+              simpan();
+              terapkan();
+              aturGambar();
+              toast('Pengaturan dikembalikan ke bawaan');
+            }
+          );
+        else return;
+        simpan();
+        terapkan();
+      });
+      atur.addEventListener('input', (e) => {
+        if (e.target.id != 'arz') return;
+        P.arz = +e.target.value;
+        $('#arzV').textContent = P.arz;
+        simpan();
+        terapkan();
+      });
+      atur.addEventListener('change', (e) => {
+        const k = e.target.dataset.tg;
+        if (!k) return;
+        if (k.startsWith('k:')) {
+          const on = $$('[data-tg^="k:"]', atur)
+            .filter((x) => x.checked)
+            .map((x) => x.dataset.tg.slice(2));
+          if (!on.length) {
+            e.target.checked = true;
+            return toast('Minimal satu kitab harus aktif');
+          }
+          P.kitab = on.length == KITAB.length ? [] : on;
+        } else P[k] = e.target.checked;
+        simpan();
+        if (k == 'suara' && P.suara) bunyi('benar');
+      });
+      const getar = (ms) => P.getar && navigator.vibrate && navigator.vibrate(ms);
+      /* Efek suara pendek, dibuat langsung oleh peramban (Web Audio), tanpa berkas suara */
+      let AU = null;
+      function bunyi(j) {
+        if (!P.suara) return;
+        try {
+          AU = AU || new (window.AudioContext || window.webkitAudioContext)();
+          if (AU.state == 'suspended') AU.resume();
+          const nada = {
+            benar: [
+              [660, 0, 0.09],
+              [880, 0.08, 0.12],
+            ],
+            salah: [
+              [220, 0, 0.16],
+              [180, 0.12, 0.18],
+            ],
+            balik: [[520, 0, 0.05]],
+            ketuk: [[440, 0, 0.04]],
+            selesai: [
+              [523, 0, 0.12],
+              [659, 0.11, 0.12],
+              [784, 0.22, 0.12],
+              [1047, 0.33, 0.22],
+            ],
+          }[j];
+          nada.forEach(([f, mulai, lama]) => {
+            const o = AU.createOscillator(),
+              g = AU.createGain(),
+              t = AU.currentTime + mulai;
+            o.type = j == 'salah' ? 'triangle' : 'sine';
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.exponentialRampToValueAtTime(0.12, t + 0.012);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + lama);
+            o.connect(g).connect(AU.destination);
+            o.start(t);
+            o.stop(t + lama + 0.02);
+          });
+        } catch (e) {}
+      }
+
+      /* ---------- Pengaturan khusus permainan ----------
+         Tombol Pengaturan di dalam permainan membuka halaman ini (hanya pilihan permainan itu). Pilihan tampilan langsung
+         terlihat saat kembali; jumlah soal/waktu berlaku mulai permainan berikutnya. */
+      let ATURG = 'tts';
+      const OPSI = {
+        tts: [
+          [
+            'seg',
+            'jumlah',
+            'Jumlah kata',
+            [
+              [9, '9 kata'],
+              [13, '13 kata'],
+              [17, '17 kata'],
+            ],
+            'Berlaku untuk TTS berikutnya.',
+          ],
+          [
+            'seg',
+            'ukuran',
+            'Ukuran kotak',
+            [
+              ['kecil', 'Kecil'],
+              ['sedang', 'Sedang'],
+              ['besar', 'Besar'],
+            ],
+          ],
+          [
+            'seg',
+            'sorot',
+            'Warna sorotan',
+            [
+              ['kuning', 'Kuning'],
+              ['aksen', 'Aksen'],
+              ['biru', 'Biru'],
+              ['hijau', 'Hijau'],
+            ],
+          ],
+          ['tg', 'namaKitab', 'Nama kitab di petunjuk', 'Asal kitab di bawah tiap petunjuk', 'news'],
+          ['tg', 'cekOto', 'Cek otomatis', 'Kata langsung diwarnai benar/salah begitu semua kotaknya terisi', 'check'],
+          [
+            'tg',
+            'lompat',
+            'Lompat ke kata berikutnya',
+            'Setelah satu kata terisi penuh, kotak aktif pindah ke kata yang belum selesai',
+            'next',
+          ],
+        ],
+        tebak: [
+          [
+            'seg',
+            'jml',
+            'Jumlah soal',
+            [
+              [5, '5 soal'],
+              [10, '10 soal'],
+              [20, '20 soal'],
+            ],
+            'Berlaku untuk putaran berikutnya.',
+          ],
+          [
+            'seg',
+            'pilihan',
+            'Jumlah pilihan',
+            [
+              [3, '3 pilihan'],
+              [4, '4 pilihan'],
+            ],
+          ],
+          [
+            'tg',
+            'arab',
+            'Tampilkan judul Arab',
+            'Judul bab dalam huruf Arab di atas artinya. Nashaihul Ibad belum punya judul Arab, jadi tidak ikut saat pilihan ini aktif.',
+            'book',
+          ],
+          ['tg', 'lanjutOto', 'Lanjut otomatis', 'Pindah ke soal berikutnya 1,5 detik setelah menjawab', 'next'],
+        ],
+        memori: [
+          [
+            'seg',
+            'pasang',
+            'Jumlah pasang',
+            [
+              [4, '4 pasang'],
+              [6, '6 pasang'],
+              [8, '8 pasang'],
+            ],
+            'Berlaku untuk permainan berikutnya. Rekor dicatat untuk 6 pasang.',
+          ],
+          [
+            'seg',
+            'pola',
+            'Punggung kartu',
+            [
+              ['titik', 'Titik'],
+              ['garis', 'Garis'],
+              ['kotak', 'Kotak'],
+              ['polos', 'Polos'],
+            ],
+          ],
+          [
+            'seg',
+            'tahan',
+            'Lama kartu terbuka saat salah',
+            [
+              [500, '0,5 dtk'],
+              [800, '0,8 dtk'],
+              [1200, '1,2 dtk'],
+            ],
+          ],
+          ['tg', 'intip', 'Intip di awal', 'Semua kartu terbuka 2 detik sebelum permainan dimulai', 'eye'],
+        ],
+        urut: [
+          [
+            'seg',
+            'n',
+            'Jumlah bab',
+            [
+              [4, '4 bab'],
+              [5, '5 bab'],
+              [6, '6 bab'],
+            ],
+            'Rekor dicatat untuk 5 bab, 5 putaran.',
+          ],
+          [
+            'seg',
+            'putaran',
+            'Jumlah putaran',
+            [
+              [3, '3'],
+              [5, '5'],
+              [10, '10'],
+            ],
+          ],
+          [
+            'tg',
+            'petunjuk',
+            'Tunjukkan urutan yang benar',
+            'Setelah Cek, bab yang salah diberi tahu seharusnya di urutan ke berapa',
+            'info',
+          ],
+        ],
+        susun: [
+          [
+            'seg',
+            'jml',
+            'Jumlah soal',
+            [
+              [5, '5 soal'],
+              [8, '8 soal'],
+              [12, '12 soal'],
+            ],
+            'Rekor dicatat untuk 8 soal.',
+          ],
+          ['tg', 'hurufAwal', 'Bantuan huruf pertama', 'Huruf pertama jawaban sudah terpasang', 'spark'],
+          ['tg', 'arti', 'Tampilkan asal kitab', 'Nama kitab di bawah petunjuk', 'book'],
+        ],
+        cepat: [
+          [
+            'seg',
+            'durasi',
+            'Waktu',
+            [
+              [30, '30 detik'],
+              [60, '60 detik'],
+              [90, '90 detik'],
+            ],
+            'Rekor dicatat untuk 60 detik.',
+          ],
+          [
+            'tg',
+            'arab',
+            'Tampilkan judul Arab',
+            'Judul bab dalam huruf Arab di atas pernyataan. Nashaihul Ibad belum punya judul Arab, jadi tidak ikut saat pilihan ini aktif.',
+            'book',
+          ],
+          ['tg', 'minus', 'Salah mengurangi waktu', 'Setiap jawaban salah memotong 2 detik', 'clock'],
+        ],
+        cari: [
+          [
+            'seg',
+            'ukuran',
+            'Ukuran kotak huruf',
+            [
+              [8, '8 × 8'],
+              [10, '10 × 10'],
+              [12, '12 × 12'],
+            ],
+            'Berlaku untuk permainan berikutnya. Rekor dicatat untuk 10 × 10 dengan 7 kata.',
+          ],
+          [
+            'seg',
+            'jml',
+            'Jumlah kata',
+            [
+              [5, '5 kata'],
+              [7, '7 kata'],
+              [9, '9 kata'],
+            ],
+          ],
+          [
+            'tg',
+            'diagonal',
+            'Kata miring (diagonal)',
+            'Kata juga bisa tersembunyi miring, bukan hanya mendatar dan menurun',
+            'next',
+          ],
+          [
+            'tg',
+            'petunjuk',
+            'Tampilkan petunjuk, bukan kata',
+            'Lebih sulit: yang ditampilkan hanya petunjuknya, kata jawabannya harus ditebak',
+            'spark',
+          ],
+        ],
+        beda: [
+          [
+            'seg',
+            'jml',
+            'Jumlah soal',
+            [
+              [5, '5 soal'],
+              [10, '10 soal'],
+              [15, '15 soal'],
+            ],
+            'Rekor dicatat untuk 10 soal.',
+          ],
+          [
+            'seg',
+            'pilihan',
+            'Jumlah pilihan',
+            [
+              [4, '4 bab'],
+              [5, '5 bab'],
+            ],
+          ],
+          [
+            'tg',
+            'arab',
+            'Tampilkan judul Arab',
+            'Judul bab dalam huruf Arab di atas artinya. Nashaihul Ibad belum punya judul Arab, jadi tidak ikut saat pilihan ini aktif.',
+            'book',
+          ],
+        ],
+        pola: [
+          [
+            'seg',
+            'kotak',
+            'Jumlah kotak',
+            [
+              [4, '4 kotak'],
+              [6, '6 kotak'],
+              [9, '9 kotak'],
+            ],
+            'Rekor dicatat untuk 6 kotak, kecepatan sedang.',
+          ],
+          [
+            'seg',
+            'kecepatan',
+            'Kecepatan nyala',
+            [
+              ['lambat', 'Lambat'],
+              ['sedang', 'Sedang'],
+              ['cepat', 'Cepat'],
+            ],
+          ],
+          ['tg', 'terbalik', 'Ulangi terbalik', 'Lebih sulit: ulangi urutannya dari yang terakhir menyala', 'rot'],
+        ],
+      };
+      function aturgGambar() {
+        const g = ATURG,
+          c = Gc(g);
+        const kartu = OPSI[g]
+          .filter((o) => o[0] == 'seg')
+          .map(
+            (o, i) =>
+              `<label${i ? ' style="margin-top:14px"' : ''}>${o[2]}</label>${seg(o[1], o[3], c[o[1]])}${o[4] ? `<small class="mut">${o[4]}</small>` : ''}`
+          )
+          .join('');
+        const sakelar = OPSI[g]
+          .filter((o) => o[0] == 'tg')
+          .map((o) => row(o[4], o[2], o[3], tg(o[1], c[o[1]])))
+          .join('');
+        $('#h-aturg').innerHTML =
+          `<h2>${JUDUL[g]}</h2><div class="card">${kartu}</div>${sakelar ? `<div class="list sg">${sakelar}</div>` : ''}
+          <h2>Lainnya</h2><div class="list sg"><div class="srw lnk" data-umum><span class="si">${ic('sliders', 20)}</span><span class="t">Pengaturan umum<br><small class="mut">Tema, ukuran tampilan, warna, huruf, suara, dan kitab</small></span>${ic('next', 18)}</div></div>
+          <div class="act" style="margin-top:16px"><button class="btn s" data-greset style="flex:1">Kembalikan bawaan ${JUDUL[g]}</button></div>`;
+      }
+      const aturg = $('#h-aturg');
+      const gSimpan = (k, v) => {
+        P.g[ATURG] = { ...(P.g[ATURG] || {}), [k]: v };
+        simpan();
+        gTerapkan();
+      };
+      /* Pilihan tampilan permainan yang langsung berlaku */
+      function gTerapkan() {
+        const t = Gc('tts');
+        $('#h-tts').dataset.sorot = t.sorot;
+        $('#h-tts').dataset.uk = t.ukuran;
+        $('#kin').dataset.pola = Gc('memori').pola;
+      }
+      aturg.addEventListener('click', (e) => {
+        const sb = e.target.closest('[data-seg] button');
+        if (sb) {
+          const k = sb.parentNode.dataset.seg,
+            v = typeof GBAWAAN[ATURG][k] == 'number' ? +sb.dataset.v : sb.dataset.v;
+          $$('button', sb.parentNode).forEach((x) => x.classList.toggle('on', x == sb));
+          gSimpan(k, v);
+        } else if (e.target.closest('[data-umum]')) ke('atur');
+        else if (e.target.closest('[data-greset]'))
+          konfirmasi(
+            `Kembalikan bawaan ${JUDUL[ATURG]}?`,
+            'Pilihan khusus permainan ini dikembalikan seperti semula.',
+            'Kembalikan',
+            () => {
+              delete P.g[ATURG];
+              simpan();
+              gTerapkan();
+              aturgGambar();
+              toast('Pengaturan permainan dikembalikan');
+            }
+          );
+      });
+      aturg.addEventListener('change', (e) => {
+        const k = e.target.dataset.tg;
+        if (k) gSimpan(k, e.target.checked);
+      });
+
+      /* ---------- Navigasi antarhalaman ----------
+         Gerak sama dengan aplikasi (js/router.js keluar()/masuk()): isi lama keluar bergiliran (0,2 s, jeda 24 ms per
+         bagian), lalu isi baru masuk bergiliran (0,5 s, jeda 45 ms). Kembali: keluar ke kanan, masuk dari kiri. Tombol
+         kembali HP / peramban ikut bekerja (riwayat). */
+      const JUDUL = {
+        awal: 'Teka-Teki Kitab',
+        tts: 'Teka-Teki Silang',
+        tebak: 'Tebak Kitab',
+        memori: 'Kartu Ingatan',
+        urut: 'Urutkan Bab',
+        susun: 'Susun Huruf',
+        cari: 'Cari Kata',
+        beda: 'Mana yang Beda',
+        pola: 'Ingat Pola',
+        cepat: 'Cepat Tepat',
+        atur: 'Pengaturan',
+        aturg: 'Pengaturan',
+        info: 'Info',
+      };
+      const GAME = ['tts', 'tebak', 'memori', 'urut', 'susun', 'cepat', 'cari', 'beda', 'pola'];
+      const BERSKOR = ['tebak', 'memori', 'urut', 'susun', 'cepat', 'cari', 'beda', 'pola'];
+      const TUMPUK = ['awal'];
+      const GERAK = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const GULIR = {};
+      const halKini = () => TUMPUK[TUMPUK.length - 1];
+      function keluar(el, arah) {
+        const K = [...el.children];
+        el.classList.remove('ent', 'entb');
+        K.forEach((c, i) => c.style.setProperty('--o', Math.min(i, 8)));
+        el.classList.add(arah == 'back' ? 'kelb' : 'kel');
+        return new Promise((r) =>
+          setTimeout(
+            () => {
+              el.classList.remove('kel', 'kelb');
+              r();
+            },
+            180 + Math.min(K.length - 1, 8) * 24
+          )
+        );
+      }
+      function masuk(el, arah) {
+        if (!GERAK) return;
+        [...el.children].forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));
+        el.classList.remove('ent', 'entb');
+        void el.offsetWidth;
+        el.classList.add('ent');
+        arah == 'back' && el.classList.add('entb');
+        clearTimeout(el.tEnt);
+        el.tEnt = setTimeout(() => el.classList.remove('ent', 'entb'), 1100);
+      }
+      function pasangHal(h, arah, anim = true) {
+        $$('.hal').forEach((x) => (x.hidden = x.id != 'h-' + h));
+        $('#judul').textContent = JUDUL[h];
+        $('#kembali').hidden = false;
+        $('#aturBuka').hidden = h == 'atur' || h == 'aturg';
+        $('#infoBuka').hidden = h == 'atur' || h == 'aturg' || h == 'info';
+        $('#aturBuka').title = $('#aturBuka').ariaLabel = GAME.includes(h) ? `Pengaturan ${JUDUL[h]}` : 'Pengaturan';
+        if (h == 'aturg') $('#judul').textContent = `Pengaturan ${JUDUL[ATURG]}`;
+        gTerapkan();
+        $('#skor').hidden = !BERSKOR.includes(h);
+        V.classList.toggle('lebar', h == 'tts');
+        /* Waktu permainan hanya berjalan saat halamannya tampil */
+        mmJeda(h != 'memori');
+        ctJeda(h != 'cepat');
+        ckJeda(h != 'cari');
+        plJeda(h != 'pola');
+        if (h == 'atur') aturGambar();
+        if (h == 'aturg') aturgGambar();
+        if (h == 'info') infoGambar();
+        if (h == 'tts' && T.aktif) gambarDaftar(), segarkan();
+        V.scrollTop = arah == 'back' ? GULIR[h] || 0 : 0;
+        anim && masuk($('#h-' + h), arah);
+      }
+      let pindahJalan = false;
+      async function ke(h, mulai) {
+        if (pindahJalan || h == halKini()) return;
+        pindahJalan = true;
+        GULIR[halKini()] = V.scrollTop;
+        const lama = $('#h-' + halKini());
+        if (GERAK) await keluar(lama, 'fwd');
+        TUMPUK.push(h);
+        history.pushState({ teka: TUMPUK.length }, '');
+        mulai && mulai();
+        pasangHal(h, 'fwd');
+        pindahJalan = false;
+      }
+      /* Kembali satu halaman. anim=false: dipakai geser kembali (halaman sudah meluncur keluar) */
+      async function mundur(anim = true) {
+        if (TUMPUK.length < 2) return;
+        pindahJalan = true;
+        const lama = $('#h-' + halKini());
+        if (anim && GERAK) await keluar(lama, 'back');
+        TUMPUK.pop();
+        pasangHal(halKini(), 'back', anim);
+        pindahJalan = false;
+      }
+      let geserMundur = false,
+        izinKeluar = false;
+      /* Permainan yang sedang berjalan tidak langsung ditinggalkan: tanya dulu (TTS belum selesai, Tebak Kitab belum di
+         halaman hasil) */
+      const perluTanya = () =>
+        (halKini() == 'tts' && T.aktif && $('#rayakan').hidden) ||
+        (halKini() == 'tebak' && TB.i < TB.soal.length) ||
+        (halKini() == 'memori' && MM.jalan) ||
+        (halKini() == 'urut' && UR.i < UR.soal.length) ||
+        (halKini() == 'susun' && SH.i < SH.soal.length) ||
+        (halKini() == 'cepat' && CT.jalan) ||
+        (halKini() == 'cari' && CK.jalan) ||
+        (halKini() == 'beda' && BD.i < BD.soal.length) ||
+        (halKini() == 'pola' && PL.jalan);
+      const tanyaKeluar = (lanjut) =>
+        konfirmasi(
+          'Keluar dari permainan?',
+          'Permainan ini belum selesai. Isian dan skormu akan hilang.',
+          'Keluar',
+          () => {
+            izinKeluar = true;
+            lanjut();
+          }
+        );
+      addEventListener('popstate', () => {
+        if (TUMPUK.length < 2) return;
+        if (!izinKeluar && !geserMundur && perluTanya()) {
+          /* Tombol kembali HP / peramban: tetap di permainan, riwayatnya dikembalikan, lalu tanya */
+          history.pushState({ teka: TUMPUK.length }, '');
+          if (!$('.back-d')) tanyaKeluar(() => history.back());
+          return;
+        }
+        izinKeluar = false;
+        mundur(!geserMundur);
+        geserMundur = false;
+      });
+      /* Di beranda permainan: kembali ke aplikasi. Dibuka dari aplikasi (riwayat ada) = mundur satu langkah, agar posisi
+         halaman Kitab Kuning tetap; dibuka langsung = ke halaman Kitab Kuning. */
+      const keAplikasi = () => {
+        let dariApp = false;
+        try {
+          dariApp = !!document.referrer && new URL(document.referrer).origin == location.origin && history.length > 1;
+        } catch (e) {}
+        if (dariApp) history.back();
+        else location.href = './#/kitab';
+      };
+      $('#kembali').onclick = (e) => {
+        e.preventDefault();
+        if (halKini() == 'awal') keAplikasi();
+        else if (perluTanya()) tanyaKeluar(() => history.back());
+        else history.back();
+      };
+      /* Di dalam permainan: pengaturan khusus permainan itu; di luar: pengaturan umum */
+      $('#aturBuka').onclick = () => {
+        if (GAME.includes(halKini())) {
+          ATURG = halKini();
+          ke('aturg');
+        } else ke('atur');
+      };
+      $('#infoBuka').onclick = () => ke('info');
+      /* Konfirmasi dulu sebelum mulai bermain */
+      const MULAI = {
+        tts: [
+          'Main Teka-Teki Silang?',
+          () => `Uji ingatanmu: isi ${Gc('tts').jumlah} kata dari petunjuk bab kitab. Jawaban bisa dicek kapan saja.`,
+          'Main',
+          () => ttsBaru(),
+        ],
+        tebak: [
+          'Mulai Tebak Kitab?',
+          () => `Uji ingatanmu: ${Gc('tebak').jml} judul bab, tebak masing-masing ada di kitab apa.`,
+          'Mulai',
+          () => tbMulai(),
+        ],
+        memori: [
+          'Main Kartu Ingatan?',
+          () =>
+            `Balik dua kartu sekaligus dan temukan ${Gc('memori').pasang} pasang judul bab Arab dengan artinya. Makin sedikit langkah, makin bagus.`,
+          'Main',
+          () => mmMulai(),
+        ],
+        urut: [
+          'Main Urutkan Bab?',
+          () => `${Gc('urut').putaran} putaran: susun ${Gc('urut').n} bab yang diacak sesuai urutannya di kitab.`,
+          'Main',
+          () => urMulai(),
+        ],
+        susun: [
+          'Main Susun Huruf?',
+          () => `${Gc('susun').jml} soal: susun huruf yang diacak menjadi jawaban dari petunjuk bab kitab.`,
+          'Main',
+          () => shMulai(),
+        ],
+        cari: [
+          'Main Cari Kata?',
+          () =>
+            `Temukan ${Gc('cari').jml} kata yang tersembunyi di kotak huruf. Seret jari dari huruf pertama ke huruf terakhir, atau ketuk keduanya.`,
+          'Main',
+          () => ckMulai(),
+        ],
+        beda: [
+          'Main Mana yang Beda?',
+          () =>
+            `${Gc('beda').jml} soal: ${Gc('beda').pilihan - 1} bab dari kitab yang sama dan 1 bab dari kitab lain. Pilih yang beda.`,
+          'Main',
+          () => bdMulai(),
+        ],
+        pola: [
+          'Main Ingat Pola?',
+          () =>
+            `Perhatikan kotak yang menyala, lalu ulangi urutannya${Gc('pola').terbalik ? ' secara terbalik' : ''}. Setiap berhasil, urutannya bertambah satu.`,
+          'Main',
+          () => plMulai(),
+        ],
+        cepat: [
+          'Mulai Cepat Tepat?',
+          () =>
+            `Kamu punya ${Gc('cepat').durasi} detik. Jawab benar atau salah secepat mungkin. Waktu mulai berjalan begitu permainan terbuka.`,
+          'Mulai',
+          () => ctMulai(),
+        ],
+      };
+      $$('[data-main]').forEach(
+        (b) =>
+          (b.onclick = () => {
+            const [judul, pesan, ya, mulai] = MULAI[b.dataset.main];
+            konfirmasi(judul, pesan(), ya, () => ke(b.dataset.main, mulai));
+          })
+      );
+
+      /* Halaman Info: cara main tiap permainan, sumber soal, dan tentang */
+      function infoGambar() {
+        const cara = [
+          [
+            'tts',
+            'Teka-Teki Silang',
+            'Ketuk kotak lalu ketik jawabannya. Ketuk dua kali untuk ganti arah mendatar/menurun.',
+          ],
+          ['tebak', 'Tebak Kitab', 'Baca judul bab (Arab dan artinya), lalu pilih kitab tempat bab itu berada.'],
+          [
+            'memori',
+            'Kartu Ingatan',
+            'Balik dua kartu. Bila judul Arab dan artinya cocok, kartu tetap terbuka. Ingat letak kartu yang sudah dilihat.',
+          ],
+          [
+            'urut',
+            'Urutkan Bab',
+            'Ketuk bab satu per satu mulai dari yang paling awal di kitab. Ketuk lagi untuk membatalkan, lalu Cek.',
+          ],
+          [
+            'susun',
+            'Susun Huruf',
+            'Baca petunjuknya, lalu ketuk huruf-huruf acak sesuai urutan jawaban. Ketuk kotak jawaban untuk menghapus.',
+          ],
+          [
+            'cari',
+            'Cari Kata',
+            'Seret jari dari huruf pertama ke huruf terakhir sebuah kata, atau ketuk huruf pertama lalu huruf terakhirnya.',
+          ],
+          [
+            'beda',
+            'Mana yang Beda',
+            'Semua bab berasal dari satu kitab, kecuali satu. Pilih bab yang berasal dari kitab lain.',
+          ],
+          [
+            'pola',
+            'Ingat Pola',
+            'Perhatikan kotak huruf yang menyala, lalu ketuk dengan urutan yang sama. Salah sekali, permainan selesai.',
+          ],
+          [
+            'cepat',
+            'Cepat Tepat',
+            'Pernyataan muncul satu per satu: benar atau salah? Jawab sebanyak mungkin sebelum waktu habis.',
+          ],
+        ];
+        const ikonMain = (k) => (GI[k] ? gi(k, 20) : k == 'tts' ? ic('grid', 20) : ic('book', 20));
+        $('#h-info').innerHTML = `<h2>Cara main</h2><div class="list sg">${cara
+          .map(
+            ([k, t, d]) =>
+              `<div class="srw"><span class="si">${ikonMain(k)}</span><span class="t">${t}<br><small class="mut">${d}</small></span></div>`
+          )
+          .join('')}</div>
+          <h2>Sumber soal</h2><div class="card sumber"><small class="mut">Semua soal diambil dari daftar isi kitab di aplikasi Fadzkuruuni:</small><ul>${KITAB.map(
+            (k) => `<li>${esc(k.judul)} <span class="mut">(${k.bab.length} bab)</span></li>`
+          ).join('')}</ul></div>
+                    <h2>Pengaturan</h2><div class="list sg"><div class="srw"><span class="si">${ic('sliders', 20)}</span><span class="t">Umum dan khusus<br><small class="mut">Tombol Pengaturan di beranda: tema, ukuran, warna, huruf, suara, dan kitab. Tombol Pengaturan di dalam permainan: pilihan khusus permainan itu.</small></span></div></div>
+          <h2>Tentang</h2><div class="list sg">${row('info', 'Teka-Teki Kitab', `${SOAL_TTS.length} kata TTS · ${KITAB.reduce((a, k) => a + k.bab.length, 0)} judul bab dari ${KITAB.length} kitab`, '')}${row(
+            'star',
+            'Rekor terbaikmu',
+            [
+              REK.memori != null ? `Kartu Ingatan: ${REK.memori} langkah` : '',
+              REK.urut != null ? `Urutkan Bab: ${REK.urut}/5` : '',
+              REK.susun != null ? `Susun Huruf: ${REK.susun}/8` : '',
+              REK.cari != null ? `Cari Kata: ${mmss(REK.cari)}` : '',
+              REK.beda != null ? `Mana yang Beda: ${REK.beda}/10` : '',
+              REK.pola != null ? `Ingat Pola: level ${REK.pola}` : '',
+              REK.cepat != null ? `Cepat Tepat: ${REK.cepat} benar` : '',
+            ]
+              .filter(Boolean)
+              .join(' · ') || 'Belum ada. Mainkan permainan untuk mencatat rekor.',
+            ''
+          )}</div>`;
+      }
+
+      /* ---------- Geser kembali (HP) ----------
+         Sama dengan mode 'back' geser di aplikasi (js/core/events.js): halaman ini mengikuti jari, halaman sebelumnya
+         tampil di belakang dengan efek paralaks; dilepas lebih dari sepertiga lebar atau dikibas = kembali. */
+      const GS_KIBAS = 0.5,
+        GS_DUR = 260,
+        GS_EASE = 'cubic-bezier(.22,.8,.3,1)';
+      const gsHP = () => matchMedia('(max-width:899px)').matches;
+      (() => {
+        let sx = null,
+          sy = 0,
+          t0 = 0,
+          dx = 0,
+          lock = null,
+          peek = null,
+          jejak = [],
+          raf = 0,
+          sibuk = false;
+        const W = () => V.clientWidth;
+        const pasang = (px, tr) => {
+          const w = W();
+          V.style.transition = tr ? `transform ${tr}` : 'none';
+          V.style.transform = px ? `translate3d(${px}px,0,0)` : '';
+          V.style.boxShadow = px ? '-10px 0 24px rgba(0,0,0,.22)' : '';
+          if (peek) {
+            peek.style.transition = tr ? `transform ${tr},filter ${tr}` : 'none';
+            peek.style.transform = `translate3d(${(px - w) * 0.3}px,0,0)`;
+            peek.style.filter = `brightness(${0.8 + 0.2 * Math.min(1, px / w)})`;
+          }
+        };
+        const pulih = () => {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          V.style.transition = V.style.transform = V.style.boxShadow = '';
+          V.style.position = V.style.zIndex = V.style.background = '';
+          peek && peek.remove();
+          peek = null;
+          sibuk = false;
+        };
+        /* Potret halaman sebelumnya: bilah judul + isi halaman, pada posisi gulirnya */
+        const buatPeek = () => {
+          const h = TUMPUK[TUMPUK.length - 2],
+            bar = $('.bar', V).cloneNode(true),
+            isi = $('#h-' + h).cloneNode(true);
+          isi.hidden = false;
+          isi.removeAttribute('id');
+          isi.classList.remove('ent', 'entb', 'kel', 'kelb');
+          $('h1', bar).textContent = JUDUL[h];
+          $('.bk', bar).hidden = false;
+          $('.gear', bar).hidden = h == 'atur' || h == 'aturg';
+          $('.inf', bar).hidden = h == 'atur' || h == 'aturg' || h == 'info';
+          if (h == 'aturg') $('h1', bar).textContent = `Pengaturan ${JUDUL[ATURG]}`;
+          $('.skor', bar).hidden = !BERSKOR.includes(h);
+          /* id dibuang dari salinan, agar $('#…') tetap menunjuk halaman asli */
+          [bar, isi, ...bar.querySelectorAll('[id]'), ...isi.querySelectorAll('[id]')].forEach((x) =>
+            x.removeAttribute('id')
+          );
+          peek = document.createElement('div');
+          peek.className = 'vpeek';
+          peek.setAttribute('aria-hidden', 'true');
+          const d = document.createElement('div');
+          d.style.marginTop = -(GULIR[h] || 0) + 'px';
+          d.append(bar, isi);
+          peek.append(d);
+          $('#app').prepend(peek);
+          Object.assign(V.style, { position: 'relative', zIndex: '1', background: 'var(--bg)' });
+        };
+        V.addEventListener(
+          'touchstart',
+          (e) => {
+            sx = null;
+            if (sibuk || TUMPUK.length < 2 || !gsHP() || e.touches.length != 1 || pindahJalan) return;
+            if (e.target.closest('input,textarea,select,.ckisi,.plk')) return;
+            sx = e.touches[0].clientX;
+            sy = e.touches[0].clientY;
+            t0 = Date.now();
+            dx = 0;
+            lock = null;
+            jejak = [];
+          },
+          { passive: true }
+        );
+        V.addEventListener(
+          'touchmove',
+          (e) => {
+            if (sx === null) return;
+            const x = e.touches[0].clientX - sx,
+              y = e.touches[0].clientY - sy,
+              kini = performance.now();
+            jejak.push([kini, x]);
+            while (jejak.length > 2 && kini - jejak[0][0] > 100) jejak.shift();
+            if (lock === null) {
+              if (Math.abs(x) < 12 && Math.abs(y) < 12) return;
+              lock = x > 0 && x > Math.abs(y) ? 'h' : 'v';
+              if (lock == 'h') {
+                GULIR[halKini()] = V.scrollTop;
+                buatPeek();
+              }
+            }
+            if (lock != 'h') return;
+            dx = Math.max(0, x);
+            if (!raf)
+              raf = requestAnimationFrame(() => {
+                raf = 0;
+                if (sx !== null) pasang(dx);
+              });
+          },
+          { passive: true }
+        );
+        const lepas = () => {
+          if (sx === null) return;
+          sx = null;
+          if (lock != 'h') return;
+          cancelAnimationFrame(raf);
+          raf = 0;
+          const j0 = jejak[0],
+            j1 = jejak[jejak.length - 1],
+            vJ = j0 && j1 && j1[0] > j0[0] ? (j1[1] - j0[1]) / (j1[0] - j0[0]) : 0,
+            w = W(),
+            vel = Math.max(vJ, dx / Math.max(1, Date.now() - t0)),
+            ms = Math.max(140, Math.min(GS_DUR, (w - dx) / Math.max(0.6, Math.abs(vel))));
+          sibuk = true;
+          if ((dx > w * 0.33 || vel > GS_KIBAS) && perluTanya()) {
+            /* Di tengah permainan: halaman kembali ke tempatnya, lalu tanya dulu */
+            pasang(0, `${GS_DUR}ms ${GS_EASE}`);
+            setTimeout(() => {
+              pulih();
+              tanyaKeluar(() => history.back());
+            }, GS_DUR + 20);
+          } else if (dx > w * 0.33 || vel > GS_KIBAS) {
+            pasang(w, `${ms}ms ${GS_EASE}`);
+            setTimeout(() => {
+              geserMundur = true;
+              history.back();
+              /* Halaman sebelumnya dipasang tanpa animasi (sudah tampil di belakang), lalu potretnya dilepas */
+              setTimeout(pulih, 60);
+            }, ms + 20);
+          } else {
+            pasang(0, `${GS_DUR}ms ${GS_EASE}`);
+            setTimeout(pulih, GS_DUR + 20);
+          }
+        };
+        V.addEventListener('touchend', lepas, { passive: true });
+        V.addEventListener('touchcancel', lepas, { passive: true });
+      })();
+
+      /* ---------- Teka-teki silang ----------
+         Susunan dibuat acak tiap main: kata ditempatkan satu per satu, tiap kata baru harus bersilangan dengan kata yang
+         sudah ada dan tidak boleh menempel di samping kata lain. Dicoba beberapa kali, diambil yang paling banyak katanya
+         lalu paling ringkas. */
+      const T = { kata: [], g: {}, w: 0, h: 0, aktif: null, arah: 'D', posisi: 0 };
+      const kunci = (x, y) => x + ',' + y;
+      function susun(daftar) {
+        const g = new Map(),
+          taruh = [];
+        const bisa = (w, x, y, a) => {
+          const dx = a == 'D' ? 1 : 0,
+            dy = a == 'D' ? 0 : 1;
+          if (g.has(kunci(x - dx, y - dy)) || g.has(kunci(x + dx * w.length, y + dy * w.length))) return -1;
+          let silang = 0;
+          for (let i = 0; i < w.length; i++) {
+            const cx = x + dx * i,
+              cy = y + dy * i,
+              c = g.get(kunci(cx, cy));
+            if (c) {
+              if (c.h != w[i] || c[a]) return -1;
+              silang++;
+            } else if (g.has(kunci(cx + dy, cy + dx)) || g.has(kunci(cx - dy, cy - dx))) return -1;
+          }
+          return silang;
+        };
+        const pasang = (s, x, y, a) => {
+          const w = s[0];
+          for (let i = 0; i < w.length; i++) {
+            const k = kunci(x + (a == 'D' ? i : 0), y + (a == 'D' ? 0 : i));
+            const c = g.get(k) || { h: w[i] };
+            c[a] = true;
+            g.set(k, c);
+          }
+          taruh.push({ w, ptj: s[1], kitab: s[2], x, y, a });
+        };
+        /* Kisi tidak boleh melebar lebih dari MAKS kotak ke samping maupun ke bawah (tetap terbaca di layar HP) */
+        const NK = Gc('tts').jumlah,
+          MAKS = NK <= 9 ? 11 : NK <= 13 ? 13 : 15,
+          B = { x0: 0, y0: 0, x1: 0, y1: 0 };
+        const muat = (w, x, y, a) => {
+          const x1 = a == 'D' ? x + w.length - 1 : x,
+            y1 = a == 'D' ? y : y + w.length - 1;
+          return (
+            Math.max(B.x1, x1) - Math.min(B.x0, x) + 1 <= MAKS && Math.max(B.y1, y1) - Math.min(B.y0, y) + 1 <= MAKS
+          );
+        };
+        const [p, ...sisa] = daftar;
+        pasang(p, 0, 0, 'D');
+        B.x1 = p[0].length - 1;
+        for (const s of sisa) {
+          if (taruh.length >= NK) break;
+          const w = s[0];
+          let best = null;
+          for (const [k, c] of g) {
+            const [cx, cy] = k.split(',').map(Number);
+            for (let i = 0; i < w.length; i++) {
+              if (w[i] != c.h) continue;
+              for (const a of ['D', 'M']) {
+                if (c[a]) continue;
+                const x = a == 'D' ? cx - i : cx,
+                  y = a == 'D' ? cy : cy - i;
+                const n = muat(w, x, y, a) ? bisa(w, x, y, a) : -1;
+                if (n > 0) {
+                  const sk = n * 10 + Math.random() * 6;
+                  if (!best || sk > best.sk) best = { x, y, a, sk };
+                }
+              }
+            }
+          }
+          if (best) {
+            pasang(s, best.x, best.y, best.a);
+            B.x0 = Math.min(B.x0, best.x);
+            B.y0 = Math.min(B.y0, best.y);
+            B.x1 = Math.max(B.x1, best.a == 'D' ? best.x + w.length - 1 : best.x);
+            B.y1 = Math.max(B.y1, best.a == 'D' ? best.y : best.y + w.length - 1);
+          }
+        }
+        const xs = [...g.keys()].map((k) => +k.split(',')[0]),
+          ys = [...g.keys()].map((k) => +k.split(',')[1]);
+        const x0 = Math.min(...xs),
+          y0 = Math.min(...ys);
+        return {
+          kata: taruh.map((t) => ({ ...t, x: t.x - x0, y: t.y - y0 })),
+          w: Math.max(...xs) - x0 + 1,
+          h: Math.max(...ys) - y0 + 1,
+        };
+      }
+      function ttsBaru() {
+        const bank = SOAL_TTS.filter((x) => kitabAktif().some((k) => k.id == x[2]));
+        let terbaik = null;
+        for (let i = 0; i < 40; i++) {
+          const s = susun(acak(bank));
+          const sk = s.kata.length * 100 - Math.max(s.w, s.h) * 3;
+          if (!terbaik || sk > terbaik.sk) terbaik = { ...s, sk };
+        }
+        Object.assign(T, terbaik, { g: {}, aktif: null, arah: 'D' });
+        /* Nomor: urut dari kiri atas, satu nomor untuk sel awal yang sama */
+        const awal = [...new Set(T.kata.map((k) => kunci(k.x, k.y)))].sort((a, b) => {
+          const [ax, ay] = a.split(',').map(Number),
+            [bx, by] = b.split(',').map(Number);
+          return ay - by || ax - bx;
+        });
+        T.kata.forEach((k) => (k.no = awal.indexOf(kunci(k.x, k.y)) + 1));
+        T.kata.sort((a, b) => a.no - b.no);
+        T.kata.forEach((k, i) => {
+          k.i = i;
+          for (let j = 0; j < k.w.length; j++) {
+            const kk = kunci(k.x + (k.a == 'D' ? j : 0), k.y + (k.a == 'D' ? 0 : j));
+            T.g[kk] = T.g[kk] || { h: k.w[j], isi: '', kata: {} };
+            T.g[kk].kata[k.a] = k.i;
+          }
+        });
+        gambarKisi();
+        gambarDaftar();
+        $('#rayakan').hidden = true;
+        pilihKata(T.kata[0], 0, false);
+      }
+      function gambarKisi() {
+        const ki = $('#kisi');
+        ki.style.gridTemplateColumns = `repeat(${T.w}, 1fr)`;
+        /* Lebar kotak maksimal 40 px di HP/tablet, 46 px di desktop (--selmaks) */
+        ki.style.maxWidth = `calc(${T.w} * var(--selmaks, 40px))`;
+        let html = '';
+        for (let y = 0; y < T.h; y++)
+          for (let x = 0; x < T.w; x++) {
+            const c = T.g[kunci(x, y)];
+            if (!c) {
+              html += '<div class="sel"></div>';
+              continue;
+            }
+            const no = T.kata.find((k) => k.x == x && k.y == y);
+            html += `<div class="sel isi" data-k="${x},${y}">${no ? `<span class="sn">${no.no}</span>` : ''}<span class="sh"></span></div>`;
+          }
+        ki.innerHTML = html;
+      }
+      function gambarDaftar() {
+        const li = (k) =>
+          `<li data-ki="${k.i}"><b>${k.no}.</b>${esc(k.ptj)}<small>${Gc('tts').namaKitab ? esc(namaKitab(k.kitab)) + ' · ' : ''}${k.w.length} huruf</small></li>`;
+        $('#lsD').innerHTML = T.kata
+          .filter((k) => k.a == 'D')
+          .map(li)
+          .join('');
+        $('#lsM').innerHTML = T.kata
+          .filter((k) => k.a == 'M')
+          .map(li)
+          .join('');
+      }
+      const selKata = (k) => [...k.w].map((_, j) => kunci(k.x + (k.a == 'D' ? j : 0), k.y + (k.a == 'D' ? 0 : j)));
+      function pilihKata(k, pos, fokus = true) {
+        T.aktif = k;
+        T.arah = k.a;
+        T.posisi = Math.max(0, Math.min(pos, k.w.length - 1));
+        segarkan();
+        const inp = $('#ketik');
+        inp.value = '';
+        fokus && inp.focus({ preventScroll: true });
+      }
+      function segarkan() {
+        const k = T.aktif,
+          sk = selKata(k);
+        $$('#kisi .sel.isi').forEach((el) => {
+          const c = T.g[el.dataset.k];
+          $('.sh', el).textContent = c.isi;
+          el.classList.toggle('kata', sk.includes(el.dataset.k));
+          el.classList.toggle('aktif', sk[T.posisi] == el.dataset.k);
+        });
+        $('#ptjNo').textContent = k.no + (k.a == 'D' ? ' Mendatar' : ' Menurun');
+        $('#ptjTx').textContent = `${k.ptj} (${k.w.length} huruf)`;
+        const k2 = T.g[sk[T.posisi]].kata;
+        $('#ganti').hidden = !(k2.D != null && k2.M != null);
+        $$('.daftar li').forEach((l) => {
+          const kk = T.kata[+l.dataset.ki];
+          l.classList.toggle('on', kk == k);
+          l.classList.toggle(
+            'selesai',
+            selKata(kk).every((x) => T.g[x].isi == T.g[x].h)
+          );
+        });
+      }
+      $('#kisi').addEventListener('click', (e) => {
+        const el = e.target.closest('.sel.isi');
+        if (!el) return;
+        const c = T.g[el.dataset.k];
+        const sekarang = T.aktif && selKata(T.aktif)[T.posisi] == el.dataset.k;
+        /* Ketuk sel yang sama dua kali: ganti arah (bila sel itu milik dua kata) */
+        const a =
+          sekarang && c.kata.D != null && c.kata.M != null
+            ? T.arah == 'D'
+              ? 'M'
+              : 'D'
+            : c.kata[T.arah] != null
+              ? T.arah
+              : c.kata.D != null
+                ? 'D'
+                : 'M';
+        const k = T.kata[c.kata[a]];
+        pilihKata(k, selKata(k).indexOf(el.dataset.k));
+      });
+      $('#ganti').onclick = () => {
+        const c = T.g[selKata(T.aktif)[T.posisi]];
+        const a = T.arah == 'D' ? 'M' : 'D';
+        if (c.kata[a] == null) return;
+        const k = T.kata[c.kata[a]];
+        pilihKata(k, selKata(k).indexOf(selKata(T.aktif)[T.posisi]));
+      };
+      $('.daftar').addEventListener('click', (e) => {
+        const l = e.target.closest('li');
+        if (!l) return;
+        pilihKata(T.kata[+l.dataset.ki], 0);
+        if (!matchMedia('(min-width:1000px)').matches) V.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      /* Ketikan dari keyboard HP / komputer masuk lewat satu kolom tersembunyi */
+      function tulis(h) {
+        const sk = selKata(T.aktif);
+        T.g[sk[T.posisi]].isi = h;
+        $$('#kisi .sel.isi').forEach((el) => el.classList.remove('benar', 'salah'));
+        if (T.posisi < sk.length - 1) T.posisi++;
+        segarkan();
+        if (Gc('tts').cekOto && sk.every((x) => T.g[x].isi))
+          sk.forEach((x) => {
+            const el = $(`#kisi [data-k="${x}"]`);
+            el.classList.toggle('benar', T.g[x].isi == T.g[x].h);
+            el.classList.toggle('salah', T.g[x].isi != T.g[x].h);
+          });
+        bunyi('ketuk');
+        cekSelesai();
+        /* Lompat ke kata berikutnya yang belum terisi penuh */
+        if (Gc('tts').lompat && sk.every((x) => T.g[x].isi) && $('#rayakan').hidden) {
+          const n = T.kata.length,
+            lanjut = [...Array(n)]
+              .map((_, d) => T.kata[(T.aktif.i + 1 + d) % n])
+              .find((k) => selKata(k).some((x) => !T.g[x].isi));
+          if (lanjut)
+            pilihKata(
+              lanjut,
+              Math.max(
+                0,
+                selKata(lanjut).findIndex((x) => !T.g[x].isi)
+              )
+            );
+        }
+      }
+      function hapus() {
+        const sk = selKata(T.aktif);
+        if (!T.g[sk[T.posisi]].isi && T.posisi > 0) T.posisi--;
+        T.g[sk[T.posisi]].isi = '';
+        segarkan();
+      }
+      const inp = $('#ketik');
+      inp.addEventListener('input', () => {
+        const v = inp.value.toUpperCase().replace(/[^A-Z]/g, '');
+        inp.value = '';
+        for (const h of v) tulis(h);
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key == 'Backspace') {
+          e.preventDefault();
+          hapus();
+        } else if (e.key.startsWith('Arrow')) {
+          e.preventDefault();
+          const maju = e.key == 'ArrowRight' || e.key == 'ArrowDown';
+          T.posisi = Math.max(0, Math.min(T.aktif.w.length - 1, T.posisi + (maju ? 1 : -1)));
+          segarkan();
+        } else if (e.key == 'Enter' || e.key == 'Tab') {
+          e.preventDefault();
+          pilihKata(T.kata[(T.aktif.i + (e.shiftKey ? T.kata.length - 1 : 1)) % T.kata.length], 0);
+        } else if (e.key == ' ') {
+          e.preventDefault();
+          $('#ganti').click();
+        }
+      });
+      /* Di komputer: huruf yang diketik saat fokus di tombol tetap masuk ke kotak aktif */
+      document.addEventListener('keydown', (e) => {
+        if (halKini() != 'tts' || document.activeElement == inp || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (/^[a-z]$/i.test(e.key)) {
+          e.preventDefault();
+          inp.focus({ preventScroll: true });
+          tulis(e.key.toUpperCase());
+        }
+      });
+      function cekSelesai() {
+        const semua = Object.values(T.g).every((c) => c.isi == c.h);
+        if (semua && $('#rayakan').hidden) getar([30, 60, 30]), bunyi('selesai');
+        $('#rayakan').hidden = !semua;
+        if (semua) $$('#kisi .sel.isi').forEach((el) => el.classList.add('benar'));
+      }
+      $('#cek').onclick = () => {
+        $$('#kisi .sel.isi').forEach((el) => {
+          const c = T.g[el.dataset.k];
+          el.classList.toggle('benar', !!c.isi && c.isi == c.h);
+          el.classList.toggle('salah', !!c.isi && c.isi != c.h);
+        });
+        cekSelesai();
+      };
+      $('#huruf').onclick = () => {
+        const sk = selKata(T.aktif);
+        const j = sk.findIndex((x) => T.g[x].isi != T.g[x].h);
+        if (j < 0) return;
+        T.g[sk[j]].isi = T.g[sk[j]].h;
+        T.posisi = j;
+        segarkan();
+        cekSelesai();
+      };
+      $('#buka').onclick = () =>
+        konfirmasi('Tampilkan semua jawaban?', 'Semua kotak akan terisi jawaban yang benar.', 'Tampilkan', () => {
+          Object.values(T.g).forEach((c) => (c.isi = c.h));
+          segarkan();
+          $$('#kisi .sel.isi').forEach((el) => el.classList.add('benar'));
+        });
+      $('#baru').onclick = () => {
+        ttsBaru();
+        masuk($('#h-tts'), 'fwd');
+      };
+
+      /* ---------- Tebak kitab ----------
+         Judul bab yang ada di lebih dari satu kitab tidak dipakai. Safinatun Najah dan Fathul Qarib (sama-sama fikih ibadah
+         dasar, banyak bab serupa) tidak pernah menjadi pilihan bersamaan. */
+      const SERUPA = [['safinatun-najah', 'fathul-qarib']];
+      const normal = (s) =>
+        s
+          .toLowerCase()
+          .replace(/[^a-z ]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const KEMBAR = (() => {
+        const n = {};
+        KITAB.forEach((k) => new Set(k.bab.map((b) => normal(b[1]))).forEach((t) => (n[t] = (n[t] || 0) + 1)));
+        return n;
+      })();
+      const TB = { soal: [], i: 0, benar: 0 };
+      function tbMulai() {
+        /* Satu putaran P.jml soal dari kitab yang aktif; tiap kitab muncul kurang lebih sama sering. Pengecoh boleh dari
+           semua kitab, agar selalu ada empat pilihan. */
+        const K = acak(kitabMain(Gc('tebak').arab));
+        TB.soal = [];
+        const c = Gc('tebak');
+        for (let i = 0; TB.soal.length < c.jml && i < 400; i++) {
+          const k = K[i % K.length];
+          const bab = k.bab.filter((b) => KEMBAR[normal(b[1])] == 1 && !TB.soal.some((s) => s.bab == b));
+          if (!bab.length) continue;
+          const b = bab[Math.floor(Math.random() * bab.length)];
+          const larang = SERUPA.find((p) => p.includes(k.id)) || [];
+          const lain = acak(kitabPengecoh(c.arab).filter((x) => x.id != k.id && !larang.includes(x.id))).slice(
+            0,
+            c.pilihan - 1
+          );
+          TB.soal.push({ kitab: k, bab: b, pil: acak([k, ...lain]) });
+        }
+        TB.i = 0;
+        TB.benar = 0;
+        tbTampil();
+      }
+      function tbTampil() {
+        const tot = TB.soal.length;
+        $('#progI').style.width = (TB.i / tot) * 100 + '%';
+        $('#skor').textContent = `${TB.benar}/${tot}`;
+        const isi = $('#tbIsi');
+        if (TB.i >= tot) {
+          const n = TB.benar;
+          const pesan =
+            n == tot
+              ? 'Sempurna! Kamu hafal daftar isi kitab.'
+              : n >= tot * 0.7
+                ? 'Bagus sekali, tinggal sedikit lagi.'
+                : n >= tot * 0.4
+                  ? 'Lumayan. Coba buka kitabnya lalu main lagi.'
+                  : 'Ayo baca lagi daftar isi kitabnya, lalu coba lagi.';
+          isi.innerHTML = `<div class="akhir"><div class="besar">${n}/${tot}</div><p class="mut">${pesan}</p></div><div class="act"><button class="btn" id="tbLagi" style="flex:1">Main lagi</button><button class="btn s" id="tbAwal" style="flex:1">Pilih permainan</button></div>`;
+          $('#tbLagi').onclick = () => (tbMulai(), masuk(isi, 'fwd'));
+          $('#tbAwal').onclick = () => history.back();
+          masuk(isi, 'fwd');
+          bunyi('selesai');
+          return;
+        }
+        const s = TB.soal[TB.i];
+        isi.innerHTML = `<div class="card soal"><small class="mut lbl">Soal ${TB.i + 1} dari ${tot} · Bab ini ada di kitab apa?</small>${Gc('tebak').arab ? `<div class="tar">${esc(s.bab[0])}</div>` : '<div style="height:8px"></div>'}<div class="tid">${esc(s.bab[1])}</div></div><div class="pil">${s.pil
+          .map(
+            (k, i) =>
+              `<button data-id="${k.id}"><span class="nk">${i + 1}</span>${esc(k.judul)}<small>${esc(k.ket.split('·').pop().trim())}</small></button>`
+          )
+          .join('')}</div><div id="tbUmpan"></div>`;
+        masuk(isi, 'fwd');
+        $$('.pil button', isi).forEach(
+          (b) =>
+            (b.onclick = () => {
+              const ok = b.dataset.id == s.kitab.id;
+              if (ok) TB.benar++, bunyi('benar');
+              else getar(120), bunyi('salah');
+              $$('.pil button', isi).forEach((x) => {
+                x.disabled = true;
+                if (x.dataset.id == s.kitab.id) x.classList.add('benar');
+              });
+              if (!ok) b.classList.add('salah');
+              $('#skor').textContent = `${TB.benar}/${tot}`;
+              $('#tbUmpan').innerHTML =
+                `<div class="umpan ${ok ? 'ok' : 'no'}"><b>${ok ? 'Benar!' : 'Belum tepat.'}</b> Bab “${esc(s.bab[1])}” ada di <b>${esc(s.kitab.judul)}</b> (${esc(s.kitab.ket)}).</div><div class="act" style="margin-top:12px"><button class="btn" id="tbLanjut">${TB.i + 1 < tot ? 'Soal berikutnya' : 'Lihat hasil'}</button></div>`;
+              $('#tbLanjut').onclick = () => {
+                clearTimeout(TB.oto);
+                TB.i++;
+                V.scrollTop = 0;
+                tbTampil();
+              };
+              if (Gc('tebak').lanjutOto)
+                TB.oto = setTimeout(() => halKini() == 'tebak' && $('#tbLanjut') && $('#tbLanjut').click(), 1500);
+            })
+        );
+      }
+      /* Tebak Kitab di komputer: angka 1-4 menjawab, Enter ke soal berikutnya / main lagi */
+      document.addEventListener('keydown', (e) => {
+        if (halKini() != 'tebak' || e.ctrlKey || e.metaKey || e.altKey || $('.back-d')) return;
+        const B = $$('.pil button');
+        if (/^[1-4]$/.test(e.key) && B[+e.key - 1] && !B[0].disabled) B[+e.key - 1].click();
+        else if (e.key == 'Enter') {
+          const b = $('#tbLanjut') || $('#tbLagi');
+          if (b && document.activeElement != b) {
+            e.preventDefault();
+            b.click();
+          }
+        }
+      });
+
+      /* Bab yang aman dipakai: judulnya hanya ada di satu kitab */
+      const babAman = (k) => k.bab.map((b, i) => ({ b, i })).filter((x) => KEMBAR[normal(x.b[1])] == 1);
+      /* Nashaihul Ibad (dan kitab lain yang belum punya judul bab Arab) tidak dipakai saat permainan menampilkan judul Arab:
+         tanpa judul Arab, soal dari kitab itu langsung ketahuan jawabannya. */
+      const punyaArab = (k) => k.bab.some((b) => b[0].trim().length > 1);
+      const kitabMain = (perluArab) => {
+        const a = kitabAktif();
+        if (!perluArab) return a;
+        const f = a.filter(punyaArab);
+        return f.length ? f : KITAB.filter(punyaArab);
+      };
+      const kitabPengecoh = (perluArab) => (perluArab ? KITAB.filter(punyaArab) : KITAB);
+      const hasilHtml = (besar, teks, rek, id) =>
+        `<div class="hasil"><div class="besar">${besar}</div><p class="mut">${teks}</p>${rek ? `<span class="rek">${rek}</span>` : ''}</div><div class="act" style="margin-top:14px"><button class="btn" data-lagi="${id}" style="flex:1">Main lagi</button><button class="btn s" data-pilih style="flex:1">Pilih permainan</button></div>`;
+      V.addEventListener('click', (e) => {
+        const l = e.target.closest('[data-lagi]');
+        if (l) {
+          MULAI[l.dataset.lagi][3]();
+          masuk($('#h-' + l.dataset.lagi), 'fwd');
+          V.scrollTop = 0;
+        } else if (e.target.closest('[data-pilih]')) history.back();
+      });
+
+      /* ---------- Kartu Ingatan ----------
+         P.pasang pasang kartu: judul bab Arab dan artinya (dari bab yang sama). Dua kartu dibuka; cocok = tetap terbuka,
+         tidak cocok = ditutup lagi setelah 0,8 s. Dihitung langkah dan waktunya. */
+      const MM = { kartu: [], buka: [], cocok: 0, langkah: 0, t0: 0, lewat: 0, jalan: false, tk: 0 };
+      function mmMulai() {
+        const pool = acak(
+          kitabMain(true).flatMap((k) =>
+            babAman(k)
+              .filter((x) => x.b[1].length <= 30 && x.b[0].length <= 34)
+              .map((x) => ({ k, b: x.b }))
+          )
+        );
+        const pakai = [],
+          lihat = new Set();
+        for (const x of pool) {
+          if (pakai.length >= Gc('memori').pasang) break;
+          if (lihat.has(normal(x.b[1])) || lihat.has(x.b[0])) continue;
+          lihat.add(normal(x.b[1]));
+          lihat.add(x.b[0]);
+          pakai.push(x);
+        }
+        MM.kartu = acak(
+          pakai.flatMap((x, i) => [
+            { p: i, ar: true, teks: x.b[0] },
+            { p: i, ar: false, teks: x.b[1] },
+          ])
+        );
+        Object.assign(MM, { buka: [], cocok: 0, langkah: 0, t0: 0, lewat: 0, jalan: true, n: pakai.length });
+        const tot = MM.kartu.length;
+        $('#kin').style.setProperty('--kol', tot <= 8 ? 4 : tot <= 12 ? 3 : 4);
+        $('#kin').innerHTML = MM.kartu
+          .map(
+            (c, i) =>
+              `<button class="kk" data-kk="${i}" aria-label="Kartu ${i + 1}"><span class="dlm"><span class="blk">${ic('book', 22)}</span><span class="muka${c.ar ? ' ar' : ''}">${esc(c.teks)}</span></span></button>`
+          )
+          .join('');
+        $('#mmHasil').innerHTML = '';
+        $('#kin').dataset.pola = Gc('memori').pola;
+        mmStatus();
+        /* Intip di awal: semua kartu terbuka 2 detik, lalu ditutup */
+        if (Gc('memori').intip) {
+          MM.intip = true;
+          setTimeout(() => $$('.kk').forEach((x) => x.classList.add('buka')), 350);
+          setTimeout(() => {
+            $$('.kk').forEach((x) => x.classList.remove('buka'));
+            setTimeout(() => (MM.intip = false), 320);
+          }, 2350);
+        } else MM.intip = false;
+      }
+      const mmDetik = () => MM.lewat + (MM.t0 ? (performance.now() - MM.t0) / 1000 : 0);
+      function mmStatus() {
+        $('#mmLangkah').innerHTML = `Langkah: <b>${MM.langkah}</b>`;
+        $('#mmWaktu').innerHTML = `Waktu: <b>${mmss(mmDetik())}</b>`;
+        $('#skor').textContent = `${MM.cocok}/${MM.n}`;
+      }
+      /* Jam berhenti saat halaman lain tampil (mis. Pengaturan) dan jalan lagi saat kembali */
+      function mmJeda(jeda) {
+        clearInterval(MM.tk);
+        if (jeda) {
+          if (MM.t0) MM.lewat = mmDetik();
+          MM.t0 = 0;
+        } else if (MM.jalan && MM.langkah + MM.buka.length > 0) {
+          MM.t0 = performance.now();
+          MM.tk = setInterval(mmStatus, 1000);
+        }
+      }
+      $('#kin').addEventListener('click', (e) => {
+        const b = e.target.closest('.kk');
+        if (
+          !b ||
+          !MM.jalan ||
+          MM.intip ||
+          b.classList.contains('buka') ||
+          b.classList.contains('pas') ||
+          MM.buka.length >= 2
+        )
+          return;
+        bunyi('balik');
+        if (!MM.t0 && MM.langkah == 0 && MM.buka.length == 0) {
+          MM.t0 = performance.now();
+          clearInterval(MM.tk);
+          MM.tk = setInterval(mmStatus, 1000);
+        }
+        b.classList.add('buka');
+        MM.buka.push(+b.dataset.kk);
+        if (MM.buka.length < 2) return;
+        MM.langkah++;
+        const [a, c] = MM.buka.map((i) => MM.kartu[i]),
+          el = MM.buka.map((i) => $(`.kk[data-kk="${i}"]`));
+        if (a.p == c.p && a.ar != c.ar) {
+          MM.cocok++;
+          el.forEach((x) => (x.classList.remove('buka'), x.classList.add('pas')));
+          MM.buka = [];
+          if (MM.cocok < MM.n) bunyi('benar');
+          if (MM.cocok == MM.n) mmSelesai();
+        } else {
+          el.forEach((x) => x.classList.add('salah'));
+          getar(60);
+          setTimeout(() => bunyi('salah'), 120);
+          setTimeout(() => {
+            el.forEach((x) => x.classList.remove('buka', 'salah'));
+            MM.buka = [];
+          }, Gc('memori').tahan);
+        }
+        mmStatus();
+      });
+      function mmSelesai() {
+        const d = mmDetik();
+        MM.jalan = false;
+        mmJeda(true);
+        MM.lewat = d;
+        mmStatus();
+        getar([30, 60, 30]);
+        bunyi('selesai');
+        const r6 = Gc('memori').pasang == 6;
+        const r = r6 ? rekor('memori', MM.langkah, (a, b) => a < b) : { baru: false };
+        const sempurna = MM.langkah == MM.n;
+        $('#mmHasil').innerHTML = hasilHtml(
+          MM.langkah,
+          `langkah untuk ${MM.n} pasang · waktu ${mmss(d)}${sempurna ? '<br>Sempurna, tanpa salah sekali pun!' : ''}`,
+          r.baru ? 'Rekor baru!' : r.lama != null && r6 ? `Rekor: ${REK.memori} langkah` : '',
+          'memori'
+        );
+        masuk($('#mmHasil'), 'fwd');
+        setTimeout(() => $('#mmHasil').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+      }
+
+      /* ---------- Urutkan Bab ----------
+         5 putaran. Tiap putaran: satu kitab, P.urutN bab acak (urutan aslinya di daftar isi kitab), ditampilkan teracak.
+         Pemain mengetuk bab mulai dari yang paling awal; Cek memperlihatkan posisi yang benar/salah. */
+      const UR = { soal: [], i: 0, benar: 0, pilih: [], dicek: false };
+      function urMulai() {
+        const K = acak(kitabAktif().filter((k) => babAman(k).length >= 12));
+        UR.soal = [];
+        const c = Gc('urut');
+        for (let r = 0; r < c.putaran; r++) {
+          const k = K[r % K.length],
+            aman = babAman(k),
+            ambil = acak(aman)
+              .slice(0, c.n)
+              .sort((a, b) => a.i - b.i);
+          let tampil = acak(ambil);
+          while (tampil.every((x, j) => x == ambil[j])) tampil = acak(ambil);
+          UR.soal.push({ k, benar: ambil, tampil });
+        }
+        Object.assign(UR, { i: 0, benar: 0, pilih: [], dicek: false });
+        urTampil();
+      }
+      function urTampil() {
+        const tot = UR.soal.length,
+          isi = $('#urIsi');
+        $('#urProg').style.width = (UR.i / tot) * 100 + '%';
+        $('#skor').textContent = `${UR.benar}/${tot}`;
+        if (UR.i >= tot) {
+          const c = Gc('urut'),
+            r = c.n == 5 && tot == 5 ? rekor('urut', UR.benar, (a, b) => a > b) : { baru: false };
+          bunyi('selesai');
+          isi.innerHTML = hasilHtml(
+            `${UR.benar}/${tot}`,
+            UR.benar == tot
+              ? 'Semua urutan tepat. Hafal betul susunan kitabnya!'
+              : UR.benar >= tot * 0.6
+                ? 'Bagus, sebagian besar urutan tepat.'
+                : 'Coba buka daftar isi kitabnya, lalu main lagi.',
+            r.baru ? 'Rekor baru!' : '',
+            'urut'
+          );
+          masuk(isi, 'fwd');
+          return;
+        }
+        const s = UR.soal[UR.i],
+          n = s.tampil.length;
+        const slot = (j) => {
+          const x = UR.pilih[j];
+          if (!x) return `<div class="uslot"><span class="no2">${j + 1}</span>…</div>`;
+          const benar = UR.dicek && x == s.benar[j],
+            asli = s.benar.indexOf(x) + 1;
+          return `<button data-ub="${s.tampil.indexOf(x)}" class="${UR.dicek ? (benar ? 'benar' : 'salah') : ''}"><span class="no2">${j + 1}</span><span>${esc(x.b[1])}</span>${UR.dicek && !benar && Gc('urut').petunjuk ? `<span class="asli">seharusnya ke-${asli}</span>` : ''}</button>`;
+        };
+        isi.innerHTML = `<div class="card soal" style="padding:14px 16px"><small class="mut lbl">Putaran ${UR.i + 1} dari ${tot}</small><div class="tid" style="margin-top:4px">${esc(s.k.judul)}</div><small class="mut">Ketuk bab mulai dari yang paling awal di kitab ini.</small></div>
+          <h2>Urutanmu</h2><div class="ulist">${s.tampil.map((_, j) => slot(j)).join('')}</div>
+          ${UR.dicek ? '' : `<h2>Pilih bab</h2><div class="ulist">${s.tampil.map((x, j) => (UR.pilih.includes(x) ? '' : `<button data-up="${j}"><span>${esc(x.b[1])}</span></button>`)).join('') || '<small class="mut">Semua bab sudah disusun. Ketuk Cek.</small>'}</div>`}
+          <div class="act" style="margin-top:14px">${
+            UR.dicek
+              ? `<button class="btn" id="urLanjut" style="flex:1">${UR.i + 1 < tot ? 'Putaran berikutnya' : 'Lihat hasil'}</button>`
+              : `<button class="btn" id="urCek" style="flex:1" ${UR.pilih.length < n ? 'disabled' : ''}>Cek</button><button class="btn s" id="urUlang" style="flex:1">Ulangi</button>`
+          }</div>`;
+      }
+      $('#urIsi').addEventListener('click', (e) => {
+        const s = UR.soal[UR.i];
+        if (!s) return;
+        const up = e.target.closest('[data-up]'),
+          ub = e.target.closest('[data-ub]');
+        if (up && !UR.dicek) UR.pilih.push(s.tampil[+up.dataset.up]), bunyi('ketuk');
+        else if (ub && !UR.dicek) UR.pilih = UR.pilih.filter((x) => x != s.tampil[+ub.dataset.ub]);
+        else if (e.target.closest('#urUlang')) UR.pilih = [];
+        else if (e.target.closest('#urCek')) {
+          UR.dicek = true;
+          const ok = UR.pilih.every((x, j) => x == s.benar[j]);
+          if (ok) UR.benar++, bunyi('benar');
+          else getar(120), bunyi('salah');
+        } else if (e.target.closest('#urLanjut')) {
+          UR.i++;
+          UR.pilih = [];
+          UR.dicek = false;
+          V.scrollTop = 0;
+          urTampil();
+          masuk($('#urIsi'), 'fwd');
+          return;
+        } else return;
+        urTampil();
+      });
+
+      /* ---------- Cepat Tepat ----------
+         P.durasi detik. Pernyataan "Bab X ada di kitab Y": separuh benar, separuh salah (kitab lain, bukan pasangan kitab
+         yang mirip). Waktu berhenti selama dialog terbuka atau halaman lain tampil. */
+      const CT = {
+        jalan: false,
+        sisa: 0,
+        t0: 0,
+        benar: 0,
+        salah: 0,
+        rentet: 0,
+        terbaik: 0,
+        s: null,
+        raf: 0,
+        kunci: false,
+      };
+      function ctSoal() {
+        const K = kitabMain(Gc('cepat').arab),
+          k = K[Math.floor(Math.random() * K.length)],
+          aman = babAman(k),
+          b = aman[Math.floor(Math.random() * aman.length)].b;
+        const larang = SERUPA.find((p) => p.includes(k.id)) || [];
+        const lain = kitabPengecoh(Gc('cepat').arab).filter((x) => x.id != k.id && !larang.includes(x.id));
+        const betul = Math.random() < 0.5;
+        const tampil = betul ? k : lain[Math.floor(Math.random() * lain.length)];
+        return { b, k, tampil, betul };
+      }
+      function ctMulai() {
+        Object.assign(CT, {
+          jalan: true,
+          sisa: Gc('cepat').durasi,
+          t0: 0,
+          benar: 0,
+          salah: 0,
+          rentet: 0,
+          terbaik: 0,
+          kunci: false,
+        });
+        $('#ctWaktu').classList.remove('habis');
+        CT.s = ctSoal();
+        ctTampil();
+      }
+      function ctTampil() {
+        const s = CT.s;
+        $('#ctIsi').innerHTML =
+          `<div class="card pernyataan" id="ctKartu"><small class="mut lbl">Benar atau salah?</small>${Gc('cepat').arab ? `<div class="tar">${esc(s.b[0])}</div>` : ''}<p>Bab <b>“${esc(s.b[1])}”</b> ada di kitab <b>${esc(s.tampil.judul)}</b>.</p></div><div class="bs"><button class="bsS" data-ct="0">Salah</button><button class="bsB" data-ct="1">Benar</button></div>`;
+        ctStatus();
+      }
+      const ctDetik = () => Math.max(0, CT.sisa - (CT.t0 ? (performance.now() - CT.t0) / 1000 : 0));
+      function ctStatus() {
+        $('#skor').textContent = `${CT.benar} benar`;
+        $('#ctSisa').innerHTML = `Sisa: <b>${Math.ceil(ctDetik())} detik</b>`;
+        $('#ctRentet').innerHTML = `Beruntun: <b>${CT.rentet}</b>`;
+      }
+      function ctLoop() {
+        cancelAnimationFrame(CT.raf);
+        const d = ctDetik();
+        $('#ctWaktu i').style.transform = `scaleX(${Math.min(1, d / Gc('cepat').durasi)})`;
+        $('#ctWaktu').classList.toggle('habis', d < 5);
+        ctStatus();
+        if (d <= 0) return ctSelesai();
+        if (CT.t0) CT.raf = requestAnimationFrame(ctLoop);
+      }
+      /* jeda = true: hentikan waktu (sisa disimpan); false: jalankan lagi */
+      function ctJeda(jeda) {
+        if (!CT.jalan) return;
+        if (jeda) {
+          if (CT.t0) CT.sisa = ctDetik();
+          CT.t0 = 0;
+          cancelAnimationFrame(CT.raf);
+        } else if (!CT.t0 && !$('.back-d')) {
+          CT.t0 = performance.now();
+          ctLoop();
+        }
+      }
+      document.addEventListener('fz-dialog', (e) => {
+        if (halKini() == 'cepat') ctJeda(e.detail);
+        if (halKini() == 'cari') ckJeda(e.detail);
+        if (halKini() == 'pola') plJeda(e.detail);
+      });
+      function ctJawab(jawab) {
+        if (!CT.jalan || CT.kunci) return;
+        const ok = jawab == CT.s.betul;
+        if (ok) {
+          CT.benar++;
+          CT.rentet++;
+          CT.terbaik = Math.max(CT.terbaik, CT.rentet);
+          bunyi('benar');
+        } else {
+          CT.salah++;
+          CT.rentet = 0;
+          getar(120);
+          bunyi('salah');
+          /* Pengaturan "Salah mengurangi waktu": potong 2 detik */
+          if (Gc('cepat').minus) CT.sisa = Math.max(0, CT.sisa - 2);
+        }
+        CT.kunci = true;
+        $('#ctKartu').classList.add(ok ? 'ok' : 'no');
+        ctStatus();
+        setTimeout(
+          () => {
+            CT.kunci = false;
+            if (!CT.jalan) return;
+            CT.s = ctSoal();
+            ctTampil();
+          },
+          ok ? 260 : 700
+        );
+      }
+      $('#ctIsi').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-ct]');
+        if (b) ctJawab(b.dataset.ct == '1');
+      });
+      function ctSelesai() {
+        CT.jalan = false;
+        CT.t0 = 0;
+        cancelAnimationFrame(CT.raf);
+        $('#ctWaktu i').style.transform = 'scaleX(0)';
+        getar([30, 60, 30]);
+        const dur = Gc('cepat').durasi,
+          r = dur == 60 ? rekor('cepat', CT.benar, (a, b) => a > b) : { baru: false };
+        bunyi('selesai');
+        const tot = CT.benar + CT.salah;
+        $('#ctIsi').innerHTML = hasilHtml(
+          CT.benar,
+          `benar dari ${tot} jawaban dalam ${dur} detik · ketepatan ${tot ? Math.round((CT.benar / tot) * 100) : 0}% · beruntun terbaik ${CT.terbaik}`,
+          r.baru ? 'Rekor baru!' : r.lama != null && dur == 60 ? `Rekor: ${REK.cepat} benar` : '',
+          'cepat'
+        );
+        masuk($('#ctIsi'), 'fwd');
+        ctStatus();
+        $('#ctSisa').innerHTML = 'Waktu habis';
+      }
+      /* ---------- Susun Huruf ----------
+         Jawaban dari bank kata TTS (petunjuknya dari bab kitab). Huruf jawaban diacak menjadi ubin; pemain mengetuk ubin
+         sesuai urutan jawaban. Benar = lanjut; boleh dilewati (dihitung salah). */
+      const SH = { soal: [], i: 0, benar: 0, isi: [], selesai: false };
+      function shMulai() {
+        const c = Gc('susun'),
+          bank = acak(
+            SOAL_TTS.filter((x) => x[0].length >= 4 && x[0].length <= 9 && kitabAktif().some((k) => k.id == x[2]))
+          );
+        SH.soal = bank.slice(0, c.jml).map((x) => {
+          let ac = acak([...x[0]]);
+          for (let n = 0; n < 5 && ac.join('') == x[0]; n++) ac = acak([...x[0]]);
+          return { w: x[0], ptj: x[1], kitab: x[2], ubin: ac };
+        });
+        Object.assign(SH, { i: 0, benar: 0 });
+        shSoal();
+      }
+      function shSoal() {
+        const s = SH.soal[SH.i];
+        SH.isi = [];
+        SH.selesai = false;
+        /* Bantuan huruf pertama: ubin huruf pertama langsung dipakai */
+        if (s && Gc('susun').hurufAwal) SH.isi.push(s.ubin.indexOf(s.w[0]));
+        shTampil();
+      }
+      function shTampil() {
+        const tot = SH.soal.length,
+          isi = $('#shIsi');
+        $('#shProg').style.width = (SH.i / tot) * 100 + '%';
+        $('#skor').textContent = `${SH.benar}/${tot}`;
+        if (SH.i >= tot) {
+          const r = tot == 8 ? rekor('susun', SH.benar, (a, b) => a > b) : { baru: false };
+          bunyi('selesai');
+          isi.innerHTML = hasilHtml(
+            `${SH.benar}/${tot}`,
+            SH.benar == tot
+              ? 'Semua kata tersusun benar. Teliti sekali!'
+              : SH.benar >= tot * 0.6
+                ? 'Bagus, sebagian besar benar.'
+                : 'Coba main lagi, pelan-pelan saja.',
+            r.baru ? 'Rekor baru!' : '',
+            'susun'
+          );
+          masuk(isi, 'fwd');
+          return;
+        }
+        const s = SH.soal[SH.i],
+          kata = SH.isi.map((j) => s.ubin[j]).join(''),
+          status = SH.selesai ? (kata == s.w ? 'ok' : 'no') : '';
+        isi.innerHTML = `<div class="card soal" style="padding:16px"><small class="mut lbl">Soal ${SH.i + 1} dari ${tot} · ${s.w.length} huruf</small><div class="tid" style="margin-top:6px;font-size:16px;font-weight:600">${esc(s.ptj)}</div>${Gc('susun').arti ? `<small class="mut">${esc(namaKitab(s.kitab))}</small>` : ''}</div>
+          <div class="jwb ${status}" id="shJwb">${[...s.w].map((_, j) => `<span class="${SH.isi[j] != null ? 'isi' : ''}" data-sj="${j}">${SH.isi[j] != null ? s.ubin[SH.isi[j]] : ''}</span>`).join('')}</div>
+          ${SH.selesai ? `<div class="umpan ${status}"><b>${status == 'ok' ? 'Benar!' : 'Belum tepat.'}</b> Jawabannya <b>${s.w}</b>.</div>` : `<div class="ubin">${s.ubin.map((h, j) => `<button data-su="${j}" ${SH.isi.includes(j) ? 'disabled' : ''}>${h}</button>`).join('')}</div>`}
+          <div class="act" style="margin-top:14px">${
+            SH.selesai
+              ? `<button class="btn" id="shLanjut" style="flex:1">${SH.i + 1 < tot ? 'Soal berikutnya' : 'Lihat hasil'}</button>`
+              : `<button class="btn s" id="shHapus" style="flex:1">Hapus</button><button class="btn s" id="shLewat" style="flex:1">Lewati</button>`
+          }</div>`;
+      }
+      function shPeriksa() {
+        const s = SH.soal[SH.i];
+        if (SH.isi.length < s.w.length) return;
+        const kata = SH.isi.map((j) => s.ubin[j]).join('');
+        if (kata == s.w) {
+          SH.benar++;
+          SH.selesai = true;
+          bunyi('benar');
+        } else {
+          /* Salah susun: digoyang, lalu huruf terakhir dilepas agar bisa dicoba lagi */
+          getar(120);
+          bunyi('salah');
+          const j = $('#shJwb');
+          j.classList.add('no');
+          setTimeout(() => {
+            SH.isi = SH.isi.slice(0, Gc('susun').hurufAwal ? 1 : 0);
+            shTampil();
+          }, 650);
+          return;
+        }
+        shTampil();
+      }
+      $('#shIsi').addEventListener('click', (e) => {
+        const s = SH.soal[SH.i];
+        if (!s) return;
+        const u = e.target.closest('[data-su]'),
+          sj = e.target.closest('[data-sj]');
+        if (u && !SH.selesai) {
+          SH.isi.push(+u.dataset.su);
+          bunyi('ketuk');
+          shTampil();
+          shPeriksa();
+        } else if ((sj || e.target.closest('#shHapus')) && !SH.selesai) {
+          const min = Gc('susun').hurufAwal ? 1 : 0;
+          if (SH.isi.length > min) SH.isi.pop();
+          shTampil();
+        } else if (e.target.closest('#shLewat')) {
+          SH.isi = [];
+          SH.selesai = true;
+          getar(60);
+          shTampil();
+          $('#shJwb').innerHTML = [...s.w].map((h) => `<span class="isi">${h}</span>`).join('');
+          $('#shJwb').classList.add('no');
+        } else if (e.target.closest('#shLanjut')) {
+          SH.i++;
+          V.scrollTop = 0;
+          shSoal();
+          masuk($('#shIsi'), 'fwd');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (halKini() != 'susun' || e.ctrlKey || e.metaKey || e.altKey || $('.back-d')) return;
+        const s = SH.soal[SH.i];
+        if (!s) return;
+        if (e.key == 'Enter' && $('#shLanjut')) return e.preventDefault(), $('#shLanjut').click();
+        if (SH.selesai) return;
+        if (e.key == 'Backspace') return e.preventDefault(), $('#shHapus').click();
+        const h = e.key.toUpperCase();
+        if (/^[A-Z]$/.test(h)) {
+          const j = s.ubin.findIndex((x, k) => x == h && !SH.isi.includes(k));
+          if (j >= 0) e.preventDefault(), $(`[data-su="${j}"]`).click();
+        }
+      });
+
+      /* ---------- Cari Kata ----------
+         Kata jawaban (bank TTS, kitab aktif) disembunyikan di kotak huruf N×N: mendatar, menurun, dan (bila diaktifkan)
+         miring. Pemain menyeret dari huruf pertama ke huruf terakhir (atau mengetuk keduanya); boleh dari arah sebaliknya. */
+      const CK = { n: 10, g: [], kata: [], jalan: false, t0: 0, lewat: 0, tk: 0, awal: null, tunggu: false };
+      function ckMulai() {
+        const c = Gc('cari'),
+          n = c.ukuran,
+          arah = c.diagonal
+            ? [
+                [1, 0],
+                [0, 1],
+                [1, 1],
+                [1, -1],
+              ]
+            : [
+                [1, 0],
+                [0, 1],
+              ];
+        let terbaik = null;
+        for (let coba = 0; coba < 30; coba++) {
+          const g = Array.from({ length: n }, () => Array(n).fill(''));
+          const bank = acak(
+            SOAL_TTS.filter((x) => x[0].length >= 3 && x[0].length <= n - 1 && kitabAktif().some((k) => k.id == x[2]))
+          );
+          const kata = [];
+          for (const x of bank) {
+            if (kata.length >= c.jml) break;
+            const w = x[0],
+              L = w.length;
+            for (let t = 0; t < 80; t++) {
+              const [dx, dy] = arah[Math.floor(Math.random() * arah.length)],
+                x0 = Math.floor(Math.random() * n),
+                y0 = Math.floor(Math.random() * n),
+                x1 = x0 + dx * (L - 1),
+                y1 = y0 + dy * (L - 1);
+              if (x1 < 0 || x1 >= n || y1 < 0 || y1 >= n) continue;
+              let bisa = true;
+              for (let i = 0; i < L && bisa; i++) {
+                const h = g[y0 + dy * i][x0 + dx * i];
+                if (h && h != w[i]) bisa = false;
+              }
+              if (!bisa) continue;
+              for (let i = 0; i < L; i++) g[y0 + dy * i][x0 + dx * i] = w[i];
+              kata.push({ w, ptj: x[1], kitab: x[2], x0, y0, x1, y1, temu: false, h: 0 });
+              break;
+            }
+          }
+          if (!terbaik || kata.length > terbaik.kata.length) terbaik = { g, kata };
+          if (kata.length >= c.jml) break;
+        }
+        /* Huruf pengisi: lebih sering huruf yang umum dalam kata Indonesia/Arab-latin */
+        const HUR = 'AAAAAAIIIIIUUUUEEOBDGHHJKKLLMMNNNRRSSTTYWQZF';
+        terbaik.g.forEach((r) => r.forEach((h, i) => !h && (r[i] = HUR[Math.floor(Math.random() * HUR.length)])));
+        terbaik.kata.forEach((k, i) => (k.h = Math.round((i * 360) / terbaik.kata.length + 15)));
+        Object.assign(CK, {
+          n,
+          g: terbaik.g,
+          kata: terbaik.kata,
+          jalan: true,
+          t0: 0,
+          lewat: 0,
+          awal: null,
+          tunggu: false,
+        });
+        const ki = $('#ckisi');
+        ki.style.setProperty('--n', n);
+        ki.innerHTML = CK.g
+          .map((r, y) => r.map((h, x) => `<div class="ck" data-cx="${x}" data-cy="${y}">${h}</div>`).join(''))
+          .join('');
+        $('#ckHasil').innerHTML = '';
+        ckDaftar();
+        ckStatus();
+      }
+      function ckDaftar() {
+        const pt = Gc('cari').petunjuk;
+        $('#ckl').classList.toggle('ptj', pt);
+        $('#ckl').innerHTML = CK.kata
+          .map(
+            (k) =>
+              `<li class="${k.temu ? 'ok' : ''}" style="--h:${k.h}">${pt ? `${esc(k.ptj)} (${k.w.length} huruf)${k.temu ? ` — <b>${k.w}</b>` : ''}` : k.w}</li>`
+          )
+          .join('');
+      }
+      const ckDetik = () => CK.lewat + (CK.t0 ? (performance.now() - CK.t0) / 1000 : 0);
+      function ckStatus() {
+        const t = CK.kata.filter((k) => k.temu).length;
+        $('#ckTemu').innerHTML = `Ditemukan: <b>${t}/${CK.kata.length}</b>`;
+        $('#ckWaktu').innerHTML = `Waktu: <b>${mmss(ckDetik())}</b>`;
+        $('#skor').textContent = `${t}/${CK.kata.length}`;
+      }
+      function ckJeda(jeda) {
+        clearInterval(CK.tk);
+        if (jeda) {
+          if (CK.t0) CK.lewat = ckDetik();
+          CK.t0 = 0;
+        } else if (CK.jalan && CK.lewat + (CK.t0 ? 1 : 0) > 0) {
+          CK.t0 = performance.now();
+          CK.tk = setInterval(ckStatus, 1000);
+        }
+      }
+      /* Sel-sel di garis lurus dari a ke b (mendatar, menurun, atau miring 45°); null bila bukan garis lurus */
+      const ckGaris = (a, b) => {
+        const dx = Math.sign(b[0] - a[0]),
+          dy = Math.sign(b[1] - a[1]),
+          px = Math.abs(b[0] - a[0]),
+          py = Math.abs(b[1] - a[1]);
+        if (px && py && px != py) return null;
+        const L = Math.max(px, py) + 1;
+        return [...Array(L)].map((_, i) => [a[0] + dx * i, a[1] + dy * i]);
+      };
+      const ckSel = (x, y) => $(`.ck[data-cx="${x}"][data-cy="${y}"]`);
+      const ckPos = (el) => [+el.dataset.cx, +el.dataset.cy];
+      function ckSorot(a, b) {
+        $$('.ck.jalur').forEach((x) => x.classList.remove('jalur'));
+        const gs = b ? ckGaris(a, b) : [a];
+        (gs || [a]).forEach(([x, y]) => ckSel(x, y).classList.add('jalur'));
+      }
+      function ckPeriksa(a, b) {
+        $$('.ck.jalur').forEach((x) => x.classList.remove('jalur'));
+        const gs = ckGaris(a, b);
+        if (!gs || gs.length < 2) return;
+        const k = CK.kata.find(
+          (k) =>
+            !k.temu &&
+            ((k.x0 == a[0] && k.y0 == a[1] && k.x1 == b[0] && k.y1 == b[1]) ||
+              (k.x0 == b[0] && k.y0 == b[1] && k.x1 == a[0] && k.y1 == a[1]))
+        );
+        if (k) {
+          k.temu = true;
+          gs.forEach(([x, y]) => {
+            const el = ckSel(x, y);
+            el.classList.add('t');
+            el.style.setProperty('--h', k.h);
+          });
+          bunyi('benar');
+          ckDaftar();
+          ckStatus();
+          if (CK.kata.every((k) => k.temu)) ckSelesai();
+        } else {
+          gs.forEach(([x, y]) => ckSel(x, y).classList.add('salah'));
+          bunyi('salah');
+          setTimeout(() => $$('.ck.salah').forEach((x) => x.classList.remove('salah')), 320);
+        }
+      }
+      (() => {
+        const ki = $('#ckisi');
+        let tekan = false;
+        const selDi = (e) => {
+          const el = document.elementFromPoint(e.clientX, e.clientY);
+          return el && el.closest && el.closest('.ck');
+        };
+        ki.addEventListener('pointerdown', (e) => {
+          const el = e.target.closest('.ck');
+          if (!el || !CK.jalan) return;
+          e.preventDefault();
+          if (!CK.t0 && CK.lewat == 0) {
+            CK.t0 = performance.now();
+            clearInterval(CK.tk);
+            CK.tk = setInterval(ckStatus, 1000);
+          }
+          /* Ketuk kedua (mode ketuk-ketuk): huruf terakhir */
+          if (CK.tunggu && CK.awal) {
+            CK.tunggu = false;
+            ckPeriksa(CK.awal, ckPos(el));
+            CK.awal = null;
+            return;
+          }
+          tekan = true;
+          CK.awal = ckPos(el);
+          bunyi('ketuk');
+          ckSorot(CK.awal);
+          ki.setPointerCapture && ki.setPointerCapture(e.pointerId);
+        });
+        ki.addEventListener('pointermove', (e) => {
+          if (!tekan || !CK.awal) return;
+          const el = selDi(e);
+          if (el) ckSorot(CK.awal, ckPos(el));
+        });
+        const lepas = (e) => {
+          if (!tekan) return;
+          tekan = false;
+          const el = selDi(e),
+            b = el ? ckPos(el) : null;
+          if (!b || (b[0] == CK.awal[0] && b[1] == CK.awal[1])) {
+            /* Tidak diseret: tunggu ketukan huruf terakhir */
+            CK.tunggu = true;
+            return;
+          }
+          ckPeriksa(CK.awal, b);
+          CK.awal = null;
+        };
+        ki.addEventListener('pointerup', lepas);
+        ki.addEventListener('pointercancel', () => {
+          tekan = false;
+          CK.awal = null;
+          $$('.ck.jalur').forEach((x) => x.classList.remove('jalur'));
+        });
+      })();
+      function ckSelesai() {
+        const d = ckDetik();
+        CK.jalan = false;
+        ckJeda(true);
+        CK.lewat = d;
+        ckStatus();
+        getar([30, 60, 30]);
+        bunyi('selesai');
+        const c = Gc('cari'),
+          ikut = c.ukuran == 10 && c.jml == 7,
+          r = ikut ? rekor('cari', Math.round(d), (a, b) => a < b) : { baru: false };
+        $('#ckHasil').innerHTML = hasilHtml(
+          mmss(d),
+          `untuk menemukan ${CK.kata.length} kata di kotak ${CK.n} × ${CK.n}`,
+          r.baru ? 'Rekor baru!' : r.lama != null && ikut ? `Rekor: ${mmss(REK.cari)}` : '',
+          'cari'
+        );
+        masuk($('#ckHasil'), 'fwd');
+        setTimeout(() => $('#ckHasil').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+      }
+
+      /* ---------- Mana yang Beda ----------
+         Tiap soal: (pilihan − 1) bab dari satu kitab + 1 bab dari kitab lain (bukan pasangan kitab yang mirip). */
+      const BD = { soal: [], i: 0, benar: 0, jawab: null };
+      function bdMulai() {
+        const c = Gc('beda'),
+          A = kitabMain(c.arab).filter((k) => babAman(k).length >= c.pilihan);
+        BD.soal = [];
+        for (let t = 0; BD.soal.length < c.jml && t < 300; t++) {
+          const a = (A.length ? A : KITAB)[Math.floor(Math.random() * (A.length || KITAB.length))],
+            larang = SERUPA.find((p) => p.includes(a.id)) || [],
+            Bs = kitabPengecoh(c.arab).filter((k) => k.id != a.id && !larang.includes(k.id)),
+            b = Bs[Math.floor(Math.random() * Bs.length)];
+          const sama = acak(babAman(a))
+            .slice(0, c.pilihan - 1)
+            .map((x) => ({ b: x.b, k: a }));
+          const beda = { b: acak(babAman(b))[0].b, k: b };
+          BD.soal.push({ a, pil: acak([...sama, beda]), beda });
+        }
+        Object.assign(BD, { i: 0, benar: 0, jawab: null });
+        bdTampil();
+      }
+      function bdTampil() {
+        const tot = BD.soal.length,
+          isi = $('#bdIsi');
+        $('#bdProg').style.width = (BD.i / tot) * 100 + '%';
+        $('#skor').textContent = `${BD.benar}/${tot}`;
+        if (BD.i >= tot) {
+          const r = tot == 10 ? rekor('beda', BD.benar, (a, b) => a > b) : { baru: false };
+          bunyi('selesai');
+          isi.innerHTML = hasilHtml(
+            `${BD.benar}/${tot}`,
+            BD.benar == tot
+              ? 'Semua tepat. Kamu kenal betul isi tiap kitab!'
+              : BD.benar >= tot * 0.6
+                ? 'Bagus, sebagian besar tepat.'
+                : 'Coba buka daftar isi kitabnya, lalu main lagi.',
+            r.baru ? 'Rekor baru!' : '',
+            'beda'
+          );
+          masuk(isi, 'fwd');
+          return;
+        }
+        const s = BD.soal[BD.i],
+          jw = BD.jawab,
+          ar = Gc('beda').arab;
+        isi.innerHTML = `<div class="card soal" style="padding:14px 16px"><small class="mut lbl">Soal ${BD.i + 1} dari ${tot}</small><div class="tid" style="margin-top:4px;font-size:16px">${s.pil.length - 1} bab dari kitab yang sama, 1 dari kitab lain. Mana yang beda?</div></div>
+          <div class="pil bdpil">${s.pil
+            .map((x, i) => {
+              const kls = jw == null ? '' : x == s.beda ? 'benar' : x == jw ? 'salah' : '';
+              return `<button data-bd="${i}" class="${kls}" ${jw != null ? 'disabled' : ''}><span class="nk">${i + 1}</span>${ar ? `<span class="tar2">${esc(x.b[0])}</span>` : ''}${esc(x.b[1])}${jw != null ? `<span class="kt">${esc(x.k.judul)}</span>` : ''}</button>`;
+            })
+            .join('')}</div>
+          ${
+            jw == null
+              ? ''
+              : `<div class="umpan ${jw == s.beda ? 'ok' : 'no'}"><b>${jw == s.beda ? 'Benar!' : 'Belum tepat.'}</b> “${esc(s.beda.b[1])}” dari <b>${esc(s.beda.k.judul)}</b>; yang lain dari <b>${esc(s.a.judul)}</b>.</div><div class="act" style="margin-top:12px"><button class="btn" id="bdLanjut">${BD.i + 1 < tot ? 'Soal berikutnya' : 'Lihat hasil'}</button></div>`
+          }`;
+      }
+      $('#bdIsi').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-bd]'),
+          s = BD.soal[BD.i];
+        if (b && s && BD.jawab == null) {
+          BD.jawab = s.pil[+b.dataset.bd];
+          if (BD.jawab == s.beda) BD.benar++, bunyi('benar');
+          else getar(120), bunyi('salah');
+          bdTampil();
+        } else if (e.target.closest('#bdLanjut')) {
+          BD.i++;
+          BD.jawab = null;
+          V.scrollTop = 0;
+          bdTampil();
+          masuk($('#bdIsi'), 'fwd');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (halKini() != 'beda' || e.ctrlKey || e.metaKey || e.altKey || $('.back-d')) return;
+        const B = $$('[data-bd]');
+        if (/^[1-5]$/.test(e.key) && B[+e.key - 1] && !B[0].disabled) B[+e.key - 1].click();
+        else if (e.key == 'Enter') {
+          const b = $('#bdLanjut') || $('[data-lagi="beda"]');
+          if (b) e.preventDefault(), b.click();
+        }
+      });
+
+      /* ---------- Ingat Pola ----------
+         Kotak berhuruf hijaiyah menyala bergiliran (dimulai 3 langkah). Pemain mengulang urutannya (atau terbalik).
+         Benar = urutan bertambah satu; salah sekali = selesai. Skor = urutan terpanjang yang berhasil diulang. */
+      const HIJ = ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ'];
+      const PL = { urut: [], masuk: 0, level: 0, jalan: false, main: false, tm: [], putus: false };
+      const PL_MS = { lambat: 900, sedang: 650, cepat: 450 };
+      function plMulai() {
+        const k = Gc('pola').kotak;
+        Object.assign(PL, { urut: [], masuk: 0, level: 0, jalan: true, main: false, putus: false });
+        plBersih();
+        const el = $('#plk');
+        el.style.setProperty('--k', k == 4 ? 2 : 3);
+        el.innerHTML = HIJ.slice(0, k)
+          .map(
+            (h, i) =>
+              `<button data-pl="${i}" style="--h:${Math.round((i * 360) / k)}" aria-label="Kotak ${h}">${h}</button>`
+          )
+          .join('');
+        $('#plHasil').innerHTML = '';
+        for (let i = 0; i < 2; i++) PL.urut.push(Math.floor(Math.random() * k));
+        plTambah();
+      }
+      const plBersih = () => {
+        PL.tm.forEach(clearTimeout);
+        PL.tm = [];
+        $$('#plk .nyala').forEach((x) => x.classList.remove('nyala'));
+      };
+      function plNada(i) {
+        if (!P.suara) return;
+        try {
+          AU = AU || new (window.AudioContext || window.webkitAudioContext)();
+          const o = AU.createOscillator(),
+            g = AU.createGain(),
+            t = AU.currentTime;
+          o.frequency.value = [262, 294, 330, 349, 392, 440, 494, 523, 587][i];
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.1, t + 0.015);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+          o.connect(g).connect(AU.destination);
+          o.start(t);
+          o.stop(t + 0.32);
+        } catch (e) {}
+      }
+      function plNyala(i, ms) {
+        const b = $(`[data-pl="${i}"]`);
+        if (!b) return;
+        b.classList.add('nyala');
+        plNada(i);
+        PL.tm.push(setTimeout(() => b.classList.remove('nyala'), ms));
+      }
+      function plTambah() {
+        PL.urut.push(Math.floor(Math.random() * Gc('pola').kotak));
+        PL.masuk = 0;
+        plPutar();
+      }
+      function plPutar() {
+        plBersih();
+        const ms = PL_MS[Gc('pola').kecepatan] || 650;
+        PL.main = true;
+        PL.putus = false;
+        $('#plk').classList.add('kunci');
+        $('#plInfo').textContent = `Perhatikan… (${PL.urut.length} langkah)`;
+        $('#skor').textContent = `Level ${PL.level}`;
+        PL.urut.forEach((i, n) => PL.tm.push(setTimeout(() => plNyala(i, ms * 0.7), 700 + n * ms)));
+        PL.tm.push(
+          setTimeout(
+            () => {
+              PL.main = false;
+              $('#plk').classList.remove('kunci');
+              $('#plInfo').textContent = Gc('pola').terbalik
+                ? 'Giliranmu: ulangi dari yang terakhir'
+                : 'Giliranmu: ulangi urutannya';
+            },
+            700 + PL.urut.length * ms
+          )
+        );
+      }
+      /* Berhenti saat halaman lain / dialog tampil; diputar ulang dari awal urutan saat kembali */
+      function plJeda(jeda) {
+        if (!PL.jalan) return;
+        if (jeda) {
+          if (PL.tm.length) PL.putus = true;
+          plBersih();
+          PL.main = true;
+        } else if (PL.putus || PL.main) {
+          PL.masuk = 0;
+          plPutar();
+        }
+      }
+      $('#plk').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-pl]');
+        if (!b || !PL.jalan || PL.main) return;
+        const i = +b.dataset.pl,
+          tb = Gc('pola').terbalik,
+          harus = tb ? PL.urut[PL.urut.length - 1 - PL.masuk] : PL.urut[PL.masuk];
+        plNyala(i, 220);
+        if (i != harus) return plSelesai();
+        PL.masuk++;
+        if (PL.masuk == PL.urut.length) {
+          PL.level = PL.urut.length;
+          PL.main = true;
+          $('#plk').classList.add('kunci');
+          $('#plInfo').textContent = 'Benar!';
+          $('#skor').textContent = `Level ${PL.level}`;
+          setTimeout(() => bunyi('benar'), 200);
+          PL.tm.push(setTimeout(plTambah, 900));
+        }
+      });
+      function plSelesai() {
+        PL.jalan = false;
+        PL.main = true;
+        plBersih();
+        $('#plk').classList.add('kunci');
+        getar([60, 40, 60]);
+        bunyi('salah');
+        const c = Gc('pola'),
+          ikut = c.kotak == 6 && c.kecepatan == 'sedang' && !c.terbalik,
+          r = ikut ? rekor('pola', PL.level, (a, b) => a > b) : { baru: false };
+        /* Tunjukkan urutan yang benar sekali lagi */
+        $('#plInfo').textContent = 'Urutan yang benar:';
+        const ms = 380;
+        PL.urut.forEach((i, n) => PL.tm.push(setTimeout(() => plNyala(i, ms * 0.7), 300 + n * ms)));
+        PL.tm.push(
+          setTimeout(
+            () => {
+              $('#plInfo').textContent = 'Permainan selesai';
+              $('#plHasil').innerHTML = hasilHtml(
+                `Level ${PL.level}`,
+                PL.level
+                  ? `urutan terpanjang yang berhasil kamu ulangi: ${PL.level} langkah`
+                  : 'Belum ada urutan yang berhasil diulang. Coba lagi!',
+                r.baru ? 'Rekor baru!' : r.lama != null && ikut ? `Rekor: level ${REK.pola}` : '',
+                'pola'
+              );
+              masuk($('#plHasil'), 'fwd');
+            },
+            300 + PL.urut.length * ms + 200
+          )
+        );
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (halKini() != 'cepat' || e.ctrlKey || e.metaKey || e.altKey || $('.back-d')) return;
+        if (e.key == 'ArrowLeft' || e.key == '1') e.preventDefault(), ctJawab(false);
+        else if (e.key == 'ArrowRight' || e.key == '2') e.preventDefault(), ctJawab(true);
+        else if (e.key == 'Enter' && !CT.jalan && $('[data-lagi="cepat"]')) $('[data-lagi="cepat"]').click();
+      });
+
+      masuk($('#h-awal'), 'fwd');
+    </script>
+  </body>
+</html>
