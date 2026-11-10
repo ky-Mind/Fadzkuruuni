@@ -57,6 +57,22 @@ service cloud.firestore {
         && request.resource.data.get('versi', {}).size() <= 200;
     }
 
+    // Pemain Teka-Teki Kitab (dashboard admin › Statistik): satu dokumen per pemain. Akun yang masuk: id = uid dan email harus
+    // email akunnya sendiri. Belum masuk: id "tamu-…" tanpa email. Hanya admin statistik yang membaca & menghapus.
+    match /pemain/{id} {
+      allow read: if bisa('statistik');
+      allow delete: if bisa('statistik') || (request.auth != null && request.auth.uid == id);
+      allow create, update: if request.resource.data.keys().hasOnly(['nama', 'email', 'tamu', 'terakhir', 'perangkat', 'main', 'selesai', 'skor', 'total'])
+        && request.resource.data.nama is string && request.resource.data.nama.size() <= 60
+        && request.resource.data.perangkat is string && request.resource.data.perangkat.size() <= 60
+        && request.resource.data.get('main', {}).size() <= 20
+        && request.resource.data.get('selesai', {}).size() <= 20
+        && request.resource.data.get('skor', {}).size() <= 20
+        && ((request.auth != null && id == request.auth.uid && request.resource.data.tamu == false
+              && request.resource.data.email == request.auth.token.get('email', ''))
+          || (id.matches('^tamu-[a-z0-9]{16}$') && request.resource.data.tamu == true && request.resource.data.email == ''));
+    }
+
     // Kelas online: jadwal & status dibaca semua orang, hanya admin yang membuat / memulai / mengakhiri / menghapus
     match /kelas/{id} {
       allow read: if true;

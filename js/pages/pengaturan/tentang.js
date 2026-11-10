@@ -23,7 +23,7 @@ SETPAGES.tentang = () => ({
         web
       );
     })()}</div>
-<h2>Privasi</h2><div class="list sg">${row('count', 'Bantu kembangkan aplikasi', 'Kirim hitungan pemakaian tanpa data pribadi (fitur yang dibuka, kota jadwal salat)', tg('stt', S.stat !== false))}</div><p class="mut pkaki"><a href="kebijakan-privasi.html">Kebijakan Privasi</a> · <a href="hapus-data.html">Penghapusan Data</a></p>`,
+<h2>Privasi</h2><div class="list sg">${row('count', 'Bantu kembangkan aplikasi', 'Kirim hitungan pemakaian (fitur yang dibuka, kota jadwal salat) dan catatan permainan', tg('stt', S.stat !== false))}</div><p class="mut pkaki"><a href="kebijakan-privasi.html">Kebijakan Privasi</a> · <a href="hapus-data.html">Penghapusan Data</a></p>`,
   init() {
     $('#stt').onchange = (e) => {
       S.stat = e.target.checked;

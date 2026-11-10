@@ -186,6 +186,10 @@ document.addEventListener('click', (x) => {
           .doc(u.uid)
           .delete()
           .catch(() => {});
+        await FBD.collection('pemain')
+          .doc(u.uid)
+          .delete()
+          .catch(() => {});
         await u.delete();
         FBU = null;
         S.foto = null;

@@ -11932,6 +11932,123 @@ const SOAL_TTS = [
         }
         return { baru: baru && lama != null, lama };
       };
+      /* Statistik pemain untuk dashboard admin (Firestore koleksi "pemain", satu dokumen per pemain):
+         nama & email akun yang sedang masuk di aplikasi (satu domain, jadi akunnya sama), atau "Tamu" dengan nama panggilan
+         dari aplikasi bila belum masuk. Mengikuti pilihan Pengaturan › Tentang & Bantuan › "Bantu kembangkan aplikasi". */
+      const FBCFG = {
+        apiKey: 'AIzaSyDBSyWkPR0ZBDDaHuHAfSzPJfdmx_H0hmE',
+        authDomain: 'fadzkuruuni-88a8b.firebaseapp.com',
+        projectId: 'fadzkuruuni-88a8b',
+        storageBucket: 'fadzkuruuni-88a8b.firebasestorage.app',
+        messagingSenderId: '530459763811',
+        appId: '1:530459763811:web:db2a65d6d2e72201544456',
+      };
+      const statBoleh = () => {
+        try {
+          if (JSON.parse(localStorage.fz || '{}').stat === false) return false;
+        } catch (e) {}
+        return !/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || /[?&]ujistat=1/.test(location.search);
+      };
+      let FBSIAP = null;
+      const fbSiap = () =>
+        (FBSIAP =
+          FBSIAP ||
+          (async () => {
+            const muat = (u) =>
+              new Promise((ok, no) => {
+                const sc = document.createElement('script');
+                sc.src = u;
+                sc.onload = ok;
+                sc.onerror = no;
+                document.head.append(sc);
+              });
+            const b = 'https://www.gstatic.com/firebasejs/10.12.2/';
+            if (!window.firebase) {
+              await muat(b + 'firebase-app-compat.js');
+              await muat(b + 'firebase-auth-compat.js');
+              await muat(b + 'firebase-firestore-compat.js');
+            }
+            if (!firebase.apps.length) firebase.initializeApp(FBCFG);
+            const u = await new Promise((ok) => {
+              const h = firebase.auth().onAuthStateChanged((x) => (h(), ok(x)));
+              setTimeout(() => ok(firebase.auth().currentUser), 6000);
+            });
+            return { db: firebase.firestore(), u };
+          })());
+      const tamuId = () => {
+        try {
+          let t = localStorage.fzTamu;
+          if (!/^tamu-[a-z0-9]{16}$/.test(t || '')) {
+            t =
+              'tamu-' +
+              Array.from(
+                crypto.getRandomValues(new Uint8Array(16)),
+                (x) => 'abcdefghijklmnopqrstuvwxyz0123456789'[x % 36]
+              ).join('');
+            localStorage.fzTamu = t;
+          }
+          return t;
+        } catch (e) {
+          return '';
+        }
+      };
+      const modelHP = async () => {
+        try {
+          const h =
+            navigator.userAgentData && (await navigator.userAgentData.getHighEntropyValues(['model', 'platform']));
+          if (h && h.model) return h.model;
+          if (h && h.platform && !/android/i.test(h.platform)) return 'Komputer ' + h.platform;
+        } catch (e) {}
+        const u = navigator.userAgent,
+          m = u.match(/Android [\d.]+; (?:[a-z]{2}[-_][a-zA-Z]{2}; )?([^;)]+?)(?: Build|\))/);
+        return m && m[1] != 'K'
+          ? m[1].trim()
+          : /iPhone/.test(u)
+            ? 'iPhone'
+            : /iPad/.test(u)
+              ? 'iPad'
+              : /Android/.test(u)
+                ? 'Android'
+                : /Windows/.test(u)
+                  ? 'Komputer Windows'
+                  : /Mac OS/.test(u)
+                    ? 'Komputer Mac'
+                    : 'Lainnya';
+      };
+      /* jenis: 'main' saat permainan dimulai, 'selesai' saat hasil tampil (skor = teks hasil, mis. "8/10") */
+      async function catatMain(g, jenis, skor) {
+        if (!statBoleh()) return;
+        try {
+          const { db, u } = await fbSiap(),
+            F = firebase.firestore.FieldValue;
+          let nm = '';
+          try {
+            nm = JSON.parse(localStorage.fz || '{}').nm || '';
+          } catch (e) {}
+          const id = u ? u.uid : tamuId();
+          if (!id) return;
+          const d = {
+            nama: String((u && u.displayName) || nm || 'Tamu').slice(0, 60),
+            email: u ? u.email || '' : '',
+            tamu: !u,
+            terakhir: F.serverTimestamp(),
+            perangkat: String(await modelHP()).slice(0, 60),
+          };
+          if (jenis == 'main') {
+            d.main = { [g]: F.increment(1) };
+            d.total = F.increment(1);
+          } else {
+            d.selesai = { [g]: F.increment(1) };
+            if (skor) d.skor = { [g]: String(skor).slice(0, 30) };
+          }
+          await db.collection('pemain').doc(id).set(d, { merge: true });
+        } catch (e) {}
+      }
+      const teksSkor = (h) =>
+        String(h)
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
       const mmss = (d) => `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
       /* Sama dengan toast() aplikasi (js/core/state.js) */
       const toast = (m, ms) => {
@@ -12875,7 +12992,7 @@ const SOAL_TTS = [
         (b) =>
           (b.onclick = () => {
             const [judul, pesan, ya, mulai] = MULAI[b.dataset.main];
-            konfirmasi(judul, pesan(), ya, () => ke(b.dataset.main, mulai));
+            konfirmasi(judul, pesan(), ya, () => (catatMain(b.dataset.main, 'main'), ke(b.dataset.main, mulai)));
           })
       );
 
@@ -13380,7 +13497,8 @@ const SOAL_TTS = [
       });
       function cekSelesai() {
         const semua = Object.values(T.g).every((c) => c.isi == c.h);
-        if (semua && $('#rayakan').hidden) getar([30, 60, 30]), bunyi('selesai');
+        if (semua && $('#rayakan').hidden)
+          getar([30, 60, 30]), bunyi('selesai'), catatMain('tts', 'selesai', 'Selesai');
         $('#rayakan').hidden = !semua;
         if (semua) $$('#kisi .sel.isi').forEach((el) => el.classList.add('benar'));
       }
@@ -13408,6 +13526,7 @@ const SOAL_TTS = [
           $$('#kisi .sel.isi').forEach((el) => el.classList.add('benar'));
         });
       $('#baru').onclick = () => {
+        catatMain('tts', 'main');
         ttsBaru();
         masuk($('#h-tts'), 'fwd');
       };
@@ -13466,7 +13585,8 @@ const SOAL_TTS = [
                   ? 'Lumayan. Coba buka kitabnya lalu main lagi.'
                   : 'Ayo baca lagi daftar isi kitabnya, lalu coba lagi.';
           isi.innerHTML = `<div class="akhir"><div class="besar">${n}/${tot}</div><p class="mut">${pesan}</p></div><div class="act"><button class="btn" id="tbLagi" style="flex:1">Main lagi</button><button class="btn s" id="tbAwal" style="flex:1">Pilih permainan</button></div>`;
-          $('#tbLagi').onclick = () => (tbMulai(), masuk(isi, 'fwd'));
+          catatMain('tebak', 'selesai', `${n}/${tot}`);
+          $('#tbLagi').onclick = () => (catatMain('tebak', 'main'), tbMulai(), masuk(isi, 'fwd'));
           $('#tbAwal').onclick = () => history.back();
           masuk(isi, 'fwd');
           bunyi('selesai');
@@ -13531,11 +13651,15 @@ const SOAL_TTS = [
         return f.length ? f : KITAB.filter(punyaArab);
       };
       const kitabPengecoh = (perluArab) => (perluArab ? KITAB.filter(punyaArab) : KITAB);
-      const hasilHtml = (besar, teks, rek, id) =>
+      const hasilHtml = (besar, teks, rek, id) => (
+        catatMain(id, 'selesai', teksSkor(besar)), hasilHtmlIsi(besar, teks, rek, id)
+      );
+      const hasilHtmlIsi = (besar, teks, rek, id) =>
         `<div class="hasil"><div class="besar">${besar}</div><p class="mut">${teks}</p>${rek ? `<span class="rek">${rek}</span>` : ''}</div><div class="act" style="margin-top:14px"><button class="btn" data-lagi="${id}" style="flex:1">Main lagi</button><button class="btn s" data-pilih style="flex:1">Pilih permainan</button></div>`;
       V.addEventListener('click', (e) => {
         const l = e.target.closest('[data-lagi]');
         if (l) {
+          catatMain(l.dataset.lagi, 'main');
           MULAI[l.dataset.lagi][3]();
           masuk($('#h-' + l.dataset.lagi), 'fwd');
           V.scrollTop = 0;
