@@ -5210,6 +5210,28 @@ a.kym {
   color: inherit;
   text-decoration: none;
 }
+/* Lapisan KyMind (js/core/overlay.js kymindBuka): menutup seluruh layar, di atas semua lapisan lain */
+#kymL.back-d {
+  display: block;
+  padding: 0;
+  z-index: 2147483000;
+  background: #040507;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: kymMasuk 0.22s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+#kymL iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@keyframes kymMasuk {
+  from {
+    opacity: 0;
+  }
+}
 .tlb {
   display: flex;
   align-items: center;

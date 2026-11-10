@@ -70,9 +70,16 @@ body.ringan #stage .it:nth-child(2n){display:none}
 </style>
 <script>
 /* Kembali ke aplikasi: bila dibuka dari aplikasi, mundur satu langkah (posisi halaman tetap); bila dibuka langsung, ke beranda */
-document.getElementById('tutup').addEventListener('click',function(e){e.preventDefault();var dari=false;
- try{dari=!!document.referrer&&new URL(document.referrer).origin==location.origin&&history.length>1}catch(x){}
- if(dari)history.back();else location.href='../';});
+var TANAM=/[?&]tanam=1/.test(location.search)&&window.parent!==window;
+function keluar(){if(TANAM){parent.postMessage({kymind:'tutup'},location.origin);return;}
+ try{document.fullscreenElement&&document.exitFullscreen()}catch(x){}
+ var dari=false;try{dari=!!document.referrer&&new URL(document.referrer).origin==location.origin&&history.length>1}catch(x){}
+ if(dari)history.back();else location.href='../';}
+document.getElementById('tutup').addEventListener('click',function(e){e.preventDefault();keluar();});
+addEventListener('keydown',function(e){if(e.key==='Escape')keluar();});
+/* Dibuka langsung (bukan dari aplikasi): ketukan pertama membawa halaman ke layar penuh sungguhan */
+if(!TANAM)addEventListener('pointerdown',function f(e){if(e.target.closest&&e.target.closest('#tutup'))return;removeEventListener('pointerdown',f);
+ var d=document.documentElement,q=d.requestFullscreen||d.webkitRequestFullscreen;try{var p=q&&q.call(d);p&&p.catch&&p.catch(function(){})}catch(x){}});
 /* Mode ringan otomatis untuk HP yang lambat: bila 2 detik pertama di bawah 40 fps, efek yang paling berat (noise
    bergerak, campuran warna, separuh potongan) dimatikan; di HP cepat tampilannya tetap penuh */
 (function(){var n=0,t0=0;function f(t){if(!t0)t0=t;n++;if(t-t0<2000)return requestAnimationFrame(f);
