@@ -2365,6 +2365,17 @@
       async function pemainGame() {
         const el = $('#pemainG');
         if (!el) return;
+        el.onclick = async (e) => {
+          const b = e.target.closest('[data-pdel]');
+          if (!b || !confirm(`Hapus data pemain "${b.dataset.pnm}"? Tidak bisa dibatalkan.`)) return;
+          try {
+            await db.collection('pemain').doc(b.dataset.pdel).delete();
+            toast('Data pemain dihapus');
+            pemainGame();
+          } catch (x) {
+            toast('Gagal menghapus: ' + (x.code || x.message));
+          }
+        };
         let L;
         try {
           L = (await db.collection('pemain').orderBy('terakhir', 'desc').limit(300).get()).docs.map((d) => ({
@@ -2390,9 +2401,9 @@
           t && t.toDate ? t.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–';
         el.innerHTML = `<h3>Pemain Teka-Teki Kitab</h3><p>${L.length} pemain (${akun} masuk akun, ${L.length - akun} tamu) · ${main}× main. Skor = hasil terakhir tiap permainan.</p>${
           L.length
-            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pemain</th><th>Perangkat</th><th>Main</th><th>Permainan</th><th>Terakhir</th></tr></thead><tbody>${L.map(
+            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pemain</th><th>Perangkat</th><th>Main</th><th>Permainan</th><th>Terakhir</th><th></th></tr></thead><tbody>${L.map(
                 (x) =>
-                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.total || 0}×</td><td>${rinci(x) || '–'}</td><td>${wkt(x.terakhir)}</td></tr>`
+                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.total || 0}×</td><td>${rinci(x) || '–'}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-pdel="${esc(x.id)}" data-pnm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
               ).join('')}</tbody></table></div>`
             : '<div class="empty">Belum ada yang bermain.</div>'
         }`;
