@@ -605,7 +605,9 @@ function qReader(n, sc) {
     .catch(() => {
       el.innerHTML =
         '<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia. Sambungkan internet sekali, atau unduh semua dari menu Al-Qur\'an.</div>';
-      $('#snav').innerHTML = '';
+      /* Halaman surah bisa sudah ditinggalkan sebelum isinya selesai dimuat (mis. langsung digeser ke Fadz AI) */
+      const sn = $('#snav');
+      if (sn) sn.innerHTML = '';
     });
 }
 /* Panah kiri/kanan di keyboard untuk halaman/surah sebelumnya/berikutnya */
