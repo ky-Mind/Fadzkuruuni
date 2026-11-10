@@ -88,3 +88,65 @@ function konfirmasi(t, m, ya, fn) {
     }
   };
 }
+/* KyMind: teks "KyMind" (a.kym) membuka halaman kymind/ di lapisan yang menutup seluruh layar. Di peramban memakai layar
+   penuh sungguhan (tab, bilah alamat, dan bookmark hilang); di aplikasi Android memakai mode imersif (bilah status &
+   navigasi hilang). Lapisan berkelas .back-d, jadi tombol kembali HP/peramban menutupnya seperti lembar lain
+   (fadzKembali & riwayat di atas). Tutup juga lewat tombol × di halaman KyMind atau Esc. */
+let KYM_BUKA = false,
+  KYM_FS = false;
+function kymindBuka() {
+  if ($('#kymL')) return;
+  const d = document.createElement('div');
+  d.className = 'back-d';
+  d.id = 'kymL';
+  d.innerHTML = '<iframe src="kymind/?tanam=1" title="KyMind" allow="fullscreen; autoplay"></iframe>';
+  document.body.append(d);
+  KYM_BUKA = true;
+  const fs = d.requestFullscreen || d.webkitRequestFullscreen;
+  try {
+    const p = fs && fs.call(d);
+    p && p.catch && p.catch(() => {});
+  } catch (e) {}
+  if (window.ANDROID) {
+    andPanggil('layarPenuh', true);
+    andPanggil('warnaBar', '#040507', '#040507');
+  }
+  setTimeout(() => {
+    const f = $('#kymL iframe');
+    f && f.focus();
+  }, 300);
+}
+const kymindTutup = () => {
+  const d = $('#kymL');
+  d && d.remove();
+};
+/* Lapisan dilepas (×, Esc, tombol kembali): keluar layar penuh dan kembalikan bilah HP */
+new MutationObserver(() => {
+  if (!KYM_BUKA || $('#kymL')) return;
+  KYM_BUKA = KYM_FS = false;
+  if (document.fullscreenElement || document.webkitFullscreenElement)
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
+  if (window.ANDROID) {
+    andPanggil('layarPenuh', false);
+    window.androidWarna && androidWarna();
+  }
+}).observe(document.body, { childList: true });
+/* Esc di peramban keluar dari layar penuh: lapisan ikut ditutup */
+addEventListener('fullscreenchange', () => {
+  const fe = document.fullscreenElement;
+  if (fe && fe.id == 'kymL') KYM_FS = true;
+  else if (!fe && KYM_FS) kymindTutup();
+});
+addEventListener('message', (e) => {
+  if (e.origin == location.origin && e.data && e.data.kymind == 'tutup') kymindTutup();
+});
+document.addEventListener(
+  'click',
+  (e) => {
+    const a = e.target.closest && e.target.closest('a.kym');
+    if (!a) return;
+    e.preventDefault();
+    kymindBuka();
+  },
+  true
+);
