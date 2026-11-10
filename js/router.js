@@ -44,6 +44,9 @@ function route() {
   if (baru && route.cur != null && v.children.length && !v.classList.contains('kel') && !v.classList.contains('kelb'))
     vSnap(route.cur || '#/', v.innerHTML);
   route.cur = location.hash;
+  /* Alamat halaman yang dipasang render ini (dikirim di fz-dipasang). Bukan location.hash saat sinyal dikirim: alamat bisa
+     sudah berganti ke tujuan geseran berikutnya, dan sinyal halaman lama lalu dikira milik halaman baru */
+  const hIni = location.hash || '#/';
   {
     const h = location.hash || '#/',
       t = RIW[RIW.length - 1],
@@ -116,11 +119,11 @@ function route() {
       Promise.race([Promise.resolve(ip).catch(() => {}), new Promise((r) => setTimeout(r, 1500))]).then(() =>
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
-            if (tok != RT) return;
+            if (tok != RT || (location.hash || '#/') != hIni) return;
             /* Mode baca (pilihan Kartu | Mushaf, tampilan mushaf) dipasang sekarang juga, bukan menunggu pengamat perubahan,
                agar halaman asli sudah sama persis dengan pratinjau saat pratinjau dilepas */
             window.mbacaCek && mbacaCek();
-            document.dispatchEvent(new CustomEvent('fz-dipasang', { detail: location.hash || '#/' }));
+            document.dispatchEvent(new CustomEvent('fz-dipasang', { detail: hIni }));
           })
         )
       );

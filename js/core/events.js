@@ -474,6 +474,7 @@ function gsTabHtml(nb) {
     el = null,
     sibuk = false,
     tm = 0,
+    tmCad = 0,
     k = 1;
   const W = () => v.clientWidth;
   const buang = () => {
@@ -640,6 +641,9 @@ function gsTabHtml(nb) {
     });
     v.style.position = v.style.zIndex = v.style.background = v.style.overflowY = v.style.opacity = '';
     buang();
+    /* Pengaman 1,5 detik milik geseran ini ikut dibatalkan: kalau tertinggal, ia bisa jatuh di tengah geseran berikutnya dan
+       melepas pratinjau sebelum halaman tujuan dipasang (halaman lama berkedip sekejap) */
+    clearTimeout(tmCad);
     sibuk = false;
   };
   /* Posisi digambar sekali per frame layar (bukan tiap event sentuh) */
@@ -712,7 +716,9 @@ function gsTabHtml(nb) {
       sx = null;
       /* Geser lagi sebelum isi halaman tujuan selesai dimuat (mis. Fadz AI): pratinjau dilepas sekarang, geseran baru langsung diterima,
      bukan diabaikan sampai 1,5 detik (terasa macet saat menggeser beruntun) */
-      if (sibuk && mode && mode != 'tab' && tujuan && hNorm(location.hash) == hNorm(tujuan)) {
+      /* Hanya bila router sudah memasang halaman tujuan (route.cur), bukan sekadar alamatnya sudah berganti: kalau dilepas lebih
+         awal, halaman lama terlihat sekejap */
+      if (sibuk && mode && mode != 'tab' && tujuan && hNorm(route.cur) == hNorm(tujuan)) {
         clearTimeout(tm);
         mode = '';
         pulih();
@@ -832,7 +838,8 @@ function gsTabHtml(nb) {
             if (peek) peek.style.zIndex = '2';
             document.documentElement.dataset.vt = 'geser';
             location.replace(tj);
-            setTimeout(() => {
+            clearTimeout(tmCad);
+            tmCad = setTimeout(() => {
               if (sibuk) {
                 mode = '';
                 pulih();
@@ -877,7 +884,8 @@ function gsTabHtml(nb) {
           }
           document.documentElement.dataset.vt = 'geser';
           location.hash = tj;
-          setTimeout(() => {
+          clearTimeout(tmCad);
+          tmCad = setTimeout(() => {
             if (sibuk) {
               mode = '';
               pulih();
