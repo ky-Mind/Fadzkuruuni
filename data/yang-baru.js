@@ -1,6 +1,13 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.63': [
+    'Video tutorial dan rekaman kelas punya pemutar baru: bilah waktu yang bisa digeser, mundur/maju 10 detik, kecepatan 0,75×–2×, dan layar penuh',
+    'Rekaman kelas (YouTube, Google Drive, atau berkas video) diputar langsung di aplikasi dan bisa dipercepat atau digeser',
+    'Semua video tutorial dibuat ulang: tulisan langkah tidak lagi menabrak bingkai HP, dan kotak penanda tombol lebih jelas',
+    'Di web, ajakan unduh aplikasi Android muncul setiap kali situs dibuka',
+    'Di aplikasi Android, tawaran pembaruan muncul setiap kali aplikasi dibuka selama versinya masih lama',
+  ],
   '2.9.62': [
     "Maulid: tombol kembali langsung keluar dari bacaan (seperti Al-Qur'an), tidak lagi mundur bagian demi bagian dan jeda sholawat",
     'Menu bawah tidak lagi hilang setelah menggeser halaman berkali-kali dengan cepat',

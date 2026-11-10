@@ -217,10 +217,10 @@ async function pembaruanCek(paksa) {
   if (!window.ANDROID || !window.FadzAndroid.versi || TPRATINJAU)
     return paksa && toast('Pemeriksaan pembaruan hanya untuk aplikasi Android');
   if (pembaruanCek.buka) return;
-  /* Tiap aplikasi dibuka: rilis terbaru diambil dari GitHub paling sering 30 menit sekali (tersimpan), lembar
-     pembaruan tampil bila ada versi lebih baru */
+  /* Tiap aplikasi dibuka atau kembali dari latar belakang: rilis terbaru selalu diperiksa (apk.json di situs ini, ringan),
+     dan lembar pembaruan tampil lagi selama versi terpasang masih lama. Tanpa internet: memakai hasil pemeriksaan terakhir. */
   let j = null;
-  if (paksa || Date.now() - (S.upCek || 0) >= 18e5) {
+  if (paksa || navigator.onLine) {
     if (!navigator.onLine) return paksa && toast('Butuh internet untuk memeriksa pembaruan');
     /* Sumber utama: apk.json di situs ini (diperbarui tiap rilis, tanpa batas 60 permintaan/jam seperti API GitHub);
        cadangan: API GitHub */
@@ -238,7 +238,8 @@ async function pembaruanCek(paksa) {
         html_url: j.html_url,
       };
     } catch (e) {
-      return paksa && toast('Gagal memeriksa pembaruan, coba lagi');
+      if (paksa) return toast('Gagal memeriksa pembaruan, coba lagi');
+      j = S.upRil && { tag_name: S.upRil.tag, body: S.upRil.body, assets: S.upRil.assets, html_url: S.upRil.html_url };
     }
     S.upCek = Date.now();
     save();
@@ -253,7 +254,8 @@ async function pembaruanCek(paksa) {
     upSegar();
     return paksa && toast('Aplikasi Android sudah versi terbaru (' + kini + ')');
   }
-  if (!paksa && (S.upTunda || 0) > Date.now()) return;
+  /* "Nanti saja" hanya berlaku sampai aplikasi ditinggal; dibuka lagi = ditawarkan lagi */
+  if (!paksa && pembaruanCek.nanti) return;
   const apk = ((j.assets || []).find((a) => /\.apk$/i.test(a.name)) || {}).browser_download_url || j.html_url;
   S.upInfo = { v: baru, url: apk };
   save();
@@ -278,13 +280,12 @@ async function pembaruanCek(paksa) {
    <p class="mut" style="font-size:12.5px;margin:10px 0 12px">${apkLangsung() ? 'Ketuk Perbarui sekarang. Setelah unduhan selesai, layar pasang Android terbuka otomatis: pilih <b>Perbarui</b>.' : 'Ketuk Unduh pembaruan, lalu buka berkas <b>fadzkuruuni.apk</b> yang terunduh dan pilih <b>Perbarui</b>.'} Data dan pengaturanmu tetap aman.</p>
    ${apkTombol(baru, apk)}<button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-upn>Nanti saja</button></div>`;
     pembaruanCek.tampil = 1;
-    /* Nanti saja = ditanyakan lagi 12 jam kemudian (versi baru tetap ditawarkan, tidak dilewati selamanya) */
+    /* Nanti saja = ditutup untuk sekarang; ditawarkan lagi setiap aplikasi dibuka / kembali dari latar belakang */
     document.body.append(e);
     e.onclick = (x) => {
       if (x.target == e && apkPerbarui.jalan) return;
       if (x.target == e || x.target.closest('[data-upn]')) {
-        S.upTunda = Date.now() + 432e5;
-        save();
+        pembaruanCek.nanti = 1;
         e.remove();
         pembaruanCek.buka = 0;
         res();
@@ -357,5 +358,43 @@ addEventListener('hashchange', perbaruiDariNotif);
 addEventListener('load', () => setTimeout(perbaruiDariNotif, 300));
 /* Kembali ke aplikasi (dari latar belakang): periksa lagi */
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState == 'hidden') pembaruanCek.nanti = 0;
   if (document.visibilityState == 'visible' && window.ANDROID) setTimeout(() => pembaruanCek().catch(() => {}), 1500);
 });
+
+/* ===== Ajakan unduh aplikasi Android di web =====
+   Tampil sekali di setiap sesi web (setiap kali situs dibuka di tab/jendela baru), setelah lembar lain (Yang baru, izin)
+   ditutup agar tidak bertumpuk. Tidak tampil di aplikasi Android dan di pratinjau admin. */
+function apkAjakWeb() {
+  if (window.ANDROID || TPRATINJAU) return;
+  try {
+    if (sessionStorage.fzAjakApk) return;
+    sessionStorage.fzAjakApk = 1;
+  } catch (e) {}
+  const android = /android/i.test(navigator.userAgent);
+  let coba = 0;
+  const tampil = () => {
+    if ($('.back-d') || document.visibilityState == 'hidden') {
+      if (++coba < 90) setTimeout(tampil, 1000);
+      return;
+    }
+    const e = document.createElement('div');
+    e.className = 'back-d';
+    e.innerHTML = `<div class="sheet upd apkajak" role="dialog" aria-label="Unduh aplikasi Fadzkuruuni">
+  <div class="offt-i"><img src="img/icon-192.png" alt="" width="40" height="40"></div>
+  <b style="font-size:18px">Pakai aplikasi Fadzkuruuni</b>
+  <p class="mut" style="margin:4px 0 10px">Lebih lengkap di aplikasi Android: adzan tetap berbunyi walau aplikasi ditutup, murottal di latar belakang dengan notifikasi media, widget jadwal salat, dan lokasi otomatis.</p>
+  <a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${UNDUH_APK}" rel="noopener" data-apkunduh>${ic('down', 16)} Unduh aplikasi Android</a>
+  ${android ? '' : '<p class="mut" style="font-size:12.5px;margin:8px 0 0">Aplikasi ini untuk HP Android. Buka situs ini di HP Android untuk memasangnya.</p>'}
+  <button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-apknanti>Nanti saja</button></div>`;
+    document.body.append(e);
+    e.onclick = (x) => {
+      if (x.target.closest('[data-apkunduh]')) {
+        toast('Mengunduh fadzkuruuni.apk… Buka berkasnya setelah selesai, lalu pilih Pasang.');
+        setTimeout(() => e.remove(), 300);
+      } else if (x.target == e || x.target.closest('[data-apknanti]')) e.remove();
+    };
+  };
+  setTimeout(tampil, 1500);
+}
+if (!window.ANDROID) setTimeout(apkAjakWeb, 6000);

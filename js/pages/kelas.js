@@ -94,6 +94,25 @@ const ytInfo = async (u) => {
     return null;
   }
 };
+/* Sumber rekaman kelas untuk pemutar aplikasi (js/core/pemutar-video.js):
+   - YouTube (tautan rekaman atau video kelas yang sudah selesai)
+   - Google Drive: diputar langsung sebagai berkas; bila Drive menolak (berkas besar), pratinjau Drive yang dipakai
+   - berkas video langsung (.mp4, .webm, .mov, .m4v)
+   Tautan lain (mis. halaman web) tidak bisa diputar di aplikasi: null, dibuka di tab baru. */
+function kRekamanSumber(k) {
+  const u = String(k.rekaman || ''),
+    y = ytId(u) || k.yt;
+  if (y) return { yt: y, poster: ytGambar(y), asli: 'https://www.youtube.com/watch?v=' + y };
+  const d = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=)([\w-]{20,})/);
+  if (d)
+    return {
+      src: 'https://drive.google.com/uc?export=download&id=' + d[1],
+      cadangan: 'https://drive.google.com/file/d/' + d[1] + '/preview',
+      asli: u,
+    };
+  if (/^https?:\/\/\S+\.(mp4|webm|mov|m4v)(\?\S*)?$/i.test(u)) return { src: u, asli: u };
+  return null;
+}
 /* Admin kelas: pemilik / admin dengan akses "semua" atau "kelas" (pengajar Kelas online) */
 const kAdmin = () => typeof adminBisa == 'function' && adminBisa('kelas');
 
@@ -105,7 +124,7 @@ function kelasKartu(k) {
   return `<div class="kls${live ? ' live' : ''}">${live ? `<div class="klt"><span class="klv">● Sedang live</span>${KR && KR.id == k.id ? '<small class="mut">Kamu sedang di kelas ini</small>' : ''}</div>` : `<small class="mut">${sel ? 'Selesai · ' : ''}${esc(kJam(k.mulai))}</small>`}
   ${k.yt ? `<a class="kyt" href="#/kelas/${k.id}" aria-label="Tonton ${esc(k.judul || 'video')}"><img src="${ytGambar(k.yt)}" alt="" loading="lazy"><span class="kyp">${ic('play', 26)}</span>${live ? '<span class="klv kytl">● LIVE</span>' : ''}</a>` : ''}
   <b>${esc(k.judul || 'Kelas')}</b>${k.pengajar ? `<small class="mut">${esc(k.pengajar)}</small>` : ''}${k.ket ? `<p>${esc(k.ket)}</p>` : ''}${kKitabJudul(k.kitabKelas) ? `<span class="klkt">${ic('book', 15)} Kitab: <b>${esc(kKitabJudul(k.kitabKelas))}</b></span>` : ''}
-  <div class="kla">${live ? `<a class="btn" href="#/kelas/${k.id}">${ic(k.yt ? 'play' : 'siar', 18)} ${k.yt ? 'Tonton live' : 'Masuk dan dengarkan'}</a>` : ''}${sel && k.rekaman ? (ytId(k.rekaman) ? `<a class="sb" href="#/kelas/${k.id}">${ic('play', 16)} Putar rekaman</a>` : `<a class="sb" href="${esc(k.rekaman)}" target="_blank" rel="noopener">${ic('play', 16)} Putar rekaman</a>`) : ''}${adm && !sel ? `<button class="sb" data-kytset="${k.id}">${k.yt ? 'Ubah' : 'Tempel'} link YouTube</button>` : ''}
+  <div class="kla">${live ? `<a class="btn" href="#/kelas/${k.id}">${ic(k.yt ? 'play' : 'siar', 18)} ${k.yt ? 'Tonton live' : 'Masuk dan dengarkan'}</a>` : ''}${sel && (k.rekaman || k.yt) ? (kRekamanSumber(k) ? `<a class="sb" href="#/kelas/${k.id}">${ic('play', 16)} Putar rekaman</a>` : `<a class="sb" href="${esc(k.rekaman)}" target="_blank" rel="noopener">${ic('play', 16)} Putar rekaman</a>`) : ''}${adm && !sel ? `<button class="sb" data-kytset="${k.id}">${k.yt ? 'Ubah' : 'Tempel'} link YouTube</button>` : ''}
   ${adm && !sel ? (live ? `<button class="sb" data-kakhir="${k.id}">Akhiri kelas</button>` : `<button class="sb pri" data-kmulai="${k.id}">Mulai kelas</button>`) : ''}${adm && sel ? `<button class="sb" data-ktaut="${k.id}">${k.rekaman ? 'Ubah' : 'Isi'} tautan rekaman</button>` : ''}${adm && !sel && !k.yt ? `<button class="sb" data-kkitabset="${k.id}">${ic('book', 14)} ${k.kitabKelas ? 'Ganti' : 'Atur'} kitab</button>` : ''}${adm ? `<button class="sb" data-ktgl="${k.id}">Ubah tanggal</button><button class="sb dng" data-khapus="${k.id}">Hapus</button>` : ''}</div>${!k.yt && k.mode == 'mesh' && !sel ? '<small class="mut">Kelas kecil (maks. ±10 jamaah).</small>' : ''}${k.rekam && !sel ? '<small class="mut">Kelas ini direkam.</small>' : ''}</div>`;
 }
 function kelasDaftar() {
@@ -163,6 +182,19 @@ P.kelas = (id) => {
     };
   const k = (KELAS || []).find((x) => x.id == id) || { id, judul: 'Kelas online' },
     vid = k.yt || (k.status == 'selesai' && ytId(k.rekaman));
+  /* Kelas yang sudah selesai: rekamannya diputar di pemutar aplikasi (bisa digeser, dipercepat, layar penuh) */
+  const rek = k.status == 'selesai' ? kRekamanSumber(k) : null;
+  if (rek)
+    return {
+      html:
+        head(esc(k.judul || 'Kelas online'), '#/kelas', '<span class="klv krek">Rekaman</span>') +
+        `<div class="kvp">${vpHtml({ ...rek, label: 'Rekaman ' + (k.judul || 'kelas') })}</div>
+  <div class="kinfo"><b>${esc(k.judul || '')}</b>${k.pengajar ? `<br><small class="mut">${esc(k.pengajar)}</small>` : ''}<br><small class="mut">Selesai · ${esc(kJam(k.mulai))}</small>${k.ket ? `<p>${esc(k.ket)}</p>` : ''}${kKitabJudul(k.kitabKelas) ? `<span class="klkt">${ic('book', 15)} Kitab: <b>${esc(kKitabJudul(k.kitabKelas))}</b></span>` : ''}<p><a class="sb" href="${esc(rek.asli)}" target="_blank" rel="noopener">${ic('share', 16)} Buka di ${rek.yt ? 'YouTube' : 'tab baru'}</a></p></div>`,
+      init() {
+        if (KR && KR.id != id) kelasKeluar(1);
+        vpPasang($('#view'));
+      },
+    };
   if (vid)
     return {
       html:
