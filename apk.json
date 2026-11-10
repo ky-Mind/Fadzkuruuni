@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.25",
- "body": "Pembaruan Fadzkuruuni 2.6.25 (isi web 2.9.61)\n\n- Murottal tetap berbunyi di latar belakang (layar mati / aplikasi ditutup ke latar) dengan notifikasi media: sebelumnya, jeda/putar, berikutnya, hentikan\n- Putar terus lintas surah sampai surah pilihan, akhir juz, atau akhir Al-Qur'an\n- Fadz AI: tombol mikrofon menghentikan suara AI, petunjuk tahan / geser ke atas untuk merekam lama\n- Moto layar pembuka diperbaiki: \"Berfikir untuk berdzikir, bertadabur untuk bersyukur.\"\n- Kelas online layar penuh ala Google Meet, Fadz AI paham semua fitur aplikasi\n",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.25",
+ "tag_name": "v2.6.26",
+ "body": "Pembaruan Fadzkuruuni 2.6.26 (isi web 2.9.64)\n\n- Pengaturan adzan jadi satu panel yang sama di Pengaturan dan Jadwal salat (tiap waktu: Adzan, Beduk, Alarm, Bunyi, Senyap, Mati)\n- Lokasi otomatis lewat GPS: diperbarui saat aplikasi dibuka dan saat berpindah tempat\n- Pemutar video baru untuk video tutorial dan rekaman kelas: geser waktu, mundur/maju 10 detik, kecepatan 0,75×–2×, layar penuh\n- Geser halaman lebih mulus dan menu bawah tidak hilang lagi; Maulid langsung keluar saat kembali\n- Ukuran tampilan bawaan menyesuaikan layar HP, tanpa tulisan yang melompat\n- Tawaran pembaruan muncul setiap aplikasi dibuka selama versinya masih lama, dan hanya bisa ditutup lewat tombolnya\n",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.26",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.25/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.26/fadzkuruuni.apk"
   }
  ]
 }
