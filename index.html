@@ -1,108 +1,239 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f5a43">
-<title>Fadzkuruuni</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192.png">
-<link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
-<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<script>/* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */try{var z=JSON.parse(localStorage.fz||'{}'),t=z.theme=='blue'?'blue':z.theme=='dark'||(z.theme=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.background={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t];try{var w={dark:'#121413',blue:'#eef4fb',light:'#ffffff'}[t];window.FadzAndroid&&FadzAndroid.warnaBar&&FadzAndroid.warnaBar(w,w)}catch(e){}}catch(e){}</script>
-<style>/* Layar pembuka: tampil seketika selagi skrip aplikasi dimuat (menggantikan layar gelap kosong), ditutup router.js */
-#pembuka{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;text-align:center;background:#fff;color:#24584a;transition:opacity .45s ease}
-[data-theme=dark] #pembuka{background:#121413;color:#cfe0d7}[data-theme=blue] #pembuka{background:#eef4fb;color:#1d4f7a}
-#pembuka.tutup{opacity:0;pointer-events:none}
-#pembuka img{width:118px;height:118px;object-fit:contain;animation:pbM .7s ease both}
-#pembuka .pbh{display:flex;align-items:center;gap:10px;margin:26px 0 14px;opacity:.55;animation:pbM .7s .15s ease both}
-#pembuka .pbh i{display:block;width:54px;height:1px;background:currentColor}#pembuka .pbh b{display:block;width:7px;height:7px;transform:rotate(45deg);border:1px solid currentColor}
-#pembuka p{margin:0;font:italic 400 21px/1.55 Georgia,"Times New Roman",serif;letter-spacing:.2px;animation:pbM .8s .3s ease both}
-#pembuka p span{display:block}
-#pembuka small{margin-top:18px;font:600 11px/1 system-ui,sans-serif;letter-spacing:.32em;opacity:.6;animation:pbM .8s .55s ease both}
-@keyframes pbM{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){#pembuka *{animation:none!important}}</style>
-<link rel="stylesheet" href="css/app.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New&display=swap">
-</head>
-<body>
-<div id="pembuka" aria-hidden="true"><img src="img/logo.png" alt=""><div class="pbh"><i></i><b></b><i></i></div><p><span>Berfikir untuk berdzikir,</span><span>bertadabur untuk bersyukur.</span></p><small>MAJELIS FADZKURUUNI</small></div>
-<div id="app">
-  <nav id="nav" aria-label="Menu utama">
-    <div class="nb">
-      <a class="brand" href="#/"><img src="img/logo.png" alt="" width="34" height="34"><span class="bt">Fadzkuruuni</span></a>
-      <button class="sbt" type="button" data-sbt aria-label="Perkecil atau perbesar menu (Ctrl+B)" data-tip="Sidebar (Ctrl+B)"><i data-i="panel"></i></button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#1f5a43" />
+    <title>Fadzkuruuni</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png" />
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+    <script>
+      /* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */
+      try {
+        var z = JSON.parse(localStorage.fz || '{}'),
+          t =
+            z.theme == 'blue'
+              ? 'blue'
+              : z.theme == 'dark' || (z.theme == 'auto' && matchMedia('(prefers-color-scheme:dark)').matches)
+                ? 'dark'
+                : 'light';
+        document.documentElement.dataset.theme = t;
+        var uz =
+            z.uz ||
+            (localStorage.fz
+              ? 'kecil'
+              : (function () {
+                  var w = Math.min(screen.width || innerWidth, screen.height || innerHeight);
+                  return w < 380 ? 'kecil' : w < 420 ? 'sedang' : 'besar';
+                })()),
+          rs = document.documentElement.style;
+        rs.setProperty('--zm', String({ kecil: 0.86, sedang: 0.93, besar: 1 }[uz] || 0.86));
+        rs.setProperty('--lt', (z.fl || 12) + 'px');
+        rs.setProperty('--tr', (z.fi || 12) + 'px');
+        document.documentElement.style.background = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
+        try {
+          var w = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
+          window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(w, w);
+        } catch (e) {}
+      } catch (e) {}
+    </script>
+    <style>
+      /* Layar pembuka: tampil seketika selagi skrip aplikasi dimuat (menggantikan layar gelap kosong), ditutup
+         router.js */
+      #pembuka {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        padding: 24px;
+        text-align: center;
+        background: #fff;
+        color: #24584a;
+        transition: opacity 0.45s ease;
+      }
+      [data-theme='dark'] #pembuka {
+        background: #121413;
+        color: #cfe0d7;
+      }
+      [data-theme='blue'] #pembuka {
+        background: #eef4fb;
+        color: #1d4f7a;
+      }
+      #pembuka.tutup {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #pembuka img {
+        width: 118px;
+        height: 118px;
+        object-fit: contain;
+        animation: pbM 0.7s ease both;
+      }
+      #pembuka .pbh {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 26px 0 14px;
+        opacity: 0.55;
+        animation: pbM 0.7s 0.15s ease both;
+      }
+      #pembuka .pbh i {
+        display: block;
+        width: 54px;
+        height: 1px;
+        background: currentColor;
+      }
+      #pembuka .pbh b {
+        display: block;
+        width: 7px;
+        height: 7px;
+        transform: rotate(45deg);
+        border: 1px solid currentColor;
+      }
+      #pembuka p {
+        margin: 0;
+        font:
+          italic 400 21px/1.55 Georgia,
+          'Times New Roman',
+          serif;
+        letter-spacing: 0.2px;
+        animation: pbM 0.8s 0.3s ease both;
+      }
+      #pembuka p span {
+        display: block;
+      }
+      #pembuka small {
+        margin-top: 18px;
+        font:
+          600 11px/1 system-ui,
+          sans-serif;
+        letter-spacing: 0.32em;
+        opacity: 0.6;
+        animation: pbM 0.8s 0.55s ease both;
+      }
+      @keyframes pbM {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #pembuka * {
+          animation: none !important;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New&display=block"
+    />
+  </head>
+  <body>
+    <div id="pembuka" aria-hidden="true">
+      <img src="img/logo.png" alt="" />
+      <div class="pbh"><i></i><b></b><i></i></div>
+      <p><span>Berfikir untuk berdzikir,</span><span>bertadabur untuk bersyukur.</span></p>
+      <small>MAJELIS FADZKURUUNI</small>
     </div>
-    <a href="#/" data-r="" data-tip="Beranda"><i data-i="home"></i><span>Beranda</span></a>
-    <a href="#/quran" data-r="quran" data-tip="Al-Qur'an"><i data-i="book"></i><span>Al-Qur'an</span></a>
-    <a href="#/ai" data-r="ai" data-tip="Fadz AI"><i data-i="spark"></i><span>Fadz AI</span></a>
-    <a href="#/kelas" data-r="kelas" data-tip="Kelas online"><i data-i="siar"></i><span>Kelas online</span></a>
-    <a href="#/pengaturan" data-r="pengaturan" data-tip="Pengaturan"><i data-i="sliders"></i><span>Pengaturan</span></a>
-  </nav>
-  <main id="view" tabindex="-1"></main>
-</div>
-<div id="toast" role="status"></div>
-<script src="data/content.js"></script>
-<script src="data/ibadah.js"></script>
-<script src="data/asma.js"></script>
-<script src="data/pustaka.js"></script>
-<script src="data/quran-meta.js"></script>
-<script src="data/menu.js"></script>
-<script src="data/kota.js"></script>
-<script src="data/maulid/daftar.js"></script>
-<script src="data/zakat-ilmu.js"></script>
-<script src="data/hadits.js"></script>
-<script src="data/hadits-bab.js"></script>
-<script src="kitab/daftar.js"></script>
-<script src="data/kitab-indeks.js"></script>
-<script src="js/core/state.js"></script>
-<script src="js/core/icons.js"></script>
-<script src="js/core/ui.js"></script>
-<script src="js/core/waktu.js"></script>
-<script src="js/core/quran-api.js"></script>
-<script src="js/core/cloud.js"></script>
-<script src="js/core/adzan.js"></script>
-<script src="js/core/android.js"></script>
-<script src="js/core/overlay.js"></script>
-<script src="js/core/pemutar.js"></script>
-<script src="js/core/unduh.js"></script>
-<script src="js/core/tata.js"></script>
-<script src="js/pages/kata-kata.js"></script>
-<script src="js/pages/beranda.js"></script>
-<script src="js/pages/quran.js"></script>
-<script src="js/pages/wirid-doa.js"></script>
-<script src="js/pages/asmaul-husna.js"></script>
-<script src="js/pages/tahlil.js"></script>
-<script src="js/pages/maulid.js"></script>
-<script src="js/pages/salat.js"></script>
-<script src="js/pages/zakat.js"></script>
-<script src="js/pages/dukung.js"></script>
-<script src="js/pages/waris.js"></script>
-<script src="js/pages/kalender.js"></script>
-<script src="js/pages/kelas-mesh.js"></script>
-<script src="js/pages/kelas.js"></script>
-<script src="js/pages/tasbih.js"></script>
-<script src="js/pages/kitab.js"></script>
-<script src="js/pages/hadits.js"></script>
-<script src="data/ai-panduan.js"></script>
-<script src="js/pages/ai.js"></script>
-<script src="js/pages/menu.js"></script>
-<script src="js/pages/segera.js"></script>
-<script src="js/pages/tentang.js"></script>
-<script src="js/pages/lapor.js"></script>
-<script src="data/tutorial.js"></script>
-<script src="js/pages/tutorial.js"></script>
-<script src="js/pages/pengaturan/index.js"></script>
-<script src="js/pages/pengaturan/akun-profil.js"></script>
-<script src="js/pages/pengaturan/beranda-kata.js"></script>
-<script src="js/pages/pengaturan/tampilan.js"></script>
-<script src="js/pages/pengaturan/salat-notifikasi.js"></script>
-<script src="data/yang-baru.js"></script>
-<script src="js/pages/pengaturan/offline-data.js"></script>
-<script src="js/pages/pengaturan/izin.js"></script>
-<script src="js/pages/pengaturan/tentang.js"></script>
-<script src="js/core/events.js"></script>
-<script src="js/router.js"></script>
-</body>
+    <div id="app">
+      <nav id="nav" aria-label="Menu utama">
+        <div class="nb">
+          <a class="brand" href="#/"
+            ><img src="img/logo.png" alt="" width="34" height="34" /><span class="bt">Fadzkuruuni</span></a
+          >
+          <button
+            class="sbt"
+            type="button"
+            data-sbt
+            aria-label="Perkecil atau perbesar menu (Ctrl+B)"
+            data-tip="Sidebar (Ctrl+B)"
+          >
+            <i data-i="panel"></i>
+          </button>
+        </div>
+        <a href="#/" data-r="" data-tip="Beranda"><i data-i="home"></i><span>Beranda</span></a>
+        <a href="#/quran" data-r="quran" data-tip="Al-Qur'an"><i data-i="book"></i><span>Al-Qur'an</span></a>
+        <a href="#/ai" data-r="ai" data-tip="Fadz AI"><i data-i="spark"></i><span>Fadz AI</span></a>
+        <a href="#/kelas" data-r="kelas" data-tip="Kelas online"><i data-i="siar"></i><span>Kelas online</span></a>
+        <a href="#/pengaturan" data-r="pengaturan" data-tip="Pengaturan"
+          ><i data-i="sliders"></i><span>Pengaturan</span></a
+        >
+      </nav>
+      <main id="view" tabindex="-1"></main>
+    </div>
+    <div id="toast" role="status"></div>
+    <script src="data/content.js"></script>
+    <script src="data/ibadah.js"></script>
+    <script src="data/asma.js"></script>
+    <script src="data/pustaka.js"></script>
+    <script src="data/quran-meta.js"></script>
+    <script src="data/menu.js"></script>
+    <script src="data/kota.js"></script>
+    <script src="data/maulid/daftar.js"></script>
+    <script src="data/zakat-ilmu.js"></script>
+    <script src="data/hadits.js"></script>
+    <script src="data/hadits-bab.js"></script>
+    <script src="kitab/daftar.js"></script>
+    <script src="data/kitab-indeks.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/icons.js"></script>
+    <script src="js/core/ui.js"></script>
+    <script src="js/core/waktu.js"></script>
+    <script src="js/core/quran-api.js"></script>
+    <script src="js/core/cloud.js"></script>
+    <script src="js/core/adzan.js"></script>
+    <script src="js/core/android.js"></script>
+    <script src="js/core/overlay.js"></script>
+    <script src="js/core/pemutar.js"></script>
+    <script src="js/core/unduh.js"></script>
+    <script src="js/core/tata.js"></script>
+    <script src="js/pages/kata-kata.js"></script>
+    <script src="js/pages/beranda.js"></script>
+    <script src="js/pages/quran.js"></script>
+    <script src="js/pages/wirid-doa.js"></script>
+    <script src="js/pages/asmaul-husna.js"></script>
+    <script src="js/pages/tahlil.js"></script>
+    <script src="js/pages/maulid.js"></script>
+    <script src="js/pages/salat.js"></script>
+    <script src="js/pages/zakat.js"></script>
+    <script src="js/pages/dukung.js"></script>
+    <script src="js/pages/waris.js"></script>
+    <script src="js/pages/kalender.js"></script>
+    <script src="js/pages/kelas-mesh.js"></script>
+    <script src="js/pages/kelas.js"></script>
+    <script src="js/pages/tasbih.js"></script>
+    <script src="js/pages/kitab.js"></script>
+    <script src="js/pages/hadits.js"></script>
+    <script src="data/ai-panduan.js"></script>
+    <script src="js/pages/ai.js"></script>
+    <script src="js/pages/menu.js"></script>
+    <script src="js/pages/segera.js"></script>
+    <script src="js/pages/tentang.js"></script>
+    <script src="js/pages/lapor.js"></script>
+    <script src="data/tutorial.js"></script>
+    <script src="js/pages/tutorial.js"></script>
+    <script src="js/pages/pengaturan/index.js"></script>
+    <script src="js/pages/pengaturan/akun-profil.js"></script>
+    <script src="js/pages/pengaturan/beranda-kata.js"></script>
+    <script src="js/pages/pengaturan/tampilan.js"></script>
+    <script src="js/pages/pengaturan/salat-notifikasi.js"></script>
+    <script src="data/yang-baru.js"></script>
+    <script src="js/pages/pengaturan/offline-data.js"></script>
+    <script src="js/pages/pengaturan/izin.js"></script>
+    <script src="js/pages/pengaturan/tentang.js"></script>
+    <script src="js/core/events.js"></script>
+    <script src="js/router.js"></script>
+  </body>
 </html>

@@ -3,17 +3,21 @@
    → audio/mpeg berbahasa Indonesia. Teks dipecah per ±180 huruf (batas layanan suara) lalu potongan MP3 digabung. */
 export const config = { runtime: 'edge' };
 
-const ASAL = /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-const MAKS = 900, POTONG = 180;
+const ASAL =
+  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const MAKS = 900,
+  POTONG = 180;
 
 /* Pecah di batas kalimat/koma/spasi agar tidak memotong kata */
 function pecah(t) {
-  const L = []; let s = t.trim();
+  const L = [];
+  let s = t.trim();
   while (s.length > POTONG) {
     let i = Math.max(s.lastIndexOf('. ', POTONG), s.lastIndexOf(', ', POTONG), s.lastIndexOf('; ', POTONG));
     if (i < 60) i = s.lastIndexOf(' ', POTONG);
     if (i < 1) i = POTONG;
-    L.push(s.slice(0, i + 1).trim()); s = s.slice(i + 1).trim();
+    L.push(s.slice(0, i + 1).trim());
+    s = s.slice(i + 1).trim();
   }
   if (s) L.push(s);
   return L;
@@ -25,14 +29,26 @@ export default async function handler(req) {
   const t = (new URL(req.url).searchParams.get('t') || '').replace(/\s+/g, ' ').trim().slice(0, MAKS);
   if (!t) return new Response('Teks kosong', { status: 400 });
   try {
-    const bag = await Promise.all(pecah(t).map(async q => {
-      const r = await fetch('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=id&q=' + encodeURIComponent(q),
-        { headers: { 'user-agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/130 Mobile Safari/537.36' } });
-      if (!r.ok) throw new Error('suara ' + r.status);
-      return new Uint8Array(await r.arrayBuffer());
-    }));
-    const all = new Uint8Array(bag.reduce((n, b) => n + b.length, 0)); let o = 0;
-    for (const b of bag) { all.set(b, o); o += b.length; }
+    const bag = await Promise.all(
+      pecah(t).map(async (q) => {
+        const r = await fetch(
+          'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=id&q=' + encodeURIComponent(q),
+          {
+            headers: {
+              'user-agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/130 Mobile Safari/537.36',
+            },
+          }
+        );
+        if (!r.ok) throw new Error('suara ' + r.status);
+        return new Uint8Array(await r.arrayBuffer());
+      })
+    );
+    const all = new Uint8Array(bag.reduce((n, b) => n + b.length, 0));
+    let o = 0;
+    for (const b of bag) {
+      all.set(b, o);
+      o += b.length;
+    }
     return new Response(all, { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'public, max-age=86400' } });
   } catch (e) {
     return new Response('Suara tidak tersedia', { status: 502 });

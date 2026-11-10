@@ -1,44 +1,121 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Penghapusan Data · Fadzkuruuni</title>
-<meta name="description" content="Cara menghapus akun dan data Fadzkuruuni, termasuk data dari masuk dengan Facebook atau Google.">
-<link rel="icon" href="img/favicon-48.png">
-<!-- hapus-data.html - Petunjuk penghapusan data pengguna (dipakai sebagai URL "Penghapusan data pengguna" di Facebook Developer).
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Penghapusan Data · Fadzkuruuni</title>
+    <meta
+      name="description"
+      content="Cara menghapus akun dan data Fadzkuruuni, termasuk data dari masuk dengan Facebook atau Google."
+    />
+    <link rel="icon" href="img/favicon-48.png" />
+    <!-- hapus-data.html - Petunjuk penghapusan data pengguna (dipakai sebagai URL "Penghapusan data pengguna" di Facebook Developer).
      Penghapusan mandiri ada di aplikasi: Pengaturan > Akun & Profil > Hapus akun & data (js/pages/pengaturan/akun-profil.js).
      Tampilan: css/dokumen.css (tema mengikuti aplikasi / perangkat, bisa diganti lewat tombol di bilah atas). -->
-<script>/* Tema: pilihan di halaman ini > tema aplikasi > tema perangkat */try{var d=localStorage.fzdok,z=JSON.parse(localStorage.fz||'{}'),t=d||(z.theme=='blue'?'blue':z.theme=='dark'?'dark':z.theme=='light'?'light':(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}</script>
-<link rel="stylesheet" href="css/dokumen.css">
-</head>
-<body>
-<header class="dbar"><a class="dk" data-kembali href="./#/pengaturan/tentang" aria-label="Kembali ke aplikasi"><svg viewBox="0 0 24 24"><path d="M20 12H4M10.5 5.5 4 12l6.5 6.5"/></svg></a><span class="dj">Penghapusan Data</span><button type="button" id="tema" aria-label="Ganti tema terang / gelap"><svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 6.5 6.5 0 0 0 10 10z"/></svg></button></header>
-<main>
-<div class="dhead"><img src="img/icon-192.png" alt=""><div><h1>Penghapusan Data</h1><small>Fadzkuruuni</small></div></div>
+    <script>
+      /* Tema: pilihan di halaman ini > tema aplikasi > tema perangkat */
+      try {
+        var d = localStorage.fzdok,
+          z = JSON.parse(localStorage.fz || '{}'),
+          t =
+            d ||
+            (z.theme == 'blue'
+              ? 'blue'
+              : z.theme == 'dark'
+                ? 'dark'
+                : z.theme == 'light'
+                  ? 'light'
+                  : matchMedia('(prefers-color-scheme:dark)').matches
+                    ? 'dark'
+                    : 'light');
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+      }
+    </script>
+    <link rel="stylesheet" href="css/dokumen.css" />
+  </head>
+  <body>
+    <header class="dbar">
+      <a class="dk" data-kembali href="./#/pengaturan/tentang" aria-label="Kembali ke aplikasi"
+        ><svg viewBox="0 0 24 24"><path d="M20 12H4M10.5 5.5 4 12l6.5 6.5" /></svg></a
+      ><span class="dj">Penghapusan Data</span
+      ><button type="button" id="tema" aria-label="Ganti tema terang / gelap">
+        <svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 6.5 6.5 0 0 0 10 10z" /></svg>
+      </button>
+    </header>
+    <main>
+      <div class="dhead">
+        <img src="img/icon-192.png" alt="" />
+        <div>
+          <h1>Penghapusan Data</h1>
+          <small>Fadzkuruuni</small>
+        </div>
+      </div>
 
-<p class="lead">Akun Fadzkuruuni dan semua data yang tersimpan di cloud bisa dihapus kapan saja, termasuk akun yang dibuat lewat Facebook atau Google. Ada dua cara.</p>
+      <p class="lead">
+        Akun Fadzkuruuni dan semua data yang tersimpan di cloud bisa dihapus kapan saja, termasuk akun yang dibuat lewat
+        Facebook atau Google. Ada dua cara.
+      </p>
 
-<section class="sec"><h2>Hapus sendiri dari aplikasi</h2>
-<ol>
-<li>Buka Fadzkuruuni (aplikasi Android, fadzkuruuni.vercel.app, atau fadzkuruuni.xianzing.my.id) dan pastikan kamu sedang masuk akun.</li>
-<li>Buka <b>Pengaturan › Akun &amp; Profil</b>.</li>
-<li>Ketuk <b>Hapus akun &amp; data</b>, lalu konfirmasi.</li>
-</ol>
-<p>Akunmu (nama, email, dan foto profil) serta data yang disinkronkan (pengaturan, penanda ayat, riwayat baca) langsung terhapus. Kadang aplikasi meminta kamu masuk sekali lagi sebelum penghapusan bisa dilanjutkan.</p></section>
+      <section class="sec">
+        <h2>Hapus sendiri dari aplikasi</h2>
+        <ol>
+          <li>
+            Buka Fadzkuruuni (aplikasi Android, fadzkuruuni.vercel.app, atau fadzkuruuni.xianzing.my.id) dan pastikan
+            kamu sedang masuk akun.
+          </li>
+          <li>Buka <b>Pengaturan › Akun &amp; Profil</b>.</li>
+          <li>Ketuk <b>Hapus akun &amp; data</b>, lalu konfirmasi.</li>
+        </ol>
+        <p>
+          Akunmu (nama, email, dan foto profil) serta data yang disinkronkan (pengaturan, penanda ayat, riwayat baca)
+          langsung terhapus. Kadang aplikasi meminta kamu masuk sekali lagi sebelum penghapusan bisa dilanjutkan.
+        </p>
+      </section>
 
-<section class="sec"><h2>Minta kami yang menghapus</h2>
-<p>Kirim pesan lewat email atau WhatsApp. Sebutkan email akunmu dan cara kamu masuk (Facebook, Google, atau email). Kami proses paling lambat 30 hari. Kalau kamu juga ingin laporan masalah yang pernah dikirim ikut dihapus, sebutkan saja.</p>
-<div class="kontak"><a href="mailto:ponpesfadzkuruuni@gmail.com?subject=Hapus%20data%20Fadzkuruuni"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>ponpesfadzkuruuni@gmail.com</a><a class="s" href="https://wa.me/6289506138191?text=Assalamu'alaikum%2C%20saya%20ingin%20menghapus%20akun%20dan%20data%20Fadzkuruuni."><svg viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>WhatsApp 0895-0613-8191</a></div></section>
+      <section class="sec">
+        <h2>Minta kami yang menghapus</h2>
+        <p>
+          Kirim pesan lewat email atau WhatsApp. Sebutkan email akunmu dan cara kamu masuk (Facebook, Google, atau
+          email). Kami proses paling lambat 30 hari. Kalau kamu juga ingin laporan masalah yang pernah dikirim ikut
+          dihapus, sebutkan saja.
+        </p>
+        <div class="kontak">
+          <a href="mailto:ponpesfadzkuruuni@gmail.com?subject=Hapus%20data%20Fadzkuruuni"
+            ><svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" /></svg
+            >ponpesfadzkuruuni@gmail.com</a
+          ><a
+            class="s"
+            href="https://wa.me/6289506138191?text=Assalamu'alaikum%2C%20saya%20ingin%20menghapus%20akun%20dan%20data%20Fadzkuruuni."
+            ><svg viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z" /></svg>WhatsApp 0895-0613-8191</a
+          >
+        </div>
+      </section>
 
-<section class="sec"><h2>Mencabut akses dari Facebook</h2>
-<p>Di Facebook, buka <b>Pengaturan &amp; privasi › Pengaturan › Aplikasi dan situs web</b>, pilih <b>fadzkuruuni</b>, lalu ketuk <b>Hapus</b>. Setelah itu hapus juga akunnya di Fadzkuruuni dengan salah satu cara di atas.</p></section>
+      <section class="sec">
+        <h2>Mencabut akses dari Facebook</h2>
+        <p>
+          Di Facebook, buka <b>Pengaturan &amp; privasi › Pengaturan › Aplikasi dan situs web</b>, pilih
+          <b>fadzkuruuni</b>, lalu ketuk <b>Hapus</b>. Setelah itu hapus juga akunnya di Fadzkuruuni dengan salah satu
+          cara di atas.
+        </p>
+      </section>
 
-<section class="sec"><h2>Data di HP</h2>
-<p>Pengaturan, riwayat Fadz AI, dan isi yang diunduh untuk dibaca tanpa internet hanya ada di HP-mu. Semuanya ikut terhapus kalau kamu menghapus data aplikasi di pengaturan HP atau mencopot aplikasinya.</p></section>
+      <section class="sec">
+        <h2>Data di HP</h2>
+        <p>
+          Pengaturan, riwayat Fadz AI, dan isi yang diunduh untuk dibaca tanpa internet hanya ada di HP-mu. Semuanya
+          ikut terhapus kalau kamu menghapus data aplikasi di pengaturan HP atau mencopot aplikasinya.
+        </p>
+      </section>
 
-<p class="kaki"><a href="kebijakan-privasi.html">Kebijakan Privasi</a> · <a href="./" data-kembali>Kembali ke aplikasi</a></p>
-</main>
-<script src="js/dokumen.js"></script>
-</body>
+      <p class="kaki">
+        <a href="kebijakan-privasi.html">Kebijakan Privasi</a> · <a href="./" data-kembali>Kembali ke aplikasi</a>
+      </p>
+    </main>
+    <script src="js/dokumen.js"></script>
+  </body>
 </html>
