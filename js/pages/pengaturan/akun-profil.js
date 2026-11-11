@@ -41,7 +41,12 @@ const fotoBaca = (src) =>
   });
 /* Editor foto seperti Instagram: lapisan layar penuh, foto dicubit (dua jari) / roda tetikus untuk ukuran dan diseret
    untuk posisi di dalam lingkaran FPK px; Selesai = simpan */
-const FPK = 280;
+/* Lingkaran potong selebar layar (dikurangi tepi), seperti Instagram; ditentukan saat editor dibuka */
+let FPK = 280;
+const fpUkur = () => {
+  const z = typeof zmKini == 'function' ? zmKini() : 1;
+  FPK = Math.round(Math.max(220, Math.min(innerWidth / z - 40, (innerHeight / z) * 0.62, 440)));
+};
 let FOTOCALON = null;
 const fpDasar = (c) => FPK / Math.min(c.w, c.h);
 const fpBatas = (c) => {
@@ -83,13 +88,14 @@ const fpHasil = (c) =>
     im.src = c.u;
   });
 function fpBuka(c) {
+  fpUkur();
   FOTOCALON = c;
   fpBatas(c);
   $('#fped')?.remove();
   const d = document.createElement('div');
   d.className = 'back-d fpl';
   d.id = 'fped';
-  d.innerHTML = `<div class="fplb"><button type="button" class="ib2" data-fbatal aria-label="Batal"><span aria-hidden="true">×</span></button><b>Atur foto</b><button type="button" class="fpok" data-fsimpan>Selesai</button></div><div class="fplw"><div class="fpc" id="fpc" data-noswipe style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"></div></div><p class="fplt">Cubit dengan dua jari untuk memperbesar, seret untuk menggeser.</p><label class="fpzl" data-noswipe>${ic('search', 16)}<input type="range" id="fpz" min="1" max="5" step="0.01" value="${c.z}" aria-label="Ukuran foto"></label>`;
+  d.innerHTML = `<div class="fplb"><button type="button" class="ib2" data-fbatal aria-label="Batal"><span aria-hidden="true">×</span></button><b>Atur foto</b><button type="button" class="fpok" data-fsimpan>Selesai</button></div><div class="fplw" data-noswipe><div class="fpc" id="fpc" style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"><i class="fpmk" aria-hidden="true"></i></div></div><p class="fplt">Cubit untuk memperbesar, seret untuk menggeser</p>`;
   document.body.append(d);
 }
 const fpTutup = () => {
@@ -114,7 +120,7 @@ document.addEventListener('input', (x) => {
 /* Seret satu jari = geser; dua jari = cubit (ukuran) sekaligus geser; roda tetikus = ukuran */
 const FPJ = new Map();
 document.addEventListener('pointerdown', (x) => {
-  const el = x.target.closest('#fpc');
+  const el = x.target.closest('#fped .fplw') && $('#fpc');
   if (!el || !FOTOCALON) return;
   x.preventDefault();
   FPJ.set(x.pointerId, { x: x.clientX, y: x.clientY });
@@ -168,7 +174,7 @@ document.addEventListener('pointerdown', (x) => {
 document.addEventListener(
   'wheel',
   (x) => {
-    if (!x.target.closest('#fpc') || !FOTOCALON) return;
+    if (!x.target.closest('#fped .fplw') || !FOTOCALON) return;
     x.preventDefault();
     FOTOCALON.z *= x.deltaY < 0 ? 1.08 : 1 / 1.08;
     fpBatas(FOTOCALON);
