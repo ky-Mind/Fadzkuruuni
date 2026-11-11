@@ -93,7 +93,33 @@ function konfirmasi(t, m, ya, fn) {
    navigasi hilang). Sesuai permintaan pemilik, tampilan ini "mengambil alih" layar: tidak ada tombol keluar, dan tombol
    kembali HP/peramban tidak menutupnya (lapisan .back-d ber-data-wajib, lihat fadzKembali & riwayat di atas). Lapisan baru
    tertutup saat halaman ke latar belakang: layar dimatikan (tombol daya), tombol Home, pindah aplikasi/tab. */
-let KYM_BUKA = false;
+let KYM_BUKA = false,
+  KYM_TUNGGU = false;
+/* APK 2.6.34 ke atas: aplikasi disematkan & ditarik balik (KunciLayanan) sampai tombol daya ditekan. Menarik balik butuh
+   izin "Tampil di atas aplikasi lain"; ditanyakan sebelum KyMind dibuka, sekali per sesi. */
+const kymSemat = () => kymKunci() && !!andPanggil('kunciSiap');
+function kymindMasuk() {
+  if ($('#kymL')) return;
+  if (kymSemat() && !andPanggil('izinAtas') && !sessionStorage.fzKymIzin) {
+    sessionStorage.fzKymIzin = 1;
+    return konfirmasi(
+      'Kunci KyMind',
+      'Agar KyMind hanya bisa ditutup dengan tombol daya, izinkan Fadzkuruuni "Tampil di atas aplikasi lain", lalu kembali ke aplikasi.',
+      'Izinkan',
+      () => {
+        KYM_TUNGGU = true;
+        andPanggil('mintaIzinAtas');
+      }
+    );
+  }
+  kymindBuka();
+}
+/* Kembali dari pengaturan izin: KyMind langsung dibuka */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !KYM_TUNGGU) return;
+  KYM_TUNGGU = false;
+  setTimeout(kymindBuka, 300);
+});
 function kymindBuka() {
   if ($('#kymL')) return;
   const d = document.createElement('div');
@@ -108,6 +134,7 @@ function kymindBuka() {
     try {
       localStorage.fzKym = 1;
     } catch (e) {}
+  if (kymSemat()) andPanggil('kunciMulai');
   const fs = d.requestFullscreen || d.webkitRequestFullscreen;
   try {
     const p = fs && fs.call(d);
@@ -130,6 +157,7 @@ const kymindTutup = () => {
 new MutationObserver(() => {
   if (!KYM_BUKA || $('#kymL')) return;
   KYM_BUKA = false;
+  if (kymSemat()) andPanggil('kunciLepas');
   if (document.fullscreenElement || document.webkitFullscreenElement)
     (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
   if (window.ANDROID) {
@@ -159,7 +187,8 @@ window.fzLayarMati = () => {
 };
 try {
   if (localStorage.fzKym == 1) {
-    if (kymKunci()) setTimeout(kymindBuka, 50);
+    /* APK dengan kunci: hanya bila kunci belum dilepas tombol daya (saat aplikasi tertutup, hanya layanan yang hidup) */
+    if (kymKunci() && (!kymSemat() || andPanggil('kunciAktif'))) setTimeout(kymindBuka, 50);
     else localStorage.removeItem('fzKym');
   }
 } catch (e) {}
@@ -169,7 +198,7 @@ document.addEventListener(
     const a = e.target.closest && e.target.closest('a.kym');
     if (!a) return;
     e.preventDefault();
-    kymindBuka();
+    kymindMasuk();
   },
   true
 );
