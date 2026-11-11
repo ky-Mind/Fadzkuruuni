@@ -95,7 +95,7 @@ function fpBuka(c) {
   const d = document.createElement('div');
   d.className = 'back-d fpl';
   d.id = 'fped';
-  d.innerHTML = `<div class="fplb"><button type="button" class="ib2" data-fbatal aria-label="Batal"><span aria-hidden="true">×</span></button><b>Atur foto</b><button type="button" class="fpok" data-fsimpan>Selesai</button></div><div class="fplw" data-noswipe><div class="fpc" id="fpc" style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"><i class="fpmk" aria-hidden="true"></i></div></div><p class="fplt">Cubit untuk memperbesar, seret untuk menggeser</p>`;
+  d.innerHTML = `<div class="fplb"><button type="button" class="ib2" data-fbatal aria-label="Batal"><span aria-hidden="true">×</span></button><b>Atur foto</b><button type="button" class="fpok" data-fsimpan>Selesai</button></div><div class="fplw" data-noswipe><div class="fpc" id="fpc" style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"><i class="fpmk" aria-hidden="true"></i></div><i class="fprd" aria-hidden="true" style="--r:${FPK / 2}px"></i></div><p class="fplt">Cubit untuk memperbesar, seret untuk menggeser</p>`;
   document.body.append(d);
 }
 const fpTutup = () => {
@@ -205,6 +205,14 @@ document.addEventListener('click', async (x) => {
     } catch (e) {
       return toast('Foto tidak bisa disimpan. Coba foto lain.');
     }
+    /* Foto asli & posisinya disimpan di perangkat ini saja (tidak ikut cloud), agar "Atur ukuran & posisi" bisa
+       memperbesar/menggeser lagi dari foto aslinya, bukan dari potongan kecil 192 px */
+    try {
+      await idbSimpan('fotoAsli', FOTOCALON.u);
+      S.fotoPos = { z: FOTOCALON.z, x: FOTOCALON.x / FPK, y: FOTOCALON.y / FPK };
+      /* Penanda: foto asli hanya dipakai bila foto profil belum diganti dari perangkat lain (sinkron cloud) */
+      S.fotoKunci = S.foto.slice(-48);
+    } catch (e) {}
     fpTutup();
     save();
     tataNav();
@@ -214,7 +222,14 @@ document.addEventListener('click', async (x) => {
   else if (t.closest('[data-fatur]') && S.foto) {
     t.closest('.back-d')?.remove();
     try {
-      fpBuka(await fotoBaca(S.foto));
+      const asli = await idbAmbil('fotoAsli'),
+        cocok = asli && S.fotoKunci == S.foto.slice(-48),
+        c = await fotoBaca(cocok ? asli : S.foto);
+      if (cocok && S.fotoPos) {
+        fpUkur();
+        Object.assign(c, { z: S.fotoPos.z || 1, x: (S.fotoPos.x || 0) * FPK, y: (S.fotoPos.y || 0) * FPK });
+      }
+      fpBuka(c);
     } catch (e) {
       toast('Foto tidak bisa dibuka');
     }
@@ -224,6 +239,8 @@ document.addEventListener('click', (x) => {
   if (!x.target.closest('[data-fdel]')) return;
   x.target.closest('.back-d')?.remove();
   S.foto = null;
+  S.fotoPos = null;
+  idbSimpan('fotoAsli', null).catch(() => {});
   save();
   tataNav();
   route();

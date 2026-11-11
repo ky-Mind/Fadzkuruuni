@@ -10615,3 +10615,26 @@ body,
 #fped .fplt {
   margin-bottom: calc(26px + env(safe-area-inset-bottom));
 }
+
+/* Redup di luar lingkaran: lapisan gradien (box-shadow raksasa tidak tergambar di WebView Android) */
+#fped .fpmk {
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+}
+#fped .fprd {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent var(--r), rgba(0, 0, 0, 0.62) calc(var(--r) + 1px));
+}
+/* Tombol Selesai: teks biru tanpa kotak (di WebView sempat tampil kotak putih) */
+#fped .fplb [data-fsimpan] {
+  padding: 6px 4px;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #8fb6e6 !important;
+  font: 700 16px/1 var(--ui);
+  -webkit-appearance: none;
+  appearance: none;
+}
