@@ -10616,6 +10616,36 @@ body,
   display: none;
 }
 
+/* Editor foto profil seperti Instagram: foto utuh terlihat, di luar lingkaran diredupkan, lingkaran bergaris tipis;
+   seluruh area bisa dicubit & diseret */
+#fped .fplw {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+#fped .fpc {
+  overflow: visible;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+}
+#fped .fpc img {
+  pointer-events: none;
+}
+#fped .fpmk {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.9),
+    0 0 0 200vmax rgba(0, 0, 0, 0.62);
+  pointer-events: none;
+}
+#fped .fplt {
+  margin-bottom: calc(26px + env(safe-area-inset-bottom));
+}
+
     </style>
     <style>
       /* ---------- Tambahan khusus Teka-Teki Kitab. Semua ukuran, warna, dan gerak memakai nilai aplikasi. ---------- */
