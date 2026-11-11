@@ -130,7 +130,7 @@ function kymindBuka() {
   document.body.append(d);
   KYM_BUKA = true;
   /* Aplikasi Android baru: tetap terkunci walau aplikasi ditutup paksa lalu dibuka lagi */
-  if (kymKunci())
+  if (kymKunci() || kymDesk())
     try {
       localStorage.fzKym = 1;
     } catch (e) {}
@@ -144,10 +144,14 @@ function kymindBuka() {
     andPanggil('layarPenuh', true);
     andPanggil('warnaBar', '#040507', '#040507');
   }
-  setTimeout(() => {
-    const f = $('#kymL iframe');
-    f && f.focus();
-  }, 300);
+  /* Desktop: tombol Esc juga ditangkap saat fokus ada di dalam iframe KyMind */
+  const f = d.querySelector('iframe');
+  f.addEventListener('load', () => {
+    try {
+      f.contentWindow.addEventListener('keydown', kymEsc, true);
+    } catch (e) {}
+  });
+  setTimeout(() => f.focus(), 300);
 }
 const kymindTutup = () => {
   const d = $('#kymL');
@@ -168,7 +172,10 @@ new MutationObserver(() => {
 /* Jalan keluar:
    - Aplikasi Android 2.6.33 ke atas (FadzAndroid.layarMatiSiap): HANYA tombol daya (layar mati, fzLayarMati). Tombol Home,
      pindah aplikasi, menutup paksa / menghapus dari Terbaru tidak membebaskan: saat dibuka lagi KyMind tampil lagi.
-   - APK lama: onPause memanggil window.fadzLatar. Peramban: visibilitychange (tab/aplikasi ke latar, termasuk tombol
+   - Desktop (peramban komputer, bukan HP/tablet): HANYA tombol Esc (permintaan pemilik). Pindah tab, minimize, menutup tab
+     lalu membuka situs lagi tidak membebaskan (localStorage.fzKym). Esc saat layar penuh ditelan peramban untuk keluar
+     layar penuh, jadi keluarnya layar penuh saat halaman masih terlihat juga dihitung sebagai Esc.
+   - APK lama: onPause memanggil window.fadzLatar. Peramban HP: visibilitychange (tab/aplikasi ke latar, termasuk tombol
      daya), karena peramban tidak bisa membedakan tombol daya dari pindah tab. */
 const kymKunci = () => {
   try {
@@ -177,8 +184,43 @@ const kymKunci = () => {
     return false;
   }
 };
-document.addEventListener('visibilitychange', () => document.hidden && KYM_BUKA && !kymKunci() && kymindTutup());
-window.fadzLatar = () => KYM_BUKA && !kymKunci() && kymindTutup();
+const kymDesk = () => {
+  try {
+    if (window.ANDROID) return false;
+    const ua = navigator.userAgent;
+    /* iPad tampil sebagai "Macintosh" tapi layar sentuh */
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1))
+      return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+document.addEventListener(
+  'visibilitychange',
+  () => document.hidden && KYM_BUKA && !kymKunci() && !kymDesk() && kymindTutup()
+);
+window.fadzLatar = () => KYM_BUKA && !kymKunci() && !kymDesk() && kymindTutup();
+function kymEsc(e) {
+  if (e.key != 'Escape' || !KYM_BUKA || !kymDesk()) return;
+  e.preventDefault();
+  e.stopPropagation();
+  window.fzLayarMati();
+}
+document.addEventListener('keydown', kymEsc, true);
+const kymLayarPenuh = () => {
+  if (!KYM_BUKA || !kymDesk() || document.fullscreenElement || document.webkitFullscreenElement) return;
+  /* Bukan karena minimize / pindah jendela: tunggu sebentar lalu pastikan halaman masih terlihat */
+  setTimeout(() => !document.hidden && KYM_BUKA && window.fzLayarMati(), 200);
+};
+let KYM_PENUH = false;
+['fullscreenchange', 'webkitfullscreenchange'].forEach((n) =>
+  document.addEventListener(n, () => {
+    const p = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (KYM_PENUH && !p) kymLayarPenuh();
+    KYM_PENUH = p;
+  })
+);
 window.fzLayarMati = () => {
   try {
     localStorage.removeItem('fzKym');
@@ -188,7 +230,7 @@ window.fzLayarMati = () => {
 try {
   if (localStorage.fzKym == 1) {
     /* APK dengan kunci: hanya bila kunci belum dilepas tombol daya (saat aplikasi tertutup, hanya layanan yang hidup) */
-    if (kymKunci() && (!kymSemat() || andPanggil('kunciAktif'))) setTimeout(kymindBuka, 50);
+    if ((kymKunci() && (!kymSemat() || andPanggil('kunciAktif'))) || kymDesk()) setTimeout(kymindBuka, 50);
     else localStorage.removeItem('fzKym');
   }
 } catch (e) {}
