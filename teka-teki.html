@@ -12345,9 +12345,12 @@ const SOAL_TTS = [
         try {
           const { db, u } = await fbSiap(),
             F = firebase.firestore.FieldValue;
-          let nm = '';
+          let nm = '',
+            jk = '';
           try {
-            nm = JSON.parse(localStorage.fz || '{}').nm || '';
+            const z = JSON.parse(localStorage.fz || '{}');
+            nm = z.nm || '';
+            jk = ['l', 'p'].includes(z.jk) ? z.jk : '';
           } catch (e) {}
           const id = u ? u.uid : tamuId();
           if (!id) return;
@@ -12357,6 +12360,7 @@ const SOAL_TTS = [
             tamu: !u,
             terakhir: F.serverTimestamp(),
             perangkat: String(await modelHP()).slice(0, 60),
+            jk,
           };
           if (jenis == 'main') {
             d.main = { [g]: F.increment(1) };
@@ -12365,7 +12369,13 @@ const SOAL_TTS = [
             d.selesai = { [g]: F.increment(1) };
             if (skor) d.skor = { [g]: String(skor).slice(0, 30) };
           }
-          await db.collection('pemain').doc(id).set(d, { merge: true });
+          try {
+            await db.collection('pemain').doc(id).set(d, { merge: true });
+          } catch (e) {
+            /* Aturan Firestore lama (belum mengenal "jk"): simpan tanpa jenis kelamin */
+            delete d.jk;
+            await db.collection('pemain').doc(id).set(d, { merge: true });
+          }
         } catch (e) {}
       }
       const teksSkor = (h) =>

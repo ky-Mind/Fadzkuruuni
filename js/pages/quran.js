@@ -134,9 +134,7 @@ function qReader(n, sc) {
   R.satu = (k) => pmQuran(R.n, k, { satu: 1 });
   /* Putar terus lintas surah sampai titik pilihan {n,a} */
   R.terus = (k, akhir) => pmQuran(R.n, k, { akhir });
-  ['touchmove', 'wheel'].forEach((t) =>
-    $('#view').addEventListener(t, () => (R.gulir = Date.now()), { passive: true })
-  );
+  ['touchmove', 'wheel'].forEach((t) => halDengar($('#view'), t, () => (R.gulir = Date.now()), { passive: true }));
   const hdr = () => {
     $('#qt').textContent = R.n + '. ' + NAMA[R.n - 1];
     $('#qa').textContent = ARTI[R.n - 1] + ' · ' + AYAT[R.n - 1] + ' ayat';
@@ -576,7 +574,8 @@ function qReader(n, sc) {
   /* Catat ayat paling atas yang sedang dibaca (untuk Riwayat & Lanjutkan) */
   let qt = 0;
   const vw = $('#view');
-  vw.addEventListener(
+  halDengar(
+    vw,
     'scroll',
     function f() {
       if (window.QR !== R || !$('#ay')) return vw.removeEventListener('scroll', f);

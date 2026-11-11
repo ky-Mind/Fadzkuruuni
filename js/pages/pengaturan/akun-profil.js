@@ -288,6 +288,7 @@ document.addEventListener('change', (x) => {
   if (x.target.name != 'jk') return;
   S.jk = x.target.value;
   save();
+  window.penggunaUlang && penggunaUlang();
   toast('Jenis kelamin disimpan');
   setTimeout(() => keInduk('#/pengaturan/akun'), 250);
 });

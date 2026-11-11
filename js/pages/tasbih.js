@@ -360,6 +360,6 @@ P.tasbih = () => ({
         tap();
       }
     };
-    addEventListener('keydown', k);
+    halDengar(window, 'keydown', k);
   },
 });
