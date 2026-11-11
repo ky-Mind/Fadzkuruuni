@@ -13,7 +13,7 @@ const tutIsi = (t, j) => {
   const b = `${TUT_ASAL}video/tutorial/${t.id}-${j}`;
   return `<div class="tutv ${j}">${vpHtml({ src: b + '.mp4?v=' + t.ver, poster: b + '.jpg?v=' + t.ver, label: t.judul + ', video untuk ' + (j == 'hp' ? 'HP' : 'desktop'), kelas: 'vp-' + j })}</div>
 <details class="tutd"><summary>Langkah-langkah (${j == 'hp' ? 'HP' : 'desktop'})</summary><ol class="tutl">${t.langkah.map((l) => `<li>${j == 'desktop' && l[1] ? l[1] : l[0]}</li>`).join('')}</ol></details>
-${(t.id == 'kelas' && typeof TUT_KE != 'undefined' && TUT_KE) || t.ke ? `<a class="btn" href="${((t.id == 'kelas' && TUT_KE) || t.ke)[0]}" style="display:block;text-align:center;margin-top:12px">${esc(((t.id == 'kelas' && TUT_KE) || t.ke)[1])}</a>` : ''}`;
+${(t.id == 'kelas' && typeof TUT_KE != 'undefined' && TUT_KE) || t.ke ? `<a class="btn" href="${((t.id == 'kelas' && TUT_KE) || t.ke)[0]}" style="display:flex;width:100%;align-items:center;justify-content:center;text-align:center;margin-top:12px">${esc(((t.id == 'kelas' && TUT_KE) || t.ke)[1])}</a>` : ''}`;
 };
 P.tutorial = (buka) => {
   const j = tutJenis(),

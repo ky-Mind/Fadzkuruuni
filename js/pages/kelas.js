@@ -470,8 +470,11 @@ function kelasInfo() {
         ? `<button class="btn${mic ? ' s' : ''}" data-kmic>${ic('mic', 18)} ${mic ? 'Matikan mikrofon' : 'Aktifkan mikrofon'}</button>`
         : `<button class="btn s" data-ktangan>${ic('tangan', 18)} ${tangan ? 'Turunkan tangan' : 'Angkat tangan'}</button>`) +
       `<button class="btn s" data-kcam>${ic('camera', 18)} ${KR.camOn ? 'Matikan kamera' : 'Nyalakan kamera'}</button>` +
-      (KR.camOn && KR.camBanyak
-        ? `<button class="btn s" data-kflip>${ic('camera', 18)} ${kHadap() == 'user' ? 'Pakai kamera belakang' : 'Pakai kamera depan'}</button>`
+      (KR.camOn && (KR.camBanyak || matchMedia('(pointer:coarse)').matches)
+        ? `<button class="btn s" data-kflip>${ic('camera', 18)} ${kHadap() == 'user' ? 'Balik ke kamera belakang' : 'Balik ke kamera depan'}</button>`
+        : '') +
+      (KR.admin
+        ? `<button class="btn s" data-kkursor>${ic('edit', 18)} Penunjuk: ${KPN_NAMA[kPenunjuk()]}</button>`
         : '') +
       (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia
         ? `<button class="btn s${KR.layarOn ? ' kon' : ''}" data-klayar>${ic('panel', 18)} ${KR.layarOn ? 'Hentikan berbagi layar' + (kLayarSuara() ? ' <small>· dengan suara</small>' : ' <small>· tanpa suara</small>') : 'Bagikan layar'}</button>`
@@ -2258,6 +2261,8 @@ function kelasRekamSambung(tr) {
     KREC.ac.createMediaStreamSource(new MediaStream([tr])).connect(KREC.dst);
   } catch (e) {}
 }
+window.fzRekamSelesai = (ok) =>
+  toast(ok ? 'Rekaman disimpan di Download/Fadzkuruuni' : 'Rekaman disimpan, tapi durasinya mungkin tidak terbaca');
 const REKAM_FMT = { mp4: 'MP4 (video, disarankan)', webm: 'WebM (video)', audio: 'Suara saja' };
 /* Jenis berkas yang didukung perangkat untuk format pilihan (MP4 hanya bila codec H.264 tersedia, "video/mp4" tanpa
    codec bisa menghasilkan berkas kosong); MP4 tidak didukung → WebM */
@@ -2304,6 +2309,77 @@ function kRekamKitab() {
   }
   const c = S.kzk || {};
   return { img: KRKITAB.img, label: (kKitabJudul(c.id) || 'Kitab') + ' · hal. ' + (c.n || 1) };
+}
+/* Penunjuk pengajar: sentuhan/kursor pengajar di halaman kitab yang ditampilkan ikut terekam (titik merah atau panah),
+   seolah-olah pengajar menunjuk tulisan. Pilihan disimpan di S.kpn: titik | panah | cincin | mati */
+const KPN_NAMA = { titik: 'Titik merah', panah: 'Panah', cincin: 'Lingkaran', mati: 'Mati' };
+const kPenunjuk = () => (KPN_NAMA[S.kpn] ? S.kpn : 'titik');
+const KPN = { x: 0, y: 0, t: 0, tekan: false };
+['pointerdown', 'pointermove'].forEach((n) =>
+  document.addEventListener(
+    n,
+    (e) => {
+      if (!KR || !KR.admin) return;
+      const im = e.target.closest && e.target.closest('#kzk .kzkb img');
+      if (!im) return;
+      if (n == 'pointermove' && e.pointerType != 'mouse' && !KPN.tekan) return;
+      const r = im.getBoundingClientRect();
+      KPN.x = (e.clientX - r.left) / r.width;
+      KPN.y = (e.clientY - r.top) / r.height;
+      KPN.t = performance.now();
+      if (n == 'pointerdown') KPN.tekan = true;
+    },
+    { passive: true, capture: true }
+  )
+);
+['pointerup', 'pointercancel'].forEach((n) =>
+  document.addEventListener(n, () => (KPN.tekan = false), { passive: true, capture: true })
+);
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-kkursor]')) return;
+  const L = Object.keys(KPN_NAMA);
+  S.kpn = L[(L.indexOf(kPenunjuk()) + 1) % L.length];
+  save();
+  toast('Penunjuk di rekaman: ' + KPN_NAMA[S.kpn]);
+  kelasInfo();
+});
+function kPenunjukGambar(g, x, y, z) {
+  const j = kPenunjuk();
+  if (j == 'mati') return;
+  g.save();
+  if (j == 'panah') {
+    g.translate(x, y);
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.lineTo(0, z * 1.5);
+    g.lineTo(z * 0.42, z * 1.12);
+    g.lineTo(z * 0.72, z * 1.7);
+    g.lineTo(z * 0.95, z * 1.58);
+    g.lineTo(z * 0.66, z * 1.02);
+    g.lineTo(z * 1.12, z * 1.02);
+    g.closePath();
+    g.fillStyle = '#fff';
+    g.strokeStyle = '#111';
+    g.lineWidth = Math.max(1.5, z / 12);
+    g.fill();
+    g.stroke();
+  } else if (j == 'cincin') {
+    g.beginPath();
+    g.arc(x, y, z * 0.75, 0, Math.PI * 2);
+    g.strokeStyle = 'rgba(229,57,53,.95)';
+    g.lineWidth = Math.max(3, z / 6);
+    g.stroke();
+  } else {
+    g.beginPath();
+    g.arc(x, y, z * 0.75, 0, Math.PI * 2);
+    g.fillStyle = 'rgba(229,57,53,.35)';
+    g.fill();
+    g.beginPath();
+    g.arc(x, y, z * 0.32, 0, Math.PI * 2);
+    g.fillStyle = 'rgba(229,57,53,.95)';
+    g.fill();
+  }
+  g.restore();
 }
 function kRekamKanvas() {
   const W = window.ANDROID ? 854 : 1280,
@@ -2363,6 +2439,9 @@ function kRekamKanvas() {
           w = ki.img.naturalWidth * s,
           h = ki.img.naturalHeight * s;
         g.drawImage(ki.img, x0 + (KW - w) / 2, 8 + (H - 44 - h) / 2, w, h);
+        /* Penunjuk pengajar: tampil selama disentuh dan 1,5 detik sesudahnya */
+        if (KPN.tekan || performance.now() - KPN.t < 1500)
+          kPenunjukGambar(g, x0 + (KW - w) / 2 + KPN.x * w, 8 + (H - 44 - h) / 2 + KPN.y * h, Math.round(H / 26));
       }
       g.fillStyle = '#14513a';
       g.fillRect(x0, H - 30, KW, 30);
@@ -2507,7 +2586,9 @@ async function kelasRekamStop() {
     try {
       FadzAndroid.rekamSelesai();
     } catch (e) {}
-    toast('Rekaman disimpan di Download/Fadzkuruuni');
+    /* Aplikasi menata ulang berkas (agar durasinya terbaca dan bisa dimajukan/dimundurkan), lalu memanggil
+       window.fzRekamSelesai */
+    toast('Menyimpan rekaman…', 6000);
   } else {
     const u = URL.createObjectURL(new Blob(k.bag, { type: k.J.mime.split(';')[0] })),
       a = document.createElement('a');

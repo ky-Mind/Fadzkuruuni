@@ -10,9 +10,24 @@
     <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png" />
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
     <script>
+      /* Di dalam bingkai (pratinjau dashboard admin): jangan menyentuh jembatan Android (warna bilah status, layar
+         pembuka, dll.), karena itu milik halaman dashboard di luarnya */
+      try {
+        if (window.top !== window) {
+          try {
+            window.FadzAndroid = undefined;
+          } catch (e) {}
+          try {
+            Object.defineProperty(window, 'FadzAndroid', { value: undefined, configurable: true });
+          } catch (e) {}
+        }
+      } catch (e) {}
+    </script>
+    <script>
       /* Tema dipasang sebelum CSS & isi dimuat, agar tidak berkedip putih saat aplikasi dimuat ulang */
       try {
-        var z = JSON.parse(localStorage.fz || '{}'),
+        var qs = new URLSearchParams(location.search),
+          z = qs.has('pratinjau') ? { theme: qs.get('tema') || 'light' } : JSON.parse(localStorage.fz || '{}'),
           t =
             z.theme == 'blue'
               ? 'blue'
@@ -35,7 +50,7 @@
         document.documentElement.style.background = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
         try {
           var w = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
-          window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(w, w);
+          window.top === window && window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(w, w);
         } catch (e) {}
       } catch (e) {}
     </script>

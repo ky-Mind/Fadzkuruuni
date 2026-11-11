@@ -147,48 +147,91 @@ document.addEventListener('click', (e) => {
   const ts = t.closest('[data-aztes]');
   if (ts) return cobaTombol(ts, () => ujiNotif(), window.ANDROID ? 24e4 : 0);
 });
-SETPAGES.salat = () => ({
-  html:
-    head('Waktu Salat & Notifikasi', '#/pengaturan') +
-    `<h2>Lokasi</h2>${locCard()}<div class="list sg" style="margin-top:8px">${row('pin', 'Lokasi otomatis', S.locAuto === false ? 'Mati · lokasi hanya berubah saat kamu mengubahnya' : 'Mengikuti GPS: diperbarui setiap aplikasi dibuka dan saat kamu berpindah tempat', tg('lauto', S.locAuto !== false))}${row('pin', 'Izin lokasi', bdg('geolocation'), '<button class="btn s" data-gps>Perbarui sekarang</button>')}</div>
-<h2>Jam sekarang</h2><div class="card"><div class="lc"><span class="t"><b>Koreksi jam</b><br><small class="mut" id="kori">${korTxt()}</small></span><button class="sb" id="kreset">Reset</button></div><div class="qa" style="margin-top:12px"><input class="in" type="time" id="kjam" value="${hm(locNow())}"><button class="sb pri" id="ksave">Simpan</button></div><small class="mut">Jika jam di layar kurang akurat, atur jam sekarang sesuai jam yang benar. Koreksi hanya berlaku di perangkat ini.</small></div>
-<h2>Pengingat adzan</h2><p class="mut azsama">Sama persis dengan <b>Pengaturan adzan</b> di halaman Jadwal salat: ubah di satu tempat, yang lain ikut berubah.</p>${azPanel()}
-<h2>Notifikasi kelas online</h2><div class="list sg">${row('siar', 'Notifikasi kelas online', 'Muncul walau aplikasi ditutup. Saluran & bunyinya terpisah dari adzan', tg('kno', kn().on))}<div id="knr"${kn().on ? '' : ' hidden'}>${row('cal', 'Jadwal kelas baru', 'Saat admin membuat jadwal kelas', tg('knb', kn().baru))}${row('play', 'Kelas dimulai', 'Saat kelas mulai live', tg('knm', kn().mulai))}${row('clock', 'Pengingat sebelum kelas', '10 menit sebelum dan saat jadwal kelas', tg('kni', kn().ingat))}${row('moon', 'Senyap saat adzan berbunyi', 'Notifikasi kelas tetap muncul, tapi tanpa bunyi selama adzan diputar', tg('kns', kn().senyap))}</div>${row('play', 'Ajakan tonton tutorial', 'Saat masuk kelas baru, ditawari video tutorial singkat dulu', tg('ktutr', !S.ktutOff))}</div>
+/* Waktu Salat & Notifikasi dibagi ke subhalaman (seperti pengaturan Instagram): halaman utama hanya daftar ringkas */
+const SALAT_BAG = {
+  lokasi: [
+    'Lokasi',
+    () =>
+      `${locCard()}<div class="list sg" style="margin-top:8px">${row('pin', 'Lokasi otomatis', S.locAuto === false ? 'Mati · lokasi hanya berubah saat kamu mengubahnya' : 'Mengikuti GPS: diperbarui setiap aplikasi dibuka dan saat kamu berpindah tempat', tg('lauto', S.locAuto !== false))}${row('pin', 'Izin lokasi', bdg('geolocation'), '<button class="btn s" data-gps>Perbarui sekarang</button>')}</div>`,
+  ],
+  jam: [
+    'Jam sekarang',
+    () =>
+      `<div class="card"><div class="lc"><span class="t"><b>Koreksi jam</b><br><small class="mut" id="kori">${korTxt()}</small></span><button class="sb" id="kreset">Reset</button></div><div class="qa" style="margin-top:12px"><input class="in" type="time" id="kjam" value="${hm(locNow())}"><button class="sb pri" id="ksave">Simpan</button></div><small class="mut">Jika jam di layar kurang akurat, atur jam sekarang sesuai jam yang benar. Koreksi hanya berlaku di perangkat ini.</small></div>`,
+  ],
+  adzan: [
+    'Pengingat adzan',
+    () =>
+      `<p class="mut azsama">Sama persis dengan <b>Pengaturan adzan</b> di halaman Jadwal salat: ubah di satu tempat, yang lain ikut berubah.</p>${azPanel()}`,
+  ],
+  kelas: [
+    'Notifikasi kelas online',
+    () => `<div class="list sg">${row('siar', 'Notifikasi kelas online', 'Muncul walau aplikasi ditutup. Saluran & bunyinya terpisah dari adzan', tg('kno', kn().on))}<div id="knr"${kn().on ? '' : ' hidden'}>${row('cal', 'Jadwal kelas baru', 'Saat admin membuat jadwal kelas', tg('knb', kn().baru))}${row('play', 'Kelas dimulai', 'Saat kelas mulai live', tg('knm', kn().mulai))}${row('clock', 'Pengingat sebelum kelas', '10 menit sebelum dan saat jadwal kelas', tg('kni', kn().ingat))}${row('moon', 'Senyap saat adzan berbunyi', 'Notifikasi kelas tetap muncul, tapi tanpa bunyi selama adzan diputar', tg('kns', kn().senyap))}</div>${row('play', 'Ajakan tonton tutorial', 'Saat masuk kelas baru, ditawari video tutorial singkat dulu', tg('ktutr', !S.ktutOff))}</div>
 <div class="knsw" id="knsw"${kn().on ? '' : ' hidden'}><div class="ksh-l">Suara notifikasi kelas</div><div class="knsl" role="group" aria-label="Suara notifikasi kelas">${KN_SUARA.map(([v, n]) => `<button type="button" data-knsu="${v}" aria-pressed="${kn().suara == v}"${kn().suara == v ? ' class="on"' : ''}>${n}</button>`).join('')}</div>
 <div class="act knsa"><button class="sb" data-kncoba>${ic('play', 14)} Coba</button><span id="knsr"${kn().suara == 'sendiri' ? '' : ' hidden'}><label class="sb sbf">${ic('down', 14)} Pilih berkas<input type="file" accept="audio/*" data-unggah="kelas" hidden></label> <button class="sb" data-rekam="kelas">${ic('mic', 14)} Rekam</button></span></div><small class="mut" id="knsst"></small></div>
 <div class="act" style="margin:10px 0 4px"><button class="sb" data-kntes>${ic('bell', 14)} Tes notifikasi kelas</button>${window.ANDROID ? '<button class="sb" data-knhp>Pengaturan notifikasi di HP</button>' : ''}</div><small class="mut" id="knst"></small>
 `,
-  init() {
-    permFill();
-    $('#ksave').onclick = () => {
-      const [h, m] = ($('#kjam').value || '').split(':').map(Number);
-      if (isNaN(h) || isNaN(m)) return toast('Isi jam dulu');
-      let d = Math.round(h * 60 + m - locNow() * 60);
-      if (d > 720) d -= 1440;
-      if (d < -720) d += 1440;
-      S.kor = (S.kor || 0) + d;
-      save();
-      toast('Jam disesuaikan');
-      route();
-    };
-    $('#kreset').onclick = () => {
-      S.kor = 0;
-      save();
-      toast('Koreksi jam direset');
-      route();
-    };
-    $('[data-gps]').onclick = () => gps(() => route(), 1);
-    $('#lauto').onchange = (e) => {
-      S.locAuto = e.target.checked;
-      save();
-      if (S.locAuto) lokasiOtomatis(1);
-      else lokasiPantauHenti();
-      toast(S.locAuto ? 'Lokasi otomatis menyala' : 'Lokasi otomatis dimatikan');
-      route();
-    };
-    knIkat();
-  },
-});
+  ],
+};
+const SALAT_DAFTAR = () => [
+  [
+    '#/pengaturan/salat/lokasi',
+    'pin',
+    'Lokasi',
+    esc((S.loc && S.loc.n) || 'Belum diatur') + (S.locAuto === false ? ' · manual' : ' · otomatis'),
+  ],
+  ['#/pengaturan/salat/adzan', 'bell', 'Pengingat adzan', 'Adzan, beduk, alarm, dan pengingat tiap waktu salat'],
+  ['#/pengaturan/salat/kelas', 'siar', 'Notifikasi kelas online', kn().on ? 'Nyala' : 'Mati'],
+  [
+    '#/pengaturan/salat/jam',
+    'clock',
+    'Jam sekarang',
+    S.kor ? 'Dikoreksi ' + (S.kor > 0 ? '+' : '') + S.kor + ' menit' : 'Sesuai jam perangkat',
+  ],
+];
+SETPAGES.salat = (sub) => {
+  const b = SALAT_BAG[sub];
+  return {
+    html: b
+      ? head(b[0], '#/pengaturan/salat') + b[1]()
+      : head('Waktu Salat & Notifikasi', '#/pengaturan') +
+        `<div class="list">${SALAT_DAFTAR().map(setBaris).join('')}</div>`,
+    init() {
+      if (!b) return;
+      permFill();
+      if (sub == 'jam')
+        $('#ksave').onclick = () => {
+          const [h, m] = ($('#kjam').value || '').split(':').map(Number);
+          if (isNaN(h) || isNaN(m)) return toast('Isi jam dulu');
+          let d = Math.round(h * 60 + m - locNow() * 60);
+          if (d > 720) d -= 1440;
+          if (d < -720) d += 1440;
+          S.kor = (S.kor || 0) + d;
+          save();
+          toast('Jam disesuaikan');
+          route();
+        };
+      if (sub == 'jam')
+        $('#kreset').onclick = () => {
+          S.kor = 0;
+          save();
+          toast('Koreksi jam direset');
+          route();
+        };
+      if (sub == 'lokasi') $('[data-gps]').onclick = () => gps(() => route(), 1);
+      if (sub == 'lokasi')
+        $('#lauto').onchange = (e) => {
+          S.locAuto = e.target.checked;
+          save();
+          if (S.locAuto) lokasiOtomatis(1);
+          else lokasiPantauHenti();
+          toast(S.locAuto ? 'Lokasi otomatis menyala' : 'Lokasi otomatis dimatikan');
+          route();
+        };
+      if (sub == 'kelas') knIkat();
+    },
+  };
+};
 /* Rekaman/berkas sendiri: simpan di perangkat (IndexedDB) dan, di Android, salin ke aplikasi untuk alarm adzan */
 async function suaraSimpan(j, blob) {
   if (j == 'kelas') return knSuaraSimpan(blob);

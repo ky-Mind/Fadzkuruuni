@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.30",
+ "tag_name": "v2.6.31",
  "body": "Update",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.30",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.31",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.30/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.31/fadzkuruuni.apk"
   }
  ]
 }

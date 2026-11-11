@@ -888,7 +888,7 @@
         border: 10px solid #1d2b25;
         border-radius: 36px;
         overflow: hidden;
-        background: #fff;
+        background: var(--bg);
         box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
       }
       .hpf iframe {
@@ -1625,7 +1625,7 @@
             .map(([h, t]) => `<button data-ke="${h}" class="${h == KE ? 'on' : ''}">${t}</button>`)
             .join(
               ''
-            )}</div><small class="hpt">Tekan lama tombol, kartu, atau chip apa saja di pratinjau lalu geser untuk memindahkannya. Ketuk sekali teks untuk mengubahnya (pilih Buka untuk menjalankan tombolnya).</small><div class="hpf"><iframe id="fr" title="Pratinjau aplikasi" src="index.html?pratinjau=1${KE}"></iframe></div></div></div>`;
+            )}</div><small class="hpt">Tekan lama tombol, kartu, atau chip apa saja di pratinjau lalu geser untuk memindahkannya. Ketuk sekali teks untuk mengubahnya (pilih Buka untuk menjalankan tombolnya).</small><div class="hpf"><iframe id="fr" title="Pratinjau aplikasi" src="index.html?pratinjau=1&tema=${{ gelap: 'dark', biru: 'blue' }[document.documentElement.dataset.tema] || 'light'}${KE}"></iframe></div></div></div>`;
         $('#fr').onload = async () => {
           const w = $('#fr').contentWindow;
           for (let k = 0; k < 40 && !w.TATAINFO; k++) await new Promise((r) => setTimeout(r, 100));
@@ -1664,6 +1664,7 @@
         const { j, k } = e.data.urut,
           D = DRAF;
         if (!Array.isArray(k) || !k.length) return;
+        const sblm = JSON.stringify([D.nav, D.pintasan, D.beranda, D.setelan, D.menu]);
         if (j == 'nav') D.nav = k;
         else if (j == 'pin') D.pintasan = k;
         else if (j == 'beranda') {
@@ -1677,6 +1678,8 @@
           const g = +k[0].split('|')[0];
           if (D.menu[g]) D.menu[g].isi = k.map((x) => x.split('|').slice(1).join('|'));
         } else return;
+        /* Dilepas di tempat semula: tidak ada yang berubah, tidak perlu pemberitahuan */
+        if (JSON.stringify([D.nav, D.pintasan, D.beranda, D.setelan, D.menu]) == sblm) return;
         tUbah();
         toast('Urutan diubah. Tekan Terbitkan untuk menerapkannya ke semua pengguna.');
       });
@@ -1689,6 +1692,7 @@
           const { h, c, k } = m.urutU;
           if (!h || !c || !Array.isArray(k)) return;
           D.urutU = D.urutU || {};
+          if (JSON.stringify((D.urutU[h] || {})[c] || null) == JSON.stringify(k)) return;
           (D.urutU[h] = D.urutU[h] || {})[c] = k;
           UBAH = true;
           gambarEd();
@@ -2333,8 +2337,10 @@
    .join('')}</div></div>
  <div class="ted ted2"><div class="blok"><h3>Fitur paling sering dibuka</h3>${bar(sum('hal'), nmHal, 15)}</div><div><div class="blok"><h3>Kota pengguna</h3>${bar(sum('kota'), (k) => KOTA_NM[k] || k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))}</div><div class="blok"><h3>Jenis aplikasi</h3>${bar(sum('jenis'), (k) => ({ android: 'Aplikasi Android', terpasang: 'Dipasang dari browser (PWA)', browser: 'Browser biasa' })[k] || k)}</div></div></div>
  <div class="ted ted2"><div class="blok"><h3>Merek & model HP</h3><p>Jumlah perangkat aktif per model (dihitung sekali per perangkat per hari, dijumlah ${SR} hari).</p>${sum('model').length ? bar(sum('model'), nmModel, 20) : BELUMMV}</div><div><div class="blok"><h3>Unduhan APK per versi</h3><p>Berapa kali berkas APK tiap versi diunduh dari GitHub (sejak awal).</p>${REL.length ? bar(REL, (k) => k, 20) + (RELLAMA ? `<p style="color:var(--mut);font-size:12.5px;margin:8px 0 0">Data terakhir tersimpan (${new Date(RELT).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}); GitHub sedang tidak bisa dihubungi. <a href="#" data-unduhulang>Coba lagi</a></p>` : '') : '<div class="empty">Data unduhan dari GitHub sedang tidak bisa dibaca (batas akses GitHub atau koneksi). <a href="#" data-unduhulang>Coba lagi</a></div>'}</div><div class="blok"><h3>Versi aplikasi yang dipakai</h3>${sum('versi').length ? bar(sum('versi'), nmVersi, 15) : BELUMMV}</div></div></div>
+ <div class="blok" id="penggunaA"><h3>Pengguna aplikasi</h3><div class="empty">Memuat pengguna…</div></div>
  <div class="blok" id="pemainG"><h3>Pemain Teka-Teki Kitab</h3><div class="empty">Memuat pemain…</div></div>
  <p style="color:var(--mut);font-size:13px">Statistik di atas dicatat tanpa data pribadi: hanya hitungan halaman per fitur, perangkat aktif per hari (dihitung sekali per perangkat per hari), kota pilihan untuk jadwal salat, jenis aplikasi, merek/model HP, dan versi aplikasi. Model HP dan versi mulai tercatat sejak versi 2.4.4. Pengguna bisa mematikannya di Pengaturan › Tentang & Bantuan.</p>`;
+        penggunaApp();
         pemainGame();
         $('#isi').onclick = (e) => {
           if (e.target.closest('[data-unduhulang]')) {
@@ -2362,6 +2368,45 @@
         beda: 'Mana yang Beda',
         pola: 'Ingat Pola',
       };
+      /* Pengguna aplikasi (koleksi "pengguna"): akun (nama & email) dan tamu, jenis aplikasi, versi, HP, terakhir dibuka */
+      async function penggunaApp() {
+        const el = $('#penggunaA');
+        if (!el) return;
+        el.onclick = async (e) => {
+          const b = e.target.closest('[data-udel]');
+          if (!b || !confirm(`Hapus data pengguna "${b.dataset.unm}"? Tidak bisa dibatalkan.`)) return;
+          try {
+            await db.collection('pengguna').doc(b.dataset.udel).delete();
+            toast('Data pengguna dihapus');
+            penggunaApp();
+          } catch (x) {
+            toast('Gagal menghapus: ' + (x.code || x.message));
+          }
+        };
+        let L;
+        try {
+          L = (await db.collection('pengguna').orderBy('terakhir', 'desc').limit(500).get()).docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          }));
+        } catch (e) {
+          el.innerHTML = `<h3>Pengguna aplikasi</h3><div class="empty">Tidak bisa membaca data pengguna (${esc(e.code || e.message)}).<br>Pasang Firestore Rules terbaru: Firebase Console › Firestore Database › Rules › tempel isi <b>firestore.rules</b> › Publish.</div>`;
+          return;
+        }
+        if ($('#penggunaA') != el) return;
+        const akun = L.filter((x) => !x.tamu).length,
+          apk = L.filter((x) => /^apk/.test(x.versi || '')).length;
+        const wkt = (t) =>
+          t && t.toDate ? t.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–';
+        el.innerHTML = `<h3>Pengguna aplikasi</h3><p>${L.length} pengguna (${akun} masuk akun, ${L.length - akun} tamu; ${apk} memakai aplikasi Android). Satu baris per akun atau per HP tamu, diperbarui sekali sehari saat aplikasi dibuka.</p>${
+          L.length
+            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pengguna</th><th>Aplikasi</th><th>Perangkat</th><th>Hari aktif</th><th>Terakhir</th><th></th></tr></thead><tbody>${L.map(
+                (x) =>
+                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${esc((x.versi || '–').replace(/^apk /, 'Android ').replace(/^web /, 'Web '))}<br><small style="color:var(--mut)">${esc(x.jenis || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.hari || 0}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-udel="${esc(x.id)}" data-unm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
+              ).join('')}</tbody></table></div>`
+            : '<div class="empty">Belum ada data pengguna.</div>'
+        }`;
+      }
       async function pemainGame() {
         const el = $('#pemainG');
         if (!el) return;

@@ -217,7 +217,7 @@ route();
 requestAnimationFrame(() =>
   requestAnimationFrame(() => {
     try {
-      window.FadzAndroid && FadzAndroid.halamanSiap && FadzAndroid.halamanSiap();
+      window.top === window && window.FadzAndroid && FadzAndroid.halamanSiap && FadzAndroid.halamanSiap();
     } catch (e) {}
   })
 );

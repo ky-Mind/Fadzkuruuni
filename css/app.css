@@ -10277,20 +10277,167 @@ body,
   text-decoration: none;
 }
 
-/* Pengaturan › Akun & Profil: atur ukuran & posisi foto profil */
-.fped {
+/* Pengaturan › Akun & Profil seperti Instagram: foto di tengah, kotak isian berlabel, editor foto layar penuh */
+.pfh {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  margin: 6px 0 18px;
+}
+.pff {
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.pfe {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--g);
+  font: 600 14.5px/1.2 var(--ui);
+  cursor: pointer;
+}
+.pfk {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.pfb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+.pfb small {
+  color: var(--mut);
+  font-size: 12.5px;
+}
+.pfb span {
+  font-size: 16px;
+  padding-right: 22px;
+}
+.pfb > .ic {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--mut);
+}
+.pfin input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.pfin:focus-within {
+  border-color: var(--g);
+}
+.pfkt {
+  margin: -8px 2px 14px;
+  font-size: 13px;
+}
+.pfok {
+  margin-left: auto;
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  color: var(--g);
+  font: 700 15px/1 var(--ui);
+  cursor: pointer;
+}
+.pfr {
+  cursor: pointer;
+}
+.pfr input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--g);
+}
+.fpm {
+  display: grid;
+  gap: 2px;
+}
+.fpmj {
+  margin: 0 0 8px;
   text-align: center;
+  font: 700 15px/1.3 var(--ui);
+}
+.fpm button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font: 500 15px/1.2 var(--ui);
+  text-align: left;
+  cursor: pointer;
+}
+.fpm button.mrh {
+  color: #e5534b;
+}
+#fped.back-d {
+  z-index: 60;
+  flex-direction: column;
+  align-items: stretch;
+  background: #000;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: #fff;
+}
+.fplb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+}
+.fplb b {
+  flex: 1;
+  font: 700 17px/1 var(--ui);
+}
+.fplb .ib2 {
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+}
+.fplb .pfok {
+  color: #8fb6e6;
+}
+.fplw {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+.fplt {
+  margin: 0 16px 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  text-align: center;
+}
+#fped .fpzl {
+  margin: 0 auto calc(22px + env(safe-area-inset-bottom));
+  color: #fff;
 }
 .fpc {
   position: relative;
   overflow: hidden;
   border-radius: 50%;
-  background: var(--fill);
-  box-shadow: 0 0 0 2px var(--line);
+  background: #222;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
   touch-action: none;
   cursor: grab;
 }
@@ -10313,4 +10460,50 @@ body,
 .fpzl input {
   flex: 1;
   accent-color: var(--g);
+}
+/* Halaman pengaturan (phal) tanpa jarak samping: kotak profil diberi jarak sendiri */
+.phal .pfk,
+.phal .pfkt {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+#fped .pfok,
+.bar .pfok {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  min-height: 0;
+  width: auto;
+}
+/* Izin Aplikasi seperti "Izin perangkat" Instagram: status sebagai teks biasa di kanan */
+.izr .t {
+  flex: 1;
+}
+.izr .bdg {
+  padding: 0;
+  background: none;
+  color: var(--mut);
+  font-size: 14px;
+  font-weight: 400;
+}
+.izr .bdg::before {
+  display: none;
+}
+.izd {
+  display: grid;
+  gap: 12px;
+  margin: 0 16px 18px;
+}
+.izd .si {
+  width: 44px;
+  height: 44px;
+}
+.izd p {
+  margin: 0;
+  line-height: 1.6;
+}
+.izdst {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

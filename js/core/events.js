@@ -745,7 +745,11 @@ function gsTabHtml(nb) {
          Menu, bukan ke halaman sebelah (Beranda / Fadz AI) */
       const [ra, rb] = (location.hash || '#/').slice(2).split('/');
       tepi = t.clientX < 24;
-      if ((tepi && document.body.classList.contains('subhal')) || (window.DARIMENU === ra && !rb)) mode = 'back';
+      /* Geser keluar seperti Telegram: di subhalaman tanpa tab dan tanpa bagian berurutan (.pnav), geser ke kanan dari mana
+         saja = kembali (halaman sebelumnya tampil di belakang). Halaman bertab / berbagian tetap hanya dari tepi kiri. */
+      const sub = document.body.classList.contains('subhal'),
+        bebas = sub && !v.querySelector('.pnav') && !(tabSemua().length > 1);
+      if ((tepi && sub) || bebas || (window.DARIMENU === ra && !rb)) mode = 'back';
       else if (v.querySelector(':scope > #ay')) sx = null;
     },
     { passive: true }
@@ -769,6 +773,8 @@ function gsTabHtml(nb) {
         if (Math.abs(x) < 12 && Math.abs(y) < 12) return;
         if (mode == 'back') {
           lock = x > 0 && x > Math.abs(y) * (tepi ? 1 : 1.6) ? 'h' : 'v';
+          /* Wadah samping (carousel, deretan tombol) yang masih bisa digulir ke kiri: wadahnya yang bergulir */
+          if (lock == 'h' && !tepi && gsMasihGulir(gsW, -1)) lock = 'v';
           if (lock == 'h') {
             gsLapis();
             dir = -1;

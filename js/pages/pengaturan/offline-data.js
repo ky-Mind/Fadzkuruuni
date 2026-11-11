@@ -63,9 +63,9 @@ async function offFill() {
   dlUkuran();
 }
 
-SETPAGES.offline = () => ({
+const OFFLINE_ISI = () => ({
+  kunci: 'offline',
   html:
-    head('Offline & Data', '#/pengaturan') +
     OFFL() +
     `<h2>Data</h2><div class="list sg">${lk('#/bookmark', 'star', 'Daftar penanda ayat')}${row('clock', "Riwayat bacaan Al-Qur'an", `<span id="hxk">${(S.hist || []).length ? (S.hist || []).length + ' surah di tab Riwayat, beserta posisi terakhir dibaca. Penanda ayat tidak ikut terhapus.' : 'Riwayat kosong.'}</span>`, `<button class="sb dng" id="hx" ${(S.hist || []).length ? '' : 'disabled'}>${ic('trash', 14)} Hapus</button>`)}</div>`,
   init() {
@@ -88,6 +88,20 @@ SETPAGES.offline = () => ({
       );
   },
 });
+SETPAGES.offline = (sub) =>
+  setBagi(OFFLINE_ISI(), 'Offline & Data', '#/pengaturan', sub, [
+    ['mode', 'down', 'Mode offline', 'Unduh semua isi agar bisa dibuka tanpa internet', ['Mode offline']],
+    [
+      'isi',
+      'book',
+      "Al-Qur'an, kitab, dan maulid",
+      'Unduh atau hapus per bagian',
+      (t) => !['Mode offline', "Audio Al-Qur'an", 'AI offline', 'Data'].includes(t),
+    ],
+    ['audio', 'play', "Audio Al-Qur'an", 'Unduh murattal per surah', ["Audio Al-Qur'an"]],
+    ['ai', 'spark', 'AI offline', 'Fadz AI tanpa internet', ['AI offline']],
+    ['data', 'clock', 'Data', 'Penanda ayat dan riwayat bacaan', ['Data']],
+  ]);
 
 /* ===== Tawaran mode offline: langkah terakhir setelah izin awal (dan setelah pembaruan bila ada isi baru) =====
    Diizinkan: semua isi (Al-Qur'an, kitab kuning, maulid) diunduh di latar; isi baru setelah pembaruan ikut diunduh otomatis.

@@ -9,7 +9,7 @@ const AI_PANDUAN = [
     'Menu utama aplikasi',
     'menu navigasi bawah sidebar beranda letak fitur semua menu lainnya',
     'Menu bawah (HP) atau samping (komputer): Beranda, Al-Qur\'an, Fadz AI, Kelas online, Pengaturan. Fitur lain ada di pintasan Beranda dan di "Lainnya" (Semua Menu): Ibadah (Al-Qur\'an, Wirid & Doa, Sholawat, Jadwal Salat, Kiblat, Tahlil & Yasin, Maulid, Tasbih, Asmaul Husna), Keuangan (Zakat & Sedekah, Kalkulator Zakat, Waris), Belajar (Fadz AI, Kelas online, Kitab Kuning, Hadits Nabi, Kata Mutiara), Lainnya (Kalender, Penanda, Pengaturan, Tentang). Urutan menu bawah & pintasan bisa diatur di Pengaturan › Beranda. Halaman yang dibuka dari Semua Menu kembali (panah ← / geser kanan / tombol kembali HP) ke Semua Menu.',
-    'Foto profil (Pengaturan › Akun & Profil): Pilih/Ganti foto, lalu seret foto untuk mengatur posisi dan geser penggeser untuk mengatur ukuran, lalu Simpan foto. Foto yang sudah tersimpan bisa diatur lagi lewat tombol Atur ukuran.',
+    'Akun & Profil (seperti Instagram): ketuk foto atau Edit foto untuk memilih foto dari galeri, lalu cubit dengan dua jari untuk memperbesar dan seret untuk menggeser, tekan Selesai. Foto yang sudah ada bisa Atur ukuran & posisi atau Hapus. Nama dan Jenis kelamin diubah di halamannya masing-masing (ketuk kotaknya). Admin melihat baris Dashboard admin › Buka. Di subhalaman mana pun, geser ke kanan dari mana saja untuk kembali (seperti Telegram), kecuali halaman bertab yang memakai geser untuk pindah tab.',
     '#/menu',
   ],
   [
@@ -98,13 +98,13 @@ const AI_PANDUAN = [
     'Pengingat adzan & notifikasi salat',
     'adzan azan alarm pengingat notifikasi muadzin suara bunyi sebelum waktu beduk senyap duha terbit',
     'Pengaturan › Waktu Salat & Notifikasi › Pengingat adzan (sama persis dengan tombol Pengaturan adzan di Jadwal salat, saling sinkron): saklar Pengingat adzan, izin notifikasi, lalu Tiap waktu salat (Subuh, Terbit, Duha, Zuhur, Asar, Magrib, Isya; ketuk tombol di kanan untuk memilih Adzan, Beduk, Alarm, Bunyi, Senyap, atau Mati), Suara adzan (putar suara, suara Zuhur–Isya dan Subuh lewat tombol Ubah, bisa dicoba dan bisa rekaman sendiri), Pengingat sebelum waktu, dan Uji coba. Di aplikasi Android pengingat tetap berbunyi walau aplikasi ditutup.',
-    '#/pengaturan/salat',
+    '#/pengaturan/salat/adzan',
   ],
   [
     'Lokasi otomatis',
     'lokasi gps otomatis pindah kota realtime presisi lokasi saya perbarui',
-    'Lokasi otomatis (bawaan menyala) mengikuti GPS: diperbarui begitu aplikasi dibuka dan saat kamu berpindah tempat, lalu jadwal salat, kiblat, dan alarm adzan langsung ikut. Atur di Pengaturan › Waktu Salat & Notifikasi › Lokasi otomatis; tombol Perbarui sekarang mengambil titik terbaru. Memilih kota atau titik peta secara manual mematikan lokasi otomatis.',
-    '#/pengaturan/salat',
+    'Lokasi otomatis (bawaan menyala) mengikuti GPS: diperbarui begitu aplikasi dibuka dan saat kamu berpindah tempat, lalu jadwal salat, kiblat, dan alarm adzan langsung ikut. Atur di Pengaturan › Waktu Salat & Notifikasi › Lokasi › Lokasi otomatis; tombol Perbarui sekarang mengambil titik terbaru. Memilih kota atau titik peta secara manual mematikan lokasi otomatis.',
+    '#/pengaturan/salat/lokasi',
   ],
   [
     'Arah kiblat',
@@ -202,14 +202,14 @@ const AI_PANDUAN = [
   [
     'Membuat & mengatur kelas (pengajar)',
     'buat kelas jadwal mulai akhiri rekam youtube kitab yang dikaji pengajar admin',
-    'Khusus pengajar/admin: di Kelas online ketuk "Buat kelas", isi judul, pengajar, waktu, kitab yang dikaji, jenis kelas, dan pilihan rekam; lalu Simpan jadwal atau Langsung mulai. Kartu kelas punya tombol Mulai/Akhiri kelas, Atur kitab, Ubah tanggal, tempel link YouTube, dan isi tautan rekaman. Rekaman kelas (di perangkat pengajar) memuat video/layar pengajar, semua suara, dan halaman kitab yang sedang ditampilkan pengajar di sisi kanan; kitab yang dibuka jamaah sendiri tidak ikut terekam.',
+    'Khusus pengajar/admin: di Kelas online ketuk "Buat kelas", isi judul, pengajar, waktu, kitab yang dikaji, jenis kelas, dan pilihan rekam; lalu Simpan jadwal atau Langsung mulai. Kartu kelas punya tombol Mulai/Akhiri kelas, Atur kitab, Ubah tanggal, tempel link YouTube, dan isi tautan rekaman. Rekaman kelas (di perangkat pengajar) memuat video/layar pengajar, semua suara, dan halaman kitab yang sedang ditampilkan pengajar di sisi kanan; kitab yang dibuka jamaah sendiri tidak ikut terekam. Saat kamera menyala ada tombol Balik ke kamera belakang/depan. Pengajar bisa memilih Penunjuk (Titik merah, Panah, Lingkaran, atau Mati): sentuhan pengajar di halaman kitab ikut terekam sebagai penunjuk. Rekaman di aplikasi Android disimpan sebagai berkas utuh sehingga durasinya terbaca dan bisa dimajukan/dimundurkan.',
     '#/kelas',
   ],
   [
     'Notifikasi kelas online',
     'notifikasi kelas jadwal baru dimulai pengingat 10 menit suara lonceng bel',
     'Pengaturan › Waktu Salat & Notifikasi › Notifikasi kelas online: jadwal baru, kelas dimulai, pengingat 10 menit sebelum, senyap saat adzan, suara notifikasi, dan ajakan tonton tutorial saat masuk kelas.',
-    '#/pengaturan/salat',
+    '#/pengaturan/salat/kelas',
   ],
   /* ---------- Fadz AI ---------- */
   [
@@ -246,7 +246,7 @@ const AI_PANDUAN = [
   [
     'Izin aplikasi',
     'izin lokasi kamera mikrofon notifikasi penyimpanan',
-    'Pengaturan › Izin Aplikasi: lihat dan berikan izin lokasi, notifikasi, mikrofon, kamera, dan penyimpanan.',
+    'Pengaturan › Izin Aplikasi (seperti Izin perangkat di Instagram): daftar Notifikasi, Lokasi, Mikrofon, Kamera, dll. dengan statusnya; ketuk salah satu untuk melihat kegunaannya lalu Izinkan, Tolak, atau Cabut izin. Pengaturan Waktu Salat & Notifikasi, Tampilan & Bacaan, dan Offline & Data juga dibagi ke subhalaman (mis. Waktu Salat › Lokasi / Pengingat adzan / Notifikasi kelas / Jam sekarang; Tampilan › Tema & warna / Ukuran / Jenis huruf / Teks bacaan / Tasbih).',
     '#/pengaturan/izin',
   ],
   [
