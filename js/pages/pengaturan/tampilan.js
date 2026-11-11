@@ -74,7 +74,7 @@ const TAMPILAN_ISI = () => ({
       ['besar', 'Besar'],
     ],
     S.uz || 'kecil'
-  )}<small class="mut">Besar-kecilnya seluruh tampilan di HP (tombol, menu, dan tulisan). Bawaannya disesuaikan dengan ukuran layar HP saat aplikasi pertama dipasang.</small></div><h2>Warna aksen</h2><div class="card"><div class="wtk acw" id="acw">${Object.entries(
+  )}<small class="mut">Besar-kecilnya seluruh tampilan di HP (tombol, menu, dan tulisan). Bawaannya Besar (seperti Instagram).</small></div><h2>Warna aksen</h2><div class="card"><div class="wtk acw" id="acw">${Object.entries(
     ACC
   )
     .map(

@@ -16,10 +16,10 @@
   --on: #06140f;
   --ink: #eef2ef;
   --mut: #9aa6a0;
-  --bg: #121413;
+  --bg: #000000;
   --card: #1a1d1c;
   --fill: #222624;
-  --line: #2c312e;
+  --line: #262626;
   --sh: none;
 }
 [data-theme='blue'] {
