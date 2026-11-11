@@ -71,6 +71,15 @@ const cariIndeks = () => {
         const t = document.createElement('div');
         t.innerHTML = SETPAGES[g[0]]().html;
         const lihat = new Set();
+        /* Subhalaman pengaturan (mis. Tampilan › Tema & warna): langsung ke subhalamannya */
+        $$('a.row[href^="#/pengaturan/"]', t).forEach((r) => {
+          const b = r.querySelector('.t'),
+            x = b && b.firstChild ? b.firstChild.textContent.trim() : '';
+          if (x && !lihat.has(x)) {
+            lihat.add(x);
+            tb(x, r.getAttribute('href'), 'Pengaturan · ' + g[2], b.textContent);
+          }
+        });
         $$('h2,h3,.tg>span,.ftpr>span,label>span:first-child,.row .t>b,span.t', t).forEach((e) => {
           const x = (e.firstChild && e.firstChild.nodeType == 3 ? e.firstChild.textContent : e.textContent).trim();
           if (x && x.length < 60 && !lihat.has(x)) {
@@ -80,6 +89,23 @@ const cariIndeks = () => {
         });
       } catch (e) {}
     });
+  /* Profil (Akun & Profil gaya Instagram) */
+  tb('Foto profil', '#/pengaturan/akun', 'Pengaturan · Akun & Profil', 'edit foto avatar gambar profil');
+  tb('Nama panggilan', '#/pengaturan/akun/nama', 'Pengaturan · Akun & Profil', 'nama profil');
+  tb('Jenis kelamin', '#/pengaturan/akun/jk', 'Pengaturan · Akun & Profil', 'laki laki perempuan gender');
+  /* Hadis pilihan (judul ringkas + awal terjemahan) dan kata mutiara */
+  if (typeof HADIS_KITAB != 'undefined')
+    HADIS_KITAB.forEach((k) =>
+      k.h.forEach((x) =>
+        tb(
+          (x[4] || 'Hadis no. ' + x[0]) + ' · ' + k.nama,
+          `#/hadits/${k.id}/${x[0]}`,
+          'Hadis · ' + k.nama + ' no. ' + x[0],
+          String(x[3] || '').slice(0, 160)
+        )
+      )
+    );
+  if (typeof QUOTES != 'undefined') QUOTES.forEach((q) => q && q[1] && tb(q[1], '#/mutiara', 'Kata mutiara'));
   /* Menu zakat & sedekah, dan video tutorial */
   if (MENU.zakat) MENU.zakat.forEach((m) => m && m[1] && tb(m[1], '#/sedekah/' + m[0], 'Zakat & sedekah'));
   if (typeof TUTOR != 'undefined') TUTOR.forEach((v) => tb(v.judul, '#/tutorial/' + v.id, 'Video tutorial', v.ket));

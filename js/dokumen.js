@@ -79,7 +79,7 @@ document.querySelectorAll('[data-kembali]').forEach(function (a) {
   var terap = function () {
     try {
       var w = hex(getComputedStyle(document.body).backgroundColor);
-      if (w && window.FadzAndroid && FadzAndroid.warnaBar) FadzAndroid.warnaBar(w, w);
+      if (w && window.top === window && window.FadzAndroid && FadzAndroid.warnaBar) FadzAndroid.warnaBar(w, w);
     } catch (e) {}
   };
   terap();

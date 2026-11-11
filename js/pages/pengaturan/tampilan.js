@@ -55,47 +55,46 @@ const fontBind = (k, M) => {
     toast('Font ' + n + ' dipakai');
   };
 };
-SETPAGES.tampilan = () => ({
-  html:
-    head('Tampilan & Bacaan', '#/pengaturan') +
-    `<h2>Tema</h2><div class="card">${seg(
-      'th',
-      [
-        ['auto', 'Perangkat'],
-        ['light', 'Terang'],
-        ['dark', 'Gelap'],
-        ['blue', 'Biru'],
-      ],
-      S.theme
-    )}</div><h2>Ukuran tampilan</h2><div class="card">${seg(
-      'uz',
-      [
-        ['kecil', 'Kecil'],
-        ['sedang', 'Sedang'],
-        ['besar', 'Besar'],
-      ],
-      S.uz || 'kecil'
-    )}<small class="mut">Besar-kecilnya seluruh tampilan di HP (tombol, menu, dan tulisan). Bawaannya disesuaikan dengan ukuran layar HP saat aplikasi pertama dipasang.</small></div><h2>Warna aksen</h2><div class="card"><div class="wtk acw" id="acw">${Object.entries(
-      ACC
+const TAMPILAN_ISI = () => ({
+  kunci: 'tampilan',
+  html: `<h2>Tema</h2><div class="card">${seg(
+    'th',
+    [
+      ['auto', 'Perangkat'],
+      ['light', 'Terang'],
+      ['dark', 'Gelap'],
+      ['blue', 'Biru'],
+    ],
+    S.theme
+  )}</div><h2>Ukuran tampilan</h2><div class="card">${seg(
+    'uz',
+    [
+      ['kecil', 'Kecil'],
+      ['sedang', 'Sedang'],
+      ['besar', 'Besar'],
+    ],
+    S.uz || 'kecil'
+  )}<small class="mut">Besar-kecilnya seluruh tampilan di HP (tombol, menu, dan tulisan). Bawaannya disesuaikan dengan ukuran layar HP saat aplikasi pertama dipasang.</small></div><h2>Warna aksen</h2><div class="card"><div class="wtk acw" id="acw">${Object.entries(
+    ACC
+  )
+    .map(
+      ([v, a]) =>
+        `<button type="button" data-v="${v}" class="${v == (S.ac || 'hitam') ? 'on' : ''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check', 16)}</i><small>${a[0]}</small></button>`
     )
-      .map(
-        ([v, a]) =>
-          `<button type="button" data-v="${v}" class="${v == (S.ac || 'hitam') ? 'on' : ''}" style="--c:${a[1]}" aria-label="${a[0]}"><i>${ic('check', 16)}</i><small>${a[0]}</small></button>`
-      )
-      .join(
-        ''
-      )}</div><small class="mut">Warna tombol, ikon, dan sorotan di seluruh aplikasi. Tema Biru selalu memakai aksen biru.</small></div>
+    .join(
+      ''
+    )}</div><small class="mut">Warna tombol, ikon, dan sorotan di seluruh aplikasi. Tema Biru selalu memakai aksen biru.</small></div>
 <h2>Jenis huruf</h2><div class="card"><label>Huruf Latin (seluruh tampilan)</label>${fontUI('lf', FLT, 'Abc Fadzkuruuni')}<label style="margin-top:14px">Huruf Arab</label>${fontUI('af', FAR, 'بِسْمِ اللّٰهِ')}<small class="mut">Font selain bawaan diunduh dari Google Fonts saat pertama dipakai (perlu internet sekali).</small></div><h2>Warna teks bacaan</h2><div class="card">${wteksUI()}<small class="mut">Untuk teks Arab, latin, dan terjemah. Otomatis: hitam di tema terang, putih di tema gelap.</small></div><h2>Ukuran teks bacaan</h2><div class="list sg">${row('book', 'Huruf Arab', `<span data-uv="fs">${S.fs}</span> px`, `<input type="range" id="fs" min="22" max="52" value="${S.fs}">`)}${row('search', 'Huruf Latin', `<span data-uv="fl">${S.fl || 15}</span> px`, `<input type="range" id="fl" min="12" max="26" value="${S.fl || 15}">`)}${row('news', 'Terjemah (Indonesia)', `<span data-uv="fi">${S.fi || 14}</span> px`, `<input type="range" id="fi" min="12" max="26" value="${S.fi || 14}">`)}</div>
 <div class="ukp" aria-label="Contoh ukuran teks"><small class="mut">Contoh</small><div class="ukp-ar" id="upa">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div><p class="ukp-lt" id="upl">Bismillāhir-raḥmānir-raḥīm</p><p class="ukp-tr" id="upt">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang.</p></div><h2>Tampilkan</h2><div class="list sg">${row('search', 'Teks Latin', 'Transliterasi di bawah ayat', tg('lt', S.lt))}${row('news', 'Terjemah', 'Arti dalam bahasa Indonesia', tg('tr', S.tr))}${row('count', 'Tasbih melayang', 'Tombol hitung kecil di semua halaman', tg('fb', S.ft !== false))}</div><h2>Tasbih</h2><div class="list sg">${row('beads', 'Getar saat menghitung', 'Getar ringan pada setiap hitungan dan saat target tercapai', tg('vib', S.vib !== false))}</div><div class="card" style="margin-top:12px"><label>Getar saat target tercapai</label>${seg('tvp', VPOLAS, S.vpola || 'ganda')}<label style="margin-top:12px">Target hitungan</label>${seg(
-      'ftt',
-      [
-        [33, '33'],
-        [99, '99'],
-        [100, '100'],
-        [1000, '1000'],
-      ],
-      S.tt || 33
-    )}<label style="margin-top:12px">Ukuran tasbih melayang</label>${seg('tfz', FTZ, S.ftz || 'kecil')}<div class="act"><button class="sb" id="trs">Reset hitungan</button></div></div>`,
+    'ftt',
+    [
+      [33, '33'],
+      [99, '99'],
+      [100, '100'],
+      [1000, '1000'],
+    ],
+    S.tt || 33
+  )}<label style="margin-top:12px">Ukuran tasbih melayang</label>${seg('tfz', FTZ, S.ftz || 'kecil')}<div class="act"><button class="sb" id="trs">Reset hitungan</button></div></div>`,
   init() {
     /* Contoh ukuran teks ikut berubah saat penggeser digeser */
     const ukp = () => {
@@ -179,3 +178,17 @@ SETPAGES.tampilan = () => ({
     };
   },
 });
+SETPAGES.tampilan = (sub) =>
+  setBagi(TAMPILAN_ISI(), 'Tampilan & Bacaan', '#/pengaturan', sub, [
+    ['tema', 'moon', 'Tema & warna', 'Perangkat, terang, gelap, biru, dan warna aksen', ['Tema', 'Warna aksen']],
+    ['ukuran', 'search', 'Ukuran tampilan', 'Besar-kecilnya seluruh tampilan', ['Ukuran tampilan']],
+    ['huruf', 'edit', 'Jenis huruf', 'Huruf Latin dan Arab', ['Jenis huruf']],
+    [
+      'bacaan',
+      'book',
+      'Teks bacaan',
+      'Ukuran, warna, Latin, dan terjemah',
+      ['Warna teks bacaan', 'Ukuran teks bacaan', 'Tampilkan'],
+    ],
+    ['tasbih', 'beads', 'Tasbih', 'Tasbih melayang, getar, dan hitungan', ['Tasbih']],
+  ]);

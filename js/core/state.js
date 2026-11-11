@@ -21,7 +21,8 @@ const S = Object.assign(
     hist: [],
     tas: 0,
   },
-  PRAT ? {} : JSON.parse(localStorage.fz || '{}')
+  /* Pratinjau dashboard admin: tema mengikuti tema dashboard (?tema=dark|light|blue), sisanya bawaan */
+  PRAT ? { theme: new URLSearchParams(location.search).get('tema') || 'light' } : JSON.parse(localStorage.fz || '{}')
 );
 /* Ukuran tampilan bawaan mengikuti layar HP, ditetapkan sekali saat aplikasi pertama dipasang (rumus yang sama dipakai skrip awal di index.html,
    jadi ukuran sudah benar sejak gambar pertama, tanpa tulisan yang tiba-tiba membesar/mengecil). Pengguna lama tetap memakai pilihannya / 'kecil'. */
@@ -215,7 +216,7 @@ const accent = () => {
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change', theme);
 const P = {};
-const VER = '2.9.73';
+const VER = '2.9.74';
 const REPORT = { wa: '6289506138191', url: '', nocors: false };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 let LAST = '#/',

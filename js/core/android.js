@@ -2,10 +2,11 @@
    dialihkan ke Android asli lewat window.FadzAndroid (MainActivity.Jembatan di proyek fadzkuruuni-android):
    izin aplikasi, pengingat adzan (alarm Android, tetap jalan walau aplikasi ditutup), suara pembaca, unduhan, bagikan,
    layar penuh, warna bilah status, dan masuk Google (lewat tab Chrome aman). Di browser biasa berkas ini tidak berbuat apa-apa. */
-const ANDROID = !!window.FadzAndroid;
+const ANDROID = !!window.FadzAndroid && window.top === window;
 window.ANDROID = ANDROID;
 const andPanggil = (f, ...a) => {
   try {
+    if (window.top !== window) return;
     return window.FadzAndroid[f](...a);
   } catch (e) {}
 };

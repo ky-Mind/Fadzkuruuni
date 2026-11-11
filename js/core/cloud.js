@@ -36,6 +36,7 @@ const SYNC = [
   'ac',
   'dibuka',
   'foto',
+  'jk',
 ];
 const ldjs = (src) =>
   new Promise((o, r) => {

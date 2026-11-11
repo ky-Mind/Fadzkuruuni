@@ -9,7 +9,7 @@ const LG_E = `<span class="lge">${ic('mail', 16)}</span>`;
    pengguna lain mendapat pesan yang jelas (lihat FBGAGAL di js/core/android.js dan events.js) */
 const FBMASUK = false;
 const AKUN = () =>
-  `<h2>Akun</h2><div class="list sg" id="cl">${cloudOn() ? (FBU ? row('user', esc(FBU.displayName || S.nm || FBU.email || 'Akun'), esc(FBU.email || '') + ' · ' + ({ 'google.com': 'Google', 'facebook.com': 'Facebook', password: 'Email', emailLink: 'Email' }[FBU.providerData?.[0]?.providerId] || 'Akun') + ' · data tersinkron ke cloud', '<button class="btn s" data-gout>Keluar</button>') + (typeof adminBisa == 'function' && adminBisa('tampilan') ? row('sliders', 'Mode admin', 'Atur susunan Beranda, pintasan, Semua Menu, dan Pengaturan langsung di aplikasi', `<button class="btn s" data-tadm="mulai">${TADMON ? 'Aktif' : 'Mulai'}</button>`) : '') : `<p class="lgi mut">Masuk agar penanda ayat, riwayat bacaan, dan pengaturanmu tersimpan di cloud dan ikut pindah ke perangkat lain.</p><div class="lgn"><button class="lgb" data-gin>${LG_G}Masuk dengan Google</button>${FBMASUK ? `<button class="lgb" data-gin="fb">${LG_F}Masuk dengan Facebook</button>` : ''}<button class="lgb" data-gem>${LG_E}Masuk dengan Email</button></div>`) : row('user', 'Masuk dengan Google', 'Belum diaktifkan. Isi konfigurasi Firebase (lihat PANDUAN-FIREBASE.md).', '<button class="btn s" disabled>Segera</button>')}</div>`;
+  `<h2>Akun</h2><div class="list sg" id="cl">${cloudOn() ? (FBU ? row('user', esc(FBU.displayName || S.nm || FBU.email || 'Akun'), esc(FBU.email || '') + ' · ' + ({ 'google.com': 'Google', 'facebook.com': 'Facebook', password: 'Email', emailLink: 'Email' }[FBU.providerData?.[0]?.providerId] || 'Akun') + ' · data tersinkron ke cloud', '<button class="btn s" data-gout>Keluar</button>') + (typeof TADM != 'undefined' && TADM ? row('sliders', 'Dashboard admin', 'Atur tampilan aplikasi, laporan, statistik, dan kelas online', '<a class="btn s" href="admin.html">Buka</a>') : '') : `<p class="lgi mut">Masuk agar penanda ayat, riwayat bacaan, dan pengaturanmu tersimpan di cloud dan ikut pindah ke perangkat lain.</p><div class="lgn"><button class="lgb" data-gin>${LG_G}Masuk dengan Google</button>${FBMASUK ? `<button class="lgb" data-gin="fb">${LG_F}Masuk dengan Facebook</button>` : ''}<button class="lgb" data-gem>${LG_E}Masuk dengan Email</button></div>`) : row('user', 'Masuk dengan Google', 'Belum diaktifkan. Isi konfigurasi Firebase (lihat PANDUAN-FIREBASE.md).', '<button class="btn s" disabled>Segera</button>')}</div>`;
 /* Foto profil: dipotong persegi & dikecilkan (192 px JPEG) di perangkat, disimpan di pengaturan & ikut sinkron cloud */
 window.fotoProfil = () => S.foto || (typeof FBU != 'undefined' && FBU && FBU.photoURL) || '';
 window.avatarHtml = (px) => {
@@ -39,11 +39,13 @@ const fotoBaca = (src) =>
     };
     im.src = u;
   });
-/* Atur foto: lingkaran pratinjau FPK px; foto bisa diperbesar (penggeser) dan digeser (seret) di dalamnya */
-const FPK = 168;
+/* Editor foto seperti Instagram: lapisan layar penuh, foto dicubit (dua jari) / roda tetikus untuk ukuran dan diseret
+   untuk posisi di dalam lingkaran FPK px; Selesai = simpan */
+const FPK = 280;
 let FOTOCALON = null;
 const fpDasar = (c) => FPK / Math.min(c.w, c.h);
 const fpBatas = (c) => {
+  c.z = Math.max(1, Math.min(5, c.z));
   const b = fpDasar(c) * c.z,
     mx = (c.w * b - FPK) / 2,
     my = (c.h * b - FPK) / 2;
@@ -55,8 +57,10 @@ const fpGaya = (c) => {
   return `width:${c.w * b}px;height:${c.h * b}px;transform:translate(calc(-50% + ${c.x}px),calc(-50% + ${c.y}px))`;
 };
 const fpGambar = () => {
-  const im = $('#fpc img');
+  const im = $('#fpc img'),
+    z = $('#fpz');
   if (im && FOTOCALON) im.style.cssText = fpGaya(FOTOCALON);
+  if (z && FOTOCALON) z.value = FOTOCALON.z;
 };
 /* Hasil akhir: persegi 192 px JPEG sesuai yang terlihat di lingkaran */
 const fpHasil = (c) =>
@@ -78,14 +82,28 @@ const fpHasil = (c) =>
     im.onerror = no;
     im.src = c.u;
   });
+function fpBuka(c) {
+  FOTOCALON = c;
+  fpBatas(c);
+  $('#fped')?.remove();
+  const d = document.createElement('div');
+  d.className = 'back-d fpl';
+  d.id = 'fped';
+  d.innerHTML = `<div class="fplb"><button type="button" class="ib2" data-fbatal aria-label="Batal"><span aria-hidden="true">×</span></button><b>Atur foto</b><button type="button" class="fpok" data-fsimpan>Selesai</button></div><div class="fplw"><div class="fpc" id="fpc" data-noswipe style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"></div></div><p class="fplt">Cubit dengan dua jari untuk memperbesar, seret untuk menggeser.</p><label class="fpzl" data-noswipe>${ic('search', 16)}<input type="range" id="fpz" min="1" max="5" step="0.01" value="${c.z}" aria-label="Ukuran foto"></label>`;
+  document.body.append(d);
+}
+const fpTutup = () => {
+  FOTOCALON = null;
+  $('#fped')?.remove();
+};
 document.addEventListener('change', async (x) => {
   if (x.target.id != 'fpi' || !x.target.files[0]) return;
   try {
-    FOTOCALON = await fotoBaca(x.target.files[0]);
-    route();
+    fpBuka(await fotoBaca(x.target.files[0]));
   } catch (e) {
     toast('Foto tidak bisa dibaca. Coba foto lain.');
   }
+  x.target.value = '';
 });
 document.addEventListener('input', (x) => {
   if (x.target.id != 'fpz' || !FOTOCALON) return;
@@ -93,51 +111,104 @@ document.addEventListener('input', (x) => {
   fpBatas(FOTOCALON);
   fpGambar();
 });
-/* Seret foto di dalam lingkaran (jari atau tetikus) */
+/* Seret satu jari = geser; dua jari = cubit (ukuran) sekaligus geser; roda tetikus = ukuran */
+const FPJ = new Map();
 document.addEventListener('pointerdown', (x) => {
   const el = x.target.closest('#fpc');
   if (!el || !FOTOCALON) return;
   x.preventDefault();
+  FPJ.set(x.pointerId, { x: x.clientX, y: x.clientY });
   const c = FOTOCALON,
-    k = el.getBoundingClientRect().width / el.offsetWidth || 1,
-    sx = x.clientX,
-    sy = x.clientY,
-    ox = c.x,
-    oy = c.y;
+    k = el.getBoundingClientRect().width / el.offsetWidth || 1;
+  let awal = null;
+  const ukur = () => {
+    const P = [...FPJ.values()];
+    if (P.length < 2) return null;
+    return {
+      d: Math.hypot(P[0].x - P[1].x, P[0].y - P[1].y),
+      mx: (P[0].x + P[1].x) / 2,
+      my: (P[0].y + P[1].y) / 2,
+    };
+  };
+  const mulai = () => {
+    const u = ukur(),
+      P = [...FPJ.values()][0];
+    awal = { z: c.z, x: c.x, y: c.y, u, px: P.x, py: P.y };
+  };
+  mulai();
   const gerak = (e) => {
-    c.x = ox + (e.clientX - sx) / k;
-    c.y = oy + (e.clientY - sy) / k;
+    if (!FPJ.has(e.pointerId)) return;
+    FPJ.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const u = ukur();
+    if (u && awal.u) {
+      c.z = (awal.z * u.d) / Math.max(1, awal.u.d);
+      c.x = awal.x + (u.mx - awal.u.mx) / k;
+      c.y = awal.y + (u.my - awal.u.my) / k;
+    } else if (!u && !awal.u) {
+      const P = [...FPJ.values()][0];
+      c.x = awal.x + (P.x - awal.px) / k;
+      c.y = awal.y + (P.y - awal.py) / k;
+    } else mulai();
     fpBatas(c);
     fpGambar();
   };
-  const lepas = () => {
+  const lepas = (e) => {
+    FPJ.delete(e.pointerId);
+    if (FPJ.size) return mulai();
     removeEventListener('pointermove', gerak);
     removeEventListener('pointerup', lepas);
     removeEventListener('pointercancel', lepas);
   };
-  addEventListener('pointermove', gerak);
-  addEventListener('pointerup', lepas);
-  addEventListener('pointercancel', lepas);
+  if (FPJ.size == 1) {
+    addEventListener('pointermove', gerak);
+    addEventListener('pointerup', lepas);
+    addEventListener('pointercancel', lepas);
+  }
 });
+document.addEventListener(
+  'wheel',
+  (x) => {
+    if (!x.target.closest('#fpc') || !FOTOCALON) return;
+    x.preventDefault();
+    FOTOCALON.z *= x.deltaY < 0 ? 1.08 : 1 / 1.08;
+    fpBatas(FOTOCALON);
+    fpGambar();
+  },
+  { passive: false }
+);
+/* Foto profil: ketuk foto / "Edit foto" → pilihan (galeri, atur ukuran, hapus) bila sudah ada foto; bila belum langsung
+   ke galeri */
+function fotoMenu() {
+  if (!S.foto) return $('#fpi')?.click();
+  const d = document.createElement('div');
+  d.className = 'back-d';
+  d.innerHTML = `<div class="sheet fpm"><b class="fpmj">Foto profil</b><button type="button" data-fgaleri>${ic('camera', 20)} Pilih dari galeri</button><button type="button" data-fatur>${ic('edit', 20)} Atur ukuran & posisi</button><button type="button" data-fdel class="mrh">${ic('trash', 20)} Hapus foto</button></div>`;
+  d.addEventListener('click', (e) => e.target == d && d.remove());
+  document.body.append(d);
+}
 document.addEventListener('click', async (x) => {
-  if (x.target.closest('[data-fsimpan]') && FOTOCALON) {
+  const t = x.target;
+  if (t.closest('[data-fmenu]')) return fotoMenu();
+  if (t.closest('[data-fgaleri]')) {
+    t.closest('.back-d')?.remove();
+    return $('#fpi')?.click();
+  }
+  if (t.closest('[data-fsimpan]') && FOTOCALON) {
     try {
       S.foto = await fpHasil(FOTOCALON);
     } catch (e) {
       return toast('Foto tidak bisa disimpan. Coba foto lain.');
     }
-    FOTOCALON = null;
+    fpTutup();
     save();
     tataNav();
     route();
     toast('Foto profil disimpan');
-  } else if (x.target.closest('[data-fbatal]')) {
-    FOTOCALON = null;
-    route();
-  } else if (x.target.closest('[data-fatur]') && S.foto) {
+  } else if (t.closest('[data-fbatal]')) fpTutup();
+  else if (t.closest('[data-fatur]') && S.foto) {
+    t.closest('.back-d')?.remove();
     try {
-      FOTOCALON = await fotoBaca(S.foto);
-      route();
+      fpBuka(await fotoBaca(S.foto));
     } catch (e) {
       toast('Foto tidak bisa dibuka');
     }
@@ -145,23 +216,58 @@ document.addEventListener('click', async (x) => {
 });
 document.addEventListener('click', (x) => {
   if (!x.target.closest('[data-fdel]')) return;
+  x.target.closest('.back-d')?.remove();
   S.foto = null;
   save();
   tataNav();
   route();
   toast('Foto profil dihapus');
 });
-const FOTOBOX = () => {
-  const c = FOTOCALON;
-  if (c)
-    return `<h2>Foto profil</h2><div class="card"><div class="fped"><div class="fpc" id="fpc" data-noswipe style="width:${FPK}px;height:${FPK}px"><img src="${c.u}" alt="Atur foto profil" draggable="false" style="${fpGaya(c)}"></div><small class="mut">Seret foto untuk mengatur posisi, geser penggeser untuk mengatur ukuran.</small><label class="fpzl" data-noswipe>${ic('search', 16)}<input type="range" id="fpz" min="1" max="4" step="0.01" value="${c.z}" aria-label="Ukuran foto"></label></div>
- <div class="act"><button class="sb pri" data-fsimpan>Simpan foto</button><button class="sb" data-fbatal>Batal</button></div></div>`;
-  return `<h2>Foto profil</h2><div class="card"><div class="fpb">${avatarHtml(76)}<div class="fpt"><small class="mut">${S.foto ? 'Foto ini tampil di Pengaturan dan menu bawah.' : 'Belum ada foto. Pilih foto dari galeri HP.'}</small></div></div>
- <div class="act"><label class="sb pri">${ic('camera', 16)} ${S.foto ? 'Ganti foto' : 'Pilih foto'}<input type="file" accept="image/*" id="fpi" hidden></label>${S.foto ? '<button class="sb" data-fatur>Atur ukuran</button><button class="sb" data-fdel>Hapus foto</button>' : ''}</div></div>`;
-};
-const NAMEBOX = () =>
-  FOTOBOX() +
-  `<h2>Nama</h2><div class="card"><label>Nama panggilan</label><input class="in" id="nm" maxlength="24" value="${esc(S.nm || '')}" placeholder="Dipakai pada sapaan di Beranda"><div class="act"><button class="sb pri" data-nsave>Simpan nama</button><button class="sb" data-ndel>Hapus nama</button></div></div>`;
+const JK = [
+  ['l', 'Laki-laki'],
+  ['p', 'Perempuan'],
+  ['', 'Memilih untuk tidak memberi tahu'],
+];
+const jkNama = () => (JK.find((j) => j[0] == (S.jk || '')) || JK[2])[1];
+/* Kepala profil seperti Instagram: foto di tengah + "Edit foto", lalu kotak isian yang dibuka di halamannya sendiri */
+const PROFIL = () =>
+  `<div class="pfh"><button type="button" class="pff" data-fmenu aria-label="Edit foto">${avatarHtml(92)}</button><button type="button" class="pfe" data-fmenu>Edit foto</button><input type="file" accept="image/*" id="fpi" hidden></div>
+<div class="pfk"><a class="pfb" href="#/pengaturan/akun/nama"><small>Nama</small><span>${S.nm ? esc(S.nm) : '<i class="mut">Belum diisi</i>'}</span></a><a class="pfb" href="#/pengaturan/akun/jk"><small>Jenis kelamin</small><span>${esc(jkNama())}</span>${ic('next', 18)}</a></div>`;
+/* Subhalaman Nama (Selesai di kanan atas, seperti Instagram) */
+const HAL_NAMA = () => ({
+  html:
+    head('Nama', '#/pengaturan/akun', '<button class="pfok" data-nsimpan type="button">Selesai</button>') +
+    `<div class="pfk"><label class="pfb pfin"><small>Nama</small><input id="nm" maxlength="24" value="${esc(S.nm || '')}" placeholder="Nama panggilan" autocomplete="off"></label></div><p class="mut pfkt">Dipakai pada sapaan di Beranda dan di kelas online. Maksimal 24 huruf.</p>`,
+  init() {
+    const i = $('#nm');
+    if (i) {
+      i.focus();
+      i.addEventListener('keydown', (e) => e.key == 'Enter' && $('[data-nsimpan]')?.click());
+    }
+  },
+});
+const HAL_JK = () => ({
+  html:
+    head('Jenis kelamin', '#/pengaturan/akun') +
+    `<p class="mut pfkt">Tidak ditampilkan ke pengguna lain.</p><div class="list sg">${JK.map(
+      (j) =>
+        `<label class="srw pfr"><span class="t">${j[1]}</span><input type="radio" name="jk" value="${j[0]}"${(S.jk || '') == j[0] ? ' checked' : ''}></label>`
+    ).join('')}</div>`,
+});
+document.addEventListener('click', (x) => {
+  if (!x.target.closest('[data-nsimpan]')) return;
+  S.nm = ($('#nm')?.value || '').trim().slice(0, 24);
+  save();
+  toast(S.nm ? 'Nama disimpan' : 'Nama dikosongkan');
+  keInduk('#/pengaturan/akun');
+});
+document.addEventListener('change', (x) => {
+  if (x.target.name != 'jk') return;
+  S.jk = x.target.value;
+  save();
+  toast('Jenis kelamin disimpan');
+  setTimeout(() => keInduk('#/pengaturan/akun'), 250);
+});
 /* Hapus akun & data cloud (wajib untuk kebijakan Facebook/Google; petunjuk publik di hapus-data.html) */
 const HAPUSAKUN = () =>
   cloudOn() && FBU
@@ -169,9 +275,12 @@ const HAPUSAKUN = () =>
     : '';
 /* Tautan kecil ke dokumen privasi, selalu tampil di bawah (sudah masuk akun maupun belum, di web maupun aplikasi) */
 const PRIVASI_KAKI = `<p class="mut pkaki"><a href="kebijakan-privasi.html">Kebijakan Privasi</a> · <a href="hapus-data.html">Penghapusan Data</a></p>`;
-SETPAGES.akun = () => ({
-  html: head('Akun & Profil', '#/pengaturan') + NAMEBOX() + AKUN() + HAPUSAKUN() + PRIVASI_KAKI,
-});
+SETPAGES.akun = (sub) =>
+  sub == 'nama'
+    ? HAL_NAMA()
+    : sub == 'jk'
+      ? HAL_JK()
+      : { html: head('Akun & Profil', '#/pengaturan') + PROFIL() + AKUN() + HAPUSAKUN() + PRIVASI_KAKI };
 document.addEventListener('click', (x) => {
   if (!x.target.closest('[data-hapusakun]') || !FBU) return;
   konfirmasi(
@@ -187,6 +296,10 @@ document.addEventListener('click', (x) => {
           .delete()
           .catch(() => {});
         await FBD.collection('pemain')
+          .doc(u.uid)
+          .delete()
+          .catch(() => {});
+        await FBD.collection('pengguna')
           .doc(u.uid)
           .delete()
           .catch(() => {});

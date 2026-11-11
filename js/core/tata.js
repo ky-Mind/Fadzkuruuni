@@ -362,6 +362,10 @@ if (TPRATINJAU) {
     if (!s) return;
     tTag($('#view'));
     s.on = 1;
+    /* Urutan saat diangkat: dilepas di tempat semula = tidak ada perubahan yang dikirim ke dashboard */
+    s.awal = s.t.bebas
+      ? [...s.t.el.parentElement.children].map((x) => x.dataset.tk).join('\n')
+      : s.t.sib().map(s.t.kunci).join('\n');
     const r = s.t.el.getBoundingClientRect();
     s.gx = x0 - r.left;
     s.gy = y0 - r.top;
@@ -414,8 +418,19 @@ if (TPRATINJAU) {
       .find(Boolean);
     if (atas && !gerak.has(atas)) {
       const i = sib.indexOf(el),
-        k = sib.indexOf(atas);
-      pindah(el, atas, k > i);
+        k = sib.indexOf(atas),
+        ra = atas.getBoundingClientRect(),
+        /* Kisi (berdampingan) dibandingkan mendatar, daftar/bagian tegak. Tukar hanya setelah jari melewati tengah
+           elemen tujuan: bagian yang tingginya berbeda tidak bertukar bolak-balik (tampak patah-patah) */
+        dat = Math.abs(ra.top - el.getBoundingClientRect().top) < ra.height / 2,
+        lewat = dat
+          ? k > i
+            ? e.clientX > ra.left + ra.width / 2
+            : e.clientX < ra.left + ra.width / 2
+          : k > i
+            ? e.clientY > ra.top + ra.height / 2
+            : e.clientY < ra.top + ra.height / 2;
+      if (lewat) pindah(el, atas, k > i);
     }
     el.style.transform = 'none';
     const r = el.getBoundingClientRect(),
@@ -501,6 +516,10 @@ if (TPRATINJAU) {
     setTimeout(() => {
       lewatKlik = null;
     }, 0);
+    const kini = s.t.bebas
+      ? [...el.parentElement.children].map((x) => x.dataset.tk).join('\n')
+      : s.t.sib().map(s.t.kunci).join('\n');
+    if (kini == s.awal) return;
     if (s.t.bebas) {
       const p = el.parentElement;
       parent.postMessage(
@@ -688,6 +707,76 @@ function tataCatat(a) {
   clearTimeout(TSTT);
   TSTT = setTimeout(tataKirim, 30000);
 }
+/* Daftar pengguna untuk dashboard admin › Statistik (koleksi "pengguna", satu dokumen per akun / per perangkat tamu):
+   nama & email akun yang masuk, atau "Tamu" + nama panggilan; jenis aplikasi, versi, model HP, dan waktu terakhir
+   dibuka. Dikirim paling banyak sekali sehari per akun. Ikut pilihan "Bantu kembangkan aplikasi". */
+const tTamuId = () => {
+  try {
+    let t = localStorage.fzTamu;
+    if (!/^tamu-[a-z0-9]{16}$/.test(t || '')) {
+      t =
+        'tamu-' +
+        Array.from(
+          crypto.getRandomValues(new Uint8Array(16)),
+          (x) => 'abcdefghijklmnopqrstuvwxyz0123456789'[x % 36]
+        ).join('');
+      localStorage.fzTamu = t;
+    }
+    return t;
+  } catch (e) {
+    return '';
+  }
+};
+async function penggunaCatat() {
+  if (!tStatAktif() || !navigator.onLine) return;
+  const u = typeof FBU != 'undefined' && FBU ? FBU : null,
+    id = u ? u.uid : tTamuId(),
+    hari = tHari();
+  if (!id) return;
+  try {
+    if (localStorage.fzpengguna == hari + id) return;
+  } catch (e) {}
+  let tok = '';
+  try {
+    if (u) tok = await u.getIdToken();
+  } catch (e) {
+    return;
+  }
+  const str = (v) => ({ stringValue: String(v || '').slice(0, 60) }),
+    F = {
+      nama: str((u && u.displayName) || S.nm || 'Tamu'),
+      email: str(u ? u.email : ''),
+      tamu: { booleanValue: !u },
+      perangkat: str(TMODEL || 'Lainnya'),
+      jenis: str(tJenis()),
+      versi: str(tVersi()),
+    };
+  try {
+    const r = await fetch(FSURL.replace(/\/documents$/, '/documents:commit') + '?key=' + FBCFG.apiKey, {
+      method: 'POST',
+      keepalive: true,
+      headers: Object.assign({ 'content-type': 'application/json' }, tok ? { authorization: 'Bearer ' + tok } : {}),
+      body: JSON.stringify({
+        writes: [
+          {
+            update: {
+              name: 'projects/' + FBCFG.projectId + '/databases/(default)/documents/pengguna/' + id,
+              fields: F,
+            },
+            updateMask: { fieldPaths: Object.keys(F) },
+            updateTransforms: [
+              { fieldPath: 'terakhir', setToServerValue: 'REQUEST_TIME' },
+              { fieldPath: 'hari', increment: { integerValue: '1' } },
+            ],
+          },
+        ],
+      }),
+    });
+    if (r.ok) localStorage.fzpengguna = hari + id;
+  } catch (e) {}
+}
+addEventListener('fbu', () => setTimeout(penggunaCatat, 3000));
+setTimeout(penggunaCatat, 8000);
 function tataKirim() {
   if (!tStatAktif() || !navigator.onLine) return;
   const hari = tHari(),

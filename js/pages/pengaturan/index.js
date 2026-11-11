@@ -37,8 +37,39 @@ function setKelompok(L) {
     (g) => `<section class="setg"><h3>${esc(g[0])}</h3><div class="list">${g[1].map(setBaris).join('')}</div></section>`
   ).join('');
 }
-P.pengaturan = (g) => {
-  if (SETPAGES[g]) return SETPAGES[g]();
+/* Halaman pengaturan panjang dibagi seperti pengaturan Instagram: halaman utama hanya daftar ringkas, tiap bagian
+   (kumpulan <h2>) dibuka di subhalamannya sendiri. Isi lengkap tetap dipasang (bagian lain disembunyikan) agar semua
+   pengikat di init() tetap bekerja. G = [[kunci, ikon, judul, keterangan, [judul h2 …] | fungsi(judulH2)], …]. */
+function setBagi(pg, judul, induk, sub, G) {
+  const S2 = pg.html.split(/(?=<h2>)/),
+    kepala = S2[0] && !S2[0].startsWith('<h2>') ? S2.shift() : '',
+    milik = (g, t) => (typeof g[4] == 'function' ? g[4](t) : g[4].includes(t)),
+    jdl = (x) => (x.match(/^<h2>([\s\S]*?)<\/h2>/) || [])[1] || '';
+  const g = G.find((x) => x[0] == sub);
+  if (!g)
+    return {
+      html:
+        head(judul, induk) +
+        kepala +
+        `<div class="list">${G.filter((x) => S2.some((b) => milik(x, jdl(b))))
+          .map((x) => setBaris(['#/pengaturan/' + pg.kunci + '/' + x[0], x[1], x[2], x[3]]))
+          .join('')}</div><div hidden>${S2.join('')}</div>`,
+      init: pg.init,
+    };
+  const punya = S2.filter((b) => milik(g, jdl(b))).length;
+  return {
+    html:
+      head(g[2], '#/pengaturan/' + pg.kunci) +
+      S2.map((b) => {
+        const t = jdl(b),
+          ok = milik(g, t);
+        return `<section class="sbag"${ok ? '' : ' hidden'}>${ok && punya == 1 ? b.replace(/^<h2>[\s\S]*?<\/h2>/, '') : b}</section>`;
+      }).join(''),
+    init: pg.init,
+  };
+}
+P.pengaturan = (g, h) => {
+  if (SETPAGES[g]) return SETPAGES[g](h);
   const adm = TADMON && TDRAF;
   const ph = `<a class="setpro" href="#/pengaturan/akun">${avatarHtml(64)}<span class="t"><b>${esc(S.nm || (FBU && FBU.displayName) || 'Pengguna Fadzkuruuni')}</b><br><small>${FBU ? esc(FBU.email || 'Sudah masuk') : 'Belum masuk · ketuk untuk masuk'}</small></span>${ic('next', 18)}</a>`;
   return {
