@@ -9835,7 +9835,9 @@ html,
 body,
 #app {
   overscroll-behavior: none;
-  overflow-x: hidden;
+  /* hidden di kedua sumbu: dengan overflow-x saja, overflow-y otomatis 'auto', sehingga saat tarik-untuk-memuat
+     menggeser #view ke bawah, #app bisa digulir dan memunculkan batang gulirnya sendiri (isi menyempit/bergeser) */
+  overflow: hidden;
 }
 #view {
   overscroll-behavior-x: none;
