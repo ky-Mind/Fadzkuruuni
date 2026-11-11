@@ -57,12 +57,12 @@
         st.setProperty('--gs', 'color-mix(in srgb,var(--g) ' + (dk ? 16 : 11) + '%,var(--card))');
         st.setProperty('--on', dk ? '#06140f' : '#fff');
         var m = document.querySelector('meta[name=theme-color]');
-        m && m.setAttribute('content', dk ? '#121413' : t == 'biru' ? '#eef4fb' : '#ffffff');
+        m && m.setAttribute('content', dk ? '#000000' : t == 'biru' ? '#eef4fb' : '#ffffff');
         /* Di aplikasi Android: bilah status (atas) sewarna kepala dashboard, bilah navigasi (bawah) sewarna latar halaman,
            agar ujung atas & bawah menyatu dengan tampilan, tidak putih sendiri */
         try {
-          var atas = dk ? '#181b1a' : t == 'biru' ? '#f7faff' : '#ffffff',
-            bawah = dk ? '#121413' : t == 'biru' ? '#eef4fb' : '#f6f7f6';
+          var atas = dk ? '#0a0a0a' : t == 'biru' ? '#f7faff' : '#ffffff',
+            bawah = dk ? '#000000' : t == 'biru' ? '#eef4fb' : '#f6f7f6';
           window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(atas, bawah);
         } catch (e) {}
       }
@@ -90,12 +90,12 @@
       }
       :root[data-tema='gelap'] {
         color-scheme: dark;
-        --bg: #121413;
-        --card: #181b1a;
+        --bg: #000000;
+        --card: #0a0a0a;
         --ink: #eef2ef;
         --mut: #9aa6a0;
-        --line: #2c312e;
-        --fill: #1f2321;
+        --line: #262626;
+        --fill: #1c1c1c;
         --red: #ef8a7c;
         --amb: #e3b54f;
         --ambs: #2d2615;

@@ -51,19 +51,20 @@
   --ui: 'Times New Roman', Times, serif;
   --hero: var(--g);
 }
+/* Gelap: hitam pekat seperti Instagram */
 [data-theme='dark'] {
-  --bg: #121413;
-  --card: #121413;
-  --fill: #1f2321;
-  --ink: #eef2ef;
+  --bg: #000000;
+  --card: #000000;
+  --fill: #1c1c1c;
+  --ink: #f5f5f5;
   --bc: #ffffff;
-  --mut: #9aa6a0;
-  --line: #2c312e;
+  --mut: #a8a8a8;
+  --line: #262626;
   --g: #7fb5a2;
   --g2: #9fcdbb;
   --gs: #1d2a26;
   --on: #06140f;
-  --hero: color-mix(in srgb, var(--g) 30%, #0c110f);
+  --hero: color-mix(in srgb, var(--g) 26%, #000000);
 }
 /* Tema Biru: terang dengan latar kebiruan; aksen biru dipasang lewat accent() di js/core/state.js */
 [data-theme='blue'] {
@@ -10537,6 +10538,81 @@ body,
   align-items: center;
   gap: 8px;
 }
+/* HP: halaman tidak pernah menggulir akar (yang menggulir #view). Saat tarik-untuk-memuat #view digeser turun; akar
+   dikunci agar tidak muncul batang/lintasan gulir dan isi tidak menyempit/bergeser ke kiri (dulu terlihat di APK) */
+@media (max-width: 899px) {
+  html,
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  #view,
+  .vpeek {
+    scrollbar-gutter: auto;
+  }
+  #view::-webkit-scrollbar-track,
+  #view::-webkit-scrollbar-thumb {
+    display: none;
+    background: transparent;
+  }
+}
+
+/* Fadz AI: kolom ketik seperti pesan Instagram. Kapsul tanpa garis tepi; tombol mikrofon menyatu (sewarna kapsul,
+   ikon biasa), baru menjadi tombol aksen bulat saat ada teks untuk dikirim. Petunjuk rekam berupa baris rapi di atas
+   kolom, bukan gelembung melayang. */
+.aif {
+  align-items: center;
+  gap: 6px;
+}
+.aiin {
+  border: 0;
+  border-radius: 22px;
+  background: var(--fill);
+}
+.aiin:focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
+.aif textarea {
+  min-height: 44px;
+  padding: 12px 8px 12px 18px;
+  font-size: 15.5px;
+}
+.aif textarea::placeholder {
+  color: var(--mut);
+}
+#aikb {
+  width: 44px;
+  height: 44px;
+  background: var(--fill);
+  color: var(--ink);
+}
+#aikb.kirim {
+  background: var(--g);
+  color: var(--on);
+}
+#aikb .ic {
+  width: 21px;
+  height: 21px;
+}
+.aimh {
+  left: 6px;
+  right: 6px;
+  bottom: calc(100% + 4px);
+  max-width: none;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--ink);
+  box-shadow: none;
+  font-size: 12.5px;
+}
+.aimh .ic {
+  color: var(--g);
+}
+.aimh::after {
+  display: none;
+}
 
     </style>
     <style>
@@ -11044,7 +11120,7 @@ body,
         background: var(--c3);
       }
       .tmp i.auto {
-        background: linear-gradient(135deg, #ffffff 50%, #121413 50%);
+        background: linear-gradient(135deg, #ffffff 50%, #000000 50%);
       }
       .lnk {
         cursor: pointer;
@@ -12448,7 +12524,7 @@ const SOAL_TTS = [
         if (m)
           m.setAttribute(
             'content',
-            { dark: '#121413', pekat: '#000000', blue: '#eef4fb', sepia: '#f6efe2' }[t] || '#ffffff'
+            { dark: '#000000', pekat: '#000000', blue: '#eef4fb', sepia: '#f6efe2' }[t] || '#ffffff'
           );
       }
       const hex = (c) => {
@@ -12495,7 +12571,7 @@ const SOAL_TTS = [
         const TEMA = [
           ['auto', 'Perangkat', '', '', ''],
           ['light', 'Terang', '#ffffff', '#1c1f1e', '#e5e7e5'],
-          ['dark', 'Gelap', '#121413', '#e6e9e7', '#2c312e'],
+          ['dark', 'Gelap', '#000000', '#e6e9e7', '#262626'],
           ['blue', 'Biru', '#eef4fb', '#24497d', '#d5e0ed'],
           ['sepia', 'Sepia', '#f6efe2', '#6b4423', '#e3d6bf'],
           ['pekat', 'Hitam pekat', '#000000', '#f2f2f2', '#232323'],

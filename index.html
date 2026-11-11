@@ -36,6 +36,8 @@
                 : 'light';
         document.documentElement.dataset.theme = t;
         var uz =
+            (z.uzv == 2 && z.uz) ||
+            'besar' ||
             z.uz ||
             (localStorage.fz
               ? 'kecil'
@@ -47,9 +49,9 @@
         rs.setProperty('--zm', String({ kecil: 0.86, sedang: 0.93, besar: 1 }[uz] || 0.86));
         rs.setProperty('--lt', (z.fl || 12) + 'px');
         rs.setProperty('--tr', (z.fi || 12) + 'px');
-        document.documentElement.style.background = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
+        document.documentElement.style.background = { dark: '#000000', blue: '#eef4fb', light: '#ffffff' }[t];
         try {
-          var w = { dark: '#121413', blue: '#eef4fb', light: '#ffffff' }[t];
+          var w = { dark: '#000000', blue: '#eef4fb', light: '#ffffff' }[t];
           window.top === window && window.FadzAndroid && FadzAndroid.warnaBar && FadzAndroid.warnaBar(w, w);
         } catch (e) {}
       } catch (e) {}
@@ -73,7 +75,7 @@
         transition: opacity 0.45s ease;
       }
       [data-theme='dark'] #pembuka {
-        background: #121413;
+        background: #000000;
         color: #cfe0d7;
       }
       [data-theme='blue'] #pembuka {

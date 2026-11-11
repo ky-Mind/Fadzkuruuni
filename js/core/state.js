@@ -30,8 +30,20 @@ const uzLayar = () => {
   const w = Math.min(screen.width || innerWidth, screen.height || innerHeight);
   return w < 380 ? 'kecil' : w < 420 ? 'sedang' : 'besar';
 };
+/* Sejak 2.9.75 ukuran bawaan 'besar' (100%, seperti Instagram) untuk semua pengguna, sekali (S.uzv = 2); sesudahnya
+   pilihan pengguna dihormati */
+if (!PRAT && S.uzv != 2) {
+  S.uz = 'besar';
+  S.uzv = 2;
+  try {
+    const z = JSON.parse(localStorage.fz || '{}');
+    z.uz = 'besar';
+    z.uzv = 2;
+    localStorage.fz = JSON.stringify(z);
+  } catch (e) {}
+}
 if (!S.uz && !PRAT) {
-  S.uz = localStorage.fz ? 'kecil' : uzLayar();
+  S.uz = 'besar';
   try {
     const z = JSON.parse(localStorage.fz || '{}');
     z.uz = S.uz;
@@ -211,12 +223,12 @@ const accent = () => {
   r.setProperty('--ui', fl[1]);
   window.androidWarna && setTimeout(androidWarna);
   const m = $('meta[name=theme-color]');
-  m && m.setAttribute('content', dk ? '#121413' : a[1]);
+  m && m.setAttribute('content', dk ? '#000000' : a[1]);
 };
 theme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change', theme);
 const P = {};
-const VER = '2.9.74';
+const VER = '2.9.75';
 const REPORT = { wa: '6289506138191', url: '', nocors: false };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 let LAST = '#/',
