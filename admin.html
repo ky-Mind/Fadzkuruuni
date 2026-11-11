@@ -1061,6 +1061,20 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
+      /* Label jenis kelamin di tabel Pengguna & Pemain */
+      .tg.jkl {
+        background: color-mix(in srgb, #3b82f6 18%, transparent);
+      }
+      .tg.jkp {
+        background: color-mix(in srgb, #ec4899 18%, transparent);
+      }
+      .tg.jkx {
+        opacity: 0.7;
+      }
+      .jks {
+        flex-wrap: wrap;
+        margin: 6px 0 10px;
+      }
       .tg {
         display: inline-block;
         margin: 0 4px 4px 0;
@@ -2368,7 +2382,28 @@
         beda: 'Mana yang Beda',
         pola: 'Ingat Pola',
       };
-      /* Pengguna aplikasi (koleksi "pengguna"): akun (nama & email) dan tamu, jenis aplikasi, versi, HP, terakhir dibuka */
+      /* Jenis kelamin (dari Pengaturan › Akun & Profil pengguna): ringkasan + penyaring Semua / Laki-laki / Perempuan /
+         Belum diisi, dipakai tabel Pengguna aplikasi dan Pemain Teka-Teki Kitab */
+      const JKNM = { l: 'Laki-laki', p: 'Perempuan', '': 'Belum diisi' };
+      const jkDari = (x) => (x.jk == 'l' || x.jk == 'p' ? x.jk : '');
+      const jkTag = (x) => `<span class="tg jk${jkDari(x) || 'x'}">${JKNM[jkDari(x)]}</span>`;
+      const JKPIL = { penggunaA: 'semua', pemainG: 'semua' };
+      const jkSaring = (blok, L) =>
+        `<div class="hpk jks" style="justify-content:flex-start">${['semua', 'l', 'p', '']
+          .map((k) => {
+            const n = k == 'semua' ? L.length : L.filter((x) => jkDari(x) == k).length;
+            return `<button data-jkp="${k}" data-jkb="${blok}" class="${JKPIL[blok] === k ? 'on' : ''}">${k == 'semua' ? 'Semua' : JKNM[k]} · ${n}</button>`;
+          })
+          .join('')}</div>`;
+      const jkCocok = (blok, x) => JKPIL[blok] == 'semua' || jkDari(x) == JKPIL[blok];
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest && e.target.closest('[data-jkp]');
+        if (!b) return;
+        JKPIL[b.dataset.jkb] = b.dataset.jkp;
+        b.dataset.jkb == 'penggunaA' ? penggunaApp() : pemainGame();
+      });
+      /* Pengguna aplikasi (koleksi "pengguna"): akun (nama & email) dan tamu, jenis kelamin, jenis aplikasi, versi, HP,
+         terakhir dibuka */
       async function penggunaApp() {
         const el = $('#penggunaA');
         if (!el) return;
@@ -2398,13 +2433,14 @@
           apk = L.filter((x) => /^apk/.test(x.versi || '')).length;
         const wkt = (t) =>
           t && t.toDate ? t.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–';
-        el.innerHTML = `<h3>Pengguna aplikasi</h3><p>${L.length} pengguna (${akun} masuk akun, ${L.length - akun} tamu; ${apk} memakai aplikasi Android). Satu baris per akun atau per HP tamu, diperbarui sekali sehari saat aplikasi dibuka.</p>${
-          L.length
-            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pengguna</th><th>Aplikasi</th><th>Perangkat</th><th>Hari aktif</th><th>Terakhir</th><th></th></tr></thead><tbody>${L.map(
+        const LS = L.filter((x) => jkCocok('penggunaA', x));
+        el.innerHTML = `<h3>Pengguna aplikasi</h3><p>${L.length} pengguna (${akun} masuk akun, ${L.length - akun} tamu; ${apk} memakai aplikasi Android). Satu baris per akun atau per HP tamu, diperbarui sekali sehari saat aplikasi dibuka.</p>${jkSaring('penggunaA', L)}${
+          LS.length
+            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pengguna</th><th>Jenis kelamin</th><th>Aplikasi</th><th>Perangkat</th><th>Hari aktif</th><th>Terakhir</th><th></th></tr></thead><tbody>${LS.map(
                 (x) =>
-                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${esc((x.versi || '–').replace(/^apk /, 'Android ').replace(/^web /, 'Web '))}<br><small style="color:var(--mut)">${esc(x.jenis || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.hari || 0}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-udel="${esc(x.id)}" data-unm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
+                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${jkTag(x)}</td><td>${esc((x.versi || '–').replace(/^apk /, 'Android ').replace(/^web /, 'Web '))}<br><small style="color:var(--mut)">${esc(x.jenis || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.hari || 0}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-udel="${esc(x.id)}" data-unm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
               ).join('')}</tbody></table></div>`
-            : '<div class="empty">Belum ada data pengguna.</div>'
+            : `<div class="empty">${L.length ? 'Tidak ada pengguna di kategori ini.' : 'Belum ada data pengguna.'}</div>`
         }`;
       }
       async function pemainGame() {
@@ -2444,13 +2480,14 @@
             .join(' ');
         const wkt = (t) =>
           t && t.toDate ? t.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–';
-        el.innerHTML = `<h3>Pemain Teka-Teki Kitab</h3><p>${L.length} pemain (${akun} masuk akun, ${L.length - akun} tamu) · ${main}× main. Skor = hasil terakhir tiap permainan.</p>${
-          L.length
-            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pemain</th><th>Perangkat</th><th>Main</th><th>Permainan</th><th>Terakhir</th><th></th></tr></thead><tbody>${L.map(
+        const LS = L.filter((x) => jkCocok('pemainG', x));
+        el.innerHTML = `<h3>Pemain Teka-Teki Kitab</h3><p>${L.length} pemain (${akun} masuk akun, ${L.length - akun} tamu) · ${main}× main. Skor = hasil terakhir tiap permainan.</p>${jkSaring('pemainG', L)}${
+          LS.length
+            ? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Pemain</th><th>Jenis kelamin</th><th>Perangkat</th><th>Main</th><th>Permainan</th><th>Terakhir</th><th></th></tr></thead><tbody>${LS.map(
                 (x) =>
-                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${esc(x.perangkat || '–')}</td><td>${x.total || 0}×</td><td>${rinci(x) || '–'}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-pdel="${esc(x.id)}" data-pnm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
+                  `<tr><td><b>${esc(x.nama || 'Tamu')}</b><br><small style="color:var(--mut)">${x.tamu ? 'Tamu (belum masuk akun)' : esc(x.email || '')}</small></td><td>${jkTag(x)}</td><td>${esc(x.perangkat || '–')}</td><td>${x.total || 0}×</td><td>${rinci(x) || '–'}</td><td>${wkt(x.terakhir)}</td><td><button class="btn s" data-pdel="${esc(x.id)}" data-pnm="${esc(x.nama || 'Tamu')}">Hapus</button></td></tr>`
               ).join('')}</tbody></table></div>`
-            : '<div class="empty">Belum ada yang bermain.</div>'
+            : `<div class="empty">${L.length ? 'Tidak ada pemain di kategori ini.' : 'Belum ada yang bermain.'}</div>`
         }`;
       }
 

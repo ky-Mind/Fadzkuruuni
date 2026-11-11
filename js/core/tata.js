@@ -750,9 +750,11 @@ async function penggunaCatat() {
       perangkat: str(TMODEL || 'Lainnya'),
       jenis: str(tJenis()),
       versi: str(tVersi()),
+      /* Jenis kelamin dari Pengaturan › Akun & Profil: l / p / '' (tidak memberi tahu) */
+      jk: str(['l', 'p'].includes(S.jk) ? S.jk : ''),
     };
-  try {
-    const r = await fetch(FSURL.replace(/\/documents$/, '/documents:commit') + '?key=' + FBCFG.apiKey, {
+  const kirim = (F) =>
+    fetch(FSURL.replace(/\/documents$/, '/documents:commit') + '?key=' + FBCFG.apiKey, {
       method: 'POST',
       keepalive: true,
       headers: Object.assign({ 'content-type': 'application/json' }, tok ? { authorization: 'Bearer ' + tok } : {}),
@@ -772,8 +774,22 @@ async function penggunaCatat() {
         ],
       }),
     });
+  try {
+    let r = await kirim(F);
+    /* Aturan Firestore lama (belum mengenal "jk"): kirim ulang tanpa jenis kelamin */
+    if (r.status == 403) {
+      delete F.jk;
+      r = await kirim(F);
+    }
     if (r.ok) localStorage.fzpengguna = hari + id;
   } catch (e) {}
+}
+/* Jenis kelamin diubah: catatan pengguna diperbarui hari itu juga */
+function penggunaUlang() {
+  try {
+    localStorage.removeItem('fzpengguna');
+  } catch (e) {}
+  setTimeout(penggunaCatat, 500);
 }
 addEventListener('fbu', () => setTimeout(penggunaCatat, 3000));
 setTimeout(penggunaCatat, 8000);

@@ -205,7 +205,7 @@ ${pnav(jn(j.no - 1) && [`#/kitab/${k.id}/${j.no - 1}`, 'Juz ' + (j.no - 1)], jn(
   const vw = $('#view');
   let y0 = vw.scrollTop,
     usr = 0;
-  ['touchmove', 'wheel', 'keydown'].forEach((n) => vw.addEventListener(n, () => (usr = Date.now()), { passive: true }));
+  ['touchmove', 'wheel', 'keydown'].forEach((n) => halDengar(vw, n, () => (usr = Date.now()), { passive: true }));
   vw.onscroll = () => {
     const y = vw.scrollTop,
       d = y - y0;
@@ -598,14 +598,14 @@ function kitabCubit(kp, zoomKe) {
     e.preventDefault();
     seret = { x: e.clientX, y: e.clientY, tx, ty };
   });
-  addEventListener('mousemove', (e) => {
+  halDengar(window, 'mousemove', (e) => {
     if (!seret) return;
     tx = seret.tx + e.clientX - seret.x;
     ty = seret.ty + e.clientY - seret.y;
     batas();
     terap();
   });
-  addEventListener('mouseup', () => (seret = null));
+  halDengar(window, 'mouseup', () => (seret = null));
   kp.addEventListener('dblclick', (e) => {
     if (!geser() || Date.now() - (+kp.dataset.dbl || 0) < 600) return;
     if (kp.classList.contains('kzum')) stabil();

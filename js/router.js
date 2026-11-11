@@ -35,6 +35,27 @@ const sesiBaca = (h) => {
 let RIWS = '';
 /* LAST/LASTT: halaman asal untuk laporan. Video tutorial (dibuka dari halaman laporan) bukan halaman asal,
    agar kembali dan selesai melapor tidak bolak-balik ke tutorial */
+/* Pendengar peristiwa & pembersih per halaman: semuanya dilepas saat halaman berganti, agar pemakaian lama tidak
+   menumpuk pendengar (memori naik, HP makin berat, WebView bisa dimuat ulang paksa) */
+let HALAB = new AbortController(),
+  HALBS = [];
+function halDengar(t, n, f, o) {
+  o = typeof o == 'boolean' ? { capture: o } : Object.assign({}, o);
+  o.signal = HALAB.signal;
+  t.addEventListener(n, f, o);
+}
+const halBersih = (f) => HALBS.push(f);
+function halSelesai() {
+  HALAB.abort();
+  HALAB = new AbortController();
+  const L = HALBS;
+  HALBS = [];
+  L.forEach((f) => {
+    try {
+      f();
+    } catch (e) {}
+  });
+}
 function route() {
   const lw = /^#\/tutorial/;
   if (lw.test(location.hash)) {
@@ -99,6 +120,7 @@ function route() {
     setSz();
     applyNav();
     v.style.transform = v.style.opacity = v.style.transition = '';
+    halSelesai();
     v.innerHTML = pg.html;
     if (window.DARIMENU === a && !b) {
       const bk = $('.bar .bk', v);

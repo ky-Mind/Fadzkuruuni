@@ -239,6 +239,7 @@ function seretMelayang(el, kunci) {
     Object.assign(el.style, { left: l + 'px', top: t + 'px', right: 'auto', bottom: 'auto', transform: 'none' });
   };
   const pulihkan = () => {
+    if (!el.isConnected) return removeEventListener('resize', pulihkan);
     const p = S[kunci];
     if (p && el.isConnected && !el.hidden) taruh(p.x, p.y);
   };

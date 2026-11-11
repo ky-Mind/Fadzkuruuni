@@ -185,8 +185,10 @@ P.kiblat = () => {
           }
           if (!gbr) gbr = requestAnimationFrame(gambar);
         };
-        addEventListener('deviceorientationabsolute', f, true);
-        addEventListener('deviceorientation', f, true);
+        /* Kompas berhenti saat halaman ditinggalkan (sensor ±60 kali/detik, dulu terus berjalan di latar) */
+        halDengar(window, 'deviceorientationabsolute', f, true);
+        halDengar(window, 'deviceorientation', f, true);
+        halBersih(() => gbr && cancelAnimationFrame(gbr));
         kompasOn = 1;
         rotUI();
         if (M && S.kmrot !== false) M.setView([S.loc.lat, S.loc.lng], Math.max(M.getZoom(), 15));
@@ -326,6 +328,20 @@ P.kiblat = () => {
             rotateControl: false,
             compassBearing: false,
           }).setView([S.loc.lat, S.loc.lng], 5);
+          /* Peta dilepas saat halaman ditinggalkan (Leaflet memasang pendengar di window) */
+          const m = M;
+          halBersih(() => {
+            if (M === m) M = null;
+            try {
+              m.stop();
+              /* Ditunda sampai animasi zoom/geser peta selesai (melepas di tengah animasi memicu galat Leaflet) */
+              setTimeout(() => {
+                try {
+                  m.remove();
+                } catch (e) {}
+              }, 1500);
+            } catch (e) {}
+          });
           lap.peta = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 21,
             maxNativeZoom: 19,

@@ -756,7 +756,8 @@ P.ai = () => ({
         v.addEventListener(n, () => (v._ux = Date.now()), { passive: true })
       );
     }
-    v.addEventListener(
+    halDengar(
+      v,
       'scroll',
       function f() {
         if (!$('#aic')) return v.removeEventListener('scroll', f);

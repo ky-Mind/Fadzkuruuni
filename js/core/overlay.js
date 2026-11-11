@@ -103,6 +103,11 @@ function kymindBuka() {
   d.innerHTML = '<iframe src="kymind/?tanam=1" title="KyMind" allow="fullscreen; autoplay"></iframe>';
   document.body.append(d);
   KYM_BUKA = true;
+  /* Aplikasi Android baru: tetap terkunci walau aplikasi ditutup paksa lalu dibuka lagi */
+  if (kymKunci())
+    try {
+      localStorage.fzKym = 1;
+    } catch (e) {}
   const fs = d.requestFullscreen || d.webkitRequestFullscreen;
   try {
     const p = fs && fs.call(d);
@@ -132,10 +137,32 @@ new MutationObserver(() => {
     window.androidWarna && androidWarna();
   }
 }).observe(document.body, { childList: true });
-/* Satu-satunya jalan keluar: halaman ke latar belakang. Peramban: visibilitychange; aplikasi Android: onPause memanggil
-   window.fadzLatar (APK 2.6.29 ke atas) */
-document.addEventListener('visibilitychange', () => document.hidden && KYM_BUKA && kymindTutup());
-window.fadzLatar = () => KYM_BUKA && kymindTutup();
+/* Jalan keluar:
+   - Aplikasi Android 2.6.33 ke atas (FadzAndroid.layarMatiSiap): HANYA tombol daya (layar mati, fzLayarMati). Tombol Home,
+     pindah aplikasi, menutup paksa / menghapus dari Terbaru tidak membebaskan: saat dibuka lagi KyMind tampil lagi.
+   - APK lama: onPause memanggil window.fadzLatar. Peramban: visibilitychange (tab/aplikasi ke latar, termasuk tombol
+     daya), karena peramban tidak bisa membedakan tombol daya dari pindah tab. */
+const kymKunci = () => {
+  try {
+    return !!(window.ANDROID && window.FadzAndroid && FadzAndroid.layarMatiSiap && FadzAndroid.layarMatiSiap());
+  } catch (e) {
+    return false;
+  }
+};
+document.addEventListener('visibilitychange', () => document.hidden && KYM_BUKA && !kymKunci() && kymindTutup());
+window.fadzLatar = () => KYM_BUKA && !kymKunci() && kymindTutup();
+window.fzLayarMati = () => {
+  try {
+    localStorage.removeItem('fzKym');
+  } catch (e) {}
+  KYM_BUKA && kymindTutup();
+};
+try {
+  if (localStorage.fzKym == 1) {
+    if (kymKunci()) setTimeout(kymindBuka, 50);
+    else localStorage.removeItem('fzKym');
+  }
+} catch (e) {}
 document.addEventListener(
   'click',
   (e) => {

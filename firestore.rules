@@ -62,7 +62,8 @@ service cloud.firestore {
     match /pemain/{id} {
       allow read: if bisa('statistik');
       allow delete: if bisa('statistik') || (request.auth != null && request.auth.uid == id);
-      allow create, update: if request.resource.data.keys().hasOnly(['nama', 'email', 'tamu', 'terakhir', 'perangkat', 'main', 'selesai', 'skor', 'total'])
+      allow create, update: if request.resource.data.keys().hasOnly(['nama', 'email', 'tamu', 'terakhir', 'perangkat', 'main', 'selesai', 'skor', 'total', 'jk'])
+        && request.resource.data.get('jk', '') in ['', 'l', 'p']
         && request.resource.data.nama is string && request.resource.data.nama.size() <= 60
         && request.resource.data.perangkat is string && request.resource.data.perangkat.size() <= 60
         && request.resource.data.get('main', {}).size() <= 20
@@ -78,7 +79,8 @@ service cloud.firestore {
     match /pengguna/{id} {
       allow read: if bisa('statistik');
       allow delete: if bisa('statistik') || (request.auth != null && request.auth.uid == id);
-      allow create, update: if request.resource.data.keys().hasOnly(['nama', 'email', 'tamu', 'perangkat', 'jenis', 'versi', 'terakhir', 'hari'])
+      allow create, update: if request.resource.data.keys().hasOnly(['nama', 'email', 'tamu', 'perangkat', 'jenis', 'versi', 'terakhir', 'hari', 'jk'])
+        && request.resource.data.get('jk', '') in ['', 'l', 'p']
         && request.resource.data.nama is string && request.resource.data.nama.size() <= 60
         && request.resource.data.perangkat is string && request.resource.data.perangkat.size() <= 60
         && request.resource.data.jenis is string && request.resource.data.jenis.size() <= 30
