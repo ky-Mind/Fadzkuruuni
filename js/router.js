@@ -43,7 +43,8 @@ function route() {
   $('#au')?.pause();
   const [a = '', b, c, d] = location.hash.slice(2).split('/');
   /* Alamat tak dikenal (mis. '#null'): ke Beranda yang sebenarnya, agar menu bawah tetap ada */
-  if (a && !P[a] && !(a == 'quran' && b)) {
+  /* Hanya fungsi halaman (P juga menyimpan pewaktu seperti P.tq / P.tk) */
+  if (a && typeof P[a] != 'function' && !(a == 'quran' && b)) {
     location.replace('#/');
     return;
   }

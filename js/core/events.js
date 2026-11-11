@@ -337,6 +337,7 @@ function keInduk(up) {
    (mis. Surah → Al-Qur'an → Beranda). Di Beranda mengembalikan 'akar': aplikasi lalu meminta tekan sekali lagi untuk keluar.
    Mode Kartu/Mushaf Al-Qur'an bukan lapisan: kembali langsung keluar dari surah, tidak berganti mode. */
 window.fadzKembali = () => {
+  if (window.gsSedang && gsSedang()) return 'ok';
   const o = $$('.back-d');
   if (o.length) {
     const d = o[o.length - 1];
@@ -408,7 +409,7 @@ function vHtml(h) {
     const [a = '', b, c, d] = h.replace(/^#\/?/, '').split('/');
     const pr = PRATINJAU[a] && PRATINJAU[a](b, c, d);
     if (pr) return pr;
-    return ((a == 'quran' && b ? surah(b, c) : (P[a] || P[''])(b, c, d)) || {}).html || '';
+    return ((a == 'quran' && b ? surah(b, c) : (typeof P[a] == 'function' ? P[a] : P[''])(b, c, d)) || {}).html || '';
   } catch (e) {
     return '';
   }
@@ -538,7 +539,10 @@ function gsTabHtml(nb) {
       width: v.offsetWidth + 'px',
       height: v.offsetHeight + 'px',
     });
-    blk ? app.insertBefore(peek, v) : app.append(peek);
+    /* Selalu SESUDAH #view di DOM (lapisan atas-bawah diatur z-index). Pratinjau berisi id yang sama dengan halaman
+       tujuan (mis. #ql daftar surah); bila ada di depan #view, kode halaman yang dipasang router mengisi pratinjau
+       (yang lalu dibuang) sehingga halaman asli kosong/hitam setelah geser kembali */
+    app.append(peek);
     /* Kepala halaman yang menempel (dipasang router lewat barLekat) juga dipasang di pratinjau, agar letaknya sama */
     const lk =
       peek.querySelector(':scope>.rh') ||
@@ -710,6 +714,15 @@ function gsTabHtml(nb) {
     Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
   let gsW = null,
     tepi = false;
+  /* Halaman yang punya gerakan samping sendiri (balik halaman kitab, cubit/geser panel kitab kelas, kompas, kalender,
+     video, tasbih) hanya bisa kembali lewat tepi kiri, agar dua gerakan tidak berebut (dulu: macet, layar kosong) */
+  const GS_TEPI_SAJA = ['tasbih', 'kiblat', 'kalender', 'tutorial', 'jadwal'],
+    GS_TEPI_SUB = ['kitab', 'quran', 'maulid', 'jeda', 'baca', 'bacaan', 'kelas', 'shf', 'asma', 'hadits'],
+    GS_TEPI_EL = '#kp,#kzk,[data-kzkgeser],video,canvas,.vp,.kmp,.cal,iframe,.car,.chips';
+  /* Gerakan kembali bawaan Android (geser dari tepi layar) saat geseran aplikasi sedang berjalan atau baru saja
+     selesai: diabaikan, agar tidak kembali dua kali (lompat ke halaman lain / keluar) */
+  let gsAkhir = 0;
+  window.gsSedang = () => (sx !== null && lock == 'h') || sibuk || Date.now() - gsAkhir < 700;
   const gsLapis = () => v.classList.add('gsj');
   v.addEventListener(
     'touchstart',
@@ -748,7 +761,13 @@ function gsTabHtml(nb) {
       /* Geser keluar seperti Telegram: di subhalaman tanpa tab dan tanpa bagian berurutan (.pnav), geser ke kanan dari mana
          saja = kembali (halaman sebelumnya tampil di belakang). Halaman bertab / berbagian tetap hanya dari tepi kiri. */
       const sub = document.body.classList.contains('subhal'),
-        bebas = sub && !v.querySelector('.pnav') && !(tabSemua().length > 1);
+        bebas =
+          sub &&
+          !v.querySelector('.pnav') &&
+          !(tabSemua().length > 1) &&
+          !GS_TEPI_SAJA.includes(ra) &&
+          !(GS_TEPI_SUB.includes(ra) && rb) &&
+          !e.target.closest(GS_TEPI_EL);
       if ((tepi && sub) || bebas || (window.DARIMENU === ra && !rb)) mode = 'back';
       else if (v.querySelector(':scope > #ay')) sx = null;
     },
@@ -840,8 +859,9 @@ function gsTabHtml(nb) {
     /* Tujuan dikunci saat jari dilepas: geseran berikutnya tidak boleh mengganti tujuan selagi halaman meluncur (dulu
        bisa menjadi alamat '#null' → halaman tanpa menu bawah) */
     const tj = tujuan;
+    gsAkhir = Date.now();
     if (mode == 'back') {
-      if (tj && (dx > w * 0.33 || vel > GS_KIBAS)) {
+      if (tj && hNorm(tj) != hNorm(location.hash) && (dx > w * 0.33 || vel > GS_KIBAS)) {
         sibuk = true;
         meluncur(
           w,
