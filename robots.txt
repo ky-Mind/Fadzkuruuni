@@ -1,0 +1,10 @@
+# Fadzkuruuni: semua mesin pencari & AI boleh membaca situs; halaman teknis/admin tidak diindeks
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /masuk-app.html
+Disallow: /pindah.html
+Disallow: /teka-teki.html
+Disallow: /api/
+
+Sitemap: https://majelisfadzkuruuni.web.id/sitemap.xml
