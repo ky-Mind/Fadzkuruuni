@@ -1,6 +1,7 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
 const YANG_BARU = {
+  '2.9.82': ['Update'],
   '2.9.81': ['Update'],
   '2.9.80': ['Update'],
   '2.9.79': ['Update'],

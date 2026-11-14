@@ -6,9 +6,9 @@ export const config = { runtime: 'edge' };
 
 /* Model dicoba berurutan; bila satu tidak tersedia untuk akun ini, pakai berikutnya */
 const MODEL = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
-/* Asal yang diizinkan: situs di Vercel, domain sendiri (fadzkuruuni.xianzing.my.id), dan uji lokal */
+/* Asal yang diizinkan: situs di Vercel, domain sendiri (majelisfadzkuruuni.web.id), dan uji lokal */
 const ASAL =
-  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/majelisfadzkuruuni\.web\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 const SISTEM = `Kamu adalah "Fadz AI", asisten tanya-jawab di aplikasi ibadah Fadzkuruuni milik Pondok Pesantren Fadzkuruuni.
 Jawab dalam bahasa Indonesia yang santun, ringkas, dan mudah dipahami santri maupun masyarakat umum.
