@@ -78,7 +78,7 @@ P.dukung = () => ({
     /* Bagikan tautan rilis terbaru: lembar berbagi HP (WhatsApp, Instagram, dll.); tautan juga disalin */
     $('#dkbg').onclick = async (e) => {
       e.preventDefault();
-      const t = `Assalamu'alaikum! Yuk pakai aplikasi Fadzkuruuni: Al-Qur'an, jadwal salat & adzan, kitab kuning, doa, dan Fadz AI. Gratis tanpa iklan.\n\nUnduh aplikasi Android:\n${UNDUH_APK}\n\nAtau buka versi web:\nhttps://fadzkuruuni.vercel.app`;
+      const t = `Assalamu'alaikum! Yuk pakai aplikasi Fadzkuruuni: Al-Qur'an, jadwal salat & adzan, kitab kuning, doa, dan Fadz AI. Gratis tanpa iklan.\n\nUnduh aplikasi Android:\n${UNDUH_APK}\n\nAtau buka versi web:\nhttps://majelisfadzkuruuni.web.id`;
       salinTeks(t);
       if (window.ANDROID && window.FadzAndroid.bagikan) {
         andPanggil('bagikan', t);
