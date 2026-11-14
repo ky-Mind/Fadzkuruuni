@@ -4,7 +4,7 @@
    Juga: statistik pemakaian ringan tanpa data pribadi (koleksi "stat", satu dokumen per hari). */
 const FSURL = 'https://firestore.googleapis.com/v1/projects/' + FBCFG.projectId + '/databases/(default)/documents';
 const TPRATINJAU = new URLSearchParams(location.search).has('pratinjau');
-const TPEMILIK = ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
+const TPEMILIK = ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com', 'info@majelisfadzkuruuni.web.id'];
 
 /* Semua tujuan yang bisa dipakai di pintasan, Semua Menu, dan menu bawah: rute -> [ikon, nama] */
 const TPOOL = (() => {

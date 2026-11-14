@@ -15,7 +15,7 @@ import { FS, jawab, b64u, b64uTeks, dariB64u, verifikasi, adminkah } from './_fi
 
 export const config = { runtime: 'edge' };
 
-const KONTAK = 'mailto:ponpesfadzkuruuni@gmail.com';
+const KONTAK = 'mailto:info@majelisfadzkuruuni.web.id';
 const teks = (s) => new TextEncoder().encode(s);
 const gabung = (...a) => {
   const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0));
