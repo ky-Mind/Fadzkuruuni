@@ -16,6 +16,7 @@ Catatan: login Google tidak berjalan dari `file://`; buka lewat server atau host
 Buka `https://majelisfadzkuruuni.web.id/admin.html`, lalu masuk dengan Google memakai salah satu email admin:
 - hilmykia@gmail.com
 - ponpesfadzkuruuni@gmail.com
+- info@majelisfadzkuruuni.web.id (akun Google dengan email domain sendiri)
 
 Di sana terlihat semua laporan (bug, salah tulis, konten kurang, saran) beserta foto, halaman asal (bisa langsung dibuka), nama pelapor, kontak, dan perangkat. Status bisa diubah (Baru, Diproses, Selesai), diberi catatan, atau dihapus.
 

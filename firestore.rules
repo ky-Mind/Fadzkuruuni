@@ -6,7 +6,7 @@ service cloud.firestore {
     function isPemilik() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email.lower() in ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
+        && request.auth.token.email.lower() in ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com', 'info@majelisfadzkuruuni.web.id'];
     }
     // Admin = pemilik + email di dokumen config/admin (diatur dari dashboard > Admin)
     function isAdmin() {

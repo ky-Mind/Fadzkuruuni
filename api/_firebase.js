@@ -1,7 +1,7 @@
 /* api/_firebase.js - Bagian bersama fungsi Vercel (bukan endpoint: berkas berawalan _ tidak dijadikan rute).
    Verifikasi ID token Firebase, cek admin, dan alamat Firestore REST. Dipakai api/kelas.js dan api/push.js. */
 export const PID = 'fadzkuruuni-88a8b';
-export const PEMILIK = ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com'];
+export const PEMILIK = ['hilmykia@gmail.com', 'ponpesfadzkuruuni@gmail.com', 'info@majelisfadzkuruuni.web.id'];
 export const FS = `https://firestore.googleapis.com/v1/projects/${PID}/databases/(default)/documents`;
 const JSONH = { 'content-type': 'application/json', 'cache-control': 'no-store' };
 export const jawab = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: JSONH });

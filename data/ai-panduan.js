@@ -287,8 +287,8 @@ const AI_PANDUAN = [
   ],
   [
     'Alamat situs',
-    'alamat situs web domain link website buka di browser laptop komputer majelisfadzkuruuni web.id vercel',
-    'Situs resmi Fadzkuruuni: https://majelisfadzkuruuni.web.id (www ikut dialihkan ke sana). Aplikasi Android juga memakai alamat ini; saat pertama dibuka setelah pembaruan, data di HP (pengaturan, penanda, riwayat, status masuk akun) dipindah otomatis, dan kitab/Al-Quran offline diunduh ulang otomatis saat Wi-Fi.',
+    'alamat situs web domain link website email kontak hubungi buka di browser laptop komputer majelisfadzkuruuni web.id vercel',
+    'Situs resmi Fadzkuruuni: https://majelisfadzkuruuni.web.id (www ikut dialihkan ke sana). Aplikasi Android juga memakai alamat ini; saat pertama dibuka setelah pembaruan, data di HP (pengaturan, penanda, riwayat, status masuk akun) dipindah otomatis, dan kitab/Al-Quran offline diunduh ulang otomatis saat Wi-Fi. Email resmi untuk kontak, pertanyaan, dan permintaan hapus data: info@majelisfadzkuruuni.web.id.',
     '#/tentang',
   ],
   [
