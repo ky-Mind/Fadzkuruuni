@@ -4,7 +4,7 @@
 export const config = { runtime: 'edge' };
 
 const ASAL =
-  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/majelisfadzkuruuni\.web\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const MAKS = 900,
   POTONG = 180;
 

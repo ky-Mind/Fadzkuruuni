@@ -5,9 +5,9 @@ export const config = { runtime: 'edge' };
 
 /* large-v3 (lebih teliti untuk ucapan campuran Indonesia-Arab) didahulukan; turbo sebagai cadangan */
 const MODEL = ['whisper-large-v3', 'whisper-large-v3-turbo'];
-/* Asal yang diizinkan: situs di Vercel, domain sendiri (fadzkuruuni.xianzing.my.id), dan uji lokal */
+/* Asal yang diizinkan: situs di Vercel, domain sendiri (majelisfadzkuruuni.web.id), dan uji lokal */
 const ASAL =
-  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/fadzkuruuni\.xianzing\.my\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  /^https:\/\/([a-z0-9-]+\.)*vercel\.app$|^https:\/\/majelisfadzkuruuni\.web\.id$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const MAKS = 4 * 1024 * 1024;
 /* Petunjuk ejaan: daftar istilah (bukan kalimat), agar Whisper menulis salam & istilah keagamaan dengan benar.
    Bila suara tidak jelas Whisper kadang mengulang petunjuk ini; hasil seperti itu dibuang di bawah (mirip()). */
