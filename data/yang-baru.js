@@ -1,6 +1,13 @@
 /* data/yang-baru.js - Ringkasan "Yang baru" per versi web (ditampilkan sekali setelah pembaruan, lihat yangBaruCek).
-   Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. */
+   Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
+   dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.85': [
+    'Alamat situs baru: majelisfadzkuruuni.web.id',
+    'Aplikasi Android memakai alamat baru; pengaturan, penanda, riwayat, dan status masuk akun dipindah otomatis',
+    "Kitab & Al-Qur'an offline diunduh ulang otomatis saat tersambung Wi-Fi",
+    'Foto profil yang tidak pantas akan diberi peringatan agar diganti',
+  ],
   '2.9.84': ['Update'],
   '2.9.83': ['Update'],
   '2.9.82': ['Update'],

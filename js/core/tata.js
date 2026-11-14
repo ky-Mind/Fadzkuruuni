@@ -793,6 +793,126 @@ function penggunaUlang() {
 }
 addEventListener('fbu', () => setTimeout(penggunaCatat, 3000));
 setTimeout(penggunaCatat, 8000);
+
+/* Profil (nama & foto yang tampil di Kelas online) dikirim ke koleksi "profil" agar admin bisa memantau foto yang tidak
+   pantas (admin.html tab Profil): admin memberi peringatan, lalu menghapus foto bila tidak diganti. Pengguna tidak bisa
+   mengubah kolom peringatan/dihapus (firestore.rules). "kunci" menandai foto mana yang diperingatkan/dihapus, jadi
+   peringatan otomatis gugur begitu fotonya diganti. */
+const profilKunci = (f) => (f ? String(f).length + ':' + String(f).slice(-40) : '');
+const profilAktif = () => window.__profilUji || (!TPRATINJAU && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+async function profilAkses() {
+  const u = typeof FBU != 'undefined' && FBU ? FBU : null,
+    id = u ? u.uid : tTamuId();
+  let tok = '';
+  if (u)
+    try {
+      tok = await u.getIdToken();
+    } catch (e) {
+      return null;
+    }
+  return id ? { u, id, tok } : null;
+}
+const profilUrl = (id) => FSURL + '/profil/' + id + '?key=' + FBCFG.apiKey;
+/* Kirim bila foto/nama berubah sejak kiriman terakhir (dan sekali sehari agar admin melihat yang masih aktif) */
+async function profilKirim(paksa) {
+  if (!profilAktif() || !navigator.onLine) return;
+  const a = await profilAkses();
+  if (!a) return;
+  const foto = (window.fotoProfil && fotoProfil()) || '',
+    nama = String((a.u && a.u.displayName) || S.nm || 'Tamu').slice(0, 60),
+    tanda = tHari() + a.id + profilKunci(foto) + nama;
+  try {
+    if (!paksa && localStorage.fzprofil == tanda) return;
+    /* Belum pernah punya foto & belum pernah terkirim: tidak perlu dicatat */
+    if (!foto && !localStorage.fzprofil) return;
+  } catch (e) {}
+  if (foto.length > 200000) return;
+  try {
+    const r = await fetch(FSURL.replace(/\/documents$/, '/documents:commit') + '?key=' + FBCFG.apiKey, {
+      method: 'POST',
+      keepalive: true,
+      headers: Object.assign({ 'content-type': 'application/json' }, a.tok ? { authorization: 'Bearer ' + a.tok } : {}),
+      body: JSON.stringify({
+        writes: [
+          {
+            update: {
+              name: 'projects/' + FBCFG.projectId + '/databases/(default)/documents/profil/' + a.id,
+              fields: { nama: { stringValue: nama }, foto: { stringValue: foto } },
+            },
+            updateMask: { fieldPaths: ['nama', 'foto'] },
+            updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
+          },
+        ],
+      }),
+    });
+    if (r.ok) localStorage.fzprofil = tanda;
+  } catch (e) {}
+}
+window.profilKirim = profilKirim;
+/* Baca keputusan admin untuk profil sendiri */
+async function profilCek() {
+  if (!profilAktif() || !navigator.onLine) return;
+  const a = await profilAkses();
+  if (!a) return;
+  let d;
+  try {
+    const r = await fetch(profilUrl(a.id), { headers: a.tok ? { authorization: 'Bearer ' + a.tok } : {} });
+    if (!r.ok) return;
+    d = (await r.json()).fields || {};
+  } catch (e) {
+    return;
+  }
+  const peta = (m) => {
+    const f = (m && m.mapValue && m.mapValue.fields) || null;
+    if (!f) return null;
+    const o = {};
+    for (const k in f) o[k] = f[k].stringValue != null ? f[k].stringValue : f[k].timestampValue || '';
+    return o;
+  };
+  const kini = profilKunci((window.fotoProfil && fotoProfil()) || '');
+  if (!kini) return;
+  const hapus = peta(d.dihapus),
+    ingat = peta(d.peringatan);
+  if (hapus && hapus.kunci == kini) {
+    /* Admin menghapus foto ini: foto sendiri dihapus; foto dari akun Google disembunyikan di aplikasi */
+    if (S.foto && profilKunci(S.foto) == kini) {
+      S.foto = null;
+      S.fotoPos = null;
+      typeof idbSimpan == 'function' && idbSimpan('fotoAsli', null).catch(() => {});
+    } else if (a.u && a.u.photoURL) S.fotoGoogleNo = a.u.photoURL;
+    save();
+    tataNav();
+    route();
+    profilKirim(1);
+    konfirmasi(
+      'Foto profil dihapus',
+      (hapus.pesan ? hapus.pesan + ' ' : '') +
+        'Foto profilmu dihapus oleh admin karena dinilai tidak pantas. Silakan pasang foto lain yang sopan.',
+      'Pasang foto',
+      () => (location.hash = '#/pengaturan/akun')
+    );
+    return;
+  }
+  if (ingat && ingat.kunci == kini) {
+    try {
+      if (sessionStorage.fzprofilIngat == ingat.t) return;
+      sessionStorage.fzprofilIngat = ingat.t;
+    } catch (e) {}
+    konfirmasi(
+      'Peringatan foto profil',
+      (ingat.pesan || 'Foto profilmu dinilai tidak pantas untuk tampil di Kelas online.') +
+        ' Mohon ganti fotomu. Bila tidak diganti, admin akan menghapusnya.',
+      'Ganti foto',
+      () => (location.hash = '#/pengaturan/akun')
+    );
+  }
+}
+async function profilJalan() {
+  await profilKirim();
+  await profilCek();
+}
+addEventListener('fbu', () => setTimeout(profilJalan, 4000));
+setTimeout(profilJalan, 9000);
 function tataKirim() {
   if (!tStatAktif() || !navigator.onLine) return;
   const hari = tHari(),

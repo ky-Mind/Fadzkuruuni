@@ -19,6 +19,7 @@ service cloud.firestore {
 
     // Kategori akses admin tambahan (config/admin.akses: { email: ['kelas', ...] }):
     //   semua = semua akses; kelas = pengajar Kelas online; laporan = laporan & donasi; tampilan = tampilan aplikasi; statistik = peta & statistik.
+    //   profil = memantau foto profil pengguna (peringatan & hapus foto yang tidak pantas).
     // Admin yang belum diberi kategori (data lama) dianggap "semua". Pemilik selalu semua akses.
     function aksesAdmin() {
       return get(/databases/$(database)/documents/config/admin).data.get('akses', {}).get(request.auth.token.email.lower(), ['semua']);
@@ -88,6 +89,28 @@ service cloud.firestore {
         && ((request.auth != null && id == request.auth.uid && request.resource.data.tamu == false
               && request.resource.data.email == request.auth.token.get('email', ''))
           || (id.matches('^tamu-[a-z0-9]{16}$') && request.resource.data.tamu == true && request.resource.data.email == ''));
+    }
+
+    // Profil pengguna (nama & foto yang tampil di Kelas online): ditulis pemiliknya (akun = uid, tamu = tamu-xxxx),
+    // dipantau admin berakses 'profil'. Admin memberi peringatan / menghapus foto; pengguna tidak bisa mengubah
+    // kolom peringatan & dihapus.
+    match /profil/{id} {
+      function pemilikProfil() {
+        return (request.auth != null && id == request.auth.uid) || id.matches('^tamu-[a-z0-9]{16}$');
+      }
+      function isiProfilSah() {
+        return request.resource.data.nama is string && request.resource.data.nama.size() <= 60
+          && request.resource.data.foto is string && request.resource.data.foto.size() <= 200000;
+      }
+      allow get: if bisa('profil') || pemilikProfil();
+      allow list: if bisa('profil');
+      allow delete: if bisa('profil') || (request.auth != null && request.auth.uid == id);
+      allow create: if pemilikProfil() && request.resource.data.keys().hasOnly(['nama', 'foto', 't']) && isiProfilSah();
+      allow update: if (pemilikProfil()
+          && request.resource.data.keys().hasOnly(['nama', 'foto', 't', 'peringatan', 'dihapus'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['peringatan', 'dihapus'])
+          && isiProfilSah())
+        || (bisa('profil') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['foto', 'peringatan', 'dihapus']));
     }
 
     // Kelas online: jadwal & status dibaca semua orang, hanya admin yang membuat / memulai / mengakhiri / menghapus

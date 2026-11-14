@@ -9,7 +9,7 @@ const AI_PANDUAN = [
     'Menu utama aplikasi',
     'menu navigasi bawah sidebar beranda letak fitur semua menu lainnya',
     'Menu bawah (HP) atau samping (komputer): Beranda, Al-Qur\'an, Fadz AI, Kelas online, Pengaturan. Fitur lain ada di pintasan Beranda dan di "Lainnya" (Semua Menu): Ibadah (Al-Qur\'an, Wirid & Doa, Sholawat, Jadwal Salat, Kiblat, Tahlil & Yasin, Maulid, Tasbih, Asmaul Husna), Keuangan (Zakat & Sedekah, Kalkulator Zakat, Waris), Belajar (Fadz AI, Kelas online, Kitab Kuning, Hadits Nabi, Kata Mutiara), Lainnya (Kalender, Penanda, Pengaturan, Tentang). Urutan menu bawah & pintasan bisa diatur di Pengaturan › Beranda. Halaman yang dibuka dari Semua Menu kembali (panah ← / geser kanan / tombol kembali HP) ke Semua Menu.',
-    'Akun & Profil (seperti Instagram): ketuk foto atau Edit foto untuk memilih foto dari galeri, lalu cubit dengan dua jari untuk memperbesar dan seret untuk menggeser, tekan Selesai. Foto yang sudah ada bisa Atur ukuran & posisi atau Hapus. Nama dan Jenis kelamin diubah di halamannya masing-masing (ketuk kotaknya). Jenis kelamin yang diisi ikut terlihat oleh admin di daftar pengguna; pilih "Memilih untuk tidak memberi tahu" bila tidak ingin. Admin melihat baris Dashboard admin › Buka. Di subhalaman mana pun, geser ke kanan dari mana saja untuk kembali (seperti Telegram), kecuali halaman bertab yang memakai geser untuk pindah tab.',
+    'Akun & Profil (seperti Instagram): ketuk foto atau Edit foto untuk memilih foto dari galeri, lalu cubit dengan dua jari untuk memperbesar dan seret untuk menggeser, tekan Selesai. Foto yang sudah ada bisa Atur ukuran & posisi atau Hapus. Nama dan Jenis kelamin diubah di halamannya masing-masing (ketuk kotaknya). Jenis kelamin yang diisi ikut terlihat oleh admin di daftar pengguna; pilih "Memilih untuk tidak memberi tahu" bila tidak ingin. Foto profil (yang tampil di Kelas online) dipantau admin: foto yang tidak pantas diberi peringatan agar diganti, dan bila tidak diganti admin menghapusnya; peringatan muncul saat aplikasi dibuka, tombol Ganti foto membuka Akun & Profil. Admin melihat baris Dashboard admin › Buka. Di subhalaman mana pun, geser ke kanan dari mana saja untuk kembali (seperti Telegram), kecuali halaman bertab yang memakai geser untuk pindah tab.',
     '#/menu',
   ],
   [
@@ -284,6 +284,12 @@ const AI_PANDUAN = [
     'widget layar utama home screen jadwal android',
     'Di HP Android: tekan lama area kosong layar utama › Widget › cari Fadzkuruuni › pilih Jadwal Salat atau Pengingat Salat › Tambah.',
     '#/tutorial/widget',
+  ],
+  [
+    'Alamat situs',
+    'alamat situs web domain link website buka di browser laptop komputer majelisfadzkuruuni web.id vercel',
+    'Situs resmi Fadzkuruuni: https://majelisfadzkuruuni.web.id (www ikut dialihkan ke sana). Aplikasi Android juga memakai alamat ini; saat pertama dibuka setelah pembaruan, data di HP (pengaturan, penanda, riwayat, status masuk akun) dipindah otomatis, dan kitab/Al-Quran offline diunduh ulang otomatis saat Wi-Fi.',
+    '#/tentang',
   ],
   [
     'Tentang pondok',

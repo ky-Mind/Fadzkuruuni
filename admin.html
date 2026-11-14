@@ -1245,6 +1245,91 @@
         font-weight: 600;
         margin-top: 4px;
       }
+      /* Tab Profil */
+      .prg {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .prk {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px;
+        border: 1px solid var(--line, rgba(127, 127, 127, 0.25));
+        border-radius: 12px;
+        min-width: 0;
+      }
+      .prk.ingat {
+        border-color: #e0a030;
+      }
+      .prk.hapus {
+        opacity: 0.7;
+      }
+      .prk b,
+      .prk small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .prk small {
+        color: var(--mut);
+      }
+      .prk .prst {
+        white-space: normal;
+        color: #c98a1a;
+      }
+      .prk.ganti .prst {
+        color: #3a9a63;
+      }
+      .prf {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        overflow: hidden;
+        background: rgba(127, 127, 127, 0.12);
+        display: grid;
+        place-items: center;
+        width: 96px;
+        margin: 0 auto 6px;
+      }
+      .prf img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: zoom-in;
+      }
+      .prf span {
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .prb {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .prb .btn {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 12px;
+      }
+      #prs .btn.on {
+        outline: 2px solid currentColor;
+      }
+      .prbesar {
+        position: fixed;
+        inset: 0;
+        z-index: 99;
+        background: rgba(0, 0, 0, 0.85);
+        display: grid;
+        place-items: center;
+        cursor: zoom-out;
+      }
+      .prbesar img {
+        max-width: 92vw;
+        max-height: 92vh;
+        border-radius: 12px;
+      }
     </style>
   </head>
   <body>
@@ -1368,6 +1453,7 @@
         ['laporan', 'Laporan & donasi', 'Membaca dan menanggapi laporan pengguna serta konfirmasi donasi'],
         ['tampilan', 'Tampilan aplikasi', 'Mengatur susunan Beranda & menu (tab Tampilan dan Mode admin di aplikasi)'],
         ['statistik', 'Peta & statistik', 'Melihat peta aplikasi dan statistik pemakaian'],
+        ['profil', 'Profil pengguna', 'Memantau foto profil, memberi peringatan, dan menghapus foto yang tidak pantas'],
       ];
       const aksesNama = (a) => (AKSES.find((x) => x[0] == a) || [a, a])[1];
       const bisaA = (a) => AKSESKU.includes('semua') || AKSESKU.includes(a);
@@ -1379,6 +1465,7 @@
         peta: 'statistik',
         statistik: 'statistik',
         kelas: 'kelas',
+        profil: 'profil',
       };
       const TABS = [
         ['laporan', 'Laporan'],
@@ -1387,6 +1474,7 @@
         ['peta', 'Peta aplikasi'],
         ['statistik', 'Statistik'],
         ['kelas', 'Kelas online'],
+        ['profil', 'Profil'],
         ['admin', 'Admin'],
       ];
       auth.onAuthStateChanged(async (u) => {
@@ -1449,6 +1537,7 @@
           peta: tabPeta,
           statistik: tabStatistik,
           kelas: tabKelas,
+          profil: tabProfil,
           admin: tabAdmin,
         })[k]();
       }
@@ -2492,6 +2581,117 @@
       }
 
       /* ===================== ADMIN: kelola daftar admin (hanya pemilik yang bisa mengubah) ===================== */
+      /* Profil pengguna (koleksi "profil"): nama & foto yang tampil di Kelas online. Admin memberi peringatan agar foto
+         yang tidak pantas diganti; bila tidak diganti, foto dihapus. "kunci" menandai foto yang diperingatkan/dihapus
+         (sama dengan profilKunci di js/core/tata.js), jadi terlihat apakah pengguna sudah mengganti fotonya. */
+      const profilKunci = (f) => (f ? String(f).length + ':' + String(f).slice(-40) : '');
+      let PROFSAR = 'foto';
+      function tabProfil() {
+        const isi = $('#isi');
+        isi.innerHTML = `<div class="blok"><h3>Profil pengguna</h3><p>Foto profil yang dipasang pengguna (tampil di Kelas online). Beri peringatan bila fotonya tidak pantas; pengguna melihatnya saat membuka aplikasi. Bila tidak diganti, hapus fotonya.</p><div class="hpk jks" id="prs"></div><div id="prl"><div class="empty">Memuat…</div></div></div>`;
+        const FV = firebase.firestore.FieldValue,
+          em = (auth.currentUser && auth.currentUser.email) || '';
+        let L = [];
+        const wkt = (t) =>
+          t && t.toDate ? t.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–';
+        const status = (x) => {
+          const k = profilKunci(x.foto);
+          if (!x.foto && x.dihapus) return ['hapus', 'Foto dihapus ' + wkt(x.dihapus.t)];
+          if (x.peringatan && x.peringatan.kunci == k) {
+            const hr =
+              x.peringatan.t && x.peringatan.t.toDate ? Math.floor((Date.now() - x.peringatan.t.toDate()) / 864e5) : 0;
+            return ['ingat', `Diperingatkan ${wkt(x.peringatan.t)} · belum diganti${hr ? ' (' + hr + ' hari)' : ''}`];
+          }
+          if (x.peringatan) return ['ganti', 'Sudah diganti setelah peringatan'];
+          return ['', ''];
+        };
+        const SAR = [
+          ['foto', 'Ada foto', (x) => !!x.foto],
+          ['ingat', 'Diperingatkan', (x) => status(x)[0] == 'ingat'],
+          ['hapus', 'Dihapus', (x) => status(x)[0] == 'hapus'],
+          ['semua', 'Semua', () => true],
+        ];
+        const gambar = () => {
+          const el = $('#prl');
+          if (!el) return;
+          $('#prs').innerHTML = SAR.map(
+            ([k, n, f]) =>
+              `<button class="btn s${PROFSAR == k ? ' on' : ''}" data-prs="${k}">${n} <small>${L.filter(f).length}</small></button>`
+          ).join('');
+          const LS = L.filter((SAR.find((x) => x[0] == PROFSAR) || SAR[0])[2]);
+          el.innerHTML = LS.length
+            ? `<div class="prg">${LS.map((x) => {
+                const [st, ket] = status(x);
+                return `<div class="prk ${st}"><div class="prf">${x.foto ? `<img src="${esc(x.foto)}" alt="Foto ${esc(x.nama || 'Tamu')}" loading="lazy" referrerpolicy="no-referrer" data-prz="${esc(x.id)}">` : '<span>Tanpa foto</span>'}</div><b>${esc(x.nama || 'Tamu')}</b><small>${/^tamu-/.test(x.id) ? 'Tamu (belum masuk akun)' : 'Akun'} · ${wkt(x.t)}</small>${ket ? `<small class="prst">${esc(ket)}</small>` : ''}${
+                  x.foto
+                    ? `<div class="prb">${st == 'ingat' ? `<button class="btn s" data-prb="${esc(x.id)}">Batalkan</button>` : `<button class="btn s" data-pri="${esc(x.id)}">Peringatan</button>`}<button class="btn d" data-prh="${esc(x.id)}">Hapus foto</button></div>`
+                    : ''
+                }</div>`;
+              }).join('')}</div>`
+            : `<div class="empty">${L.length ? 'Tidak ada profil di kategori ini.' : 'Belum ada foto profil yang terkirim.'}</div>`;
+        };
+        isi.onclick = async (e) => {
+          const t = e.target.closest('button,[data-prz]');
+          if (!t) return;
+          if (t.dataset.prs) return (PROFSAR = t.dataset.prs), gambar();
+          const id = t.dataset.prz || t.dataset.pri || t.dataset.prb || t.dataset.prh,
+            x = L.find((p) => p.id == id);
+          if (!x) return;
+          const ref = db.collection('profil').doc(id);
+          try {
+            if (t.dataset.prz) {
+              const d = document.createElement('div');
+              d.className = 'prbesar';
+              d.innerHTML = `<img src="${esc(x.foto)}" alt="" referrerpolicy="no-referrer">`;
+              d.onclick = () => d.remove();
+              return document.body.append(d);
+            }
+            if (t.dataset.pri) {
+              const pesan = prompt(
+                `Peringatan untuk ${x.nama || 'Tamu'} (boleh dikosongkan):`,
+                'Foto profilmu dinilai tidak pantas untuk tampil di Kelas online.'
+              );
+              if (pesan == null) return;
+              await ref.update({
+                peringatan: {
+                  t: FV.serverTimestamp(),
+                  pesan: pesan.slice(0, 300),
+                  kunci: profilKunci(x.foto),
+                  oleh: em,
+                },
+              });
+              toast('Peringatan dikirim. Pengguna melihatnya saat membuka aplikasi.');
+            } else if (t.dataset.prb) {
+              await ref.update({ peringatan: FV.delete() });
+              toast('Peringatan dibatalkan');
+            } else if (t.dataset.prh) {
+              if (!confirm(`Hapus foto profil ${x.nama || 'Tamu'}? Pengguna diberi tahu saat membuka aplikasi.`))
+                return;
+              await ref.update({
+                foto: '',
+                dihapus: { t: FV.serverTimestamp(), kunci: profilKunci(x.foto), oleh: em },
+              });
+              toast('Foto dihapus');
+            }
+          } catch (x) {
+            toast('Gagal: ' + (x.code || x.message));
+          }
+        };
+        stop = db
+          .collection('profil')
+          .orderBy('t', 'desc')
+          .limit(500)
+          .onSnapshot(
+            (q) => {
+              L = q.docs.map((d) => ({ id: d.id, ...d.data() }));
+              gambar();
+            },
+            (e) =>
+              $('#prl') &&
+              ($('#prl').innerHTML =
+                `<div class="empty">Tidak bisa membaca profil (${esc(e.code || e.message)}).<br>Pasang Firestore Rules terbaru: Firebase Console › Firestore Database › Rules › tempel isi <b>firestore.rules</b> › Publish.</div>`)
+          );
+      }
       function tabAdmin() {
         const akses = (e) => ADMA[e] || ['semua'],
           pilih = (id, L) =>
