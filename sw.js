@@ -1,4 +1,4 @@
-const V = 'fz-v279',
+const V = 'fz-v280',
   A = [
     './',
     'index.html',

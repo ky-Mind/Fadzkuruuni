@@ -11,7 +11,11 @@ const FBMASUK = false;
 const AKUN = () =>
   `<h2>Akun</h2><div class="list sg" id="cl">${cloudOn() ? (FBU ? row('user', esc(FBU.displayName || S.nm || FBU.email || 'Akun'), esc(FBU.email || '') + ' · ' + ({ 'google.com': 'Google', 'facebook.com': 'Facebook', password: 'Email', emailLink: 'Email' }[FBU.providerData?.[0]?.providerId] || 'Akun') + ' · data tersinkron ke cloud', '<button class="btn s" data-gout>Keluar</button>') + (typeof TADM != 'undefined' && TADM ? row('sliders', 'Dashboard admin', 'Atur tampilan aplikasi, laporan, statistik, dan kelas online', '<a class="btn s" href="admin.html">Buka</a>') : '') : `<p class="lgi mut">Masuk agar penanda ayat, riwayat bacaan, dan pengaturanmu tersimpan di cloud dan ikut pindah ke perangkat lain.</p><div class="lgn"><button class="lgb" data-gin>${LG_G}Masuk dengan Google</button>${FBMASUK ? `<button class="lgb" data-gin="fb">${LG_F}Masuk dengan Facebook</button>` : ''}<button class="lgb" data-gem>${LG_E}Masuk dengan Email</button></div>`) : row('user', 'Masuk dengan Google', 'Belum diaktifkan. Isi konfigurasi Firebase (lihat PANDUAN-FIREBASE.md).', '<button class="btn s" disabled>Segera</button>')}</div>`;
 /* Foto profil: dipotong persegi & dikecilkan (192 px JPEG) di perangkat, disimpan di pengaturan & ikut sinkron cloud */
-window.fotoProfil = () => S.foto || (typeof FBU != 'undefined' && FBU && FBU.photoURL) || '';
+/* Foto akun Google yang dihapus admin (tata.js profilCek) tidak dipakai lagi */
+window.fotoProfil = () =>
+  S.foto ||
+  (typeof FBU != 'undefined' && FBU && FBU.photoURL && FBU.photoURL != S.fotoGoogleNo ? FBU.photoURL : '') ||
+  '';
 window.avatarHtml = (px) => {
   const h = ((S.nm || (FBU && FBU.displayName) || '').trim()[0] || '').toUpperCase(),
     f = fotoProfil();
@@ -218,6 +222,7 @@ document.addEventListener('click', async (x) => {
     tataNav();
     route();
     toast('Foto profil disimpan');
+    window.profilKirim && profilKirim(1);
   } else if (t.closest('[data-fbatal]')) fpTutup();
   else if (t.closest('[data-fatur]') && S.foto) {
     t.closest('.back-d')?.remove();
@@ -245,6 +250,7 @@ document.addEventListener('click', (x) => {
   tataNav();
   route();
   toast('Foto profil dihapus');
+  window.profilKirim && profilKirim(1);
 });
 const JK = [
   ['l', 'Laki-laki'],
