@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Menyiapkan Fadzkuruuni</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0f0d;
+        color: #cfd8d3;
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+      i {
+        display: block;
+        width: 28px;
+        height: 28px;
+        margin: 0 auto 14px;
+        border: 3px solid #2c3a33;
+        border-top-color: #7fc8a0;
+        border-radius: 50%;
+        animation: p 0.9s linear infinite;
+      }
+      @keyframes p {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div><i></i>Menyiapkan aplikasi…</div>
+    <script>
+      /* Pindah domain aplikasi Android (APK 2.6.36): WebView membuka alamat lama (fadzkuruuni.vercel.app) dengan ?ke=ekspor
+         untuk mengumpulkan data yang tersimpan di HP (localStorage + IndexedDB, termasuk status masuk akun Firebase), lalu
+         alamat baru (majelisfadzkuruuni.web.id) dengan ?ke=impor untuk memasangnya kembali. Data diserahkan lewat
+         FadzAndroid.pindahEkspor / pindahAmbil / pindahSelesai / pindahGagal (MainActivity). Cache unduhan offline tidak
+         ikut (terlalu besar): daftarnya disimpan di localStorage.fzoffPindah dan diunduh ulang otomatis (js/core/unduh.js). */
+      const A = window.FadzAndroid;
+      const ke = new URLSearchParams(location.search).get('ke');
+      /* Cache Firestore hanya salinan data cloud, tidak perlu dipindah */
+      const LEWATI = /^firestore\//;
+      const jadiDataUrl = (b) =>
+        new Promise((ok, no) => {
+          const f = new FileReader();
+          f.onload = () => ok(f.result);
+          f.onerror = no;
+          f.readAsDataURL(b);
+        });
+      async function bungkus(v) {
+        if (v instanceof Blob) return { __fzBlob: await jadiDataUrl(v), t: v.type };
+        if (v instanceof ArrayBuffer) return { __fzBuf: await jadiDataUrl(new Blob([v])) };
+        if (ArrayBuffer.isView(v)) return { __fzBuf: await jadiDataUrl(new Blob([v])) };
+        if (v instanceof Date) return { __fzDate: v.getTime() };
+        if (Array.isArray(v)) return Promise.all(v.map(bungkus));
+        if (v && typeof v == 'object') {
+          const o = {};
+          for (const k of Object.keys(v)) o[k] = await bungkus(v[k]);
+          return o;
+        }
+        return v;
+      }
+      async function buka(v) {
+        if (Array.isArray(v)) return Promise.all(v.map(buka));
+        if (v && typeof v == 'object') {
+          if (v.__fzBlob) return new Blob([await (await fetch(v.__fzBlob)).arrayBuffer()], { type: v.t || '' });
+          if (v.__fzBuf) return await (await fetch(v.__fzBuf)).arrayBuffer();
+          if (v.__fzDate != null) return new Date(v.__fzDate);
+          const o = {};
+          for (const k of Object.keys(v)) o[k] = await buka(v[k]);
+          return o;
+        }
+        return v;
+      }
+      const janji = (r) =>
+        new Promise((ok, no) => {
+          r.onsuccess = () => ok(r.result);
+          r.onerror = () => no(r.error);
+        });
+      async function eksporDb(nama) {
+        const db = await janji(indexedDB.open(nama));
+        const toko = [];
+        for (const s of Array.from(db.objectStoreNames)) {
+          const st = db.transaction(s, 'readonly').objectStore(s);
+          const kunci = await janji(st.getAllKeys());
+          const nilai = await janji(st.getAll());
+          toko.push({
+            n: s,
+            kp: st.keyPath,
+            ai: st.autoIncrement,
+            ix: Array.from(st.indexNames).map((i) => {
+              const x = st.index(i);
+              return { n: i, kp: x.keyPath, u: x.unique, m: x.multiEntry };
+            }),
+            k: await bungkus(kunci),
+            v: await bungkus(nilai),
+          });
+        }
+        const r = { n: nama, ver: db.version, s: toko };
+        db.close();
+        return r;
+      }
+      async function ekspor() {
+        const ls = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          ls[k] = localStorage.getItem(k);
+        }
+        const dbs = [];
+        const daftar = indexedDB.databases ? await indexedDB.databases() : [];
+        for (const d of daftar) {
+          if (!d.name || LEWATI.test(d.name)) continue;
+          try {
+            dbs.push(await eksporDb(d.name));
+          } catch (e) {}
+        }
+        return { v: 1, ls, dbs };
+      }
+      async function imporDb(d) {
+        await janji(indexedDB.deleteDatabase(d.n)).catch(() => {});
+        const r = indexedDB.open(d.n, d.ver || 1);
+        r.onupgradeneeded = () => {
+          const db = r.result;
+          for (const s of d.s) {
+            const o = db.createObjectStore(s.n, { keyPath: s.kp == null ? undefined : s.kp, autoIncrement: !!s.ai });
+            for (const x of s.ix) o.createIndex(x.n, x.kp, { unique: !!x.u, multiEntry: !!x.m });
+          }
+        };
+        const db = await janji(r);
+        for (const s of d.s) {
+          const kunci = await buka(s.k),
+            nilai = await buka(s.v);
+          await new Promise((ok, no) => {
+            const t = db.transaction(s.n, 'readwrite'),
+              o = t.objectStore(s.n);
+            nilai.forEach((v, i) => (s.kp == null ? o.put(v, kunci[i]) : o.put(v)));
+            t.oncomplete = ok;
+            t.onerror = () => no(t.error);
+          });
+        }
+        db.close();
+      }
+      async function impor(data) {
+        const ls = data.ls || {};
+        /* Paket offline: tandanya dipindah ke daftar unduh-ulang, karena isi cache tidak ikut */
+        if (ls.fzoff) {
+          ls.fzoffPindah = ls.fzoff;
+          delete ls.fzoff;
+        }
+        for (const k of Object.keys(ls)) localStorage.setItem(k, ls[k]);
+        for (const d of data.dbs || []) {
+          try {
+            await imporDb(d);
+          } catch (e) {}
+        }
+      }
+      (async () => {
+        try {
+          if (!A) return;
+          if (ke == 'ekspor') A.pindahEkspor(JSON.stringify(await ekspor()));
+          else if (ke == 'impor') {
+            const s = A.pindahAmbil();
+            if (s) await impor(JSON.parse(s));
+            A.pindahSelesai();
+          }
+        } catch (e) {
+          try {
+            A.pindahGagal(String(e).slice(0, 200));
+          } catch (x) {}
+        }
+      })();
+    </script>
+  </body>
+</html>
