@@ -2,7 +2,7 @@
 Konfigurasi proyek `fadzkuruuni-88a8b` sudah ada di `FBCFG` pada `js/core/cloud.js` (dan `admin.html`). Kunci web Firebase memang publik; keamanannya ada pada Rules di bawah.
 
 ## Yang harus kamu atur di Firebase Console
-1. **Authentication > Settings > Authorized domains**: tambahkan domain tempat aplikasi berjalan, mis. `fadzkuruuni.vercel.app` (`localhost` sudah ada). Tanpa ini tombol Masuk akan menampilkan pesan domain belum diizinkan.
+1. **Authentication > Settings > Authorized domains**: tambahkan domain tempat aplikasi berjalan, mis. `majelisfadzkuruuni.web.id` dan `fadzkuruuni.vercel.app` (`localhost` sudah ada). Tanpa ini tombol Masuk akan menampilkan pesan domain belum diizinkan.
 2. **Authentication > Sign-in method**: Google sudah Enabled.
    Untuk tombol **Masuk dengan Email**: aktifkan **Email/Password** (dan *Email link* bila ingin masuk tanpa kata sandi). Email pendaftaran, reset kata sandi, dan tautan masuk bisa diubah bahasanya di **Authentication > Templates** (pilih bahasa Indonesia).
    Untuk tombol **Masuk dengan Facebook**: buat aplikasi di developers.facebook.com (produk *Facebook Login*), lalu di Firebase aktifkan **Facebook** dan isi *App ID* dan *App Secret*. Salin *OAuth redirect URI* yang ditampilkan Firebase ke pengaturan Facebook Login (Valid OAuth Redirect URIs). Sebelum ini diaktifkan, tombol Facebook menampilkan pesan "belum diaktifkan".
@@ -13,7 +13,7 @@ Konfigurasi proyek `fadzkuruuni-88a8b` sudah ada di `FBCFG` pada `js/core/cloud.
 Catatan: login Google tidak berjalan dari `file://`; buka lewat server atau hosting.
 
 ## Dashboard admin (laporan pengguna)
-Buka `https://fadzkuruuni.vercel.app/admin.html`, lalu masuk dengan Google memakai salah satu email admin:
+Buka `https://majelisfadzkuruuni.web.id/admin.html`, lalu masuk dengan Google memakai salah satu email admin:
 - hilmykia@gmail.com
 - ponpesfadzkuruuni@gmail.com
 

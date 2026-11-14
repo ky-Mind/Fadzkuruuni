@@ -24,7 +24,7 @@ Jangan menambahkan amalan, jumlah bacaan, atau tata cara yang tidak kamu yakini 
 Jangan menyebut frasa "Isi aplikasi yang terkait" dan jangan menyebut fitur yang tidak ada di aplikasi (misalnya audio doa); cukup sarankan membuka menu yang sesuai.`;
 
 /* Pengetahuan tetap tentang aplikasi: menu dan letak fitur, agar AI bisa menunjukkan jalan di dalam aplikasi */
-const PANDUAN = `Tentang aplikasi Fadzkuruuni (web fadzkuruuni.vercel.app dan aplikasi Android; perbarui APK lewat Pengaturan › Tentang & Bantuan › Cek pembaruan). Sebagian besar isi bisa diunduh untuk dipakai tanpa internet (Pengaturan › Offline & Data).
+const PANDUAN = `Tentang aplikasi Fadzkuruuni (web majelisfadzkuruuni.web.id dan aplikasi Android; perbarui APK lewat Pengaturan › Tentang & Bantuan › Cek pembaruan). Sebagian besar isi bisa diunduh untuk dipakai tanpa internet (Pengaturan › Offline & Data).
 - Menu bawah: Beranda, Al-Qur'an, Fadz AI, Kelas online, Pengaturan (bisa diatur di Pengaturan › Beranda). Fitur lain di pintasan Beranda dan "Lainnya" (Semua Menu).
 - Beranda: kartu waktu salat (Subuh, Terbit, Duha, Zuhur, Asar, Magrib, Isya), kata mutiara, pintasan, kolom cari semua isi (termasuk bab kitab), lanjutkan membaca.
 - Al-Qur'an: 114 surah, tab Surah/Juz/Riwayat, mode Kartu & Mushaf, bintang = penanda (menu Penanda), Pengaturan baca. Ketuk ayat: putar ayat ini saja, putar sampai akhir surah, "Putar terus sampai surah…" (lintas surah sampai surah berikutnya/akhir juz/akhir Al-Qur'an/surah pilihan), tandai terakhir dibaca, bagikan. Murottal tetap berbunyi di latar belakang (layar mati/aplikasi ditutup) dengan kontrol di kapsul pemutar dan notifikasi media.

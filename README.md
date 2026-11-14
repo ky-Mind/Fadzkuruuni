@@ -2,7 +2,7 @@
 
 Aplikasi dzikir, Al-Qur'an, dan ibadah harian. Jalan di browser sebagai PWA (bisa offline) dan di Android.
 
-Live: https://fadzkuruuni.vercel.app
+Live: https://majelisfadzkuruuni.web.id (juga https://fadzkuruuni.vercel.app)
 
 ## Fitur
 
