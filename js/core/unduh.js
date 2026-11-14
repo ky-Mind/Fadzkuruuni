@@ -255,3 +255,20 @@ document.addEventListener('click', (e) => {
       }
     );
 });
+
+/* Pindah domain aplikasi Android (pindah.html): paket offline dari alamat lama diunduh ulang otomatis di alamat baru,
+   hanya saat terhubung tanpa data seluler (Wi-Fi), agar kuota pengguna tidak habis tanpa ditanya */
+setTimeout(() => {
+  let L = null;
+  try {
+    L = JSON.parse(localStorage.fzoffPindah || 'null');
+  } catch (e) {}
+  if (!L || !navigator.onLine) return;
+  const c = navigator.connection;
+  if (c && c.type == 'cellular') return;
+  try {
+    localStorage.removeItem('fzoffPindah');
+  } catch (e) {}
+  const I = Object.keys(L).filter((i) => PAKET[i]);
+  if (I.length) dlSemua(I);
+}, 5000);
