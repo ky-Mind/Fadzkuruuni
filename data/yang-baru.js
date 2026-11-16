@@ -2,6 +2,11 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.87': [
+    'Tasbih: tampilan baru "Ringankan beban": tiap dzikir menggugurkan satu beban, badan makin tegak, lalu beban ditaruh saat target tercapai',
+    'Tasbih: suara tiap ketukan (bisa dimatikan di Pengaturan tasbih)',
+    'Tasbih: tiap ketukan memunculkan bacaan dzikir (Arab + latin); bawaannya Subhanallah, Alhamdulillah, Allahu Akbar bergantian per putaran, bisa dipilih di Pengaturan tasbih',
+  ],
   '2.9.86': ['Email kontak resmi baru: info@majelisfadzkuruuni.web.id'],
   '2.9.85': [
     'Alamat situs baru: majelisfadzkuruuni.web.id',

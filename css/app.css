@@ -10638,3 +10638,188 @@ body,
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* Tasbih tampilan "Ringankan beban" (js/pages/tasbih.js tbBangun) */
+.tsf.tsb {
+  justify-content: flex-start;
+  padding: 16px 12px 12px;
+  gap: 4px;
+}
+.tsf.tsb .tsr {
+  display: none;
+}
+.tsf.tsb .tsw b {
+  font-size: clamp(40px, 11vmin, 60px);
+}
+.tsf.tsb .tsh {
+  position: static;
+}
+.tbn {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  place-items: center;
+}
+.tbn svg {
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tbn .tbog {
+  stroke-width: 6.5;
+}
+.tbn .tbkp {
+  fill: currentColor;
+  stroke: none;
+}
+.tbn .tbtnh {
+  stroke-width: 1.6;
+  opacity: 0.4;
+}
+.tbn .tbrp {
+  stroke-width: 1.4;
+  opacity: 0.45;
+}
+.tbn .tbbk {
+  fill: color-mix(in srgb, currentColor 10%, transparent);
+  stroke: none;
+}
+.tbn .tbtl {
+  stroke-width: 1.2;
+  opacity: 0.6;
+}
+.tbn .tbbt,
+.tbn .tbj {
+  fill: #e3b94f;
+  stroke: #fff4c9;
+  stroke-width: 0.8;
+}
+.tbn .tbkl {
+  fill: none;
+  stroke: #e3b94f;
+  stroke-width: 1.4;
+}
+.tbn .tbb {
+  fill: color-mix(in srgb, #000 74%, var(--g));
+  stroke: color-mix(in srgb, #fff 16%, transparent);
+  stroke-width: 0.5;
+}
+.tbn .tbb.hilang {
+  visibility: hidden;
+}
+.tbn .tbb.masuk {
+  animation: tbmasuk 0.45s calc(var(--i) * var(--jeda, 6ms)) cubic-bezier(0.3, 1.4, 0.6, 1) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes tbmasuk {
+  from {
+    transform: translateY(-40px) scale(0.3);
+    opacity: 0;
+  }
+}
+.tbn .tbdb {
+  fill: currentColor;
+  stroke: none;
+}
+.tbn .tbmk {
+  fill: color-mix(in srgb, currentColor 34%, transparent);
+  stroke-width: 2.4;
+}
+.tbn .tbmt {
+  fill: currentColor;
+  stroke: none;
+  font: 700 8px var(--ui);
+  letter-spacing: 2px;
+  opacity: 0.75;
+}
+.tbn .tbs,
+.tbn .tbt {
+  position: absolute;
+  top: 2%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  transition: opacity 0.5s;
+}
+.tbn .tbs {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.tbn .tbkw {
+  pointer-events: none;
+}
+.tbn .tbka {
+  animation: tbkata 1.3s ease-out forwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tbn .tbka1 {
+  fill: #e3b94f;
+  stroke: none;
+  font: 700 13px var(--ar);
+}
+.tbn .tbka2 {
+  fill: currentColor;
+  stroke: none;
+  font: 600 6.5px var(--ui);
+  opacity: 0.85;
+}
+@keyframes tbkata {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-34px) scale(1.05);
+  }
+}
+.tbn .tbt {
+  opacity: 0;
+  pointer-events: none;
+}
+.tbn .tbt b {
+  display: block;
+  font-size: 21px;
+}
+.tbn .tbt small {
+  display: block;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.tbn .tblg {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  border: 1.5px solid currentColor;
+  border-radius: 99px;
+  padding: 6px 16px;
+}
+.tbn.selesai .tbs {
+  opacity: 0;
+}
+/* untaian tasbih yang menggantung disembunyikan agar tidak menabrak tulisan & tombol "Mulai lagi" */
+.tbn .tbtl,
+.tbn .tbbt {
+  transition: opacity 0.5s;
+}
+.tbn.selesai .tbtl,
+.tbn.selesai .tbbt {
+  opacity: 0;
+}
+.tbn.selesai .tbt {
+  opacity: 1;
+  pointer-events: auto;
+}
