@@ -114,8 +114,8 @@ const AI_PANDUAN = [
   ],
   [
     'Tasbih digital',
-    'tasbih hitung dzikir zikir counter melayang',
-    'Menu Tasbih untuk menghitung dzikir (ketuk layar untuk menambah). Ada juga tasbih melayang yang bisa dinyalakan di semua halaman.',
+    'tasbih hitung dzikir zikir counter melayang beban dosa animasi suara ringankan',
+    'Menu Tasbih untuk menghitung dzikir (ketuk layar untuk menambah). Tampilan "Ringankan beban" (bawaan): orang memikul mangkuk berisi bola beban sebanyak target; tiap ketukan satu butir tasbih jatuh dan menggugurkan satu bola, badannya makin tegak, dan setelah target tercapai mangkuk ditaruh lalu ia berjalan ringan. Tiap ketukan juga memunculkan bacaan dzikir yang melayang (Arab + latin), dan nama bacaannya tampil di atas. Mulai ulang lewat tombol Mulai lagi, ketuk lagi, atau tombol reset (ikon putar). Pengaturan tasbih (ikon penggeser): Tampilan (Ringankan beban / Lingkaran), Suara ketukan, Bacaan yang muncul (Bergantian = Subhanallah, Alhamdulillah, Allahu Akbar per putaran; atau satu bacaan: Subhanallah, Alhamdulillah, Allahu Akbar, Astaghfirullah, Tahlil), getar, target 33/99/100/1000. Ada juga tasbih melayang yang bisa dinyalakan di semua halaman.',
     '#/tasbih',
   ],
   [
