@@ -613,12 +613,24 @@ function gsTabHtml(nb) {
       g = mode == 'tab' ? el : v;
     g.style.transition = tr ? `transform ${tr}` : 'none';
     g.style.transform = px ? `translate3d(${px}px,0,0)` : '';
+    /* Tema terang: bayangan & peredupan dibuat tipis (bayangan pekat di latar putih terlihat kotor/abu-abu) */
+    const gelap = document.documentElement.dataset.theme == 'dark',
+      r = Math.min(1, Math.abs(px) / w);
     if (mode == 'back') {
-      v.style.boxShadow = px ? '-10px 0 24px rgba(0,0,0,.22)' : '';
+      v.style.boxShadow = px
+        ? gelap
+          ? '-10px 0 24px rgba(0,0,0,.22)'
+          : '-1px 0 0 var(--line), -8px 0 20px rgba(0,0,0,.07)'
+        : '';
       if (peek) {
         peek.style.transition = tr ? `transform ${tr},filter ${tr}` : 'none';
         peek.style.transform = `translate3d(${(px - w) * 0.3}px,0,0)`;
-        peek.style.filter = `brightness(${0.8 + 0.2 * Math.min(1, px / w)})`;
+        peek.style.filter = gelap ? `brightness(${0.8 + 0.2 * r})` : r < 1 ? `brightness(${0.97 + 0.03 * r})` : '';
+      }
+      /* Kembali ke halaman menu bawah: menu bawah ikut naik bersama jari, tidak muncul tiba-tiba sesudah geseran */
+      if (gsNav) {
+        gsNav.style.transition = tr ? `transform ${tr}` : 'none';
+        gsNav.style.transform = `translate3d(0,${((1 - r) * 100).toFixed(1)}%,0)`;
       }
     } else if (peek) {
       peek.style.transition = g.style.transition ? `${g.style.transition}` : 'none';
@@ -627,9 +639,11 @@ function gsTabHtml(nb) {
          halaman rusak): halaman yang datang diberi bayangan di tepinya, halaman yang pergi sedikit meredup.
          Hanya bayangan statis dan opacity (murah untuk GPU HP kelas bawah). */
       if (mode == 'hal') {
-        peek.style.boxShadow = `${dir > 0 ? -1 : 1}px 0 0 var(--line), ${dir > 0 ? -16 : 16}px 0 32px rgba(0,0,0,.42)`;
+        peek.style.boxShadow = gelap
+          ? `${dir > 0 ? -1 : 1}px 0 0 var(--line), ${dir > 0 ? -16 : 16}px 0 32px rgba(0,0,0,.42)`
+          : `${dir > 0 ? -1 : 1}px 0 0 var(--line), ${dir > 0 ? -8 : 8}px 0 20px rgba(0,0,0,.07)`;
         v.style.transition = tr ? `transform ${tr},opacity ${tr}` : 'none';
-        v.style.opacity = String(1 - 0.35 * Math.min(1, Math.abs(px) / w));
+        v.style.opacity = String(1 - (gelap ? 0.35 : 0.12) * r);
       }
     }
   };
@@ -644,6 +658,11 @@ function gsTabHtml(nb) {
       }
     });
     v.style.position = v.style.zIndex = v.style.background = v.style.overflowY = v.style.opacity = '';
+    if (gsNav) {
+      gsNav.style.transition = gsNav.style.transform = '';
+      document.body.classList.remove('gsnav');
+      gsNav = null;
+    }
     buang();
     /* Pengaman 1,5 detik milik geseran ini ikut dibatalkan: kalau tertinggal, ia bisa jatuh di tengah geseran berikutnya dan
        melepas pratinjau sebelum halaman tujuan dipasang (halaman lama berkedip sekejap) */
@@ -713,6 +732,7 @@ function gsTabHtml(nb) {
     Jangan dipasang sejak disentuh: will-change:transform membuat elemen position:fixed di dalam #view (mis. pemutar audio
     Al-Qur'an) ikut tergulir bersama isi; dilepas lagi oleh pulih(). */
   let gsW = null,
+    gsNav = null,
     tepi = false;
   /* Halaman yang punya gerakan samping sendiri (balik halaman kitab, cubit/geser panel kitab kelas, kompas, kalender,
      video, tasbih) hanya bisa kembali lewat tepi kiri, agar dua gerakan tidak berebut (dulu: macet, layar kosong) */
@@ -800,6 +820,14 @@ function gsTabHtml(nb) {
             tujuan = tujuanKembali();
             Object.assign(v.style, { position: 'relative', zIndex: '1', background: 'var(--bg)' });
             peekHal(vHtml(tujuan), 1);
+            const [na, nb] = (tujuan || '').slice(2).split('/');
+            if (tujuan && tataNavR().includes(na) && !nb && window.DARIMENU !== na && $('#nav')) {
+              gsNav = $('#nav');
+              gsNav.style.transition = 'none';
+              gsNav.style.transform = 'translate3d(0,100%,0)';
+              document.body.classList.add('gsnav');
+              $$('#nav a[data-r]').forEach((l) => l.classList.toggle('on', l.dataset.r == (na || '')));
+            }
           }
         } else {
           lock = Math.abs(x) > Math.abs(y) * 1.6 && !(window.ptrTarik && ptrTarik()) ? 'h' : 'v';
