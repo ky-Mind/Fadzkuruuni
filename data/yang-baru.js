@@ -2,6 +2,12 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.88': [
+    'Geser halaman di tema terang lebih bersih: tanpa bayangan gelap dan halaman abu-abu',
+    'Geser kembali ke Beranda, Pengaturan, dan halaman menu bawah lain tidak lagi terlihat seperti dimuat ulang; menu bawah ikut naik bersama geseran',
+    'Kata-kata di Beranda tidak berganti tiba-tiba saat kembali ke Beranda',
+    'Fadz AI: kartu sambutan tetap di tempatnya, tidak bergeser saat kolom tanya diketuk',
+  ],
   '2.9.87': [
     'Tasbih: tampilan baru "Ringankan beban": tiap dzikir menggugurkan satu beban, badan makin tegak, lalu beban ditaruh saat target tercapai',
     'Tasbih: suara tiap ketukan (bisa dimatikan di Pengaturan tasbih)',

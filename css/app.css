@@ -2178,6 +2178,15 @@ html,
   body.subhal #nav {
     display: none;
   }
+  /* Geser kembali ke halaman menu bawah: menu bawah tampil melayang dan naik mengikuti jari (js/core/events.js) */
+  body.subhal.gsnav #nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+  }
   body.subhal #ftb {
     bottom: calc(16px + env(safe-area-inset-bottom));
   }
@@ -3979,8 +3988,10 @@ input[type='range'] {
     transform: translateY(-4px);
   }
 }
+/* Sambutan Fadz AI: jarak tetap dari atas (bukan di tengah). Dulu di tengah (margin auto), jadi setiap tinggi layar
+   berubah (keyboard muncul saat kolom tanya diketuk, baris status dimuat) kartunya ikut bergeser seperti dimuat ulang. */
 .aie {
-  margin: auto 0;
+  margin: 36px 0 auto;
   padding: 18px 6px;
   text-align: center;
 }

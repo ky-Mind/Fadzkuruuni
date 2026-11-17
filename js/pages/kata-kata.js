@@ -23,23 +23,29 @@ P.mutiara = () => ({
           .join('')
       : '<div class="card mut">Belum ada kata-kata. Tambahkan di Pengaturan.</div>'),
 });
+/* Indeks kata yang sedang tampil disimpan di luar halaman: saat Beranda digambar ulang (kembali, geser keluar), kata yang
+   sama langsung tampil tanpa animasi, jadi halaman tidak terlihat seperti dimuat ulang. Berganti tiap 9 detik. */
+let QI = null;
 function qrot() {
   const el = $('#qtx');
   if (!el) return;
-  let i = Math.floor(Math.random() * 97);
-  const show = () => {
+  if (QI == null) QI = Math.floor(Math.random() * 97);
+  const show = (ganti) => {
     const e = $('#qtx');
     if (!e) return clearInterval(P.tq);
     const p = periode(),
       A = QA(),
       L = A.filter((q) => q.p == p || q.p == 'any').map((q) => q.t),
       M = L.length ? L : A.map((q) => q.t);
+    if (ganti) QI++;
     e.classList.remove('qs2');
-    void e.offsetWidth;
-    e.textContent = M[i++ % M.length] || '';
-    e.classList.add('qs2');
+    e.textContent = M[QI % M.length] || '';
+    if (ganti) {
+      void e.offsetWidth;
+      e.classList.add('qs2');
+    }
   };
-  show();
+  show(false);
   clearInterval(P.tq);
-  P.tq = setInterval(show, 9000);
+  P.tq = setInterval(() => show(true), 9000);
 }
