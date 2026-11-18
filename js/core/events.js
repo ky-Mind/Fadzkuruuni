@@ -614,11 +614,14 @@ function gsTabHtml(nb) {
     g.style.transition = tr ? `transform ${tr}` : 'none';
     g.style.transform = px ? `translate3d(${px}px,0,0)` : '';
     if (mode == 'back') {
-      v.style.boxShadow = px ? '-10px 0 24px rgba(0,0,0,.22)' : '';
+      /* Tema terang: tanpa peredupan (halaman belakang abu-abu kusam, dan filter seukuran layar berat untuk GPU HP
+         kelas bawah sehingga geseran tersendat) dan bayangan tipis. Tema gelap tetap seperti semula. */
+      const gelap = document.documentElement.dataset.theme == 'dark';
+      v.style.boxShadow = px ? (gelap ? '-10px 0 24px rgba(0,0,0,.22)' : '-6px 0 16px rgba(0,0,0,.08)') : '';
       if (peek) {
-        peek.style.transition = tr ? `transform ${tr},filter ${tr}` : 'none';
+        peek.style.transition = tr ? `transform ${tr}${gelap ? `,filter ${tr}` : ''}` : 'none';
         peek.style.transform = `translate3d(${(px - w) * 0.3}px,0,0)`;
-        peek.style.filter = `brightness(${0.8 + 0.2 * Math.min(1, px / w)})`;
+        if (gelap) peek.style.filter = `brightness(${0.8 + 0.2 * Math.min(1, px / w)})`;
       }
     } else if (peek) {
       peek.style.transition = g.style.transition ? `${g.style.transition}` : 'none';

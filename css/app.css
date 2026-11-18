@@ -3717,24 +3717,21 @@ input[type='range'] {
   width: 46%;
 }
 
-/* Masuk bertahap: tiap bagian halaman muncul bergiliran */
-#view.ent > * {
-  animation: entUp 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both;
-  animation-delay: calc(var(--i, 0) * 45ms);
+/* Masuk: seluruh halaman bergeser pendek (tanpa memudar, lihat masuk() di js/router.js) */
+#view.ent {
+  animation: entKanan 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
-#view.ent.entb > * {
-  animation-name: entBack;
+#view.ent.entb {
+  animation-name: entKiri;
 }
-@keyframes entUp {
+@keyframes entKanan {
   from {
-    opacity: 0;
-    transform: translateY(16px);
+    transform: translate3d(28px, 0, 0);
   }
 }
-@keyframes entBack {
+@keyframes entKiri {
   from {
-    opacity: 0;
-    transform: translateX(-20px);
+    transform: translate3d(-28px, 0, 0);
   }
 }
 /* Keluar bertahap sebelum pindah halaman */
@@ -3765,7 +3762,7 @@ input[type='range'] {
 @media (prefers-reduced-motion: reduce) {
   #view.kel > *,
   #view.kelb > *,
-  #view.ent > * {
+  #view.ent {
     animation: none;
   }
 }

@@ -2,6 +2,12 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.90': [
+    'Pindah halaman lebih cepat: halaman baru langsung tampil dengan geser pendek, tanpa layar putih atau memudar seperti dimuat ulang',
+    'Ketukan tidak lagi terabaikan saat berpindah halaman',
+    'Geser kembali di tema terang: halaman di belakang tidak lagi abu-abu dan geseran lebih ringan di HP',
+    'Layar pembuka aplikasi lebih singkat',
+  ],
   '2.9.89': [
     'Geser halaman dikembalikan seperti sebelumnya (perubahan geser di 2.9.88 dibatalkan)',
     'Fadz AI: kartu sambutan tidak lagi melompat saat halaman dibuka atau selesai digeser',

@@ -74,7 +74,9 @@ function route() {
     tok = ++RT,
     baru = route.cur != location.hash,
     geser = ['geser', 'nav'].includes(document.documentElement.dataset.vt),
-    ganti = baru && v.children.length && !gerakOff() && !geser;
+    /* Tanpa animasi keluar: dulu isi lama memudar bergiliran (±0,4 detik, ketukan diabaikan) sebelum halaman baru
+       dipasang, sehingga di HP terlihat layar putih / macet seperti dimuat ulang */
+    ganti = false;
   /* Potret halaman yang ditinggalkan, untuk ditampilkan saat geser samping (lihat geser di js/core/events.js) */
   v.querySelectorAll('.tpeek').forEach((e) => e.remove());
   if (baru && route.cur != null && v.children.length && !v.classList.contains('kel') && !v.classList.contains('kelb'))
@@ -181,16 +183,16 @@ function keluar(v, arah) {
   v.classList.add(arah == 'back' ? 'kelb' : 'kel');
   return new Promise((r) => setTimeout(r, 180 + Math.min(K.length - 1, 8) * 24));
 }
-/* Isi halaman muncul bertahap satu per satu (lembut); saat kembali, masuk dari kiri */
+/* Halaman baru masuk dengan geser pendek seluruh halaman (dari kanan; saat kembali dari kiri), tanpa memudar.
+   Dulu tiap bagian memudar masuk bergiliran (±1 detik): di HP terlihat seperti halaman dimuat ulang. */
 function masuk(v, arah) {
   if (gerakOff()) return;
-  [...v.children].forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));
   v.classList.remove('ent', 'entb');
   void v.offsetWidth;
   v.classList.add('ent');
   arah == 'back' && v.classList.add('entb');
   clearTimeout(masuk.t);
-  masuk.t = setTimeout(() => v.classList.remove('ent', 'entb'), 1100);
+  masuk.t = setTimeout(() => v.classList.remove('ent', 'entb'), 260);
 }
 /* Kepala halaman baca (yang punya tombol Pengaturan baca, dan kepala surah) menempel di atas,
    bersembunyi saat pengguna menggulir ke bawah dan muncul lagi saat menggulir ke atas, sama seperti bilah kitab */
@@ -244,7 +246,7 @@ requestAnimationFrame(() =>
     } catch (e) {}
   })
 );
-/* Layar pembuka web (index.html): tampil minimal ±1,4 detik agar slogan sempat terbaca, lalu memudar */
+/* Layar pembuka web (index.html): tampil minimal ±0,6 detik, lalu memudar (dulu 1,4 detik: pembukaan terasa lama) */
 {
   const pb = document.getElementById('pembuka');
   if (pb)
@@ -253,7 +255,7 @@ requestAnimationFrame(() =>
         pb.classList.add('tutup');
         setTimeout(() => pb.remove(), 500);
       },
-      Math.max(0, 1400 - performance.now())
+      Math.max(0, 600 - performance.now())
     );
 }
 if ('serviceWorker' in navigator && !TPRATINJAU)
