@@ -117,14 +117,14 @@ function route() {
       'full',
       !!S.full && a == 'quran' && !!b
     ); /* Halaman utama yang dibuka dari Semua Menu: tanpa menu bawah, panah kembali ke Semua Menu */
-    const dm = window.DARIMENU === a && !b;
+    const dm = !!a && window.DARIMENU === a && !b;
     document.body.classList.toggle('subhal', !(tataNavR().includes(a) && !b) || dm);
     setSz();
     applyNav();
     v.style.transform = v.style.opacity = v.style.transition = '';
     halSelesai();
     v.innerHTML = pg.html;
-    if (window.DARIMENU === a && !b) {
+    if (dm) {
       const bk = $('.bar .bk', v);
       if (bk) bk.setAttribute('href', '#/menu');
       else {

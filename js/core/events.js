@@ -1156,7 +1156,9 @@ document.addEventListener(
     const a = e.target.closest('#view a[href^="#/"]');
     if (!a || location.hash != '#/menu') return;
     const r = a.getAttribute('href').slice(2).split('/');
-    window.DARIMENU = tataNavR().includes(r[0]) && !r[1] ? r[0] : null;
+    /* Beranda ('') bukan "dibuka dari Semua Menu": panah kembali di Semua Menu menuju Beranda, dan dulu ikut ditandai
+       sehingga Beranda tampil tanpa menu bawah */
+    window.DARIMENU = r[0] && tataNavR().includes(r[0]) && !r[1] ? r[0] : null;
   },
   true
 );

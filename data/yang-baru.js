@@ -2,6 +2,7 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.91': ['Menu bawah tidak lagi hilang di Beranda setelah kembali dari Semua Menu'],
   '2.9.90': [
     'Pindah halaman lebih cepat: halaman baru langsung tampil dengan geser pendek, tanpa layar putih atau memudar seperti dimuat ulang',
     'Ketukan tidak lagi terabaikan saat berpindah halaman',
