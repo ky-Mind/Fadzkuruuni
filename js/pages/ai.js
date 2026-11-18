@@ -770,9 +770,12 @@ P.ai = () => ({
       ikut = 1;
       turun(1);
     };
+    /* Belum ada obrolan: halaman tetap di atas (tidak digulir ke bawah). Dulu selalu digulir ke bawah, sehingga di HP
+       yang isinya sedikit melewati layar kartu sambutan melompat sesaat setelah halaman terbuka / selesai digeser */
     const gambar = () => {
       c.innerHTML = L.length ? L.map((m, i) => aiGelembung(m, i)).join('') : kosong();
-      turun();
+      if (L.length) turun();
+      else v.scrollTop = 0;
     };
     gambar();
     const tinggi = () => {
@@ -1260,6 +1263,8 @@ P.ai = () => ({
     /* Salin, dengarkan, dan edit pesan. Edit langsung di gelembung: ubah lalu Kirim ulang (jawaban lama diganti) */
     c.onclick = (e) => {
       const s = e.target.closest('[data-ais]');
+      /* Saran pertanyaan tidak terkirim oleh jari yang sedang/baru saja menggeser halaman */
+      if (s && window.gsSedang && gsSedang()) return;
       if (s) {
         q.value = s.textContent;
         $('#aif').requestSubmit();
