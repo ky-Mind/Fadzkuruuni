@@ -1,11 +1,11 @@
 {
- "tag_name": "v2.6.36",
- "body": "- Aplikasi pindah ke alamat resmi baru: majelisfadzkuruuni.web.id\n- Pengaturan, penanda, riwayat baca, dan status masuk akun dipindahkan otomatis saat aplikasi pertama kali dibuka\n- Kitab & Al-Qur'an yang sudah diunduh untuk offline diunduh ulang otomatis saat tersambung Wi-Fi\n- Memuat isi aplikasi terbaru: Tasbih \"Ringankan beban\" dengan suara ketukan dan bacaan dzikir, geser halaman yang lebih halus, perbaikan Fadz AI",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.36",
+ "tag_name": "v2.6.37",
+ "body": "- Layar pembuka baru bergaya KyMind: logo Fadzkuruuni di tengah, tulisan KyMind di bawah\n- Pembaruan aplikasi kini diunduh langsung di dalam aplikasi lalu layar pasang terbuka otomatis, tanpa lewat browser atau GitHub",
+ "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.37",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.36/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.37/fadzkuruuni.apk"
   }
  ]
 }
