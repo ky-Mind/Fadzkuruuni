@@ -5,7 +5,7 @@
    - Kontrol media di luar aplikasi: Media Session (notifikasi media & layar kunci di Chrome/PWA, tombol headset/Bluetooth),
      dan di aplikasi Android lewat layanan latar AudioLayanan (FadzAndroid.mediaInfo/mediaHenti), yang memanggil kembali window.fzMedia(aksi).
    Halaman surah menyorot ayat yang sedang dibaca lewat peristiwa 'fzpemutar'. */
-const PM = { n: 0, i: 0, L: [], akhir: null, satu: 0, au: null, lepas: 0 };
+const PM = { n: 0, i: 0, L: [], akhir: null, satu: 0, au: null, lepas: 0, mulai: null, rep: 0, putaran: 1 };
 const pmAud = (n, a) =>
   `https://everyayah.com/data/Alafasy_128kbps/${String(n).padStart(3, '0')}${String(a).padStart(3, '0')}.mp3`;
 /* Berkas satu surah: bismillah (001001) di depan, kecuali Al-Fatihah dan At-Taubah */
@@ -49,6 +49,10 @@ function pmQuran(n, k, o) {
   PM.n = n;
   PM.L = pmDaftar(n);
   PM.satu = o.satu ? k : 0;
+  /* Pemutaran biasa tidak membawa pengaturan ulang dari sesi sebelumnya (lembar pengulangan memasangnya lagi sesudah ini) */
+  PM.mulai = null;
+  PM.rep = 0;
+  PM.putaran = 1;
   PM.akhir = o.satu ? { n, a: k } : o.akhir || { n, a: AYAT[n - 1] };
   /* Diputar dari ayat 1: bismillah dibaca dulu */
   pmKe(k <= 1 ? 0 : k - 1 + pmGeser(n));
@@ -93,9 +97,25 @@ function pmLanjut(d, otomatis) {
   if (!pmAktif()) return;
   const k = pmAyat(),
     A = PM.akhir;
+  /* Atur pengulangan: tiap ayat diulang S.pmUlang kali, lalu rentang dari–sampai diulang S.pmUlangS kali (0 = terus) */
+  if (d > 0 && otomatis && PM.mulai && k > 0 && (S.pmUlang || 1) > 1 && PM.rep + 1 < S.pmUlang) {
+    PM.rep++;
+    return pmKe(PM.i);
+  }
+  PM.rep = 0;
   if (d > 0) {
     if (PM.satu && otomatis) return pmHenti();
-    if (otomatis && A && PM.n == A.n && k >= A.a) return pmHenti(true);
+    if (otomatis && A && PM.n == A.n && k >= A.a) {
+      if (PM.mulai && (!S.pmUlangS || PM.putaran < S.pmUlangS)) {
+        const m = PM.mulai,
+          pt = PM.putaran + 1;
+        pmQuran(m.n, m.a, { akhir: A });
+        PM.mulai = m;
+        PM.putaran = pt;
+        return;
+      }
+      return pmHenti(true);
+    }
     if (PM.i + 1 < PM.L.length) return pmKe(PM.i + 1);
     if (PM.n < 114 && (!A || PM.n < A.n || !otomatis)) {
       const m = PM.n + 1;
@@ -131,6 +151,9 @@ function pmHenti(selesai) {
   PM.i = 0;
   PM.satu = 0;
   PM.akhir = null;
+  PM.mulai = null;
+  PM.rep = 0;
+  PM.putaran = 1;
   pmTampil();
   if (selesai === true) toast('Murottal selesai');
   try {
@@ -150,6 +173,12 @@ const pmJudul = () => {
 const pmSub = () => {
   if (!pmAktif()) return '';
   const A = PM.akhir;
+  if (PM.mulai)
+    return (
+      'Diulang' +
+      ((S.pmUlang || 1) > 1 ? ` · tiap ayat ${S.pmUlang}×` : '') +
+      ` · putaran ${PM.putaran}${S.pmUlangS ? '/' + S.pmUlangS : ''}`
+    );
   return (
     'Murottal Mishary Alafasy' +
     (PM.satu
@@ -170,7 +199,7 @@ function pmTampil() {
     m.id = 'qmini';
     m.className = 'qmini pm';
     document.body.append(m);
-    m.innerHTML = `<button class="ib2" data-pm="-1" aria-label="Ayat sebelumnya">${ic('back', 16)}</button><button class="ib" data-pm="0" aria-label="Jeda"></button><button class="ib2" data-pm="1" aria-label="Ayat berikutnya">${ic('next', 16)}</button><a class="pmt" data-pmbuka><b></b><small></small></a><button class="ib2 pmsp" data-pmsp aria-label="Kecepatan murottal"></button><button class="ib2" data-pm="x" aria-label="Hentikan murottal">×</button>`;
+    m.innerHTML = `<button class="ib2" data-pm="-1" aria-label="Ayat sebelumnya">${ic('back', 16)}</button><button class="ib" data-pm="0" aria-label="Jeda"></button><button class="ib2" data-pm="1" aria-label="Ayat berikutnya">${ic('next', 16)}</button><a class="pmt" data-pmbuka><b></b><small></small></a><button class="ib2" data-pmrep aria-label="Atur pengulangan">${ic('rot', 16)}</button><button class="ib2 pmsp" data-pmsp aria-label="Kecepatan murottal"></button><button class="ib2" data-pm="x" aria-label="Hentikan murottal">×</button>`;
   }
   if (m) {
     m.hidden = !on;
@@ -324,3 +353,98 @@ setTimeout(() => {
   const lanjut = k.main && window.ANDROID && Date.now() - k.w < 20000;
   pmPulih(k, lanjut);
 }, 600);
+
+/* Lembar "Atur pengulangan" (seperti aplikasi Al-Qur'an pada umumnya): dari surah:ayat sampai surah:ayat, ulangi tiap ayat,
+   ulangi seluruh rentang, dan kecepatan. Dibuka dari menu ayat atau tombol ulang di kapsul murottal. */
+function pmUlangLembar(n, k) {
+  if (!n) {
+    n = PM.n || (window.QR && QR.n) || 1;
+    k = Math.max(1, pmAyat() || 1);
+  }
+  const ak = PM.akhir && PM.mulai ? PM.akhir : { n, a: AYAT[n - 1] };
+  const optS = (v) =>
+      NAMA.map((x, i) => `<option value="${i + 1}"${i + 1 == v ? ' selected' : ''}>${i + 1}. ${esc(x)}</option>`).join(
+        ''
+      ),
+    optA = (s, v) =>
+      Array.from({ length: AYAT[s - 1] }, (_, i) => `<option${i + 1 == v ? ' selected' : ''}>${i + 1}</option>`).join(
+        ''
+      );
+  const pil = (id, L, v) =>
+    `<div class="seg pmsg" id="${id}">${L.map(([x, t]) => `<button type="button" data-v="${x}" class="${x == v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+  const e = document.createElement('div');
+  e.className = 'back-d';
+  e.innerHTML = `<div class="sheet pmlb pmul" role="dialog" aria-label="Atur pengulangan"><b>Atur pengulangan</b>
+<label class="pml">Dari<span class="pmr"><select class="in" id="uds">${optS(n)}</select><select class="in" id="uda">${optA(n, k)}</select></span></label>
+<label class="pml">Sampai<span class="pmr"><select class="in" id="uss">${optS(ak.n)}</select><select class="in" id="usa">${optA(ak.n, ak.a)}</select></span></label>
+<div class="pml">Ulangi tiap ayat${pil(
+    'uua',
+    [
+      [1, '1×'],
+      [2, '2×'],
+      [3, '3×'],
+      [5, '5×'],
+      [10, '10×'],
+    ],
+    S.pmUlang || 1
+  )}</div>
+<div class="pml">Ulangi seluruhnya${pil(
+    'uus',
+    [
+      [1, '1×'],
+      [2, '2×'],
+      [3, '3×'],
+      [5, '5×'],
+      [0, '∞'],
+    ],
+    S.pmUlangS == null ? 1 : S.pmUlangS
+  )}</div>
+<div class="pml">Kecepatan${pil(
+    'uks',
+    [
+      [0.75, '0,75×'],
+      [1, 'Normal'],
+      [1.25, '1,25×'],
+      [1.5, '1,5×'],
+    ],
+    S.pmSpd || 1
+  )}</div>
+<div class="act"><button class="btn s" data-x style="flex:1">Batal</button><button class="btn" data-uy style="flex:1">${ic('play', 16)} Putar</button></div></div>`;
+  document.body.append(e);
+  const v = { uua: S.pmUlang || 1, uus: S.pmUlangS == null ? 1 : S.pmUlangS, uks: S.pmSpd || 1 };
+  e.querySelector('#uds').onchange = (x) => (e.querySelector('#uda').innerHTML = optA(+x.target.value, 1));
+  e.querySelector('#uss').onchange = (x) => {
+    const s = +x.target.value;
+    e.querySelector('#usa').innerHTML = optA(s, AYAT[s - 1]);
+  };
+  e.onclick = (x) => {
+    if (x.target == e || x.target.closest('[data-x]')) return e.remove();
+    const b = x.target.closest('.pmsg button');
+    if (b) {
+      const g = b.parentNode;
+      $$('button', g).forEach((y) => y.classList.toggle('on', y == b));
+      v[g.id] = +b.dataset.v;
+      return;
+    }
+    if (x.target.closest('[data-uy]')) {
+      const dn = +e.querySelector('#uds').value,
+        da = +e.querySelector('#uda').value,
+        sn = +e.querySelector('#uss').value,
+        sa = +e.querySelector('#usa').value;
+      if (sn < dn || (sn == dn && sa < da)) return toast('Ayat "Sampai" harus sesudah ayat "Dari"');
+      S.pmUlang = v.uua;
+      S.pmUlangS = v.uus;
+      S.pmSpd = v.uks;
+      save();
+      e.remove();
+      pmQuran(dn, da, { akhir: { n: sn, a: sa } });
+      PM.mulai = { n: dn, a: da };
+      PM.putaran = 1;
+      PM.rep = 0;
+      pmTampil();
+    }
+  };
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest && e.target.closest('[data-pmrep]')) pmUlangLembar();
+});

@@ -6,6 +6,17 @@ paket('quran', {
   cache: 'fz-data',
   urls: async () => Array.from({ length: 114 }, (_, i) => qUrl(i + 1)),
 });
+/* Mushaf Madinah per halaman (data + font 604 halaman) dan teks tajwid 114 surah untuk mode Kartu: sekitar 70 MB */
+paket('mushaf', {
+  judul: 'Mushaf per halaman & tajwid (604 halaman)',
+  kat: 'quran',
+  cache: 'fz-mushaf',
+  urls: async () => [
+    ...Array.from({ length: 604 }, (_, i) => MS_API(i + 1)),
+    ...Array.from({ length: 604 }, (_, i) => MS_FONT(i + 1)),
+    ...Array.from({ length: 114 }, (_, i) => TJ_URL(i + 1)),
+  ],
+});
 const OFFKAT = [
   ['quran', "Al-Qur'an", 'book'],
   ['kitab', 'Kitab Kuning', 'lib'],

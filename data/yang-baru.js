@@ -2,6 +2,15 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.93': [
+    "Al-Qur'an mode Mushaf kini per halaman seperti Mushaf Madinah: 15 baris, 604 halaman, digeser ke kanan untuk halaman berikutnya",
+    'Tajwid berwarna di mode Mushaf dan Kartu; ketuk huruf berwarna di Kartu untuk penjelasan hukumnya, atau ketuk kata di Mushaf',
+    'Pengaturan baca › Hukum tajwid & warnanya: penjelasan, contoh ayat, dan nyala/mati per hukum',
+    'Pindah Kartu ↔ Mushaf tetap di ayat yang sama',
+    'Murottal: ayat yang dibaca disorot di halaman mushaf dan halaman membalik sendiri',
+    'Putar dengan pengulangan: dari–sampai ayat, ulangi tiap ayat, ulangi seluruhnya, dan kecepatan',
+    'Mushaf & tajwid bisa diunduh untuk dibaca tanpa internet (Pengaturan › Offline & Data)',
+  ],
   '2.9.91': ['Menu bawah tidak lagi hilang di Beranda setelah kembali dari Semua Menu'],
   '2.9.90': [
     'Pindah halaman lebih cepat: halaman baru langsung tampil dengan geser pendek, tanpa layar putih atau memudar seperti dimuat ulang',

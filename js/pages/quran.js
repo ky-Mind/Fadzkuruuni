@@ -110,6 +110,7 @@ function qReader(n, sc) {
   /* Pemutar global (js/core/pemutar.js): tetap berbunyi saat pindah halaman / aplikasi di latar. Ayat yang dibaca
      disorot di sini */
   const tandai = () => {
+    if (S.full && R.ms) return msTandai(R);
     $$('#ay .qplay').forEach((x) => x.classList.remove('qplay'));
     if (!pmAktif() || PM.n != R.n) return;
     const k = pmAyat(),
@@ -138,6 +139,7 @@ function qReader(n, sc) {
   const hdr = () => {
     $('#qt').textContent = R.n + '. ' + NAMA[R.n - 1];
     $('#qa').textContent = ARTI[R.n - 1] + ' · ' + AYAT[R.n - 1] + ' ayat';
+    if (S.full && R.ms) msInfo(R);
     segOn();
     tandai();
   };
@@ -150,8 +152,17 @@ function qReader(n, sc) {
     $('#snav').innerHTML =
       `<button class="snb" data-qn="-1" aria-label="${first ? 'Surah sebelumnya' : 'Halaman sebelumnya'}" ${first && R.n <= 1 ? 'disabled' : ''}>‹</button><small class="mut">${lbl || 'Geser ke samping untuk pindah surah'}</small><button class="snb" data-qn="1" aria-label="${last ? 'Surah berikutnya' : 'Halaman berikutnya'}" ${last && R.n >= 114 ? 'disabled' : ''}>›</button>`;
   };
+  R.gambar = () => draw();
   const draw = () => {
-    drawAy(el, R.A, R.n, S.full ? null : R.p);
+    if (S.full) {
+      if (!R.ms || !$('#msw')) msBuka(R, R.mpAwal || msHalAyat(R.n, R.tuju || 1));
+      return;
+    }
+    R.ms = null;
+    const sn0 = $('#snav');
+    if (sn0) sn0.hidden = false;
+    if (!R.A) return;
+    drawAy(el, R.A, R.n, R.p);
     nav();
     tandai();
     const t = R.tuju && $('#a' + R.tuju);
@@ -234,6 +245,10 @@ function qReader(n, sc) {
       R.n = m;
       R.tuju = 0;
       R.A = window.QAYAT = A;
+      S.tj &&
+        tjSurah(m)
+          .then(() => window.QR == R && R.n == m && !S.full && draw())
+          .catch(() => {});
       R.p = d < 0 && !S.full ? Math.ceil(A.length / QPER) - 1 : 0;
       hdr();
       draw();
@@ -245,23 +260,67 @@ function qReader(n, sc) {
     });
     R.busy = 0;
   };
-  R.mode = (full) => {
+  /* Pindah mode di ayat yang sama: Kartu → Mushaf membuka halaman ayat paling atas; Mushaf → Kartu membuka ayat yang
+     dipilih / sedang diputar di halaman itu, atau ayat pertama halaman (surahnya dimuat bila berbeda) */
+  R.mode = async (full) => {
     full = !!full;
-    if (!!S.full == full || !R.A) return;
-    const k = atas();
-    S.full = full;
+    if (!!S.full == full) return;
+    if (full) {
+      const k = R.A ? atas() : 1;
+      S.full = true;
+      save();
+      document.body.classList.add('full');
+      segOn();
+      R.ms = null;
+      R.mpAwal = msHalAyat(R.n, k);
+      draw();
+      R.mpAwal = 0;
+      return;
+    }
+    let s = R.n,
+      a = 1;
+    if (R.ms) {
+      const p = R.ms.p,
+        pil = $('#msw .msk.aytuju'),
+        main = pmAktif() && msHalAyat(PM.n, Math.max(1, pmAyat())) == p;
+      [s, a] = pil ? pil.dataset.k.split(':').map(Number) : main ? [PM.n, Math.max(1, pmAyat())] : MSH[p - 1];
+    }
+    S.full = false;
     save();
-    document.body.classList.toggle('full', full);
-    R.p = Math.floor((k - 1) / QPER);
+    document.body.classList.remove('full');
+    R.ms = null;
     segOn();
+    if (s != R.n || !R.A) {
+      el.innerHTML = '<p class="mut">Memuat…</p>';
+      try {
+        R.A = window.QAYAT = await qGet(s);
+      } catch (e) {
+        el.innerHTML = '<div class="card">Surah ini belum tersimpan di perangkat dan internet tidak tersedia.</div>';
+        return;
+      }
+      R.n = s;
+      history.replaceState(null, '', '#/quran/' + s);
+      route.cur = location.hash;
+      RIW[RIW.length - 1] = location.hash;
+      catat();
+      R.siapkan && R.siapkan();
+    }
+    hdr();
+    R.p = Math.floor((a - 1) / QPER);
     draw();
-    ke(k);
+    ke(a);
+    S.tj &&
+      tjSurah(R.n)
+        .then(() => !S.full && R.A && draw())
+        .catch(() => {});
     R.siapPeek && R.siapPeek();
   };
   $$('.mseg button').forEach((b) => (b.onclick = () => R.mode(b.dataset.md == '1')));
   /* Ketuk kartu ayat (atau ayat di mode mushaf) untuk membuka menu ayat; tombol bintang tetap langsung menandai */
   el.onclick = (e) => {
     if (e.target.closest('button,a') || String(getSelection()).trim()) return;
+    const tj = S.tj && !S.full && e.target.closest('.tj');
+    if (tj && tjPop(tj)) return;
     const t = e.target.closest('.ay,.ayt');
     if (t) {
       ayPilih(+t.id.slice(1));
@@ -491,6 +550,7 @@ function qReader(n, sc) {
         if (window.QR !== R || !el.isConnected) return ab.abort();
         if (
           e.touches.length != 1 ||
+          S.full ||
           R.busy ||
           sibuk ||
           e.touches[0].clientX < 24 ||
@@ -593,7 +653,13 @@ function qReader(n, sc) {
       R.A = window.QAYAT = A;
       R.siapkan && R.siapkan();
       if (sc) R.p = Math.floor((sc - 1) / QPER);
+      if (sc && S.full) R.mpAwal = msHalAyat(n, sc);
       draw();
+      R.mpAwal = 0;
+      S.tj &&
+        tjSurah(R.n)
+          .then(() => window.QR == R && !S.full && R.A && draw())
+          .catch(() => {});
       R.siapPeek();
       if (sc)
         requestAnimationFrame(() => {
@@ -612,6 +678,11 @@ function qReader(n, sc) {
 /* Panah kiri/kanan di keyboard untuk halaman/surah sebelumnya/berikutnya */
 addEventListener('keydown', (e) => {
   if (!window.QR || !$('#ay') || e.target.closest('input,textarea') || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (S.full && QR.ms) {
+    if (e.key == 'ArrowLeft') msGeser(QR, 1);
+    else if (e.key == 'ArrowRight') msGeser(QR, -1);
+    return;
+  }
   const g = QR.geser || QR.go;
   if (e.key == 'ArrowRight') g(1);
   else if (e.key == 'ArrowLeft') g(-1);
@@ -730,9 +801,10 @@ ${
       )}`
     : ''
 }
+${qr ? `<div class="ksh-l">Tajwid & mushaf</div><div class="list sg ksh-c">${row('book', 'Tajwid berwarna', 'Warnai hukum tajwid di Mushaf dan Kartu', tg('stj', !!S.tj))}${row('news', 'Garis tiap baris', 'Garis tipis di halaman mushaf', tg('sgr', S.msGaris !== false))}<button type="button" class="srw" data-tjl><span class="si">${ic('sliders', 20)}</span><span class="t">Hukum tajwid & warnanya<br><small class="mut">Penjelasan, contoh, dan nyala/mati per hukum</small></span>${ic('next', 18)}</button></div>` : ''}
 ${qr && window.QR ? `<div class="ksh-l">Audio surah ini</div><div class="qsdl"><span class="mut">Simpan murattal ${esc(NAMA[QR.n - 1])} agar bisa diputar tanpa internet</span>${dlW('audio:' + QR.n)}</div>` : ''}
 <div class="ksh-l">Tampilkan</div>
-<p class="mut ksh-mn">Mode Mushaf hanya menampilkan teks Arab bersambung. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.</p>
+<p class="mut ksh-mn">Mode Mushaf menampilkan halaman Mushaf Madinah 15 baris. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.</p>
 <div class="list sg ksh-c ksh-mt">${row('search', 'Teks Latin', 'Transliterasi di bawah teks Arab', tg('s5', S.lt))}${row('news', 'Terjemah', 'Arti dalam bahasa Indonesia', tg('s1', S.tr))}</div>
 <div class="ksh-l">Ukuran huruf</div>
 <div class="list sg ksh-c">${sl('s2', 'Arab', 22, 52, S.fs)}<div class="ksh-mt">${sl('s6', 'Latin', 12, 26, S.fl || 15)}${sl('s7', 'Terjemah', 12, 26, S.fi || 14)}</div></div>
@@ -753,6 +825,27 @@ ${qr && window.QR ? `<div class="ksh-l">Audio surah ini</div><div class="qsdl"><
       typeof cb == 'function' && cb();
     }
   };
+  if ($('#stj', e))
+    $('#stj', e).onchange = (x) => {
+      S.tj = x.target.checked;
+      save();
+      tjWarna();
+      if (window.QR && QR.n && !S.full) {
+        if (S.tj)
+          tjSurah(QR.n)
+            .then(() => QR.gambar && QR.gambar())
+            .catch(() => {});
+        else QR.gambar && QR.gambar();
+      }
+    };
+  if ($('#sgr', e))
+    $('#sgr', e).onchange = (x) => {
+      S.msGaris = x.target.checked;
+      save();
+      $('#msw') && $('#msw').classList.toggle('garis', S.msGaris);
+    };
+  const tjb = $('[data-tjl]', e);
+  if (tjb) tjb.onclick = () => tjLembar();
   $('#s1', e).onchange = (x) => {
     S.tr = x.target.checked;
     save();
@@ -790,7 +883,7 @@ ${qr && window.QR ? `<div class="ksh-l">Audio surah ini</div><div class="qsdl"><
     if (n)
       n.textContent = tanpa
         ? 'Halaman ini tidak memiliki teks Latin dan terjemah, jadi pengaturannya tidak dipakai di sini.'
-        : 'Mode Mushaf hanya menampilkan teks Arab bersambung. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.';
+        : 'Mode Mushaf menampilkan halaman Mushaf Madinah 15 baris. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.';
   };
   msf();
   if ($('#smd', e))
@@ -868,15 +961,42 @@ const bsmSplit = (A, n) => {
   return { b, w };
 };
 /* Menu ayat: tandai, putar dari ayat ini, salin (Arab + terjemah + rujukan), bagikan */
-function ayMenu(n, k) {
-  const x = window.QR && QR.A && QR.A[k - 1];
+async function ayMenu(n, k, o = {}) {
+  let A = window.QR && QR.n == n && QR.A;
+  if (!A)
+    try {
+      A = await qGet(n);
+    } catch (e) {
+      return toast('Surah ini belum tersimpan dan internet tidak tersedia');
+    }
+  const x = A && A[k - 1];
   if (!x) return;
   const key = n + ':' + k,
     ditandai = () => (S.bm || []).includes(key),
     teks = `${x.a}\n\n${x.t}\n\n(QS. ${NAMA[n - 1]} [${n}]: ${k})`;
   const e = document.createElement('div');
   e.className = 'back-d';
-  e.innerHTML = `<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n - 1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div>${S.full ? `${S.lt && x.l ? `<p class="lt am-lt">${x.l}</p>` : ''}${S.tr !== false ? `<p class="mut tr am-tr">${x.t}</p>` : ''}` : ''}<div class="am-l"><button data-am="bm">${ic('star', 20)}<span>${ditandai() ? 'Hapus tanda ayat' : 'Tandai ayat'}</span></button><button data-am="tb">${ic('book', 20)}<span>${S.tbaca && S.tbaca.n == n && S.tbaca.a == k ? 'Sudah ditandai terakhir dibaca' : 'Tandai sebagai terakhir dibaca'}</span></button><button data-am="play">${ic('play', 20)}<span>Putar ayat ini saja</span></button><button data-am="dari">${ic('play', 20)}<span>Putar dari ayat ini sampai akhir surah</span></button><button data-am="terus">${ic('play', 20)}<span>Putar terus sampai surah…</span></button><button data-am="share">${ic('share', 20)}<span>Bagikan</span></button></div></div>`;
+  e.innerHTML = `<div class="sheet am" role="dialog" aria-label="Menu ayat ${k}"><div class="am-h"><b>${NAMA[n - 1]} · ayat ${k}</b><button class="ib2" data-x aria-label="Tutup">×</button></div><div class="am-ar">${x.a}</div>${S.full ? `${S.lt && x.l ? `<p class="lt am-lt">${x.l}</p>` : ''}${S.tr !== false ? `<p class="mut tr am-tr">${x.t}</p>` : ''}` : ''}<div class="am-l"><button data-am="bm">${ic('star', 20)}<span>${ditandai() ? 'Hapus tanda ayat' : 'Tandai ayat'}</span></button><button data-am="tb">${ic('book', 20)}<span>${S.tbaca && S.tbaca.n == n && S.tbaca.a == k ? 'Sudah ditandai terakhir dibaca' : 'Tandai sebagai terakhir dibaca'}</span></button><button data-am="play">${ic('play', 20)}<span>Putar ayat ini saja</span></button><button data-am="dari">${ic('play', 20)}<span>Putar dari ayat ini sampai akhir surah</span></button><button data-am="terus">${ic('play', 20)}<span>Putar terus sampai surah…</span></button><button data-am="ulang">${ic('rot', 20)}<span>Putar dengan pengulangan…</span></button><button data-am="share">${ic('share', 20)}<span>Bagikan</span></button></div><div class="am-tj"></div></div>`;
+  /* Hukum tajwid kata yang diketuk (mode Mushaf) dan seluruh ayat */
+  const tjIsi = (semua) => {
+    const box = e.querySelector('.am-tj'),
+      kata = (o.kata || []).filter((c) => TJ_HK[c] && !S.tjOff[TJ_HK[c][0]]),
+      lain = semua.filter((c) => !kata.includes(c) && TJ_HK[c] && !S.tjOff[TJ_HK[c][0]]);
+    if (!box || (!kata.length && !lain.length)) return;
+    box.innerHTML =
+      (kata.length ? `<b class="am-tjj">Tajwid kata yang diketuk</b>${kata.map(tjBaris).join('')}` : '') +
+      (lain.length
+        ? `<b class="am-tjj">${kata.length ? 'Tajwid lain di ayat ini' : 'Tajwid di ayat ini'}</b>${lain.map(tjBaris).join('')}`
+        : '') +
+      `<button class="sb" data-am="tjl">Semua hukum tajwid & warnanya</button>`;
+  };
+  if (S.tj) {
+    if (o.ayat) tjIsi(o.ayat);
+    else
+      tjSurah(n)
+        .then((T) => T[k - 1] && tjIsi(tjKelas(T[k - 1])))
+        .catch(() => {});
+  }
   document.body.append(e);
   const salin = () =>
     (navigator.clipboard ? navigator.clipboard.writeText(teks) : Promise.reject()).then(
@@ -896,9 +1016,11 @@ function ayMenu(n, k) {
       save();
       $$(`[data-bm="${key}"]`).forEach((s) => s.classList.toggle('on', i < 0));
       toast(i < 0 ? 'Ayat ditandai' : 'Penanda dihapus');
-    } else if (a == 'play') window.QR && QR.satu(k);
-    else if (a == 'dari') window.QR && QR.dari(k);
+    } else if (a == 'play') pmQuran(n, k, { satu: 1 });
+    else if (a == 'dari') pmQuran(n, k);
     else if (a == 'terus') pmTerusLembar(n, k);
+    else if (a == 'ulang') pmUlangLembar(n, k);
+    else if (a == 'tjl') tjLembar();
     else if (a == 'tb') {
       S.tbaca = { n, a: k, t: Date.now() };
       save();
@@ -928,7 +1050,8 @@ const drawAy = (el, A, n, p) => {
     A.slice(s, e)
       .map((x, j) => {
         const i = s + j;
-        return `<div class="ay" id="a${i + 1}"><div class="ah"><span class="n">${i + 1}</span><button class="bm ${(S.bm || []).includes(n + ':' + (i + 1)) ? 'on' : ''}" data-bm="${n}:${i + 1}" aria-label="Penanda ayat">${ic('star', 18)}</button></div><div class="ar" style="font-size:${S.fs}px">${w[i]}</div><p class="lt">${x.l}</p><p class="mut tr" style="margin:6px 0 0">${x.t}</p></div>`;
+        const tj = S.tj && TJT[n] && TJT[n][i];
+        return `<div class="ay" id="a${i + 1}"><div class="ah"><span class="n">${i + 1}</span><button class="bm ${(S.bm || []).includes(n + ':' + (i + 1)) ? 'on' : ''}" data-bm="${n}:${i + 1}" aria-label="Penanda ayat">${ic('star', 18)}</button></div><div class="ar${tj ? ' tjar' : ''}" style="font-size:${S.fs}px">${tj ? tjTeks(tj) : w[i]}</div><p class="lt">${x.l}</p><p class="mut tr" style="margin:6px 0 0">${x.t}</p></div>`;
       })
       .join('');
 };

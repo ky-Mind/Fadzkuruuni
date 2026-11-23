@@ -1,4 +1,4 @@
-const V = 'fz-v287',
+const V = 'fz-v288',
   A = [
     './',
     'index.html',
@@ -23,6 +23,7 @@ const V = 'fz-v287',
     'data/asma.js',
     'data/pustaka.js',
     'data/quran-meta.js',
+    'data/mushaf-hal.js',
     'data/menu.js',
     'data/kota.js',
     'data/maulid/daftar.js',
@@ -56,6 +57,8 @@ const V = 'fz-v287',
     'js/core/ui.js',
     'js/core/waktu.js',
     'js/core/quran-api.js',
+    'js/core/tajwid.js',
+    'js/core/mushaf-data.js',
     'js/core/cloud.js',
     'js/core/adzan.js',
     'js/core/android.js',
@@ -67,6 +70,8 @@ const V = 'fz-v287',
     'js/pages/kata-kata.js',
     'js/pages/beranda.js',
     'js/pages/quran.js',
+    'js/pages/quran-mushaf.js',
+    'font/hafs.woff2',
     'js/pages/wirid-doa.js',
     'js/pages/asmaul-husna.js',
     'js/pages/tahlil.js',
@@ -124,7 +129,9 @@ self.addEventListener('activate', (e) => {
       .keys()
       .then((k) =>
         Promise.all(
-          k.filter((x) => x != V && x != 'fz-data' && x != 'fz-off' && x != 'fz-font').map((x) => caches.delete(x))
+          k
+            .filter((x) => x != V && x != 'fz-data' && x != 'fz-off' && x != 'fz-font' && x != 'fz-mushaf')
+            .map((x) => caches.delete(x))
         )
       )
   );
@@ -186,6 +193,24 @@ self.addEventListener('fetch', (e) => {
             if (n.ok) {
               const c = n.clone();
               caches.open('fz-off').then((x) => x.put(r, c));
+            }
+            return n;
+          })
+      )
+    );
+    return;
+  }
+  /* Mushaf per halaman & teks tajwid (Quran Foundation): data dan font halaman tidak berubah, jadi diambil dari cache
+     'fz-mushaf' bila ada; selain itu dari jaringan lalu disimpan (paket offline "Mushaf & tajwid" mengisinya sekaligus) */
+  if (/^(api\.quran\.com|verses\.quran\.foundation)$/.test(new URL(r.url).hostname)) {
+    e.respondWith(
+      caches.match(r).then(
+        (h) =>
+          h ||
+          fetch(r).then((n) => {
+            if (n.ok) {
+              const c = n.clone();
+              caches.open('fz-mushaf').then((x) => x.put(r, c));
             }
             return n;
           })

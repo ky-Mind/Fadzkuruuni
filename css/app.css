@@ -10822,3 +10822,319 @@ body,
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ===== Mushaf Madinah per halaman (js/pages/quran-mushaf.js) & tajwid berwarna (js/core/tajwid.js) ===== */
+@font-face {
+  font-family: 'Hafs';
+  src: url('../font/hafs.woff2') format('woff2');
+  font-display: swap;
+}
+#ay .msw {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -16px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.msh {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 10px 2px;
+  background: var(--bg);
+  will-change: transform;
+}
+.msi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.msb {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  direction: rtl;
+  white-space: nowrap;
+  line-height: 1;
+  border-bottom: 1px solid transparent;
+  color: var(--ink);
+}
+.msw.garis .msb {
+  border-bottom-color: var(--line);
+}
+.msb.tengah {
+  justify-content: center;
+  gap: 0.12em;
+  flex: 0 0 auto;
+  padding: 0.35em 0;
+}
+.msk {
+  border-radius: 6px;
+  padding: 0.06em 0.02em;
+  cursor: pointer;
+}
+.msk.aytuju {
+  background: color-mix(in srgb, var(--g) 16%, transparent);
+}
+.msk.qplay {
+  background: color-mix(in srgb, #e3b94f 30%, transparent);
+}
+.msj {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 3px 6px;
+  border: 1.5px solid var(--g);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--g) 10%, var(--bg));
+  color: var(--g);
+  font:
+    1.05em/1 'Hafs',
+    'Amiri',
+    serif;
+  min-height: 1.6em;
+}
+.msbs {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font:
+    1em/1 'Hafs',
+    'Amiri',
+    serif;
+  color: var(--ink);
+}
+/* Halaman 1–2 (Al-Fatihah, awal Al-Baqarah): baris lebih sedikit, isi di tengah seperti mushaf cetak */
+.msi.awal {
+  justify-content: center;
+  gap: 0.25em;
+}
+.msi.awal .msj,
+.msi.awal .msbs {
+  flex: 0 0 auto;
+  padding: 0.45em 0;
+}
+.msi.awal .msj {
+  margin: 0 12% 0.4em;
+}
+.msno {
+  text-align: center;
+  font:
+    13px 'Hafs',
+    serif;
+  color: var(--mut);
+  padding: 2px 0 0;
+}
+.msmuat {
+  margin: auto;
+}
+.msgagal {
+  margin: auto 8px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.msgagal .btn {
+  margin-top: 12px;
+}
+/* Kartu bertajwid: teks Utsmani Hafs (sama dengan mushaf), warna dari palet font mushaf */
+#ay .ar.tjar,
+.tjar {
+  font-family: 'Hafs', 'Amiri', serif;
+  line-height: 2.1;
+}
+.tjon .tj {
+  cursor: pointer;
+}
+.tjon .tj-ghunnah,
+.tjon .tj-ikhafa,
+.tjon .tj-ikhafa_shafawi,
+.tjon .tj-iqlab {
+  color: var(--tj6);
+}
+.tjon .tj-idgham_ghunnah,
+.tjon .tj-idgham_wo_ghunnah,
+.tjon .tj-idgham_shafawi,
+.tjon .tj-idgham_mutajanisayn,
+.tjon .tj-idgham_mutaqaribayn,
+.tjon .tj-laam_shamsiyah,
+.tjon .tj-ham_wasl,
+.tjon .tj-slnt {
+  color: var(--tj2);
+}
+.tjon .tj-madda_normal {
+  color: var(--tj5);
+}
+.tjon .tj-madda_permissible {
+  color: var(--tj4);
+}
+.tjon .tj-madda_obligatory {
+  color: var(--tj9);
+}
+.tjon .tj-madda_necessary {
+  color: var(--tj3);
+}
+.tjon .tj-qalaqah {
+  color: var(--tj8);
+}
+.tjpop {
+  position: fixed;
+  z-index: 80;
+  max-width: min(320px, calc(100vw - 16px));
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tjpop b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.tjpop b i,
+.tjl i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+.tjl {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.tjl i {
+  margin-top: 4px;
+}
+.tjl b,
+.tjl small {
+  display: block;
+}
+.tjl small {
+  color: var(--mut);
+}
+.am-tj {
+  margin-top: 6px;
+}
+.am-tj .am-tjj {
+  display: block;
+  margin: 10px 0 2px;
+  font-size: 14px;
+}
+.am-tj .sb {
+  margin-top: 8px;
+}
+/* Lembar "Hukum tajwid" */
+.tjsh {
+  max-height: 86vh;
+  overflow-y: auto;
+}
+.tjk {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.tjk-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  color: #fff;
+  font-weight: 600;
+}
+.tjk-b {
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tjk-b p {
+  margin: 0 0 6px;
+}
+.tjk-ex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.tjk-ex .tjar {
+  font-size: 23px;
+  direction: rtl;
+  text-align: right;
+}
+.tjsh .sw {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+}
+.tjsh .sw input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.tjsh .sw i {
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+.tjsh .sw i::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.tjsh .sw input:checked + i {
+  background: rgba(0, 0, 0, 0.28);
+}
+.tjsh .sw input:checked + i::after {
+  transform: translateX(18px);
+}
+/* Lembar "Atur pengulangan" murottal */
+.pmul .pml {
+  display: block;
+  margin: 12px 0 0;
+}
+.pmul .pmr {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.pmul .pmr select:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.pmul .pmr select:last-child {
+  width: 84px;
+}
+.pmul .pmsg {
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.pmul .act {
+  margin-top: 16px;
+}
