@@ -2,6 +2,10 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.95': [
+    'Mushaf di aplikasi HP: huruf kini pas selebar layar di semua Ukuran tampilan (kecil, sedang, besar), tidak terpotong di kiri-kanan',
+    'Mushaf: halaman memenuhi layar sampai bawah, dan geser halaman mengikuti jari dengan pas',
+  ],
   '2.9.94': [
     'Mushaf di HP: ukuran huruf kini pas selebar layar, baris tidak lagi meluber atau terpotong di kiri-kanan',
     'Kartu bertajwid: harakat berwarna tidak lagi terlepas dari hurufnya (lingkaran putus-putus dan teks bertabrakan hilang)',

@@ -6,6 +6,13 @@
    - Pindah ke mode Kartu / dari Kartu tetap di ayat yang sama (lihat R.mode di js/pages/quran.js).
    Dipanggil dari qReader (R = keadaan pembaca surah). */
 const MS_DUR = 280;
+/* Skala tampilan: di HP seluruh aplikasi diperkecil dengan CSS zoom (Pengaturan › Ukuran tampilan), sehingga ukuran dari
+   getBoundingClientRect / innerHeight / sentuhan (piksel layar) berbeda dari clientWidth / style (piksel CSS). Semua
+   ukuran layar dibagi skala ini sebelum dibandingkan dengan ukuran CSS. */
+function msSkala(el) {
+  const w = el && el.offsetWidth;
+  return w ? el.getBoundingClientRect().width / w || 1 : 1;
+}
 function msBuka(R, p) {
   const el = $('#ay');
   if (!el) return;
@@ -21,9 +28,10 @@ function msBuka(R, p) {
 function msTinggi() {
   const w = $('#msw');
   if (!w) return;
-  const atas = w.getBoundingClientRect().top,
-    bawah = $('#qmini:not([hidden])') ? 64 : 8;
-  w.style.height = Math.max(320, innerHeight - atas - bawah) + 'px';
+  const k = msSkala(w),
+    atas = w.getBoundingClientRect().top,
+    bawah = ($('#qmini:not([hidden])') ? 64 : 8) * k;
+  w.style.height = Math.max(320, (innerHeight - atas - bawah) / k) + 'px';
 }
 /* Satu halaman: 15 baris; baris tanpa kata sebelum ayat 1 = kepala surah dan/atau basmalah */
 function msHalHtml(p, W) {
@@ -57,18 +65,27 @@ function msUkur(el) {
   let fs = Math.min(tinggi * 0.95, 44);
   el.style.fontSize = fs + 'px';
   let mx = 0;
+  const k = msSkala(el);
   ls.forEach((b) => {
     b.style.justifyContent = 'flex-start';
     mx = Math.max(
       mx,
-      [...b.children].reduce((s, c) => s + c.getBoundingClientRect().width, 0)
+      [...b.children].reduce((s, c) => s + c.getBoundingClientRect().width, 0) / k +
+        (b.classList.contains('tengah') ? parseFloat(getComputedStyle(b).columnGap) || 0 : 0) * (b.children.length - 1)
     );
     b.style.justifyContent = '';
   });
   if (mx > lebar) fs *= lebar / mx;
   el.style.fontSize = fs * 0.97 + 'px';
   /* Pengaman: bila masih ada baris yang lebih lebar dari halaman (mis. ukuran diambil sebelum font siap), kecilkan */
-  const lebih = Math.max(...ls.map((b) => b.scrollWidth / Math.max(1, b.clientWidth)));
+  const lebih = Math.max(
+    ...ls.map((b) => {
+      const r = b.getBoundingClientRect(),
+        c = [...b.children].map((x) => x.getBoundingClientRect()),
+        isi = Math.max(...c.map((x) => x.right)) - Math.min(...c.map((x) => x.left));
+      return isi / Math.max(1, r.width);
+    })
+  );
   if (lebih > 1.04) el.style.fontSize = (fs * 0.97) / lebih + 'px';
 }
 /* Bangun lapisan halaman p (memuat data & font bila perlu) */
@@ -232,8 +249,9 @@ function msGeserPasang(R) {
     'touchmove',
     (e) => {
       if (x0 == null) return;
-      const x = e.touches[0].clientX - x0,
-        y = e.touches[0].clientY - y0;
+      const k = msSkala(w),
+        x = (e.touches[0].clientX - x0) / k,
+        y = (e.touches[0].clientY - y0) / k;
       if (!kunci) {
         if (Math.abs(x) < 10 && Math.abs(y) < 10) return;
         kunci = Math.abs(x) > Math.abs(y) ? 'h' : 'v';
