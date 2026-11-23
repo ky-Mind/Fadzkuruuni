@@ -139,13 +139,49 @@ function tjWarna() {
   document.body.classList.toggle('tjon', !!S.tj);
   window.msPalet && msPalet();
 }
-/* Teks tajwid → HTML berwarna; nomor ayat di akhir teks dibuang (Kartu punya nomornya sendiri) */
-const tjTeks = (t) =>
+/* Teks tajwid → HTML berwarna. Harakat/tanda tidak boleh terpisah dari hurufnya ke elemen lain (di Chrome Android
+   jadi lingkaran putus-putus dan bertabrakan), jadi potongan berwarna diperluas ke huruf dasar sebelum tanda di awalnya,
+   dan tanda sesudahnya ikut masuk. */
+const tjTeks = (t) => {
+  /* Potong jadi [teks, kelas terdalam]; tag tajwid bisa bersarang (mis. slnt di dalam madda_obligatory) */
+  const P = [],
+    tumpuk = [];
   String(t)
     .replace(/<span class=end>[^<]*<\/span>/g, '')
-    .replace(/<tajweed class=([a-z_]+)>/g, '<span class="tj tj-$1" data-tj="$1">')
-    .replace(/<\/tajweed>/g, '</span>')
+    .split(/(<tajweed class=[a-z_]+>|<\/tajweed>)/)
+    .forEach((x) => {
+      if (!x) return;
+      const b = x.match(/^<tajweed class=([a-z_]+)>$/);
+      if (b) tumpuk.push(b[1]);
+      else if (x == '</tajweed>') tumpuk.pop();
+      else P.push({ t: x, c: tumpuk[tumpuk.length - 1] });
+    });
+  for (let k = 0; k < P.length; k++) {
+    const x = P[k];
+    if (!x.c) continue;
+    if (/^\p{M}/u.test(x.t) && k > 0) {
+      let j = k - 1;
+      while (j > 0 && !P[j].t) j--;
+      const a = P[j],
+        g = a.t.match(/[^\p{M}]\p{M}*$/u);
+      if (g) {
+        a.t = a.t.slice(0, -g[0].length);
+        x.t = g[0] + x.t;
+      }
+    }
+    const b = P[k + 1];
+    if (b) {
+      const g = b.t.match(/^\p{M}+/u);
+      if (g) {
+        b.t = b.t.slice(g[0].length);
+        x.t += g[0];
+      }
+    }
+  }
+  return P.map((x) => (x.c ? `<span class="tj tj-${x.c}" data-tj="${x.c}">${x.t}</span>` : x.t))
+    .join('')
     .trim();
+};
 /* Kelas hukum yang ada di sebuah teks tajwid */
 const tjKelas = (t) =>
   [...new Set((String(t).match(/class=([a-z_]+)/g) || []).map((x) => x.slice(6)))].filter((c) => TJ_HK[c]);

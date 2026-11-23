@@ -2,6 +2,11 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.94': [
+    'Mushaf di HP: ukuran huruf kini pas selebar layar, baris tidak lagi meluber atau terpotong di kiri-kanan',
+    'Kartu bertajwid: harakat berwarna tidak lagi terlepas dari hurufnya (lingkaran putus-putus dan teks bertabrakan hilang)',
+    'Mode Mushaf: tulisan "Geser ke samping untuk pindah surah" tidak lagi muncul di bawah halaman',
+  ],
   '2.9.93': [
     "Al-Qur'an mode Mushaf kini per halaman seperti Mushaf Madinah: 15 baris, 604 halaman, digeser ke kanan untuk halaman berikutnya",
     'Tajwid berwarna di mode Mushaf dan Kartu; ketuk huruf berwarna di Kartu untuk penjelasan hukumnya, atau ketuk kata di Mushaf',

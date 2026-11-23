@@ -67,6 +67,9 @@ function msUkur(el) {
   });
   if (mx > lebar) fs *= lebar / mx;
   el.style.fontSize = fs * 0.97 + 'px';
+  /* Pengaman: bila masih ada baris yang lebih lebar dari halaman (mis. ukuran diambil sebelum font siap), kecilkan */
+  const lebih = Math.max(...ls.map((b) => b.scrollWidth / Math.max(1, b.clientWidth)));
+  if (lebih > 1.04) el.style.fontSize = (fs * 0.97) / lebih + 'px';
 }
 /* Bangun lapisan halaman p (memuat data & font bila perlu) */
 function msLapis(R, p) {
@@ -79,6 +82,10 @@ function msLapis(R, p) {
       if (!el.isConnected && R.ms && !Object.values(R.ms.H).includes(el)) return;
       el.innerHTML = msHalHtml(p, W);
       msUkur(el);
+      /* WebView kadang baru memakai font halaman sesudah bingkai berikutnya; ukur ulang agar baris tidak meluber */
+      requestAnimationFrame(() => msUkur(el));
+      document.fonts.ready.then(() => msUkur(el));
+      setTimeout(() => msUkur(el), 500);
       if (R.ms && R.ms.H[0] == el) {
         msInfo(R);
         msTandai(R);

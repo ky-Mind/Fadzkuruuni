@@ -11138,3 +11138,6 @@ body,
 .pmul .act {
   margin-top: 16px;
 }
+.snav[hidden] {
+  display: none;
+}
