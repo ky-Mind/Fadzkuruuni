@@ -6,7 +6,7 @@ export const config = { runtime: 'edge' };
 
 export default async function handler() {
   try {
-    const r = await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases?per_page=100', {
+    const r = await fetch('https://api.github.com/repos/ky-Mind/majelisfadzkuruuni/releases?per_page=100', {
       headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'fadzkuruuni-statistik' },
     });
     if (!r.ok)

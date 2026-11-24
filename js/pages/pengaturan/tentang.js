@@ -7,7 +7,7 @@ SETPAGES.tentang = () => ({
       /* Dua jenis pembaruan, dipisah:
   1) Aplikasi Android (APK): harus diunduh & dipasang ulang bila ada versi baru (dicek ke rilis GitHub)
   2) Isi & tampilan (web): masuk otomatis setiap aplikasi dibuka, tanpa unduh APK */
-      const APK = 'https://github.com/ky-Mind/Fadzkuruuni/releases/latest/download/fadzkuruuni.apk',
+      const APK = 'https://github.com/ky-Mind/majelisfadzkuruuni/releases/latest/download/fadzkuruuni.apk',
         jm = (t) => (t ? new Date(t).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '');
       const web = `<div class="srw"><span class="si">${ic('rot', 20)}</span><span class="t">Isi & tampilan · versi ${esc(VER)}<br><small class="mut">Diperbarui otomatis setiap aplikasi dibuka, tanpa perlu mengunduh apa pun.</small></span><button class="sb" data-upweb>Muat terbaru</button></div>`;
       if (!window.ANDROID)

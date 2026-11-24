@@ -13,7 +13,7 @@ const BANK = [
   ['SeaBank', '901696052778', 'id.co.bankbkemobile.digitalbank'],
   ['Bank Saqu', '10088196215', 'bjj.bank.digital.indo.prod'],
 ];
-const UNDUH_APK = 'https://github.com/ky-Mind/Fadzkuruuni/releases/latest/download/fadzkuruuni.apk';
+const UNDUH_APK = 'https://github.com/ky-Mind/majelisfadzkuruuni/releases/latest/download/fadzkuruuni.apk';
 const salinTeks = (t) =>
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(() => {
     const a = document.createElement('textarea');

@@ -1,11 +1,11 @@
 {
  "tag_name": "v2.6.38",
  "body": "- Layar pembuka: logo dan slogan Majelis di tengah, tulisan KyMind di bawah\n- Pembaruan aplikasi diunduh langsung di dalam aplikasi lalu layar pasang terbuka otomatis, tanpa lewat browser atau GitHub",
- "html_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/tag/v2.6.38",
+ "html_url": "https://github.com/ky-Mind/majelisfadzkuruuni/releases/tag/v2.6.38",
  "assets": [
   {
    "name": "fadzkuruuni.apk",
-   "browser_download_url": "https://github.com/ky-Mind/Fadzkuruuni/releases/download/v2.6.38/fadzkuruuni.apk"
+   "browser_download_url": "https://github.com/ky-Mind/majelisfadzkuruuni/releases/download/v2.6.38/fadzkuruuni.apk"
   }
  ]
 }

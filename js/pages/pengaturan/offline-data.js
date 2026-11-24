@@ -255,7 +255,7 @@ async function pembaruanCek(paksa) {
     try {
       let r = await fetch('apk.json?c=' + Date.now(), { cache: 'no-store' }).catch(() => null);
       if (!r || !r.ok)
-        r = await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases/latest', { cache: 'no-store' });
+        r = await fetch('https://api.github.com/repos/ky-Mind/majelisfadzkuruuni/releases/latest', { cache: 'no-store' });
       if (!r.ok) throw 0;
       j = await r.json();
       if (!j.tag_name) throw 0;

@@ -2349,7 +2349,7 @@
         } catch (e) {}
         if (!REL.length)
           try {
-            const r = await fetch('https://api.github.com/repos/ky-Mind/Fadzkuruuni/releases?per_page=100');
+            const r = await fetch('https://api.github.com/repos/ky-Mind/majelisfadzkuruuni/releases?per_page=100');
             if (r.ok) {
               REL = (await r.json())
                 .map((x) => [
