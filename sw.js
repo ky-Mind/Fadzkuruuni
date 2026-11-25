@@ -1,4 +1,4 @@
-const V = 'fz-v290',
+const V = 'fz-v291',
   A = [
     './',
     'index.html',
@@ -13,6 +13,7 @@ const V = 'fz-v290',
     'img/apple-touch-icon.png',
     'img/badge-96.png',
     'css/app.css',
+    'js/pelindung.js',
     'data/content.js',
     'data/ibadah.js',
     'data/wirid/3.js',
