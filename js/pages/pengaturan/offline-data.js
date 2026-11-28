@@ -408,40 +408,153 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState == 'visible' && window.ANDROID) setTimeout(() => pembaruanCek().catch(() => {}), 1500);
 });
 
-/* ===== Ajakan unduh aplikasi Android di web =====
-   Tampil sekali di setiap sesi web (setiap kali situs dibuka di tab/jendela baru), setelah lembar lain (Yang baru, izin)
-   ditutup agar tidak bertumpuk. Tidak tampil di aplikasi Android dan di pratinjau admin. */
-function apkAjakWeb() {
-  if (window.ANDROID || TPRATINJAU) return;
-  try {
-    if (sessionStorage.fzAjakApk) return;
-    sessionStorage.fzAjakApk = 1;
-  } catch (e) {}
-  const android = /android/i.test(navigator.userAgent);
+/* ===== Ajakan memasang aplikasi di web, sesuai sistem operasi =====
+   - Android: unduh APK (adzan di latar belakang, widget, dll.).
+   - Windows / Linux / macOS / ChromeOS di Chrome atau Edge: pasang sebagai aplikasi web (jendela sendiri, ikon di menu
+     aplikasi/Start/Dock, notifikasi dari sistem) lewat prompt pemasangan browser.
+   - iPhone/iPad (Safari): langkah "Bagikan › Tambahkan ke Layar Utama"; Mac Safari: "File › Tambahkan ke Dock".
+   - Firefox (tidak bisa memasang aplikasi web): sarankan Chrome/Edge.
+   Aplikasi web yang terpasang memperbarui dirinya sendiri (service worker), sama seperti situsnya.
+   Tampil sekali tiap sesi, setelah lembar lain ditutup; tidak tampil di aplikasi Android, aplikasi yang sudah terpasang,
+   dan pratinjau admin. */
+let pasangPWA = null;
+addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pasangPWA = e;
+});
+addEventListener('appinstalled', () => {
+  pasangPWA = null;
+  toast('Fadzkuruuni terpasang. Buka dari menu aplikasi di perangkatmu.');
+});
+const sudahTerpasang = () =>
+  matchMedia('(display-mode: standalone)').matches ||
+  matchMedia('(display-mode: window-controls-overlay)').matches ||
+  navigator.standalone === true;
+function sistemOS() {
+  const u = navigator.userAgent,
+    pf = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+  if (/android/i.test(u)) return 'android';
+  if (/iPhone|iPad|iPod/.test(u) || (/Mac/.test(pf) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/CrOS/.test(u) || /Chrome OS/i.test(pf)) return 'chromeos';
+  if (/Win/i.test(pf) || /Windows/.test(u)) return 'windows';
+  if (/Mac/i.test(pf) || /Mac OS X/.test(u)) return 'macos';
+  if (/Linux/i.test(pf) || /Linux|X11/.test(u)) return 'linux';
+  return 'lain';
+}
+const NAMA_OS = {
+  windows: 'Windows',
+  linux: 'Linux',
+  macos: 'macOS',
+  chromeos: 'ChromeOS',
+  ios: 'iPhone/iPad',
+  lain: 'komputer',
+};
+/* Isi lembar ajakan untuk sistem & browser ini ('' = tidak ada cara pasang yang jelas, lembar tidak ditampilkan) */
+function pasangIsi() {
+  const os = sistemOS(),
+    u = navigator.userAgent,
+    safari = /Safari/.test(u) && !/Chrome|CriOS|Edg|Firefox|FxiOS/.test(u),
+    firefox = /Firefox|FxiOS/.test(u),
+    nos = NAMA_OS[os] || 'komputer',
+    judul = (t) => `<b style="font-size:18px">${t}</b>`,
+    ket = (t) => `<p class="mut" style="margin:4px 0 10px">${t}</p>`;
+  if (os == 'android')
+    return {
+      langkah: 0,
+      html:
+        judul('Pakai aplikasi Fadzkuruuni') +
+        ket(
+          'Lebih lengkap di aplikasi Android: adzan tetap berbunyi walau aplikasi ditutup, murottal di latar belakang dengan notifikasi media, widget jadwal salat, dan lokasi otomatis.'
+        ) +
+        `<a class="btn pasb" href="${UNDUH_APK}" rel="noopener" data-apkunduh>${ic('down', 16)} Unduh aplikasi Android</a>`,
+    };
+  if (os == 'ios')
+    return {
+      langkah: 1,
+      html:
+        judul('Pasang Fadzkuruuni di ' + nos) +
+        ket('Jadi ikon di layar utama, terbuka layar penuh seperti aplikasi, dan selalu diperbarui otomatis.') +
+        (safari
+          ? `<ol class="pasl"><li>Ketuk tombol <b>Bagikan</b> ${ic('share', 15)} di Safari</li><li>Pilih <b>Tambahkan ke Layar Utama</b></li><li>Ketuk <b>Tambah</b></li></ol>`
+          : `<p class="pasl">Buka situs ini di <b>Safari</b>, lalu ketuk <b>Bagikan › Tambahkan ke Layar Utama</b>.</p>`),
+    };
+  if (pasangPWA)
+    return {
+      langkah: 0,
+      html:
+        judul('Pasang Fadzkuruuni di ' + nos) +
+        ket(
+          `Terbuka di jendela sendiri dengan ikon di ${os == 'windows' ? 'menu Start dan taskbar' : os == 'macos' ? 'Dock dan Launchpad' : 'menu aplikasi'}, notifikasi muncul sebagai notifikasi ${nos}, dan pembaruannya otomatis tanpa unduh ulang.`
+        ) +
+        `<button class="btn pasb" data-pwapasang>${ic('down', 16)} Pasang untuk ${nos}</button>`,
+    };
+  if (os == 'macos' && safari)
+    return {
+      langkah: 1,
+      html:
+        judul('Pasang Fadzkuruuni di macOS') +
+        ket('Terbuka di jendela sendiri dengan ikon di Dock, dan pembaruannya otomatis.') +
+        `<ol class="pasl"><li>Di bilah menu Safari, pilih <b>File</b></li><li>Pilih <b>Tambahkan ke Dock</b></li><li>Klik <b>Tambah</b></li></ol>`,
+    };
+  if (firefox)
+    return {
+      langkah: 1,
+      html:
+        judul('Pasang Fadzkuruuni di ' + nos) +
+        ket(
+          'Firefox belum bisa memasang aplikasi web. Buka <b>majelisfadzkuruuni.web.id</b> di <b>Chrome</b> atau <b>Edge</b>, lalu pilih Pasang: Fadzkuruuni terbuka di jendela sendiri dan diperbarui otomatis.'
+        ),
+    };
+  return null;
+}
+function apkAjakWeb(paksa) {
+  if (window.ANDROID || TPRATINJAU || sudahTerpasang()) return;
+  if (!paksa)
+    try {
+      if (sessionStorage.fzAjakApk) return;
+      sessionStorage.fzAjakApk = 1;
+    } catch (e) {}
   let coba = 0;
   const tampil = () => {
     if ($('.back-d') || document.visibilityState == 'hidden') {
       if (++coba < 90) setTimeout(tampil, 1000);
       return;
     }
+    const isi = pasangIsi();
+    if (!isi) return;
     const e = document.createElement('div');
     e.className = 'back-d';
-    e.innerHTML = `<div class="sheet upd apkajak" role="dialog" aria-label="Unduh aplikasi Fadzkuruuni">
+    e.innerHTML = `<div class="sheet upd apkajak" role="dialog" aria-label="Pasang aplikasi Fadzkuruuni">
   <div class="offt-i"><img src="img/icon-192.png" alt="" width="40" height="40"></div>
-  <b style="font-size:18px">Pakai aplikasi Fadzkuruuni</b>
-  <p class="mut" style="margin:4px 0 10px">Lebih lengkap di aplikasi Android: adzan tetap berbunyi walau aplikasi ditutup, murottal di latar belakang dengan notifikasi media, widget jadwal salat, dan lokasi otomatis.</p>
-  <a class="btn" style="width:100%;display:flex;justify-content:center;gap:6px" href="${UNDUH_APK}" rel="noopener" data-apkunduh>${ic('down', 16)} Unduh aplikasi Android</a>
-  ${android ? '' : '<p class="mut" style="font-size:12.5px;margin:8px 0 0">Aplikasi ini untuk HP Android. Buka situs ini di HP Android untuk memasangnya.</p>'}
-  <button class="btn s" style="width:100%;margin-top:8px;background:transparent;color:var(--mut)" data-apknanti>Nanti saja</button></div>`;
-    /* Hanya bisa ditutup lewat tombol Unduh atau Nanti saja */
+  ${isi.html}
+  <button class="btn s pasn" data-apknanti>${isi.langkah ? 'Oke' : 'Nanti saja'}</button></div>`;
+    /* Hanya bisa ditutup lewat tombolnya (atau Esc di komputer) */
     e.dataset.wajib = '1';
     document.body.append(e);
-    e.onclick = (x) => {
+    const kunci = (x) => {
+      if (!e.isConnected) return document.removeEventListener('keydown', kunci, true);
+      if (x.key == 'Escape' && $$('.back-d').pop() == e) tutup();
+    };
+    const tutup = () => {
+      document.removeEventListener('keydown', kunci, true);
+      e.remove();
+    };
+    document.addEventListener('keydown', kunci, true);
+    e.onclick = async (x) => {
       if (x.target == e) return wajibGoyang(e);
       if (x.target.closest('[data-apkunduh]')) {
         toast('Mengunduh fadzkuruuni.apk… Buka berkasnya setelah selesai, lalu pilih Pasang.');
-        setTimeout(() => e.remove(), 300);
-      } else if (x.target.closest('[data-apknanti]')) e.remove();
+        setTimeout(tutup, 300);
+      } else if (x.target.closest('[data-pwapasang]')) {
+        const ev = pasangPWA;
+        pasangPWA = null;
+        tutup();
+        if (ev)
+          try {
+            ev.prompt();
+            await ev.userChoice;
+          } catch (er) {}
+      } else if (x.target.closest('[data-apknanti]')) tutup();
     };
   };
   setTimeout(tampil, 1500);

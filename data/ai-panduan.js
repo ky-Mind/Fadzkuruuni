@@ -270,7 +270,7 @@ const AI_PANDUAN = [
   [
     'Unduh atau perbarui aplikasi Android',
     'unduh download pasang install apk aplikasi android perbarui update versi baru',
-    'Di web, ajakan unduh aplikasi Android muncul setiap kali situs dibuka (bisa juga lewat Pengaturan › Tentang & Bantuan). Di aplikasi Android, bila ada versi baru, lembar Pembaruan tersedia muncul setiap kali aplikasi dibuka sampai diperbarui: ketuk Perbarui sekarang lalu pilih Perbarui di layar pasang Android.',
+    'Di web, ajakan memasang aplikasi muncul setiap kali situs dibuka dan menyesuaikan perangkat: Android unduh APK; Windows, Linux, macOS, ChromeOS di Chrome/Edge ketuk "Pasang untuk …" (jendela sendiri, ikon di menu aplikasi/Start/Dock, notifikasi sistem, pembaruan otomatis); Mac Safari: File › Tambahkan ke Dock; iPhone/iPad Safari: Bagikan › Tambahkan ke Layar Utama; Firefox belum bisa, pakai Chrome/Edge (APK juga lewat Pengaturan › Tentang & Bantuan). Di aplikasi Android, bila ada versi baru, lembar Pembaruan tersedia muncul setiap kali aplikasi dibuka sampai diperbarui: ketuk Perbarui sekarang lalu pilih Perbarui di layar pasang Android.',
     '#/pengaturan/tentang',
   ],
   [
