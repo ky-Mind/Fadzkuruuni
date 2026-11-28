@@ -205,17 +205,24 @@ P[''] = () => ({
       const D = Math.max(0, Math.round(df * 3600));
       $('#nl').textContent = 'Sekarang · ' + T[cur][0];
       $('#np').innerHTML = hm(c) + ' <small>' + tzl() + '</small>';
-      $('#cd').textContent =
-        'Menuju ' +
-        T[ni][0] +
-        ' · -' +
-        z((D / 3600) | 0) +
-        ':' +
-        z(((D % 3600) / 60) | 0) +
-        ':' +
-        z(
-          D % 60
-        ); /* Kotak waktu salat hanya digambar ulang bila isinya berubah (bukan tiap detik): tidak berkedip, dan susunan/teks dari admin tetap terpasang */
+      /* Sampai 20 menit setelah azan: "Azan Asar · 5 menit yang lalu"; sesudahnya "Menuju azan Isya · 1 jam 14 menit lagi"
+         (Terbit bukan waktu azan) */
+      const lalu = Math.floor((c - T[cur][1]) * 60);
+      if (cur != 1 && lalu >= 0 && lalu < 20)
+        $('#cd').textContent = 'Azan ' + T[cur][0] + ' · ' + (lalu < 1 ? 'baru saja' : lalu + ' menit yang lalu');
+      else {
+        const m = Math.ceil(D / 60),
+          j = (m / 60) | 0;
+        $('#cd').textContent =
+          'Menuju azan ' +
+          T[ni][0] +
+          ' · ' +
+          (D < 60
+            ? 'kurang dari 1 menit lagi'
+            : (j ? j + ' jam ' : '') + (m % 60 ? (m % 60) + ' menit ' : '') + 'lagi');
+      }
+      /* Kotak waktu salat hanya digambar ulang bila isinya berubah (bukan tiap detik): tidak berkedip, dan susunan/teks
+         dari admin tetap terpasang */
       const ph = T.map(
           (x, i) =>
             `<div class="${i == tn ? 'n' : ''}">${x[0]}<b>${hm(x[1])}</b></div>` +

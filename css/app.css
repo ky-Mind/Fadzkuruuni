@@ -4002,11 +4002,18 @@ input[type='range'] {
   font-size: 13.5px;
   line-height: 1.6;
 }
+/* Saran pertanyaan: selalu 2 kolom tetap, agar susunannya tidak berubah saat halaman digeser (lebar pratinjau geser
+   sedikit berbeda dan flex-wrap bisa memindah chip ke baris lain) */
 .ais {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
   justify-content: center;
   gap: 8px;
+}
+.ais .chip2 {
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
 }
 .aif {
   position: sticky;
@@ -10829,6 +10836,10 @@ body,
   src: url('../font/hafs.woff2') format('woff2');
   font-display: swap;
 }
+/* Mode Mushaf: satu halaman pas satu layar, tanpa ruang kosong bawah milik mode Kartu (membuat layar bisa digulir) */
+#ay:has(> .msw) {
+  padding-bottom: 0;
+}
 #ay .msw {
   position: relative;
   overflow: hidden;
@@ -10851,6 +10862,8 @@ body,
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
+  margin: 0 auto;
 }
 .msb {
   flex: 1;
@@ -10926,10 +10939,14 @@ body,
 .msno {
   text-align: center;
   font:
-    13px 'Hafs',
+    17px/1.2 'Hafs',
     serif;
-  color: var(--mut);
-  padding: 2px 0 0;
+  color: var(--ink);
+  opacity: 0.7;
+  padding: 3px 0 0;
+}
+.msuk .seg {
+  margin-top: 8px;
 }
 .msmuat {
   margin: auto;

@@ -2,6 +2,14 @@
    Tambahkan entri baru di atas setiap kali VER dinaikkan untuk perubahan yang terasa oleh pengguna. Sejak 2.9.85 isinya
    dijelaskan per poin (bukan sekadar "Update"); perubahan yang hanya di dashboard admin tidak dicantumkan. */
 const YANG_BARU = {
+  '2.9.96': [
+    'Kartu waktu salat: sampai 20 menit setelah azan tertulis "Azan Asar · 5 menit yang lalu", sesudahnya "Menuju azan Isya · 1 jam 14 menit lagi"',
+    'Mushaf: ukuran huruf bisa dikecilkan (Pengaturan baca › Ukuran huruf mushaf: Pas, 90%, 80%, 70%)',
+    'Mushaf: halaman tidak bisa tergulir naik-turun lagi, dan nomor halaman lebih besar',
+    'Fadz AI: saran pertanyaan tidak lagi berpindah susunan saat halaman digeser',
+    'Geser halaman di tema terang: tidak ada lagi bayangan hitam di tepi dan pojok bawah halaman',
+    'Di komputer: jendela "Fadzkuruuni diperbarui" bisa ditutup dengan tombol Enter atau Esc',
+  ],
   '2.9.95': [
     'Mushaf di aplikasi HP: huruf kini pas selebar layar di semua Ukuran tampilan (kecil, sedang, besar), tidak terpotong di kiri-kanan',
     'Mushaf: halaman memenuhi layar sampai bawah, dan geser halaman mengikuti jari dengan pas',

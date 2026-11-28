@@ -801,7 +801,20 @@ ${
       )}`
     : ''
 }
-${qr ? `<div class="ksh-l">Tajwid & mushaf</div><div class="list sg ksh-c">${row('book', 'Tajwid berwarna', 'Warnai hukum tajwid di Mushaf dan Kartu', tg('stj', !!S.tj))}${row('news', 'Garis tiap baris', 'Garis tipis di halaman mushaf', tg('sgr', S.msGaris !== false))}<button type="button" class="srw" data-tjl><span class="si">${ic('sliders', 20)}</span><span class="t">Hukum tajwid & warnanya<br><small class="mut">Penjelasan, contoh, dan nyala/mati per hukum</small></span>${ic('next', 18)}</button></div>` : ''}
+${
+  qr
+    ? `<div class="ksh-l">Tajwid & mushaf</div><div class="list sg ksh-c">${row('book', 'Tajwid berwarna', 'Warnai hukum tajwid di Mushaf dan Kartu', tg('stj', !!S.tj))}${row('news', 'Garis tiap baris', 'Garis tipis di halaman mushaf', tg('sgr', S.msGaris !== false))}<div class="srw msuk"><span class="si">${ic('book', 20)}</span><span class="t">Ukuran huruf mushaf<br><small class="mut">Pas = selebar layar; pilih lebih kecil bila terasa besar</small>${seg(
+        'smu',
+        [
+          ['1', 'Pas'],
+          ['0.9', '90%'],
+          ['0.8', '80%'],
+          ['0.7', '70%'],
+        ],
+        String(S.msUk || 1)
+      )}</span></div><button type="button" class="srw" data-tjl><span class="si">${ic('sliders', 20)}</span><span class="t">Hukum tajwid & warnanya<br><small class="mut">Penjelasan, contoh, dan nyala/mati per hukum</small></span>${ic('next', 18)}</button></div>`
+    : ''
+}
 ${qr && window.QR ? `<div class="ksh-l">Audio surah ini</div><div class="qsdl"><span class="mut">Simpan murattal ${esc(NAMA[QR.n - 1])} agar bisa diputar tanpa internet</span>${dlW('audio:' + QR.n)}</div>` : ''}
 <div class="ksh-l">Tampilkan</div>
 <p class="mut ksh-mn">Mode Mushaf menampilkan halaman Mushaf Madinah 15 baris. Latin dan terjemah tampil saat ayat diketuk, atau pilih mode Kartu.</p>
@@ -844,6 +857,12 @@ ${qr && window.QR ? `<div class="ksh-l">Audio surah ini</div><div class="qsdl"><
       save();
       $('#msw') && $('#msw').classList.toggle('garis', S.msGaris);
     };
+  if ($('#smu', e))
+    segBind('smu', (v) => {
+      S.msUk = +v;
+      save();
+      if (window.QR && QR.ms) Object.values(QR.ms.H).forEach(msUkur);
+    });
   const tjb = $('[data-tjl]', e);
   if (tjb) tjb.onclick = () => tjLembar();
   $('#s1', e).onchange = (x) => {

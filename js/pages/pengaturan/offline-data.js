@@ -175,8 +175,22 @@ function yangBaruCek() {
   document.body.append(e);
   e.onclick = (x) => {
     if (x.target == e && apkPerbarui.jalan) return;
-    if (x.target == e || x.target.closest('[data-ybo]')) e.remove();
+    if (x.target == e || x.target.closest('[data-ybo]')) tutup();
   };
+  /* Di komputer: Enter atau Esc langsung menutup (tanpa harus mengarahkan kursor ke Oke) */
+  const kunci = (x) => {
+    if (!e.isConnected) return document.removeEventListener('keydown', kunci, true);
+    if ($$('.back-d').pop() != e || (x.key != 'Enter' && x.key != 'Escape')) return;
+    if (x.key == 'Enter' && x.target.closest?.('button:not([data-ybo]),a,input,textarea,select')) return;
+    x.preventDefault();
+    x.stopPropagation();
+    tutup();
+  };
+  const tutup = () => {
+    document.removeEventListener('keydown', kunci, true);
+    e.remove();
+  };
+  document.addEventListener('keydown', kunci, true);
 }
 /* Bagian "Aplikasi Android versi baru" di lembar Yang baru: hanya di aplikasi, bila ada APK lebih baru dan lembar
    pembaruan APK belum tampil */
@@ -255,7 +269,9 @@ async function pembaruanCek(paksa) {
     try {
       let r = await fetch('apk.json?c=' + Date.now(), { cache: 'no-store' }).catch(() => null);
       if (!r || !r.ok)
-        r = await fetch('https://api.github.com/repos/ky-Mind/majelisfadzkuruuni/releases/latest', { cache: 'no-store' });
+        r = await fetch('https://api.github.com/repos/ky-Mind/majelisfadzkuruuni/releases/latest', {
+          cache: 'no-store',
+        });
       if (!r.ok) throw 0;
       j = await r.json();
       if (!j.tag_name) throw 0;

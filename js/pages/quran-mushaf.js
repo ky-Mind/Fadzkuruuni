@@ -31,7 +31,16 @@ function msTinggi() {
   const k = msSkala(w),
     atas = w.getBoundingClientRect().top,
     bawah = ($('#qmini:not([hidden])') ? 64 : 8) * k;
-  w.style.height = Math.max(320, (innerHeight - atas - bawah) / k) + 'px';
+  let h = Math.max(320, (innerHeight - atas - bawah) / k);
+  w.style.height = h + 'px';
+  /* Halaman mushaf tidak boleh membuat layar bisa digulir (jarak bawah #view dll.): kurangi tinggi sebanyak kelebihannya */
+  const v = $('#view'),
+    lebih = v ? v.scrollHeight - v.clientHeight : 0;
+  if (lebih > 0) {
+    h = Math.max(320, h - lebih);
+    w.style.height = h + 'px';
+  }
+  if (v) v.scrollTop = 0;
 }
 /* Satu halaman: 15 baris; baris tanpa kata sebelum ayat 1 = kepala surah dan/atau basmalah */
 function msHalHtml(p, W) {
@@ -60,8 +69,10 @@ function msHalHtml(p, W) {
 function msUkur(el) {
   const ls = $$('.msb', el).filter((b) => b.children.length);
   if (!ls.length) return;
+  const msi = $('.msi', el);
+  if (msi) msi.style.maxWidth = '';
   const lebar = el.clientWidth - 20,
-    tinggi = (el.clientHeight - 22) / 15.6;
+    tinggi = (el.clientHeight - 28) / 15.6;
   let fs = Math.min(tinggi * 0.95, 44);
   el.style.fontSize = fs + 'px';
   let mx = 0;
@@ -87,6 +98,13 @@ function msUkur(el) {
     })
   );
   if (lebih > 1.04) el.style.fontSize = (fs * 0.97) / lebih + 'px';
+  /* Ukuran huruf mushaf pilihan pengguna (Pengaturan baca): lebih kecil dari "Pas", halaman ikut menyempit di tengah
+     agar jarak antarkata tetap rapat seperti mushaf cetak */
+  const u = S.msUk || 1;
+  if (u < 1 && msi) {
+    el.style.fontSize = parseFloat(el.style.fontSize) * u + 'px';
+    msi.style.maxWidth = lebar * u + 20 + 'px';
+  }
 }
 /* Bangun lapisan halaman p (memuat data & font bila perlu) */
 function msLapis(R, p) {

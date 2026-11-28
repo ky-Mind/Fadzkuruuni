@@ -630,7 +630,13 @@ function gsTabHtml(nb) {
          halaman rusak): halaman yang datang diberi bayangan di tepinya, halaman yang pergi sedikit meredup.
          Hanya bayangan statis dan opacity (murah untuk GPU HP kelas bawah). */
       if (mode == 'hal') {
-        peek.style.boxShadow = `${dir > 0 ? -1 : 1}px 0 0 var(--line), ${dir > 0 ? -16 : 16}px 0 32px rgba(0,0,0,.42)`;
+        /* Tema terang: hanya garis tipis + bayangan sangat lembut (bayangan gelap tebal terlihat seperti noda hitam di
+           tepi dan pojok bawah halaman, keluhan 2026-11-28) */
+        const gelap = document.documentElement.dataset.theme == 'dark',
+          s = dir > 0 ? -1 : 1;
+        peek.style.boxShadow = gelap
+          ? `${s}px 0 0 var(--line), ${s * 16}px 0 32px rgba(0,0,0,.42)`
+          : `${s}px 0 0 var(--line), ${s * 6}px 0 14px rgba(0,0,0,.06)`;
         v.style.transition = tr ? `transform ${tr},opacity ${tr}` : 'none';
         v.style.opacity = String(1 - 0.35 * Math.min(1, Math.abs(px) / w));
       }
